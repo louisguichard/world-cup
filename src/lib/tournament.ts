@@ -133,7 +133,7 @@ function headToHeadStats(records: TeamRecord[], matches: MatchWithScore[]): Reco
   return stats;
 }
 
-function breakPointTie(records: TeamRecord[], groupMatches: MatchWithScore[]): TeamRecord[] {
+function applyHeadToHeadCriteria(records: TeamRecord[], groupMatches: MatchWithScore[]): TeamRecord[][] {
   let buckets = [records];
   const criteria = [
     (bucket: TeamRecord[]) => {
@@ -147,11 +147,7 @@ function breakPointTie(records: TeamRecord[], groupMatches: MatchWithScore[]): T
     (bucket: TeamRecord[]) => {
       const h2h = headToHeadStats(bucket, groupMatches);
       return (record: TeamRecord) => h2h[record.teamId].goalsFor;
-    },
-    () => (record: TeamRecord) => record.goalDifference,
-    () => (record: TeamRecord) => record.goalsFor,
-    () => (record: TeamRecord) => record.conduct,
-    () => (record: TeamRecord) => rankingValue(record)
+    }
   ];
 
   for (const criterion of criteria) {
@@ -164,7 +160,49 @@ function breakPointTie(records: TeamRecord[], groupMatches: MatchWithScore[]): T
     });
   }
 
-  return buckets.flatMap((bucket) =>
+  return buckets;
+}
+
+function resolveHeadToHeadTies(records: TeamRecord[], groupMatches: MatchWithScore[]): TeamRecord[][] {
+  if (records.length <= 1) {
+    return [records];
+  }
+
+  const buckets = applyHeadToHeadCriteria(records, groupMatches);
+
+  if (buckets.length === 1) {
+    return [records];
+  }
+
+  return buckets.flatMap((bucket) => (bucket.length <= 1 ? [bucket] : resolveHeadToHeadTies(bucket, groupMatches)));
+}
+
+function applyOverallTieBreakers(buckets: TeamRecord[][]): TeamRecord[][] {
+  const criteria = [
+    () => (record: TeamRecord) => record.goalDifference,
+    () => (record: TeamRecord) => record.goalsFor,
+    () => (record: TeamRecord) => record.conduct,
+    () => (record: TeamRecord) => rankingValue(record)
+  ];
+
+  for (const criterion of criteria) {
+    buckets = buckets.flatMap((bucket) => {
+      if (bucket.length <= 1) {
+        return [bucket];
+      }
+
+      return groupByValue(bucket, criterion());
+    });
+  }
+
+  return buckets;
+}
+
+function breakPointTie(records: TeamRecord[], groupMatches: MatchWithScore[]): TeamRecord[] {
+  const headToHeadBuckets = resolveHeadToHeadTies(records, groupMatches);
+  const resolvedBuckets = applyOverallTieBreakers(headToHeadBuckets);
+
+  return resolvedBuckets.flatMap((bucket) =>
     [...bucket].sort((a, b) => rankingValue(b) - rankingValue(a) || a.teamId.localeCompare(b.teamId))
   );
 }

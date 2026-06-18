@@ -1254,7 +1254,8 @@ const methodSections = [
     icon: <ScrollText size={18} />,
     title: "Tie-breakers implemented",
     body: [
-      "Group ranking: points → head-to-head mini-table among tied teams (points, goal difference, goals scored) → overall goal difference → goals scored → fair-play (cards) → FIFA ranking.",
+      "Group ranking: points → head-to-head mini-table among tied teams (points, goal difference, goals scored). If only part of the tie is resolved, those same head-to-head criteria are reapplied to the teams still tied before moving on.",
+      "Remaining group ties: overall goal difference → goals scored → fair-play (cards) → FIFA ranking.",
       "Best third-placed: points → overall goal difference → goals scored → fair-play → FIFA ranking, exactly as in the FIFA regulations."
     ]
   },
