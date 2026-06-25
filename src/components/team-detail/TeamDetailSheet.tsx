@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "../../store";
 import { getTeamElo } from "../../services/ClubEloClient";
+import { TeamThemeRoot } from "../team/TeamThemeRoot";
 
 type Tab = "now" | "path" | "odds";
 
@@ -30,12 +31,18 @@ export function TeamDetailSheet() {
         aria-label={`${team.shortName} details`}
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="team-sheet-header">
-          <h2>{team.name}</h2>
-          <button type="button" onClick={close} aria-label="Close">
-            ×
-          </button>
-        </header>
+        <TeamThemeRoot teamId={team.id} className="team-sheet-header-themed">
+          <div className="team-accent-bar" aria-hidden />
+          <header className="team-sheet-header">
+            <div className="team-sheet-header-main">
+              {team.logo ? <img src={team.logo} alt="" width={40} height={40} /> : null}
+              <h2>{team.name}</h2>
+            </div>
+            <button type="button" onClick={close} aria-label="Close">
+              ×
+            </button>
+          </header>
+        </TeamThemeRoot>
 
         <div className="team-sheet-tabs">
           {(["now", "path", "odds"] as Tab[]).map((t) => (

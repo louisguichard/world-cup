@@ -4,6 +4,8 @@ import { projectTournament } from "../../lib/tournament";
 import { formatKickoffLocal } from "../../services/ScheduleLinker";
 import type { BracketMatch, Stage, Team } from "../../types";
 import { useStore } from "../../store";
+import { useTeamTheme } from "../../hooks/useTeamTheme";
+import type { TeamThemeStatus } from "../team/TeamThemeRoot";
 
 const bracketStages: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
 const stageColumns: Record<Stage, number> = { R32: 1, R16: 2, QF: 3, SF: 4, Final: 5 };
@@ -11,14 +13,24 @@ const stageColumns: Record<Stage, number> = { R32: 1, R16: 2, QF: 3, SF: 4, Fina
 function BracketTeamReadonly({
   team,
   seedLabel,
-  winner
+  winner,
+  status = "default"
 }: {
   team?: Team;
   seedLabel?: string;
   winner?: boolean;
+  status?: TeamThemeStatus;
 }) {
+  const theme = useTeamTheme(team?.id);
+  const resolvedStatus: TeamThemeStatus = winner ? "advancing" : status;
+
   return (
-    <div className={`bracket-team ${winner ? "winner" : ""}`}>
+    <div
+      className={`bracket-team bracket-team-themed ${winner ? "winner" : ""}`}
+      style={team ? theme : undefined}
+      data-team-id={team?.id}
+      data-status={resolvedStatus === "default" ? undefined : resolvedStatus}
+    >
       {team?.logo ? <img src={team.logo} alt="" /> : <span className="bracket-dot" />}
       <span>{team?.shortName ?? seedLabel ?? "TBD"}</span>
       {winner ? <b>✓</b> : null}

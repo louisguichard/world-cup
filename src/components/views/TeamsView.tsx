@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { computeQualificationStatus } from "../../lib/qualification";
 import { useStore } from "../../store";
 import type { QualificationTier } from "../../types";
+import { TeamThemeRoot } from "../team/TeamThemeRoot";
 
 type Filter = QualificationTier | "all";
 
@@ -98,7 +99,8 @@ export function TeamsView() {
               const rank = row ? (groupStanding?.rows.indexOf(row) ?? 0) + 1 : "—";
               return (
                 <li key={t.id}>
-                  <button type="button" className="teams-row" onClick={() => openTeamSheet(t.id)}>
+                  <TeamThemeRoot teamId={t.id} className="team-row-themed">
+                    <button type="button" className="teams-row" onClick={() => openTeamSheet(t.id)}>
                     {t.logo ? <img src={t.logo} alt="" width={24} height={24} /> : null}
                     <span>{t.shortName}</span>
                     <span className={`badge badge--${status.status}`}>
@@ -107,7 +109,8 @@ export function TeamsView() {
                     <span className="teams-stats">
                       Rank {rank} · {row?.points ?? 0}pts · {row?.goalDifference ?? 0} GD
                     </span>
-                  </button>
+                    </button>
+                  </TeamThemeRoot>
                 </li>
               );
             })}

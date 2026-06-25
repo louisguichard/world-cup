@@ -34,6 +34,8 @@ import { knockoutSchedule, type KnockoutInfo } from "../../data/knockoutSchedule
 import { loadWorldCupData } from "../../lib/dataSources";
 import { formatPercent } from "../../lib/normalize";
 import { projectTournament, simulateTournamentOutcomes, toTeamsById } from "../../lib/tournament";
+import { TeamLabel } from "../team/TeamLabel";
+import { BracketTeamButton } from "../team/BracketTeamButton";
 
 const STORAGE_KEY = "world-cup-2026-score-overrides";
 const PICKS_KEY = "world-cup-2026-bracket-picks";
@@ -850,15 +852,6 @@ function ScoreBox({ value, disabled, onChange }: { value: number; disabled: bool
   );
 }
 
-function TeamLabel({ team, align = "left" }: { team: Team; align?: "left" | "right" }) {
-  return (
-    <span className={`team-label ${align}`}>
-      <img src={team.logo} alt="" />
-      <span>{team.shortName}</span>
-    </span>
-  );
-}
-
 function BracketView({
   bracket,
   bracketPicks,
@@ -969,14 +962,14 @@ function BracketCard({
           {info ? info.hostCity : match.id}
         </span>
       </div>
-      <BracketTeam
+      <BracketTeamButton
         team={home}
         probability={decided ? homeProb : undefined}
         winner={match.winnerTeamId === home?.id}
         clickable={decided}
         onClick={() => onPickWinner(match.id, home?.id, predictedWinnerId)}
       />
-      <BracketTeam
+      <BracketTeamButton
         team={away}
         probability={decided ? awayProb : undefined}
         winner={match.winnerTeamId === away?.id}
@@ -984,34 +977,6 @@ function BracketCard({
         onClick={() => onPickWinner(match.id, away?.id, predictedWinnerId)}
       />
     </article>
-  );
-}
-
-function BracketTeam({
-  team,
-  probability,
-  winner,
-  clickable,
-  onClick
-}: {
-  team?: Team;
-  probability?: number;
-  winner: boolean;
-  clickable: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      className={`bracket-team ${winner ? "winner" : ""}`}
-      onClick={onClick}
-      disabled={!clickable}
-      type="button"
-      title={team ? `${team.name} — ${typeof probability === "number" ? formatPercent(probability, 0) : "?"} to advance` : undefined}
-    >
-      {team ? <img src={team.logo} alt="" /> : <span className="bracket-dot" />}
-      <span>{team?.shortName ?? "TBD"}</span>
-      {typeof probability === "number" ? <b>{formatPercent(probability, 0)}</b> : null}
-    </button>
   );
 }
 

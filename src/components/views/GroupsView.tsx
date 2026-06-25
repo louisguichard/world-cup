@@ -1,4 +1,5 @@
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
+import { StandingThemeRow } from "../team/StandingThemeRow";
 import { useStore } from "../../store";
 import { useCompletedGroupMatches, useUpcomingGroupMatches } from "../../store/selectors/historySelectors";
 
@@ -55,7 +56,7 @@ export function GroupsView() {
                     const rowClass =
                       i < 2 ? "qualified" : i === 2 ? "at-risk" : i === 3 ? "eliminated" : "";
                     return (
-                      <tr key={row.teamId} className={rowClass}>
+                      <StandingThemeRow key={row.teamId} teamId={row.teamId} className={rowClass}>
                         <td>
                           <span className="rank">{i + 1}</span>
                           {team?.logo ? <img src={team.logo} alt="" width={20} height={20} /> : null}
@@ -69,7 +70,7 @@ export function GroupsView() {
                         <td>
                           <b>{row.points}</b>
                         </td>
-                      </tr>
+                      </StandingThemeRow>
                     );
                   })}
                 </tbody>

@@ -2,6 +2,25 @@ import { useMemo } from "react";
 import { computeQualificationStatus } from "../../lib/qualification";
 import { rankBestThirds } from "../../lib/bestThirds";
 import { useStore } from "../../store";
+import { TeamThemeRoot } from "../team/TeamThemeRoot";
+
+function QualCrest({ teamId, dim }: { teamId: string; dim?: boolean }) {
+  const teams = useStore((s) => s.teams);
+  const team = teams[teamId];
+  if (!team?.logo) return null;
+
+  return (
+    <TeamThemeRoot teamId={teamId} className="qual-crest-wrap">
+      <img
+        src={team.logo}
+        alt={team.shortName ?? teamId}
+        className={`qual-crest qual-crest-themed ${dim ? "qual-crest--dim" : ""}`}
+        width={32}
+        height={32}
+      />
+    </TeamThemeRoot>
+  );
+}
 
 export function QualifiedBento() {
   const teams = useStore((s) => s.teams);
@@ -20,14 +39,7 @@ export function QualifiedBento() {
       <h3 className="qual-bento-title">Qualified</h3>
       <div className="qual-bento-crests">
         {qualified.slice(0, 12).map((id) => (
-          <img
-            key={id}
-            src={teams[id]?.logo}
-            alt={teams[id]?.shortName ?? id}
-            className="qual-crest"
-            width={32}
-            height={32}
-          />
+          <QualCrest key={id} teamId={id} />
         ))}
       </div>
     </section>
@@ -51,14 +63,7 @@ export function EliminatedBento() {
       <h3 className="qual-bento-title">Eliminated</h3>
       <div className="qual-bento-crests">
         {eliminated.slice(0, 12).map((id) => (
-          <img
-            key={id}
-            src={teams[id]?.logo}
-            alt={teams[id]?.shortName ?? id}
-            className="qual-crest qual-crest--dim"
-            width={32}
-            height={32}
-          />
+          <QualCrest key={id} teamId={id} dim />
         ))}
       </div>
     </section>
@@ -67,7 +72,6 @@ export function EliminatedBento() {
 
 export function BestThirdsBento() {
   const standings = useStore((s) => s.groupStandings);
-  const teams = useStore((s) => s.teams);
   const best = rankBestThirds(standings).slice(0, 8);
 
   return (
@@ -75,14 +79,7 @@ export function BestThirdsBento() {
       <h3 className="qual-bento-title">Best 3rd</h3>
       <div className="qual-bento-crests">
         {best.map((r) => (
-          <img
-            key={r.teamId}
-            src={teams[r.teamId]?.logo}
-            alt={teams[r.teamId]?.shortName}
-            className="qual-crest"
-            width={32}
-            height={32}
-          />
+          <QualCrest key={r.teamId} teamId={r.teamId} />
         ))}
       </div>
     </section>

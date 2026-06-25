@@ -1,0 +1,148 @@
+/* Team identity — CSS custom properties injected via TeamThemeRoot / useTeamTheme */
+
+.team-theme-root {
+  --team-primary: #6b7280;
+  --team-secondary: #9ca3af;
+  --team-on-primary: #ffffff;
+  --team-gradient-start: #6b7280;
+  --team-gradient-end: #9ca3af;
+}
+
+.team-accent-bar {
+  height: 3px;
+  margin: -1px -1px 0;
+  background: linear-gradient(90deg, var(--team-gradient-start), var(--team-gradient-end));
+  border-radius: var(--r-lg, 14px) var(--r-lg, 14px) 0 0;
+}
+
+.team-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--team-primary) 30%, transparent);
+  border-radius: var(--r, 14px);
+  background: color-mix(in srgb, var(--team-primary) 12%, var(--surface));
+  transition:
+    border-color 200ms ease,
+    background 200ms ease;
+}
+
+.team-card:hover {
+  border-color: color-mix(in srgb, var(--team-primary) 60%, transparent);
+  background: color-mix(in srgb, var(--team-primary) 18%, var(--surface));
+}
+
+.team-row-themed {
+  transition: background 150ms ease;
+}
+
+.team-row-themed:hover,
+.team-row-themed:focus-within {
+  background: color-mix(in srgb, var(--team-primary) 10%, var(--surface));
+}
+
+.team-label-themed .team-label {
+  transition: color 150ms ease;
+}
+
+.team-label-themed:hover {
+  color: var(--text);
+}
+
+.bracket-team-themed {
+  border-left: 3px solid var(--team-primary);
+  background: color-mix(in srgb, var(--team-primary) 8%, var(--surface));
+  transition: all 150ms ease;
+}
+
+.bracket-team-themed[data-status="eliminated"] {
+  opacity: 0.35;
+  filter: grayscale(0.6);
+}
+
+.bracket-team-themed[data-status="advancing"] {
+  box-shadow: 0 0 0 1.5px var(--team-primary);
+}
+
+.bracket-team-themed[data-status="live"] {
+  box-shadow: 0 0 0 2px var(--team-primary);
+  animation: team-pulse-ring 1.8s ease-in-out infinite;
+}
+
+@keyframes team-pulse-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px var(--team-primary);
+  }
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--team-primary) 30%, transparent);
+  }
+}
+
+.live-hero-themed {
+  border-top: 2px solid transparent;
+}
+
+.team-sheet-header-themed {
+  position: relative;
+  margin: -1rem -1.25rem 1rem;
+  padding: 1.25rem 1.25rem 1rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--team-primary) 35%, var(--surface-2)),
+    var(--surface-2)
+  );
+  border-bottom: 1px solid color-mix(in srgb, var(--team-primary) 25%, var(--line));
+}
+
+.team-sheet-header-themed .team-accent-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+}
+
+.qual-crest-themed {
+  padding: 3px;
+  border-radius: 6px;
+  border: 2px solid color-mix(in srgb, var(--team-primary) 55%, transparent);
+  background: color-mix(in srgb, var(--team-primary) 8%, transparent);
+}
+
+.schedule-card-themed.is-live {
+  border-color: color-mix(in srgb, var(--team-primary) 25%, var(--line));
+}
+
+.standing-row-themed td:first-child {
+  box-shadow: inset 3px 0 0 var(--team-primary);
+}
+
+.standing-row-themed.qualified td:first-child {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--team-primary) 70%, var(--accent));
+}
+
+.team-sheet-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.team-sheet-header-main h2 {
+  margin: 0;
+}
+
+.qual-crest-wrap {
+  display: inline-flex;
+}
+
+.qual-crest-themed {
+  display: block;
+}
+
+.bracket-team-wrap {
+  display: block;
+}
+
+.bracket-team-themed.bracket-team {
+  width: 100%;
+}

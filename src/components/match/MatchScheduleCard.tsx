@@ -3,6 +3,8 @@ import type { Team } from "../../types";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
 import { detectKickoffConflict } from "../../lib/scheduleConflict";
 import { formatKickoffLocal } from "../../services/ScheduleLinker";
+import { useMatchTheme } from "../../hooks/useMatchTheme";
+import { TeamLabel } from "../team/TeamLabel";
 
 type Props = {
   match: MergedMatch;
@@ -19,9 +21,13 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
   const kickoffUtc = broadcast?.kickoffUTC ?? match.date;
   const isLive = match.status === "live";
   const isDone = match.status === "completed";
+  const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId);
+
+  const cardClass = `schedule-card schedule-card-themed ${isLive ? "is-live" : ""} ${compact ? "schedule-card--compact" : ""} ${onSelect ? "schedule-card--btn" : ""}`.trim();
 
   const body = (
     <>
+      {isLive ? <div className="team-accent-bar" aria-hidden /> : null}
       <div className="match-meta">
         <span>
           {isLive ? (
@@ -36,10 +42,13 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
       </div>
 
       <div className="score-line schedule-score-line">
-        <span className="team-label">
-          {home?.logo ? <img src={home.logo} alt="" width={28} height={28} /> : null}
-          <span>{home?.shortName ?? match.homeTeamId}</span>
-        </span>
+        {home ? (
+          <TeamLabel team={home} />
+        ) : (
+          <span className="team-label">
+            <span>{match.homeTeamId}</span>
+          </span>
+        )}
         <strong className="schedule-score">
           {isDone || isLive ? (match.homeScore ?? 0) : "–"}
         </strong>
@@ -47,10 +56,13 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
         <strong className="schedule-score">
           {isDone || isLive ? (match.awayScore ?? 0) : "–"}
         </strong>
-        <span className="team-label right">
-          {away?.logo ? <img src={away.logo} alt="" width={28} height={28} /> : null}
-          <span>{away?.shortName ?? match.awayTeamId}</span>
-        </span>
+        {away ? (
+          <TeamLabel team={away} align="right" />
+        ) : (
+          <span className="team-label right">
+            <span>{match.awayTeamId}</span>
+          </span>
+        )}
       </div>
 
       {broadcast ? (
@@ -74,13 +86,19 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
     </>
   );
 
+  const liveStyle = isLive ? matchTheme : undefined;
+
   if (onSelect) {
     return (
-      <button type="button" className={`schedule-card schedule-card--btn ${isLive ? "is-live" : ""}`} onClick={onSelect}>
+      <button type="button" className={cardClass} style={liveStyle} onClick={onSelect}>
         {body}
       </button>
     );
   }
 
-  return <article className={`schedule-card ${isLive ? "is-live" : ""} ${compact ? "schedule-card--compact" : ""}`}>{body}</article>;
+  return (
+    <article className={cardClass} style={liveStyle}>
+      {body}
+    </article>
+  );
 }
