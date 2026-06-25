@@ -1,5 +1,6 @@
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
 import { StandingThemeRow } from "../team/StandingThemeRow";
+import { TeamThemeRoot } from "../team/TeamThemeRoot";
 import { useStore } from "../../store";
 import { useCompletedGroupMatches, useUpcomingGroupMatches } from "../../store/selectors/historySelectors";
 
@@ -36,7 +37,17 @@ export function GroupsView() {
                   <div className="mini-qualifiers" aria-hidden>
                     {g.rows.slice(0, 2).map((row) => {
                       const t = teams[row.teamId];
-                      return t?.logo ? <img key={row.teamId} src={t.logo} alt="" /> : null;
+                      return t?.logo ? (
+                        <TeamThemeRoot key={row.teamId} teamId={row.teamId} className="qual-crest-wrap">
+                          <img
+                            src={t.logo}
+                            alt=""
+                            className="qual-crest qual-crest-themed"
+                            width={20}
+                            height={20}
+                          />
+                        </TeamThemeRoot>
+                      ) : null;
                     })}
                   </div>
                 </div>

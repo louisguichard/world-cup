@@ -1,11 +1,23 @@
 import { useMemo } from "react";
 import type { CSSProperties } from "react";
-import { matchThemeToStyle } from "../lib/teamIdentity";
+import { matchThemeToStyle, resolveTeamIdentityFromAbbrev, type MatchThemeVariant } from "../lib/teamIdentity";
 import { useTeamIdentity } from "./useTeamTheme";
 
-export function useMatchTheme(homeTeamId: string, awayTeamId: string): CSSProperties {
-  const home = useTeamIdentity(homeTeamId);
-  const away = useTeamIdentity(awayTeamId);
+function useMatchIdentity(teamId: string) {
+  const identity = useTeamIdentity(teamId);
+  return useMemo(
+    () => identity ?? resolveTeamIdentityFromAbbrev(teamId),
+    [identity, teamId]
+  );
+}
 
-  return useMemo(() => matchThemeToStyle(home, away), [home, away]);
+export function useMatchTheme(
+  homeTeamId: string,
+  awayTeamId: string,
+  variant: MatchThemeVariant = "live"
+): CSSProperties {
+  const home = useMatchIdentity(homeTeamId);
+  const away = useMatchIdentity(awayTeamId);
+
+  return useMemo(() => matchThemeToStyle(home, away, variant), [home, away, variant]);
 }

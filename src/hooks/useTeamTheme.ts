@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { resolveTeamIdentity, resolveTeamIdentityById, teamIdentityToCssVars } from "../lib/teamIdentity";
+import {
+  resolveTeamIdentity,
+  resolveTeamIdentityFromAbbrev,
+  teamIdentityToCssVars
+} from "../lib/teamIdentity";
 import { useStore } from "../store";
 import { extractDominantColor } from "../utils/extractTeamColor";
 
@@ -45,16 +49,14 @@ export function useTeamIdentity(teamId: string | undefined | null) {
 
 export function useTeamTheme(teamId: string | undefined | null): CSSProperties {
   const identity = useTeamIdentity(teamId);
-  return useMemo(() => {
-    if (!identity) return FALLBACK_VARS as CSSProperties;
-    return teamIdentityToCssVars(identity) as CSSProperties;
-  }, [identity]);
-}
-
-export function useTeamThemeByTeam(teamId: string | undefined | null) {
-  const teams = useStore((s) => s.teams);
-  return useMemo(
-    () => resolveTeamIdentityById(teamId ?? "", teams),
-    [teamId, teams]
+  const abbrevIdentity = useMemo(
+    () => (teamId && !identity ? resolveTeamIdentityFromAbbrev(teamId) : null),
+    [teamId, identity]
   );
+  const resolved = identity ?? abbrevIdentity;
+
+  return useMemo(() => {
+    if (!resolved) return FALLBACK_VARS as CSSProperties;
+    return teamIdentityToCssVars(resolved) as CSSProperties;
+  }, [resolved]);
 }

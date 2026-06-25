@@ -6,6 +6,7 @@ import { ScheduleConflictBadge } from "../shared/ScheduleConflictBadge";
 import { useLiveClock } from "../../hooks/useLiveClock";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
+import { TeamLabelById } from "../team/TeamLabelById";
 
 type Props = {
   match: MergedMatch;
@@ -46,9 +47,7 @@ export function LiveMatchBento({ match, variant }: Props) {
         {home ? (
           <TeamLabel team={home} />
         ) : (
-          <span className="team-label">
-            <span>{match.homeTeamId}</span>
-          </span>
+          <TeamLabelById teamId={match.homeTeamId} />
         )}
         <strong className="live-hero-score">{match.homeScore ?? 0}</strong>
         <span className="schedule-score-sep">:</span>
@@ -56,9 +55,7 @@ export function LiveMatchBento({ match, variant }: Props) {
         {away ? (
           <TeamLabel team={away} align="right" />
         ) : (
-          <span className="team-label right">
-            <span>{match.awayTeamId}</span>
-          </span>
+          <TeamLabelById teamId={match.awayTeamId} align="right" />
         )}
       </div>
 

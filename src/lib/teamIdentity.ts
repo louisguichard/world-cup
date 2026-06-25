@@ -71,16 +71,41 @@ export function teamIdentityToCssVars(identity: TeamIdentity): Record<string, st
   };
 }
 
+export type MatchThemeVariant = "live" | "default";
+
+export function resolveTeamIdentityFromAbbrev(abbrev: string): TeamIdentity | null {
+  const key = abbrev.toUpperCase();
+  const staticOverride = TEAM_IDENTITY_OVERRIDES[key];
+  if (!staticOverride) return null;
+
+  const primary = staticOverride.primary;
+  const secondary = staticOverride.secondary;
+  const gradient: [string, string] = staticOverride.gradient ?? [primary, secondary];
+
+  return {
+    teamId: key.toLowerCase(),
+    abbreviation: key,
+    name: key,
+    primary,
+    secondary,
+    onPrimary: pickOnPrimary(primary),
+    crestUrl: "",
+    gradient
+  };
+}
+
 export function matchThemeToStyle(
   home: TeamIdentity | null,
-  away: TeamIdentity | null
+  away: TeamIdentity | null,
+  variant: MatchThemeVariant = "live"
 ): CSSProperties {
   const homePrimary = home?.primary ?? DEFAULT_PRIMARY;
   const awayPrimary = away?.primary ?? DEFAULT_SECONDARY;
+  const wash = variant === "live" ? "33" : "14";
 
   return {
-    background: `linear-gradient(135deg, ${homePrimary}33 0%, var(--surface) 45%, var(--surface) 55%, ${awayPrimary}33 100%)`,
-    borderTop: "2px solid transparent",
+    background: `linear-gradient(135deg, ${homePrimary}${wash} 0%, var(--surface) 45%, var(--surface) 55%, ${awayPrimary}${wash} 100%)`,
+    borderTop: variant === "live" ? "2px solid transparent" : "1px solid transparent",
     borderImage: `linear-gradient(90deg, ${homePrimary}, ${awayPrimary}) 1`
   } as CSSProperties;
 }

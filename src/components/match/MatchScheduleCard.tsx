@@ -5,6 +5,7 @@ import { detectKickoffConflict } from "../../lib/scheduleConflict";
 import { formatKickoffLocal } from "../../services/ScheduleLinker";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
+import { TeamLabelById } from "../team/TeamLabelById";
 
 type Props = {
   match: MergedMatch;
@@ -21,7 +22,7 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
   const kickoffUtc = broadcast?.kickoffUTC ?? match.date;
   const isLive = match.status === "live";
   const isDone = match.status === "completed";
-  const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId);
+  const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId, isLive ? "live" : "default");
 
   const cardClass = `schedule-card schedule-card-themed ${isLive ? "is-live" : ""} ${compact ? "schedule-card--compact" : ""} ${onSelect ? "schedule-card--btn" : ""}`.trim();
 
@@ -45,9 +46,7 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
         {home ? (
           <TeamLabel team={home} />
         ) : (
-          <span className="team-label">
-            <span>{match.homeTeamId}</span>
-          </span>
+          <TeamLabelById teamId={match.homeTeamId} />
         )}
         <strong className="schedule-score">
           {isDone || isLive ? (match.homeScore ?? 0) : "–"}
@@ -59,9 +58,7 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
         {away ? (
           <TeamLabel team={away} align="right" />
         ) : (
-          <span className="team-label right">
-            <span>{match.awayTeamId}</span>
-          </span>
+          <TeamLabelById teamId={match.awayTeamId} align="right" />
         )}
       </div>
 
@@ -86,18 +83,18 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
     </>
   );
 
-  const liveStyle = isLive ? matchTheme : undefined;
+  const cardStyle = matchTheme;
 
   if (onSelect) {
     return (
-      <button type="button" className={cardClass} style={liveStyle} onClick={onSelect}>
+      <button type="button" className={cardClass} style={cardStyle} onClick={onSelect}>
         {body}
       </button>
     );
   }
 
   return (
-    <article className={cardClass} style={liveStyle}>
+    <article className={cardClass} style={cardStyle}>
       {body}
     </article>
   );

@@ -31,6 +31,19 @@
   background: color-mix(in srgb, var(--team-primary) 18%, var(--surface));
 }
 
+.teams-group-panel li + li {
+  margin-top: 0.5rem;
+}
+
+.team-card .teams-row {
+  padding: 10px 16px;
+  border-top: none;
+}
+
+.team-card .teams-row:hover {
+  background: transparent;
+}
+
 .team-row-themed {
   transition: background 150ms ease;
 }
@@ -107,6 +120,16 @@
   border-radius: 6px;
   border: 2px solid color-mix(in srgb, var(--team-primary) 55%, transparent);
   background: color-mix(in srgb, var(--team-primary) 8%, transparent);
+}
+
+.schedule-card-themed {
+  transition:
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.schedule-card-themed:not(.is-live) {
+  border-color: color-mix(in srgb, var(--line) 85%, transparent);
 }
 
 .schedule-card-themed.is-live {
