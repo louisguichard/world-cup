@@ -22,7 +22,7 @@
     },
     {
       "source": "/api/sofascore/:path*",
-      "destination": "https://api.sofascore.com/api/v1/:path*"
+      "destination": "/api/sofascore?path=:path*"
     },
     {
       "source": "/api/clubelo/:path*",
