@@ -5,8 +5,15 @@ import type { Match, PolymarketMatchMarket, Team, TournamentSimulationResult } f
 
 const DEBOUNCE_MS = 2_000;
 const WORKER_ITERATIONS = 10_000;
+const BOOTSTRAP_ITERATIONS = 1_500;
 const MAX_MAIN_THREAD = 4_200;
 const WORKER_TIMEOUT_MS = 45_000;
+
+export { BOOTSTRAP_ITERATIONS };
+
+export type RunCalibrationOptions = {
+  iterations?: number;
+};
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let workerRequestId = 0;
@@ -59,7 +66,7 @@ export function scheduleSimulation(): void {
   debounceTimer = setTimeout(() => void runCalibration(), DEBOUNCE_MS);
 }
 
-export async function runCalibration(): Promise<void> {
+export async function runCalibration(options: RunCalibrationOptions = {}): Promise<void> {
   const store = useStore.getState();
   store.setSimulationRunning(true);
 
@@ -78,7 +85,8 @@ export async function runCalibration(): Promise<void> {
     }
 
     const useWorker = typeof Worker !== "undefined";
-    const iterations = useWorker ? WORKER_ITERATIONS : MAX_MAIN_THREAD;
+    const iterations =
+      options.iterations ?? (useWorker ? WORKER_ITERATIONS : MAX_MAIN_THREAD);
 
     const result = useWorker
       ? await runSimulationInWorker(teams, groupMatches, store.knockoutMarkets, iterations, store.simulationSeed)

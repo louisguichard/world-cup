@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:apis": "node scripts/test-all-apis.mjs",
     "generate:thirds": "node scripts/build-third-place-map.mjs"
   },
   "dependencies": {

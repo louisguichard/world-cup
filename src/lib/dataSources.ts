@@ -1,4 +1,5 @@
 import type { DataLoadResult, GroupLetter, Match, OutcomeProbabilities, PolymarketMatchMarket, Team } from "../types";
+import { isApiEnabled } from "../config/apiFlags";
 import { buildPrediction, makeFallbackPrediction, normalizeProbabilities } from "./predictions";
 import { normalizeName, pairKey } from "./normalize";
 import { addModelRatings, calibrateRatingsToTitleMarket, type FifaRanking, type MatchMarket, type RatingMarket } from "./ratings";
@@ -33,6 +34,8 @@ function proxied(path: string, service: "espn" | "poly" | "fifa" | "fifa-api"): 
   return `/fifa${path}`;
 }
 
+const FETCH_TIMEOUT_MS = 12_000;
+
 async function fetchJson<T>(path: string, service: "espn" | "poly" | "fifa" | "fifa-api"): Promise<T> {
   const primary = proxied(path, service);
   const direct =
@@ -49,14 +52,18 @@ async function fetchJson<T>(path: string, service: "espn" | "poly" | "fifa" | "f
   let lastError: unknown;
 
   for (const url of urls) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     try {
-      const response = await fetch(url, { headers });
+      const response = await fetch(url, { headers, signal: controller.signal });
       if (!response.ok) {
         throw new Error(`${response.status} ${response.statusText}`);
       }
       return (await response.json()) as T;
     } catch (error) {
       lastError = error;
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -177,6 +184,7 @@ function parseEspnScoreboard(scoreboard: any): { teams: Team[]; matches: Match[]
 }
 
 async function loadTitleProbabilities(): Promise<Record<string, number>> {
+  if (!isApiEnabled("polymarketWinner")) return {};
   const event = await fetchJson<any>(POLYMARKET_WINNER_PATH, "poly");
   const probabilities: Record<string, number> = {};
 
@@ -192,6 +200,7 @@ async function loadTitleProbabilities(): Promise<Record<string, number>> {
 }
 
 async function loadFifaRankings(): Promise<Record<string, FifaRanking>> {
+  if (!isApiEnabled("fifaRankings")) return {};
   const response = await fetchJson<any>(FIFA_RANKINGS_PATH, "fifa-api");
   const rankings: Record<string, FifaRanking> = {};
 
@@ -208,6 +217,8 @@ async function loadFifaRankings(): Promise<Record<string, FifaRanking>> {
 }
 
 async function loadPolymarketGames(): Promise<any[]> {
+  if (!isApiEnabled("polymarketGames")) return [];
+
   const pages = await Promise.all(
     POLYMARKET_GAMES_PATHS.map(async (path) => {
       try {
@@ -489,9 +500,16 @@ function collectRatingMarkets(
   return ratingMarkets;
 }
 
-export async function loadWorldCupData(): Promise<DataLoadResult> {
+export type LoadWorldCupDataOptions = {
+  /** Skip the 3k-iteration title-market calibration (used during background enrichment). */
+  skipTitleCalibration?: boolean;
+};
+
+export async function loadWorldCupData(options: LoadWorldCupDataOptions = {}): Promise<DataLoadResult> {
   const warnings: string[] = [];
-  const scoreboardPromise = fetchJson<any>(ESPN_SCOREBOARD_PATH, "espn");
+  const scoreboardPromise = isApiEnabled("espnScoreboard")
+    ? fetchJson<any>(ESPN_SCOREBOARD_PATH, "espn")
+    : Promise.reject(new Error("ESPN scoreboard disabled in apiFlags"));
   const auxiliarySourcesPromise = Promise.allSettled([loadTitleProbabilities(), loadPolymarketGames(), loadFifaRankings()]);
 
   const [scoreboard, [titleResult, gamesResult, rankingResult]] = await Promise.all([scoreboardPromise, auxiliarySourcesPromise]);
@@ -528,16 +546,20 @@ export async function loadWorldCupData(): Promise<DataLoadResult> {
   const usedGroupMarketSlugs = new Set(Object.values(matchMarkets).map((market) => market.marketSlug));
   const ratingMarkets = collectRatingMarkets(parsed.teams, polymarketMarkets, usedGroupMarketSlugs);
   const initialTeams = addModelRatings(parsed.teams, parsed.matches, matchMarkets, ratingMarkets, titleProbabilities, fifaRankings);
-  const initialMatches = addPredictions(parsed.matches, initialTeams, matchMarkets);
-  const rawCalibrationOdds = simulateTournamentOutcomes(
-    initialTeams,
-    initialMatches,
-    polymarketMarkets,
-    TITLE_FORCE_CALIBRATION_ITERATIONS,
-    TITLE_FORCE_CALIBRATION_SEED
-  ).championOdds;
-  const teams = calibrateRatingsToTitleMarket(initialTeams, rawCalibrationOdds);
-  const matches = addPredictions(parsed.matches, teams, matchMarkets);
+  let teams = initialTeams;
+  let matches = addPredictions(parsed.matches, initialTeams, matchMarkets);
+
+  if (!options.skipTitleCalibration) {
+    const rawCalibrationOdds = simulateTournamentOutcomes(
+      initialTeams,
+      matches,
+      polymarketMarkets,
+      TITLE_FORCE_CALIBRATION_ITERATIONS,
+      TITLE_FORCE_CALIBRATION_SEED
+    ).championOdds;
+    teams = calibrateRatingsToTitleMarket(initialTeams, rawCalibrationOdds);
+    matches = addPredictions(parsed.matches, teams, matchMarkets);
+  }
   const polymarketPredictions = Object.keys(matchMarkets).length;
 
   if (polymarketPredictions === 0) {

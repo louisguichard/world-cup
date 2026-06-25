@@ -1,3 +1,5 @@
+import { isApiEnabled } from "../config/apiFlags";
+
 const cache = new Map<string, { elo: number; at: number }>();
 const TTL = 24 * 60 * 60 * 1000;
 
@@ -13,6 +15,8 @@ const SLUGS: Record<string, string> = {
 };
 
 export async function getTeamElo(teamName: string): Promise<number | null> {
+  if (!isApiEnabled("clubElo")) return null;
+
   const slug = SLUGS[teamName] ?? teamName.replace(/\s+/g, "");
   const cached = cache.get(slug);
   if (cached && Date.now() - cached.at < TTL) return cached.elo;

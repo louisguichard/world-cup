@@ -1,4 +1,5 @@
 import type { GroupLetter, Match, MatchPeriod, Team } from "../types";
+import { isApiEnabled } from "../config/apiFlags";
 import { logger } from "./Logger";
 
 const SCOREBOARD_PATH =
@@ -211,12 +212,19 @@ export function parseEspnScoreboard(scoreboard: unknown): { teams: Team[]; match
   };
 }
 
+const ESPN_FETCH_TIMEOUT_MS = 10_000;
+
 export async function fetchScoreboard(): Promise<{ teams: Team[]; matches: Match[] }> {
+  if (!isApiEnabled("espnScoreboard")) {
+    throw new Error("ESPN scoreboard disabled in apiFlags");
+  }
   const url = proxied(SCOREBOARD_PATH);
   const direct = `https://site.api.espn.com${SCOREBOARD_PATH}`;
   for (const target of [url, direct]) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ESPN_FETCH_TIMEOUT_MS);
     try {
-      const res = await fetch(target);
+      const res = await fetch(target, { signal: controller.signal });
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       return parseEspnScoreboard(data);
@@ -225,12 +233,17 @@ export async function fetchScoreboard(): Promise<{ teams: Team[]; matches: Match
         target,
         error: error instanceof Error ? error.message : String(error)
       });
+    } finally {
+      clearTimeout(timer);
     }
   }
   throw new Error("ESPN scoreboard unavailable");
 }
 
 export async function fetchMatchPlayByPlay(espnEventId: string): Promise<unknown> {
+  if (!isApiEnabled("espnPlayByPlay")) {
+    throw new Error("ESPN play-by-play disabled in apiFlags");
+  }
   const path = `/apis/site/v2/sports/soccer/fifa.world/playbyplay?event=${espnEventId}`;
   const url = typeof window !== "undefined" ? `/espn-web${path}` : `https://site.web.api.espn.com${path}`;
   const res = await fetch(url);

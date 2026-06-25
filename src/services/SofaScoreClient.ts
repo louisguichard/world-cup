@@ -1,4 +1,5 @@
 import { logger } from "./Logger";
+import { isApiEnabled } from "../config/apiFlags";
 
 const BASE = typeof window !== "undefined" ? "/api/sofascore" : "https://api.sofascore.com";
 const API_V1 = "/api/v1";
@@ -35,7 +36,7 @@ export type SofaEvent = {
 };
 
 export async function fetchScheduledToday(): Promise<SofaEvent[]> {
-  if (sofaScoreSessionDisabled) return [];
+  if (!isApiEnabled("sofascore") || sofaScoreSessionDisabled) return [];
 
   const date = todayUtcDate();
   try {
@@ -61,7 +62,7 @@ export async function fetchScheduledToday(): Promise<SofaEvent[]> {
 }
 
 export async function fetchIncidents(sofaEventId: number): Promise<unknown[]> {
-  if (sofaScoreSessionDisabled) return [];
+  if (!isApiEnabled("sofascore") || sofaScoreSessionDisabled) return [];
 
   try {
     const res = await fetch(proxied(`/event/${sofaEventId}/incidents`), { headers: SOFA_HEADERS });
