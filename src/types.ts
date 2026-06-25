@@ -1,8 +1,14 @@
 export const groupLetters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"] as const;
 
 export type GroupLetter = (typeof groupLetters)[number];
-export type MatchStatus = "completed" | "live" | "scheduled";
-export type SourceKind = "espn" | "polymarket" | "model" | "manual";
+export type MatchStatus =
+  | "completed"
+  | "live"
+  | "scheduled"
+  | "postponed"
+  | "interrupted"
+  | "cancelled";
+export type SourceKind = "espn" | "sofascore" | "polymarket" | "model" | "manual";
 export type Stage = "R32" | "R16" | "QF" | "SF" | "Final";
 
 export type Team = {
@@ -53,7 +59,7 @@ export type PolymarketMatchMarket = {
 
 export type Match = {
   id: string;
-  group: GroupLetter;
+  group?: GroupLetter;
   date: string;
   venue?: string;
   homeTeamId: string;
@@ -66,6 +72,11 @@ export type Match = {
   locked: boolean;
   source: SourceKind;
   prediction?: Prediction;
+  period?: MatchPeriod;
+  clockMinute?: number;
+  clockExtra?: number;
+  clockRunning?: boolean;
+  displayClock?: string;
 };
 
 export type ScoreOverride = {
@@ -158,3 +169,133 @@ export type TournamentSimulationResult = {
   championOdds: Array<{ teamId: string; probability: number }>;
   teamSummaries: Record<string, TeamSimulationSummary>;
 };
+
+// --- Extended types (Road to WC Final) ---
+
+export type TabId = "live" | "bracket" | "groups" | "simulator" | "teams";
+export type SplashPhase = "loading" | "slow" | "error" | "done";
+export type BracketViewMode = "projected" | "confirmed";
+
+export type MatchPeriod =
+  | "not_started"
+  | "first_half"
+  | "half_time"
+  | "second_half"
+  | "extra_time_first"
+  | "extra_time_break"
+  | "extra_time_second"
+  | "penalties"
+  | "full_time"
+  | "postponed"
+  | "interrupted";
+
+export type QualificationTier =
+  | "qualified"
+  | "at_risk"
+  | "projected_out"
+  | "eliminated"
+  | "pending";
+
+export type QualificationStatus = {
+  status: QualificationTier;
+  eliminationProbability?: number;
+  pointsNeeded?: number;
+};
+
+export type MatchEventType =
+  | "goal"
+  | "own_goal"
+  | "yellow_card"
+  | "red_card"
+  | "yellow_red_card"
+  | "substitution"
+  | "var_review"
+  | "goal_disallowed"
+  | "penalty_missed"
+  | "penalty_saved";
+
+export type MatchEvent = {
+  providerId: string;
+  espnEventId?: string;
+  minute: number;
+  minuteExtra?: number;
+  type: MatchEventType;
+  teamId: string;
+  playerName: string;
+  assistName?: string;
+  isVarReviewed?: boolean;
+  varOutcome?: "confirmed" | "overturned";
+};
+
+export type MergedMatch = {
+  id: string;
+  matchId?: string;
+  group?: GroupLetter;
+  stage?: Stage;
+  date: string;
+  venue?: string;
+  homeTeamId: string;
+  awayTeamId: string;
+  status: MatchStatus;
+  homeScore?: number;
+  awayScore?: number;
+  homeConduct: number;
+  awayConduct: number;
+  locked: boolean;
+  source: SourceKind;
+  dataSource?: SourceKind;
+  sofaEventId?: string;
+  espnEventId?: string;
+  compositeKey?: string;
+  sofaLinkedAt?: number;
+  period?: MatchPeriod;
+  clockMinute?: number;
+  clockExtra?: number;
+  clockRunning?: boolean;
+  lastUpdatedAt?: number;
+  prediction?: Prediction;
+};
+
+export type BroadcastChip = {
+  matchId: string;
+  kickoffUTC: string;
+  englishNetwork: string;
+  spanishNetwork: string;
+  streaming: string[];
+  isConcurrent: boolean;
+  venue: { name: string; city: string; country: string };
+};
+
+export type MatchScheduleEntry = {
+  matchNumber: number;
+  stage: string;
+  group?: string;
+  homeTeam: string;
+  awayTeam: string;
+  kickoff: { utc: string };
+  venue: {
+    name: string;
+    city: string;
+    country: string;
+    ianaTimezone?: string;
+  };
+  broadcast: {
+    USA: {
+      english: { network: string; streaming?: string };
+      spanish: { network: string; streaming?: string };
+      concurrentMatchNote?: string | null;
+    };
+  };
+};
+
+export type KnockoutScore = {
+  home90: number;
+  away90: number;
+  homePens?: number;
+  awayPens?: number;
+};
+
+export const GROUP_STAGE_MATCH_COUNT = 72;
+export const STORAGE_KEY = "world-cup-2026-score-overrides";
+export const PICKS_KEY = "world-cup-2026-bracket-picks";
+export const DATA_CACHE_KEY = "world-cup-2026-data-cache-v3";

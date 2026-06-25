@@ -5,20 +5,43 @@
       "destination": "https://site.api.espn.com/:path*"
     },
     {
+      "source": "/espn-web/:path*",
+      "destination": "https://site.web.api.espn.com/:path*"
+    },
+    {
       "source": "/poly/:path*",
       "destination": "https://gamma-api.polymarket.com/:path*"
     },
     {
       "source": "/fifa-api/:path*",
-      "destination": "https://api.fifa.com/:path*"
+      "destination": "https://www.fifa.com/:path*"
     },
     {
       "source": "/fifa/:path*",
       "destination": "https://inside.fifa.com/:path*"
     },
     {
+      "source": "/api/sofascore/:path*",
+      "destination": "https://api.sofascore.com/api/v1/:path*"
+    },
+    {
+      "source": "/api/clubelo/:path*",
+      "destination": "http://api.clubelo.com/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; connect-src 'self' https://site.api.espn.com https://site.web.api.espn.com https://gamma-api.polymarket.com https://api.fifa.com https://www.fifa.com https://api.sofascore.com http://api.clubelo.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'"
+        }
+      ]
     }
   ]
 }

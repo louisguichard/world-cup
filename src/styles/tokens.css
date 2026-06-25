@@ -1,0 +1,17 @@
+:root {
+  --app-height: 100dvh;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Bridge split CSS to Pressroom tokens from styles.css */
+  --color-bg: var(--bg, #0a0c0e);
+  --color-surface: var(--surface, #101316);
+  --color-text: var(--text, #f3f6f4);
+  --color-muted: var(--muted, #98a29d);
+  --color-accent: var(--accent, #36e8a0);
+  --color-live: #ff4d4d;
+
+  --badge-at-risk-bg: rgba(255, 210, 125, 0.18);
+  --badge-at-risk-text: var(--warn, #ffd27d);
+  --badge-qualified: var(--accent);
+  --badge-eliminated: var(--coral, #ff9168);
+}

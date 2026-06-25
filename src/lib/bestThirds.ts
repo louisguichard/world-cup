@@ -1,0 +1,1 @@
+export { rankBestThirds } from "./tournament";

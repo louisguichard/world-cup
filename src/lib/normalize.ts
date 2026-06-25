@@ -47,8 +47,21 @@ export function normalizeName(value: string): string {
   return aliasToCanonical[stripped] ?? stripped;
 }
 
+/** Canonical ISO instant for cross-provider kickoff matching (ESPN uses `Z`, JSON uses `:00Z`). */
+export function normalizeKickoffUtc(iso: string): string {
+  return new Date(iso).toISOString();
+}
+
 export function pairKey(first: string, second: string): string {
   return [normalizeName(first), normalizeName(second)].sort().join("__");
+}
+
+/** UTC-noon date key for cross-provider match linking (Fix 1–2). */
+export function matchCompositeKey(teamA: string, teamB: string, isoDate: string): string {
+  const d = new Date(isoDate);
+  d.setUTCHours(12, 0, 0, 0);
+  const dateKey = d.toISOString().slice(0, 10);
+  return `${pairKey(teamA, teamB)}__${dateKey}`;
 }
 
 export function formatPercent(value: number, digits = 0): string {

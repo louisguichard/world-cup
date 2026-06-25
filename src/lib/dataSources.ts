@@ -5,7 +5,7 @@ import { addModelRatings, calibrateRatingsToTitleMarket, type FifaRanking, type 
 import { simulateTournamentOutcomes } from "./tournament";
 
 const ESPN_SCOREBOARD_PATH =
-  "/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260628&limit=200";
+  "/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=300";
 const POLYMARKET_WINNER_PATH = "/events/slug/world-cup-winner";
 const FIFA_RANKINGS_PATH = "/api/v3/rankings?gender=1&count=211&locale=en";
 const TITLE_FORCE_CALIBRATION_ITERATIONS = 3000;
@@ -23,7 +23,7 @@ function proxied(path: string, service: "espn" | "poly" | "fifa" | "fifa-api"): 
   if (!isBrowser()) {
     if (service === "espn") return `https://site.api.espn.com${path}`;
     if (service === "poly") return `https://gamma-api.polymarket.com${path}`;
-    if (service === "fifa-api") return `https://api.fifa.com${path}`;
+    if (service === "fifa-api") return `https://www.fifa.com${path}`;
     return `https://inside.fifa.com${path}`;
   }
 
@@ -41,14 +41,16 @@ async function fetchJson<T>(path: string, service: "espn" | "poly" | "fifa" | "f
       : service === "poly"
         ? `https://gamma-api.polymarket.com${path}`
         : service === "fifa-api"
-          ? `https://api.fifa.com${path}`
+          ? `https://www.fifa.com${path}`
           : `https://inside.fifa.com${path}`;
   const urls = primary === direct ? [direct] : [primary, direct];
+  const headers: HeadersInit =
+    service === "fifa-api" ? { Accept: "application/json" } : { Accept: "application/json" };
   let lastError: unknown;
 
   for (const url of urls) {
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { headers });
       if (!response.ok) {
         throw new Error(`${response.status} ${response.statusText}`);
       }
