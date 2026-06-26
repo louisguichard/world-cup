@@ -1,5 +1,18 @@
 import type { MergedMatch, SourceKind } from "../types";
 
+export type SofaEnrichmentPatch = Pick<
+  Partial<MergedMatch>,
+  | "clockMinute"
+  | "clockExtra"
+  | "clockRunning"
+  | "displayClock"
+  | "period"
+  | "homeScore"
+  | "awayScore"
+  | "status"
+  | "sofaEventId"
+>;
+
 const PRECEDENCE: Record<SourceKind, number> = {
   manual: 4,
   sofascore: 3,
@@ -46,6 +59,41 @@ export function applyLiveScore(
     source: source === "manual" ? "manual" : existing.source === "manual" ? "manual" : source,
     dataSource: source,
     lastUpdatedAt: Date.now()
+  };
+}
+
+/** Secondary SofaScore enrichment — never overwrites locked/completed/manual ESPN matches. */
+export function enrichFromSofaScore(
+  existing: MergedMatch,
+  patch: SofaEnrichmentPatch
+): MergedMatch {
+  if (existing.locked || existing.status === "completed" || existing.source === "manual") {
+    return existing;
+  }
+
+  const updates: Partial<MergedMatch> = {
+    sofaEventId: patch.sofaEventId ?? existing.sofaEventId,
+    sofaLinkedAt: Date.now()
+  };
+
+  if (patch.clockMinute !== undefined) updates.clockMinute = patch.clockMinute;
+  if (patch.clockExtra !== undefined) updates.clockExtra = patch.clockExtra;
+  if (patch.clockRunning !== undefined) updates.clockRunning = patch.clockRunning;
+  if (patch.displayClock !== undefined) updates.displayClock = patch.displayClock;
+  if (patch.period !== undefined) updates.period = patch.period;
+  if (patch.homeScore !== undefined) updates.homeScore = patch.homeScore;
+  if (patch.awayScore !== undefined) updates.awayScore = patch.awayScore;
+
+  if (patch.status) {
+    updates.status = patch.status;
+  }
+
+  return {
+    ...existing,
+    ...updates,
+    locked: existing.locked,
+    source: existing.source,
+    dataSource: existing.dataSource ?? existing.source
   };
 }
 

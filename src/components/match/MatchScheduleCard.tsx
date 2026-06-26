@@ -1,8 +1,8 @@
 import type { MergedMatch } from "../../types";
 import type { Team } from "../../types";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
-import { formatKickoffDate, formatKickoffTime } from "../../lib/formatKickoff";
-import { KICKOFF_LABEL } from "../../services/ScheduleLinker";
+import { formatKickoffTime } from "../../lib/formatKickoff";
+import { formatLiveClock } from "../../lib/formatMatchClock";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
@@ -23,12 +23,11 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
   const isDone = match.status === "completed" || match.locked;
   const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId, isLive ? "live" : "default");
 
-  const kickoffDisplay =
-    isDone || match.locked
-      ? formatKickoffDate(kickoffUtc)
-      : isLive
-        ? formatKickoffTime(kickoffUtc)
-        : `${KICKOFF_LABEL} · ${formatKickoffTime(kickoffUtc)}`;
+  const metaTimeDisplay = isDone
+    ? "FT"
+    : isLive
+      ? formatLiveClock(match)
+      : formatKickoffTime(kickoffUtc);
 
   const cardClass = `schedule-card schedule-card-themed ${isLive ? "is-live" : ""} ${compact ? "schedule-card--compact" : ""} ${onSelect ? "schedule-card--btn" : ""}`.trim();
 
@@ -42,7 +41,7 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
               <span className="live-pill-dot" aria-hidden /> LIVE
             </span>
           ) : null}
-          <time dateTime={kickoffUtc}>{kickoffDisplay}</time>
+          <time dateTime={kickoffUtc}>{metaTimeDisplay}</time>
           {broadcast?.venue.city ? ` · ${broadcast.venue.city}` : null}
         </span>
         {match.group ? <span className="match-source espn">Group {match.group}</span> : null}

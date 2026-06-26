@@ -3,12 +3,8 @@ import { BentoErrorBoundary } from "../shared/ErrorBoundary";
 import { LiveMatchBento } from "../bentos/LiveMatchBento";
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
 import { QualifiedBento, EliminatedBento, InContentionBento } from "../bentos/QualifiedBento";
+import { groupMatchesByDay } from "../../lib/groupMatchesByDay";
 import { useStore } from "../../store";
-import type { MergedMatch } from "../../types";
-
-function sortByDate(matches: MergedMatch[]): MergedMatch[] {
-  return [...matches].sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
-}
 
 export function LiveView() {
   const liveMatchesMap = useStore((s) => s.liveMatches);
@@ -24,11 +20,7 @@ export function LiveView() {
 
   const live = useMemo(() => allMatches.filter((m) => m.status === "live"), [allMatches]);
 
-  const todaySchedule = useMemo(
-    () =>
-      sortByDate(allMatches.filter((m) => m.status === "scheduled" && Boolean(m.group))).slice(0, 16),
-    [allMatches]
-  );
+  const dayGroups = useMemo(() => groupMatchesByDay(allMatches), [allMatches]);
 
   const primary = live.find((m) => m.id === primaryId) ?? live[0];
   const secondary = live.filter((m) => m.id !== primary?.id).slice(0, 6);
@@ -85,26 +77,33 @@ export function LiveView() {
         </section>
       )}
 
-      <section className="dashboard-section" aria-label="Today's schedule">
+      <section className="dashboard-section" aria-label="Match schedule">
         <div className="section-heading compact">
           <div>
             <div className="section-kicker">Schedule</div>
             <h2 className="section-title-text">Upcoming fixtures</h2>
           </div>
         </div>
-        <div className="schedule-list">
-          {todaySchedule.map((m) => (
-            <MatchScheduleCard
-              key={m.id}
-              match={m}
-              home={teams[m.homeTeamId]}
-              away={teams[m.awayTeamId]}
-            />
-          ))}
-          {todaySchedule.length === 0 ? (
-            <p className="view-note">No upcoming group fixtures in the feed right now.</p>
-          ) : null}
-        </div>
+        {dayGroups.map((group) => (
+          <div key={group.date} className="schedule-day-group">
+            <div className="schedule-day-label">{group.label}</div>
+            <div className="schedule-list">
+              {group.matches.map((m) => (
+                <MatchScheduleCard
+                  key={m.id}
+                  match={m}
+                  home={teams[m.homeTeamId]}
+                  away={teams[m.awayTeamId]}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+        {dayGroups.length === 0 ? (
+          <p className="view-note">
+            No upcoming fixtures — check the Results tab for completed matches.
+          </p>
+        ) : null}
       </section>
 
       <section className="dashboard-section qual-dashboard-row" aria-label="Qualification">

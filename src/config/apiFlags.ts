@@ -9,8 +9,15 @@ export type ApiSourceId =
   | "polymarketWinner"
   | "polymarketGames"
   | "fifaRankings"
+  | "footballDataApi"
+  | "sportApi7"
+  | "wc2026Teams"
+  | "wc2026Live"
   | "sofascore"
-  | "clubElo";
+  | "clubElo"
+  | "zafronix"
+  | "oddsIntelligence"
+  | "openWeather";
 
 export type ApiAuditStatus = "pass" | "fail" | "untested";
 
@@ -67,6 +74,34 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     failureReason: "Returns HTML instead of JSON (bot protection)",
     disableReason: "FIFA API blocked — ratings use strength-index fallback",
   },
+  footballDataApi: {
+    enabled: true,
+    splashPath: false,
+    label: "RapidAPI FotMob Live",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+  },
+  sportApi7: {
+    enabled: true,
+    splashPath: false,
+    label: "SportAPI7 (WC)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+  },
+  wc2026Teams: {
+    enabled: true,
+    splashPath: false,
+    label: "WC 2026 Teams API",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+  },
+  wc2026Live: {
+    enabled: true,
+    splashPath: false,
+    label: "WC 2026 Live API",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+  },
   sofascore: {
     enabled: false,
     splashPath: false,
@@ -74,7 +109,7 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     lastAudit: "fail",
     lastLatencyMs: 800,
     failureReason: "Akamai TLS fingerprinting returns 403 challenge (headers alone insufficient)",
-    disableReason: "Blocked by Akamai — live polling uses ESPN scoreboard instead",
+    disableReason: "Demoted to tertiary fallback — RapidAPI FootballData + SportAPI7 primary",
   },
   clubElo: {
     enabled: true,
@@ -82,6 +117,27 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     label: "ClubElo",
     lastAudit: "pass",
     lastLatencyMs: 738,
+  },
+  zafronix: {
+    enabled: true,
+    splashPath: false,
+    label: "Zafronix Historical Form",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+  },
+  oddsIntelligence: {
+    enabled: true,
+    splashPath: false,
+    label: "Sports Odds Intelligence",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+  },
+  openWeather: {
+    enabled: true,
+    splashPath: false,
+    label: "Open Weather 13",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
   },
 };
 

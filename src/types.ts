@@ -260,6 +260,7 @@ export type MergedMatch = {
   clockMinute?: number;
   clockExtra?: number;
   clockRunning?: boolean;
+  displayClock?: string;
   lastUpdatedAt?: number;
   prediction?: Prediction;
 };

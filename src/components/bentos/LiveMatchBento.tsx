@@ -1,7 +1,7 @@
 import type { MergedMatch } from "../../types";
 import { useStore } from "../../store";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
-import { useLiveClock } from "../../hooks/useLiveClock";
+import { formatLiveClock, formatPeriodLabel } from "../../lib/formatMatchClock";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
@@ -19,12 +19,9 @@ export function LiveMatchBento({ match, variant }: Props) {
   const broadcast =
     (match.matchId ? getBroadcast(match.matchId) : undefined) ?? getBroadcastByKickoff(match.date);
 
-  const clock = useLiveClock(
-    match.period ?? (match.status === "live" ? "second_half" : "not_started"),
-    match.clockMinute ?? 0,
-    match.clockExtra,
-    match.clockRunning ?? match.status === "live"
-  );
+  const isLive = match.status === "live";
+  const clockLabel = isLive ? formatLiveClock(match) : "FT";
+  const periodLabel = isLive ? formatPeriodLabel(match.period, match.status) : null;
 
   return (
     <article
@@ -32,11 +29,16 @@ export function LiveMatchBento({ match, variant }: Props) {
       style={matchTheme}
     >
       <div className="live-hero-header">
-        <span className="live-pill">
-          <span className="live-pill-dot" aria-hidden />
-          LIVE
-        </span>
-        <span className="live-hero-clock">{clock.label}</span>
+        {isLive ? (
+          <span className="live-pill">
+            <span className="live-pill-dot" aria-hidden />
+            LIVE
+          </span>
+        ) : null}
+        {isLive && clockLabel ? (
+          <span className="live-hero-clock">{clockLabel}</span>
+        ) : null}
+        {periodLabel ? <span className="live-hero-period">{periodLabel}</span> : null}
         {match.group ? <span className="match-source espn">Group {match.group}</span> : null}
       </div>
 

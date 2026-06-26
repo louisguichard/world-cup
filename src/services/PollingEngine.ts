@@ -1,20 +1,23 @@
 import type { MergedMatch } from "../types";
 import { deriveStandingsIfScored, standingsEqual } from "../lib/qualification";
-import { isApiEnabled } from "../config/apiFlags";
 import { getLockedSet } from "../store/slices/matchSlice";
 import { useStore } from "../store";
 import { fetchScoreboard } from "./ESPNClient";
 import { applyLiveScore } from "./DataMerger";
+import {
+  applyEnrichmentEvents,
+  enrichmentSourceLabel,
+  fetchEnrichmentEvents,
+} from "./liveEnrichment";
 import { enrichMatchWithScheduleId } from "./ScheduleLinker";
-import { fetchScheduledToday, isSofaScoreDisabled } from "./SofaScoreClient";
 import { scheduleSimulation } from "./SimulationScheduler";
 import { logger } from "./Logger";
 
 const LIVE_INTERVAL_MS = 15_000;
 const IDLE_INTERVAL_MS = 300_000;
 
-function hasGroupStageLive(matches: Record<string, MergedMatch>): boolean {
-  return Object.values(matches).some((m) => m.status === "live" && Boolean(m.group));
+function hasAnyLive(matches: Record<string, MergedMatch>): boolean {
+  return Object.values(matches).some((m) => m.status === "live");
 }
 
 function allMatchesLocked(
@@ -50,8 +53,6 @@ class PollingEngine {
   private static instance: PollingEngine | null = null;
   private running = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
-  private loggedEspnFallback = false;
-
   static getInstance(): PollingEngine {
     if (!PollingEngine.instance) {
       PollingEngine.instance = new PollingEngine();
@@ -90,7 +91,7 @@ class PollingEngine {
     if (!this.running) return;
     if (this.timer) clearTimeout(this.timer);
 
-    const isLive = hasGroupStageLive(useStore.getState().liveMatches);
+    const isLive = hasAnyLive(useStore.getState().liveMatches);
     const delay = isLive ? LIVE_INTERVAL_MS : IDLE_INTERVAL_MS;
 
     if (typeof window !== "undefined" && window.__pollingStatus) {
@@ -117,42 +118,25 @@ class PollingEngine {
     let merged: Record<string, MergedMatch> = { ...store.liveMatches };
     const teams = store.teams;
 
-    const trySofa = isApiEnabled("sofascore") && !isSofaScoreDisabled();
-    const sofaEvents = trySofa ? await fetchScheduledToday() : [];
-    if (sofaEvents.length > 0) {
-      for (const ev of sofaEvents) {
-        const id = String(ev.id);
-        const applied = applyLiveScore(merged[id], {
-          id,
-          sofaEventId: String(ev.id),
-          date: new Date(ev.startTimestamp * 1000).toISOString(),
-          homeTeamId: String(ev.homeTeam.id),
-          awayTeamId: String(ev.awayTeam.id),
-          status: ev.status.type === "inprogress" ? "live" : "scheduled",
-          homeScore: ev.homeScore?.current,
-          awayScore: ev.awayScore?.current,
-          homeConduct: 0,
-          awayConduct: 0,
-          locked: false
-        }, "sofascore");
-        merged[id] = enrichMatchWithScheduleId(applied, teams);
-      }
-    } else {
-      const espn = await fetchScoreboard();
-      for (const m of espn.matches) {
-        const applied = applyLiveScore(merged[m.id], {
-          ...m,
-          espnEventId: m.id
-        }, "espn");
-        merged[m.id] = enrichMatchWithScheduleId(applied, teams);
-      }
-      if (!this.loggedEspnFallback) {
-        this.loggedEspnFallback = true;
-        logger.debug("Polling via ESPN (SofaScore unavailable)", "PollingEngine", {
-          count: espn.matches.length
-        });
-      }
+    const espn = await fetchScoreboard();
+
+    for (const m of espn.matches) {
+      const applied = applyLiveScore(merged[m.id], {
+        ...m,
+        espnEventId: m.id
+      }, "espn");
+      merged[m.id] = enrichMatchWithScheduleId(applied, teams);
     }
+
+    const { events: enrichmentEvents, source: enrichmentSource } = await fetchEnrichmentEvents();
+    const enrichedCount = applyEnrichmentEvents(merged, enrichmentEvents, teams);
+
+    logger.debug(enrichmentSourceLabel(enrichmentSource, enrichedCount), "PollingEngine", {
+      espnCount: espn.matches.length,
+      enrichmentEvents: enrichmentEvents.length,
+      enrichmentSource,
+      enrichedCount
+    });
 
     for (const m of Object.values(merged)) {
       if (m.locked) {
@@ -160,7 +144,7 @@ class PollingEngine {
       }
     }
 
-    const liveCount = Object.values(merged).filter((m) => m.status === "live" && m.group).length;
+    const liveCount = Object.values(merged).filter((m) => m.status === "live").length;
     const primary = selectPrimaryMatch(Object.values(merged), store.primaryLiveMatchId);
 
     store.batchPollUpdate({

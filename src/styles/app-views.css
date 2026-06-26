@@ -83,6 +83,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+.live-hero-period {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .live-hero-scoreline {
   grid-template-columns: minmax(0, 1fr) 52px 14px 52px minmax(0, 1fr);
 }
@@ -179,6 +187,23 @@
 }
 
 /* Schedule cards */
+.schedule-day-group {
+  margin-bottom: 1.25rem;
+}
+
+.schedule-day-group:last-child {
+  margin-bottom: 0;
+}
+
+.schedule-day-label {
+  margin-bottom: 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .schedule-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

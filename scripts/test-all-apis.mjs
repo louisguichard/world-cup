@@ -8,6 +8,15 @@ import { writeFileSync } from "node:fs";
 const TIMEOUT_MS = 12_000;
 const PROXY_BASE = "http://127.0.0.1:5173";
 const TODAY = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+const TODAY_ISO = new Date().toISOString().slice(0, 10);
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY ?? process.env.VITE_RAPIDAPI_KEY ?? "";
+
+const rapidHeaders = (host) => ({
+  Accept: "application/json",
+  "Content-Type": "application/json",
+  "x-rapidapi-host": host,
+  ...(RAPIDAPI_KEY ? { "x-rapidapi-key": RAPIDAPI_KEY } : {}),
+});
 
 const ESPN_SCOREBOARD =
   "/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=300";
@@ -152,6 +161,74 @@ const tests = [
       return line.includes(",") ? "elo row ok" : "FAIL: unexpected format";
     }
   },
+  {
+    label: "RapidAPI FotMob matches-by-date (direct)",
+    url: `https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date?date=${TODAY}`,
+    headers: rapidHeaders("free-api-live-football-data.p.rapidapi.com"),
+    skip: !RAPIDAPI_KEY,
+    parse: ({ body, status }) => {
+      if (status === 401 || status === 403) return `FAIL: HTTP ${status} (check RAPIDAPI_KEY)`;
+      const d = JSON.parse(body);
+      const matches = d.response?.matches ?? [];
+      return `matches=${matches.length}`;
+    },
+  },
+  {
+    label: "RapidAPI FotMob matches-by-date (vite proxy)",
+    url: `${PROXY_BASE}/rapidapi/football-get-matches-by-date?date=${TODAY}`,
+    headers: rapidHeaders("free-api-live-football-data.p.rapidapi.com"),
+    skip: !RAPIDAPI_KEY,
+    parse: ({ body, status }) => {
+      if (status === 401 || status === 403) return `FAIL: HTTP ${status}`;
+      const d = JSON.parse(body);
+      const matches = d.response?.matches ?? [];
+      return `matches=${matches.length}`;
+    },
+  },
+  {
+    label: "SportAPI7 WC scheduled-events (direct)",
+    url: `https://sportapi7.p.rapidapi.com/api/v1/category/1468/scheduled-events/${TODAY_ISO}`,
+    headers: rapidHeaders("sportapi7.p.rapidapi.com"),
+    skip: !RAPIDAPI_KEY,
+    parse: ({ body, status }) => {
+      if (status === 401 || status === 403) return `FAIL: HTTP ${status}`;
+      const d = JSON.parse(body);
+      return `events=${d.events?.length ?? 0}`;
+    },
+  },
+  {
+    label: "SportAPI7 WC scheduled-events (vite proxy)",
+    url: `${PROXY_BASE}/rapidapi-sportapi/api/v1/category/1468/scheduled-events/${TODAY_ISO}`,
+    headers: rapidHeaders("sportapi7.p.rapidapi.com"),
+    skip: !RAPIDAPI_KEY,
+    parse: ({ body, status }) => {
+      if (status === 401 || status === 403) return `FAIL: HTTP ${status}`;
+      const d = JSON.parse(body);
+      return `events=${d.events?.length ?? 0}`;
+    },
+  },
+  {
+    label: "WC2026 teams (direct)",
+    url: "https://world-cup-2026.p.rapidapi.com/world-cup-2026/teams",
+    headers: rapidHeaders("world-cup-2026.p.rapidapi.com"),
+    skip: !RAPIDAPI_KEY,
+    parse: ({ body, status }) => {
+      if (status === 401 || status === 403) return `FAIL: HTTP ${status}`;
+      const d = JSON.parse(body);
+      return `teams=${d.teams?.length ?? 0}`;
+    },
+  },
+  {
+    label: "WC2026 teams (vite proxy)",
+    url: `${PROXY_BASE}/rapidapi-wc2026/world-cup-2026/teams`,
+    headers: rapidHeaders("world-cup-2026.p.rapidapi.com"),
+    skip: !RAPIDAPI_KEY,
+    parse: ({ body, status }) => {
+      if (status === 401 || status === 403) return `FAIL: HTTP ${status}`;
+      const d = JSON.parse(body);
+      return `teams=${d.teams?.length ?? 0}`;
+    },
+  },
   ...Array.from({ length: 8 }, (_, i) => i * 100).map((offset) => ({
     label: `Polymarket games offset=${offset} (direct)`,
     url: `https://gamma-api.polymarket.com${polyGames(offset)}`,
@@ -164,6 +241,18 @@ const tests = [
 
 const results = [];
 for (const t of tests) {
+  if (t.skip) {
+    results.push({
+      label: t.label,
+      url: t.url,
+      ok: true,
+      ms: 0,
+      detail: "SKIP: no RAPIDAPI_KEY",
+      splashBlocking: t.splashBlocking ?? false,
+    });
+    process.stdout.write("s");
+    continue;
+  }
   const r = await probe(t);
   results.push(r);
   process.stdout.write(r.ok ? "." : "F");
