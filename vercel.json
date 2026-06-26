@@ -5,10 +5,6 @@
       "destination": "https://site.api.espn.com/:path*"
     },
     {
-      "source": "/poly/:path*",
-      "destination": "https://gamma-api.polymarket.com/:path*"
-    },
-    {
       "source": "/fifa-api/:path*",
       "destination": "https://api.fifa.com/:path*"
     },
