@@ -1,5 +1,5 @@
 import type { MergedMatch } from "../../types";
-import type { Team } from "../../types";
+import type { Team } from "../../types"; // force re-transform
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
