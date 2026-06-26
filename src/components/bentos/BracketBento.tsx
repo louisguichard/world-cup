@@ -155,6 +155,8 @@ function BracketTeamReadonly({
   const resolvedStatus: TeamThemeStatus = winner ? "advancing" : status;
   const visibleGhosts = ghosts?.slice(0, 2) ?? [];
 
+  const showGhosts = mode === "projected" && visibleGhosts.length > 0;
+
   if (effectiveCertainty === "tbd") {
     return (
       <div className="bracket-team-slot">
@@ -163,7 +165,7 @@ function BracketTeamReadonly({
           <span>TBD</span>
         </div>
         <CertaintyBadge certainty="tbd" size="xs" />
-        {visibleGhosts.length > 0 ? (
+        {showGhosts ? (
           <>
             <div className="bracket-ghost-label">Possible</div>
             <GhostTeamList ghosts={visibleGhosts} teamsById={teamsById} showFrequency={false} />
@@ -273,7 +275,7 @@ export function BracketBento() {
     () =>
       matches.filter((m) => {
         if (m.homeScore === undefined || m.awayScore === undefined) return false;
-        if (mode === "confirmed") return m.status === "completed";
+        if (mode === "confirmed") return m.status === "completed" && m.locked;
         return true;
       }) as Parameters<typeof projectTournament>[1],
     [matches, mode]
