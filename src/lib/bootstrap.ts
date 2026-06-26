@@ -1,10 +1,15 @@
 import { loadWorldCupData } from "../lib/dataSources";
 import { deriveStandingsIfScored } from "../lib/qualification";
-import { BOOTSTRAP_FLAGS } from "../config/apiFlags";
+import { BOOTSTRAP_FLAGS, isApiEnabled } from "../config/apiFlags";
 import { logger } from "../services/Logger";
 import { fetchScoreboard } from "../services/ESPNClient";
 import { applyLiveScore } from "../services/DataMerger";
 import { enrichMatchWithScheduleId } from "../services/ScheduleLinker";
+import {
+  fetchTeams as fetchWc2026Teams,
+  isWorldCup2026Disabled,
+  mergeTeamMetadata,
+} from "../services/WorldCup2026Client";
 import { runCalibration, scheduleSimulation, BOOTSTRAP_ITERATIONS, DEV_BOOTSTRAP_ITERATIONS } from "../services/SimulationScheduler";
 import { startAppServices } from "./appLifecycle";
 import { useStore } from "../store";
@@ -20,18 +25,33 @@ function startBackgroundEnrichment(): void {
     return;
   }
 
-  void Promise.allSettled([loadWorldCupData({ skipTitleCalibration: true })])
-    .then(([result]) => {
-      if (result.status !== "fulfilled") {
-        logger.warn("Background enrichment skipped", "Bootstrap", {
-          reason: result.status === "rejected" ? String(result.reason) : "unknown"
-        });
-        return;
-      }
-      useStore.getState().hydrateFromBootstrap(result.value);
+  void (async () => {
+    const [worldCupResult, wcTeamsResult] = await Promise.allSettled([
+      loadWorldCupData({ skipTitleCalibration: true }),
+      isApiEnabled("wc2026Teams") && !isWorldCup2026Disabled()
+        ? fetchWc2026Teams()
+        : Promise.resolve([]),
+    ]);
+
+    if (worldCupResult.status === "fulfilled") {
+      useStore.getState().hydrateFromBootstrap(worldCupResult.value);
       scheduleSimulation();
       logger.info("Background enrichment complete", "Bootstrap");
-    });
+    } else {
+      logger.warn("Background enrichment skipped", "Bootstrap", {
+        reason: String(worldCupResult.reason),
+      });
+    }
+
+    if (wcTeamsResult.status === "fulfilled" && wcTeamsResult.value.length > 0) {
+      const store = useStore.getState();
+      const { teams, patched } = mergeTeamMetadata(store.teams, wcTeamsResult.value);
+      if (patched > 0) {
+        store.setTeams(teams);
+        logger.info("WC2026 team metadata merged", "Bootstrap", { patched });
+      }
+    }
+  })();
 }
 
 export async function bootstrap(): Promise<void> {
