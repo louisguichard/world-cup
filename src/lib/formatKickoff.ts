@@ -11,10 +11,13 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
   day: "numeric"
 });
 
-const timeFormatter = new Intl.DateTimeFormat(undefined, {
+const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+const timeFormatter = new Intl.DateTimeFormat("en-US", {
   hour: "numeric",
   minute: "2-digit",
-  hour12: true
+  hour12: true,
+  timeZone: localTimeZone
 });
 
 /**

@@ -4,25 +4,25 @@ overview: Consolidate your 7-API audit into a phased unified services layer for 
 todos:
   - id: api-phase-a
     content: "Phase A: apiFlags, vite/edge proxies, .env.example, test-all-apis probes"
-    status: in_progress
+    status: completed
   - id: api-phase-b
     content: "Phase B: FootballDataClient + SportAPI7Client + WorldCup2026LiveClient + PollingEngine cascade"
-    status: pending
+    status: completed
   - id: api-phase-c
     content: "Phase C: WorldCup2026TeamsClient + bootstrap mergeTeamMetadata"
-    status: pending
+    status: completed
   - id: api-phase-d
     content: "Phase D: venueCoordinates + WeatherClient + WeatherBadge on MatchScheduleCard"
-    status: pending
+    status: completed
   - id: api-phase-e
     content: "Phase E: ZafronixClient + recent form in TeamDetailSheet"
-    status: pending
+    status: completed
   - id: api-phase-f
     content: "Phase F: OddsIntelligenceClient + odds row on schedule cards"
-    status: pending
+    status: completed
   - id: api-phase-g
     content: "Phase G: WC Live match detail (lineups, commentary, stats)"
-    status: pending
+    status: completed
 isProject: false
 ---
 

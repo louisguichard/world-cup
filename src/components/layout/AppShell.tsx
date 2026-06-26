@@ -12,6 +12,7 @@ import { BracketView } from "../views/BracketView";
 import { GroupsView } from "../views/GroupsView";
 import { TeamsView } from "../views/TeamsView";
 import { SimulatorView } from "../simulator/SimulatorView";
+import { ScheduleView } from "../views/ScheduleView";
 import { TeamDetailSheet } from "../team-detail/TeamDetailSheet";
 
 export function AppShell() {
@@ -52,6 +53,7 @@ export function AppShell() {
           </div>
         ) : null}
         {activeTab === "teams" ? <TeamsView /> : null}
+        {activeTab === "schedule" ? <ScheduleView /> : null}
       </main>
       <BottomTabBar />
       <SplashScreen />

@@ -9,6 +9,7 @@ import {
   enrichmentSourceLabel,
   fetchEnrichmentEvents,
 } from "./liveEnrichment";
+import { mergeEspnMatchIntoStore } from "./espnMatchMerge";
 import { enrichMatchWithScheduleId } from "./ScheduleLinker";
 import { scheduleSimulation } from "./SimulationScheduler";
 import { logger } from "./Logger";
@@ -121,11 +122,8 @@ class PollingEngine {
     const espn = await fetchScoreboard();
 
     for (const m of espn.matches) {
-      const applied = applyLiveScore(merged[m.id], {
-        ...m,
-        espnEventId: m.id
-      }, "espn");
-      merged[m.id] = enrichMatchWithScheduleId(applied, teams);
+      const incoming = applyLiveScore(undefined, { ...m, espnEventId: m.id }, "espn");
+      mergeEspnMatchIntoStore(merged, incoming, teams);
     }
 
     const { events: enrichmentEvents, source: enrichmentSource } = await fetchEnrichmentEvents();

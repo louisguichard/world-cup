@@ -3,6 +3,7 @@ import { useStore } from "../../store";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "live", label: "Live" },
+  { id: "schedule", label: "Schedule" },
   { id: "results", label: "Results" },
   { id: "groups", label: "Groups" },
   { id: "bracket", label: "Bracket" },

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BentoErrorBoundary } from "../shared/ErrorBoundary";
 import { LiveMatchBento } from "../bentos/LiveMatchBento";
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
@@ -12,15 +12,24 @@ export function LiveView() {
   const primaryId = useStore((s) => s.primaryLiveMatchId);
   const setPrimary = useStore((s) => s.setPrimaryMatch);
 
-  const allMatches = useMemo(
-    () =>
-      Object.values(liveMatchesMap).filter((m) => !m.locked && m.status !== "completed"),
+  // Live hero — no locked filter (ESPN sets locked:true for live matches)
+  const live = useMemo(
+    () => Object.values(liveMatchesMap).filter((m) => m.status === "live"),
     [liveMatchesMap]
   );
 
-  const live = useMemo(() => allMatches.filter((m) => m.status === "live"), [allMatches]);
+  // Schedule — only upcoming, non-locked matches
+  const scheduleMatches = useMemo(
+    () => Object.values(liveMatchesMap).filter((m) => m.status === "scheduled" && !m.locked),
+    [liveMatchesMap]
+  );
 
-  const dayGroups = useMemo(() => groupMatchesByDay(allMatches), [allMatches]);
+  const [scheduleExpanded, setScheduleExpanded] = useState(false);
+
+  const allDayGroups = useMemo(() => groupMatchesByDay(scheduleMatches), [scheduleMatches]);
+  const dayGroups = scheduleExpanded ? allDayGroups : allDayGroups.slice(0, 3);
+
+  const todayMatchCount = allDayGroups.find((g) => g.isToday)?.matches.length ?? 0;
 
   const primary = live.find((m) => m.id === primaryId) ?? live[0];
   const secondary = live.filter((m) => m.id !== primary?.id).slice(0, 6);
@@ -77,7 +86,7 @@ export function LiveView() {
         </section>
       )}
 
-      <section className="dashboard-section" aria-label="Match schedule">
+      <section className="dashboard-section" aria-label="Upcoming fixtures">
         <div className="section-heading compact">
           <div>
             <div className="section-kicker">Schedule</div>
@@ -85,8 +94,13 @@ export function LiveView() {
           </div>
         </div>
         {dayGroups.map((group) => (
-          <div key={group.date} className="schedule-day-group">
-            <div className="schedule-day-label">{group.label}</div>
+          <div key={group.dateKey} className="schedule-day-group">
+            <div className="schedule-day-label">
+              {group.label}
+              {group.isToday && todayMatchCount > 0 ? (
+                <span className="schedule-day-count">{todayMatchCount}</span>
+              ) : null}
+            </div>
             <div className="schedule-list">
               {group.matches.map((m) => (
                 <MatchScheduleCard
@@ -99,10 +113,22 @@ export function LiveView() {
             </div>
           </div>
         ))}
-        {dayGroups.length === 0 ? (
+        {allDayGroups.length === 0 ? (
           <p className="view-note">
             No upcoming fixtures — check the Results tab for completed matches.
           </p>
+        ) : null}
+        {allDayGroups.length > 3 ? (
+          <button
+            type="button"
+            className="schedule-expand-btn"
+            onClick={() => setScheduleExpanded((v) => !v)}
+            aria-expanded={scheduleExpanded}
+          >
+            {scheduleExpanded
+              ? "Show less"
+              : `Show all ${allDayGroups.length} days`}
+          </button>
         ) : null}
       </section>
 

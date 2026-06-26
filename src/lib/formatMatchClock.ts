@@ -33,6 +33,11 @@ export function formatLiveClock(match: ClockFields): string {
     return `${match.clockMinute}'`;
   }
 
+  // Live match with no clock data yet — show opening minute
+  if (match.status === "live") {
+    return "0'";
+  }
+
   return "";
 }
 

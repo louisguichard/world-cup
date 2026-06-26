@@ -4,7 +4,7 @@ import { BOOTSTRAP_FLAGS, isApiEnabled } from "../config/apiFlags";
 import { logger } from "../services/Logger";
 import { fetchScoreboard } from "../services/ESPNClient";
 import { applyLiveScore } from "../services/DataMerger";
-import { enrichMatchWithScheduleId } from "../services/ScheduleLinker";
+import { mergeEspnMatchIntoStore } from "../services/espnMatchMerge";
 import {
   fetchTeams as fetchWc2026Teams,
   isWorldCup2026Disabled,
@@ -96,8 +96,8 @@ export async function bootstrap(): Promise<void> {
     const liveMatches: Record<string, MergedMatch> = {};
 
     for (const m of espnData.matches) {
-      const merged = applyLiveScore(undefined, { ...m, espnEventId: m.id }, "espn");
-      liveMatches[m.id] = enrichMatchWithScheduleId(merged, teamsMap);
+      const incoming = applyLiveScore(undefined, { ...m, espnEventId: m.id }, "espn");
+      mergeEspnMatchIntoStore(liveMatches, incoming, teamsMap);
     }
     store.setLiveMatches(liveMatches);
     for (const m of Object.values(liveMatches)) {

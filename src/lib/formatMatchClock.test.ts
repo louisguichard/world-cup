@@ -47,6 +47,14 @@ describe("formatLiveClock", () => {
       })
     ).toBe("67'");
   });
+
+  it("returns 0' for live match with no clock data", () => {
+    expect(formatLiveClock({ status: "live" })).toBe("0'");
+  });
+
+  it("returns empty string for scheduled match with no clock data", () => {
+    expect(formatLiveClock({ status: "scheduled" })).toBe("");
+  });
 });
 
 describe("formatPeriodLabel", () => {

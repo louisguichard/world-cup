@@ -3,7 +3,7 @@ import { logger } from "../services/Logger";
 import { useStore } from "../store";
 import type { SimulatorMode, TabId } from "../types";
 
-const VALID_TABS: TabId[] = ["live", "results", "bracket", "groups", "simulator", "teams"];
+const VALID_TABS: TabId[] = ["live", "results", "bracket", "groups", "simulator", "teams", "schedule"];
 const VALID_SIMULATOR_MODES: SimulatorMode[] = ["tournament", "probabilities", "methodology"];
 
 export function parseAppHash(hash: string): { tab: TabId; simulatorMode: SimulatorMode } {
