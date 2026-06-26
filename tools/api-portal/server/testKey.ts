@@ -20,7 +20,10 @@ export async function testApiKey(key: ApiKey): Promise<TestResult> {
   let url = key.endpoint;
   try {
     const parsed = new URL(url);
-    if (!parsed.search) {
+    if (parsed.hostname.includes("googleapis.com")) {
+      parsed.searchParams.set("key", key.value);
+      url = parsed.toString();
+    } else if (!parsed.search) {
       parsed.searchParams.set("apiKey", key.value);
       url = parsed.toString();
     }
@@ -28,11 +31,23 @@ export async function testApiKey(key: ApiKey): Promise<TestResult> {
     // Not a valid URL — will fail below
   }
 
+  const testHeaders = { ...(key.testHeaders ?? {}) };
   const headers: Record<string, string> = {
-    "Authorization": `Bearer ${key.value}`,
-    "Accept": "application/json",
-    ...(key.testHeaders ?? {}),
+    Accept: "application/json",
+    ...testHeaders,
   };
+
+  if (testHeaders["x-rapidapi-host"]) {
+    headers["x-rapidapi-key"] = key.value;
+  } else if ("x-api-key" in testHeaders || "X-API-Key" in testHeaders) {
+    const apiKeyHeader = testHeaders["x-api-key"] !== undefined ? "x-api-key" : "X-API-Key";
+    headers[apiKeyHeader] = key.value;
+  } else if (testHeaders["X-API-Key"] === "FILL_ME_IN" || testHeaders["x-api-key"] === "FILL_ME_IN") {
+    const apiKeyHeader = testHeaders["X-API-Key"] !== undefined ? "X-API-Key" : "x-api-key";
+    headers[apiKeyHeader] = key.value;
+  } else if (!headers.Authorization && !headers["x-rapidapi-key"] && !headers["X-API-Key"] && !headers["x-api-key"]) {
+    headers.Authorization = `Bearer ${key.value}`;
+  }
 
   const start = Date.now();
   try {

@@ -27,7 +27,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type KeyStatus = "active" | "inactive" | "untested" | "placeholder";
+export type KeyStatus = "active" | "inactive" | "untested" | "placeholder" | "disabled";
 
 export type ApiKey = {
   id: string;
@@ -42,6 +42,10 @@ export type ApiKey = {
   valueLength: number;
   /** Computed status from last test result */
   keyStatus: KeyStatus;
+  disabled?: boolean;
+  disabledReason?: string;
+  disabledAt?: string;
+  missingFromProjects?: string[];
   endpoint?: string;
   testMethod?: "GET" | "POST";
   testHeaders?: Record<string, string>;
@@ -104,8 +108,22 @@ export type ScanEnvVar = {
   existingLabel: string | null;
   existingIsPlaceholder: boolean | null;
   newValue: string | null;
+  fileValue?: string | null;
 };
 
+export type ImportProjectResult = {
+  projectName: string;
+  envFilePath: string;
+  found: boolean;
+  vars: Array<{
+    name: string;
+    action: string;
+    keyId?: string;
+  }>;
+  targetId?: string;
+};
+
+// ─── Projects ─────────────────────────────────────────────────────────────────
 // ─── Core API ─────────────────────────────────────────────────────────────────
 
 export const getStatus = () => request<StatusResponse>("/status");
@@ -147,6 +165,50 @@ export const revealKey = (id: string) =>
 export const testKey = (id: string) =>
   request<TestResult>(`/keys/${id}/test`, { method: "POST" });
 
+export type TestAllOutcome = {
+  keyId: string;
+  envVarName: string;
+  label: string;
+  ok: boolean;
+  status: number;
+  latencyMs: number;
+  skipped?: string;
+};
+
+export const testAllKeys = (options?: { includeDisabled?: boolean; onlyUntested?: boolean }) =>
+  request<{
+    outcomes: TestAllOutcome[];
+    summary: { tested: number; passed: number; failed: number; skipped: number };
+    keys: ApiKey[];
+  }>("/keys/test-all", {
+    method: "POST",
+    body: JSON.stringify(options ?? {}),
+  });
+
+export const updateKeyMeta = (
+  id: string,
+  data: Partial<ApiKeyCreate> & {
+    disabled?: boolean;
+    disabledReason?: string | null;
+    missingFromProjects?: string[] | null;
+  }
+) => updateKey(id, data);
+
+export const importJsonKeys = (entries: Array<{
+  envVarName: string;
+  label: string;
+  serviceGroup: string;
+  value: string;
+  endpoint?: string;
+  testMethod?: "GET" | "POST";
+  testHeaders?: Record<string, string>;
+  notes?: string;
+}>) =>
+  request<{ added: number; updated: number; keys: ApiKey[] }>("/keys/import-json", {
+    method: "POST",
+    body: JSON.stringify({ entries }),
+  });
+
 // ─── History ──────────────────────────────────────────────────────────────────
 
 export const getHistory = () => request<{ history: VaultHistory[] }>("/history");
@@ -183,11 +245,78 @@ export const deleteSyncTarget = (id: string) =>
   request<{ ok: boolean }>(`/sync-targets/${id}`, { method: "DELETE" });
 
 export const syncAll = async (): Promise<void> => {
-  const { targets } = await getSyncTargets();
-  await Promise.all(targets.map((t) => syncTarget(t.id)));
+  await pushAllProjects();
 };
 
+export const pullAllProjects = () =>
+  request<{ pulled: number; results: ImportProjectResult[] }>("/projects/import-all", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+
+export const pushAllProjects = () =>
+  request<{
+    outcomes: Array<{ name: string; ok: boolean; keysWritten?: number; error?: string }>;
+  }>("/projects/push-all", { method: "POST", body: JSON.stringify({}) });
+
+export const getProjectCatalog = () =>
+  request<{ projects: Array<{ name: string; envFilePath: string; expectedVars?: string[] }> }>(
+    "/projects/catalog"
+  );
+
 // ─── Projects ─────────────────────────────────────────────────────────────────
+
+export type DiscoveredEnvVar = {
+  name: string;
+  sources: string[];
+  inVault: boolean;
+  vaultKeyId: string | null;
+  onTarget: boolean;
+  inEnvFile: boolean;
+  envFileValueIsPlaceholder: boolean | null;
+};
+
+export type ProjectScanResult = {
+  projectName: string;
+  envFilePath: string;
+  rootPath: string;
+  targetId: string | null;
+  discovered: DiscoveredEnvVar[];
+  unassigned: DiscoveredEnvVar[];
+  missingFromVault: DiscoveredEnvVar[];
+  staleAssigned: Array<{ keyId: string; envVarName: string; label: string }>;
+};
+
+export type ScanUsageUpdate = {
+  disabled: string[];
+  reenabled: string[];
+  partialMissing: string[];
+};
+
+export const rescanProjects = (body: { targetId?: string; projectName?: string; envFilePath?: string } = {}) =>
+  request<{ results: ProjectScanResult[]; usage: ScanUsageUpdate; keys: ApiKey[] }>("/projects/rescan", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
+export const applyDiscoveredKeys = (data: {
+  targetId?: string;
+  projectName: string;
+  envFilePath: string;
+  varNames: string[];
+  pullValuesFromEnv?: boolean;
+}) =>
+  request<{
+    projectName: string;
+    targetId: string;
+    addedToVault: string[];
+    assigned: string[];
+    valuesPulled: string[];
+    keys: ApiKey[];
+  }>("/projects/apply-discovered", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 
 export const scanEnvFile = (envFilePath: string) =>
   request<{ vars: ScanEnvVar[]; filePath: string }>("/projects/scan-env", {

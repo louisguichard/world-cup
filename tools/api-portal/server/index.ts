@@ -74,6 +74,18 @@ async function start(): Promise<void> {
     console.log(`\n  API Vault server running at http://${HOST}:${PORT}`);
     console.log(`  Open http://localhost:4243 to manage your keys\n`);
     resetIdleTimer();
+  }).on("error", (err: NodeJS.ErrnoException) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(
+        `\n  ✗ Port ${PORT} is already in use (another portal instance may be running).`
+      );
+      console.error(`    From repo root: npm run portal:stop`);
+      console.error(`    Then:           npm run dev:portal\n`);
+      process.exit(1);
+      return;
+    }
+    console.error("[api-vault] Server error:", err.message);
+    process.exit(1);
   });
 }
 

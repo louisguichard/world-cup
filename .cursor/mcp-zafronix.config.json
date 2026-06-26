@@ -1,0 +1,12 @@
+{
+  "enabled": [
+    "tournaments",
+    "tournament-2026",
+    "team-matches",
+    "team-profile",
+    "team-roster",
+    "live-matches",
+    "bracket-2026",
+    "trivia"
+  ]
+}

@@ -1,15 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
-import { formatKickoffDate } from "../../lib/formatKickoff";
+import { createPortal } from "react-dom";
+import { formatKickoffDate, formatKickoffTime } from "../../lib/formatKickoff";
+import {
+  buildQualificationContext,
+  computeQualificationStatus
+} from "../../lib/qualification";
+import { rankBestThirds } from "../../lib/bestThirds";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import { useStore } from "../../store";
 import { getTeamElo } from "../../services/ClubEloClient";
-import {
-  getHistoricalMatchesForTeam,
-  type ZafronixMatch,
-} from "../../services/ZafronixClient";
+import { getHistoricalMatchesForTeam, type ZafronixMatch } from "../../services/ZafronixClient";
 import { TeamThemeRoot } from "../team/TeamThemeRoot";
+import { TeamFlag } from "../team/TeamFlag";
+import { CertaintyBadge } from "../shared/CertaintyBadge";
 import type { MergedMatch } from "../../types";
 
-type Tab = "now" | "path" | "odds";
+type Tab = "overview" | "fixtures" | "stats" | "betting";
 type MatchOutcome = "W" | "D" | "L";
 
 function outcomeForTeam(match: MergedMatch, teamId: string): MatchOutcome {
@@ -21,45 +27,61 @@ function outcomeForTeam(match: MergedMatch, teamId: string): MatchOutcome {
   return "D";
 }
 
-function outcomeClass(outcome: MatchOutcome): string {
-  switch (outcome) {
-    case "W":
-      return "team-history-outcome--win";
-    case "D":
-      return "team-history-outcome--draw";
-    case "L":
-      return "team-history-outcome--loss";
-    default: {
-      const _exhaustive: never = outcome;
-      return _exhaustive;
-    }
-  }
-}
-
 export function TeamDetailSheet() {
   const open = useStore((s) => s.teamSheetOpen);
   const teamId = useStore((s) => s.activeTeamId);
   const close = useStore((s) => s.closeTeamSheet);
   const teams = useStore((s) => s.teams);
   const liveMatches = useStore((s) => s.liveMatches);
+  const standings = useStore((s) => s.groupStandings);
   const simulationRunning = useStore((s) => s.simulationRunning);
-  const [tab, setTab] = useState<Tab>("now");
+  const [tab, setTab] = useState<Tab>("overview");
   const [elo, setElo] = useState<number | null>(null);
   const [recentForm, setRecentForm] = useState<ZafronixMatch[]>([]);
-  const [recentFormLoading, setRecentFormLoading] = useState(false);
 
   const team = teamId ? teams[teamId] : null;
+  const qualContext = useMemo(
+    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
+    [liveMatches, teams]
+  );
 
-  const matchHistory = useMemo(() => {
+  const qual = useMemo(
+    () => (teamId ? computeQualificationStatus(teamId, standings, qualContext) : null),
+    [teamId, standings, qualContext]
+  );
+
+  const groupStanding = useMemo(() => {
+    if (!team) return null;
+    const g = standings.find((s) => s.group === team.group);
+    const row = g?.rows.find((r) => r.teamId === team.id);
+    return row ? { group: g!, row } : null;
+  }, [team, standings]);
+
+  const allFixtures = useMemo(() => {
     if (!teamId) return [];
     return Object.values(liveMatches)
-      .filter(
-        (match) =>
-          match.locked &&
-          (match.homeTeamId === teamId || match.awayTeamId === teamId)
-      )
-      .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+      .filter((m) => m.homeTeamId === teamId || m.awayTeamId === teamId)
+      .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
   }, [liveMatches, teamId]);
+
+  const stats = useMemo(() => {
+    if (!groupStanding) return null;
+    const { row } = groupStanding;
+    const played = row.played || 1;
+    return {
+      gf: row.goalsFor,
+      ga: row.goalsAgainst,
+      gd: row.goalDifference,
+      cleanSheets: 0,
+      wdl: { w: row.wins, d: row.draws, l: row.losses },
+      avgGoals: (row.goalsFor / played).toFixed(2)
+    };
+  }, [groupStanding]);
+
+  const thirdRank = useMemo(() => {
+    if (!teamId) return -1;
+    return rankBestThirds(standings).findIndex((r) => r.teamId === teamId);
+  }, [standings, teamId]);
 
   useEffect(() => {
     if (!team) return;
@@ -67,30 +89,44 @@ export function TeamDetailSheet() {
   }, [team]);
 
   useEffect(() => {
-    if (!team || tab !== "now") return;
-    setRecentFormLoading(true);
-    void getHistoricalMatchesForTeam(team.name, 7).then((matches) => {
-      setRecentForm(matches);
-      setRecentFormLoading(false);
-    });
+    if (!team || tab !== "overview") return;
+    void getHistoricalMatchesForTeam(team.name, 7).then(setRecentForm);
   }, [team, tab]);
 
-  if (!open || !team) return null;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, close]);
 
-  return (
-    <div className="team-sheet-backdrop" role="presentation" onClick={close}>
+  if (!open || !team || !teamId) return null;
+
+  const certaintyBadge =
+    qual?.certainty === "confirmed" ? "confirmed" : qual?.certainty ? "projected" : "projected";
+
+  const sheet = (
+    <div className="team-sheet-backdrop team-sheet-backdrop--portal" role="presentation" onClick={close}>
       <div
-        className="team-sheet"
+        className="team-sheet team-sheet--portal"
         role="dialog"
-        aria-label={`${team.shortName} details`}
+        aria-label={`${teamDisplayName(team)} profile`}
         onClick={(e) => e.stopPropagation()}
       >
         <TeamThemeRoot teamId={team.id} className="team-sheet-header-themed">
           <div className="team-accent-bar" aria-hidden />
           <header className="team-sheet-header">
             <div className="team-sheet-header-main">
-              {team.logo ? <img src={team.logo} alt="" width={40} height={40} /> : null}
-              <h2>{team.name}</h2>
+              <TeamFlag team={team} teamId={team.id} size="xl" />
+              <div>
+                <h2>{team.name}</h2>
+                <p className="team-sheet-sub">
+                  Group {team.group} · FIFA rank {team.fifaRank ?? "—"}
+                </p>
+              </div>
+              <CertaintyBadge certainty={certaintyBadge} size="xs" />
             </div>
             <button type="button" onClick={close} aria-label="Close">
               ×
@@ -99,7 +135,7 @@ export function TeamDetailSheet() {
         </TeamThemeRoot>
 
         <div className="team-sheet-tabs">
-          {(["now", "path", "odds"] as Tab[]).map((t) => (
+          {(["overview", "fixtures", "stats", "betting"] as Tab[]).map((t) => (
             <button key={t} type="button" className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
@@ -107,95 +143,127 @@ export function TeamDetailSheet() {
         </div>
 
         <div className="team-sheet-body">
-          {tab === "now" ? (
+          {tab === "overview" ? (
             <>
-              <p>
-                Group {team.group} · FIFA rank {team.fifaRank ?? "—"} · Title market{" "}
-                {team.titleProbability ? `${(team.titleProbability * 100).toFixed(1)}%` : "—"}
-              </p>
-
-              {recentForm.length > 0 || recentFormLoading ? (
-                <section className="team-recent-form" aria-label="Recent form">
-                  <h3 className="team-match-history-title">Recent Form</h3>
-                  {recentFormLoading ? (
-                    <p className="team-match-history-empty">Loading…</p>
-                  ) : (
-                    <div className="recent-form-pills">
-                      {recentForm.map((m) => {
-                        const isHome = m.homeTeam.toLowerCase() === team.name.toLowerCase();
-                        const teamScore = isHome ? m.homeScore : m.awayScore;
-                        const oppScore = isHome ? m.awayScore : m.homeScore;
-                        const opponent = isHome ? m.awayTeam : m.homeTeam;
-                        const result = teamScore > oppScore ? "W" : teamScore < oppScore ? "L" : "D";
-                        const pillClass = `recent-form-pill recent-form-pill--${result.toLowerCase()}${m.isWorldCup ? " recent-form-pill--wc" : ""}`;
-                        return (
-                          <span key={m.id} className={pillClass} title={`${m.competition ?? ""} · ${m.date}`}>
-                            <span className="rfp-result">{result}</span>
-                            <span className="rfp-opp">{opponent}</span>
-                            <span className="rfp-score">{teamScore}–{oppScore}</span>
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-                </section>
+              {recentForm.length > 0 ? (
+                <p className="team-sheet-form">
+                  Form:{" "}
+                  {recentForm
+                    .slice(0, 5)
+                    .map((m) => {
+                      const isHome = m.homeTeam.toLowerCase() === team.name.toLowerCase();
+                      const ts = isHome ? m.homeScore : m.awayScore;
+                      const os = isHome ? m.awayScore : m.homeScore;
+                      return ts > os ? "W" : ts < os ? "L" : "D";
+                    })
+                    .join("")}
+                </p>
               ) : null}
 
-              <section className="team-match-history" aria-label="Match history">
-                <h3 className="team-match-history-title">Match History</h3>
-                {matchHistory.length === 0 ? (
-                  <p className="team-match-history-empty">No completed matches yet</p>
-                ) : (
-                  <ul className="team-match-history-list">
-                    {matchHistory.map((match) => {
-                      const isHome = match.homeTeamId === team.id;
-                      const opponentId = isHome ? match.awayTeamId : match.homeTeamId;
-                      const opponent = teams[opponentId];
-                      const teamScore = isHome ? (match.homeScore ?? 0) : (match.awayScore ?? 0);
-                      const oppScore = isHome ? (match.awayScore ?? 0) : (match.homeScore ?? 0);
-                      const outcome = outcomeForTeam(match, team.id);
+              {groupStanding ? (
+                <table className="team-sheet-standings">
+                  <thead>
+                    <tr>
+                      <th>P</th>
+                      <th>W</th>
+                      <th>D</th>
+                      <th>L</th>
+                      <th>GF</th>
+                      <th>GA</th>
+                      <th>GD</th>
+                      <th>Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="team-sheet-standings-highlight">
+                      <td>{groupStanding.row.played}</td>
+                      <td>{groupStanding.row.wins}</td>
+                      <td>{groupStanding.row.draws}</td>
+                      <td>{groupStanding.row.losses}</td>
+                      <td>{groupStanding.row.goalsFor}</td>
+                      <td>{groupStanding.row.goalsAgainst}</td>
+                      <td>{groupStanding.row.goalDifference}</td>
+                      <td>
+                        <strong>{groupStanding.row.points}</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              ) : null}
 
-                      return (
-                        <li key={match.id} className="team-match-history-row">
-                          <span className="team-match-history-opponent">
-                            {opponent?.logo ? (
-                              <img src={opponent.logo} alt="" width={18} height={18} />
-                            ) : null}
-                            <span>{opponent?.shortName ?? opponentId}</span>
-                          </span>
-                          <span className="team-match-history-score">
-                            {teamScore}–{oppScore}
-                          </span>
-                          <span className={`team-match-history-outcome ${outcomeClass(outcome)}`}>
-                            {outcome}
-                          </span>
-                          <time className="team-match-history-date" dateTime={match.date}>
-                            {formatKickoffDate(match.date)}
-                          </time>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </section>
+              {qual ? (
+                <div className="team-sheet-qual">
+                  <h3>Qualification</h3>
+                  <p>
+                    <strong>{qual.status.replace("_", " ").toUpperCase()}</strong>
+                    {qual.certainty === "confirmed" ? " · CONFIRMED" : " · PROJECTED"}
+                  </p>
+                  <p>{qual.reason}</p>
+                  {qual.status === "at_risk" && thirdRank >= 0 ? (
+                    <p>
+                      Best-third rank: {thirdRank + 1} of 12 — cut line is top 8.
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </>
           ) : null}
-          {tab === "path" ? (
-            <p>
-              ClubElo rating: {elo ?? "Loading…"} · Bracket path updates with live goals.
-            </p>
+
+          {tab === "fixtures" ? (
+            <ul className="team-match-history-list">
+              {allFixtures.map((match) => {
+                const isHome = match.homeTeamId === teamId;
+                const opponentId = isHome ? match.awayTeamId : match.homeTeamId;
+                const opponent = teams[opponentId];
+                const teamScore = isHome ? (match.homeScore ?? 0) : (match.awayScore ?? 0);
+                const oppScore = isHome ? (match.awayScore ?? 0) : (match.homeScore ?? 0);
+                return (
+                  <li key={match.id} className="team-match-history-row">
+                    <span>{match.status === "live" ? "LIVE" : match.status === "completed" ? "FT" : formatKickoffTime(match.date)}</span>
+                    <span>
+                      <TeamFlag team={opponent} teamId={opponentId} />{" "}
+                      <span className="team-name-text">{teamDisplayName(opponent, opponentId)}</span>
+                    </span>
+                    <span>
+                      {match.homeScore !== undefined ? `${teamScore}–${oppScore}` : "vs"}
+                    </span>
+                    <time dateTime={match.date}>{formatKickoffDate(match.date)}</time>
+                  </li>
+                );
+              })}
+            </ul>
           ) : null}
-          {tab === "odds" ? (
-            <div>
-              <p>Polymarket / model odds from simulation.</p>
-              {simulationRunning ? <p className="odds-recalc">Recalculating…</p> : null}
-              <p className="odds-stub">
-                Sportsbook consensus available on upcoming match cards (Sports Odds Intelligence).
+
+          {tab === "stats" && stats ? (
+            <div className="team-sheet-stats">
+              <p>
+                Goals {stats.gf} / Conceded {stats.ga} / GD {stats.gd >= 0 ? "+" : ""}
+                {stats.gd}
               </p>
+              <p>Avg goals per game: {stats.avgGoals}</p>
+              <div className="team-wdl-bar" aria-label="Win draw loss breakdown">
+                <span style={{ flex: stats.wdl.w }} className="team-wdl-bar--w" />
+                <span style={{ flex: stats.wdl.d }} className="team-wdl-bar--d" />
+                <span style={{ flex: stats.wdl.l }} className="team-wdl-bar--l" />
+              </div>
+              <p>
+                W {stats.wdl.w} · D {stats.wdl.d} · L {stats.wdl.l}
+              </p>
+            </div>
+          ) : null}
+
+          {tab === "betting" ? (
+            <div>
+              <p>Title market: {team.titleProbability ? `${(team.titleProbability * 100).toFixed(1)}%` : "—"}</p>
+              <p>ClubElo rating: {elo ?? "Loading…"}</p>
+              {simulationRunning ? <p className="odds-recalc">Recalculating…</p> : null}
+              <p className="odds-disclaimer">Based on simulated tournaments. For entertainment only — not financial advice.</p>
             </div>
           ) : null}
         </div>
       </div>
     </div>
   );
+
+  return createPortal(sheet, document.body);
 }

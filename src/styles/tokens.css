@@ -14,4 +14,7 @@
   --badge-at-risk-text: var(--warn, #ffd27d);
   --badge-qualified: var(--accent);
   --badge-eliminated: var(--coral, #ff9168);
+
+  /* Venue / location overlay — above hub (1100), sheets, nav, debug */
+  --z-venue-overlay: 10000;
 }

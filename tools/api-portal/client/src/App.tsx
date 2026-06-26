@@ -14,14 +14,13 @@ import KeyList from "./components/KeyList.js";
 import HistoryLog from "./components/HistoryLog.js";
 import SyncTargets from "./components/SyncTargets.js";
 import Settings from "./components/Settings.js";
-
 type NavTab = "keys" | "history" | "sync" | "settings";
 
 const NAV_ITEMS: { id: NavTab; label: string; icon: string }[] = [
-  { id: "keys", label: "Keys", icon: "🔑" },
-  { id: "history", label: "History", icon: "📋" },
-  { id: "sync", label: "Projects", icon: "⟳" },
-  { id: "settings", label: "Settings", icon: "⚙" },
+  { id: "keys", label: "My Secret Keys", icon: "🔑" },
+  { id: "sync", label: "My Apps", icon: "⟳" },
+  { id: "history", label: "What Changed", icon: "📋" },
+  { id: "settings", label: "Lock & Backup", icon: "⚙" },
 ];
 
 export default function App() {
@@ -29,6 +28,7 @@ export default function App() {
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [syncTargets, setSyncTargets] = useState<SyncTarget[]>([]);
   const [nav, setNav] = useState<NavTab>("keys");
+  const [keyToEdit, setKeyToEdit] = useState<ApiKey | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState("");
   const [connectionError, setConnectionError] = useState(false);
@@ -108,13 +108,12 @@ export default function App() {
     return (
       <div className="setup-screen">
         <div className="setup-card">
-          <h1>Cannot connect to server</h1>
+          <h1>Can&apos;t connect</h1>
           <p>
-            Make sure the API Vault server is running at{" "}
-            <code style={{ fontFamily: "var(--mono)" }}>http://127.0.0.1:4242</code>.
+            The key box server is not running. Start it from your project folder:
           </p>
           <p style={{ marginTop: 8 }}>
-            From the repo root, run: <code style={{ fontFamily: "var(--mono)" }}>npm run dev:portal</code>
+            Run: <code style={{ fontFamily: "var(--mono)" }}>npm run dev:portal</code>
           </p>
           <button
             className="btn btn-primary"
@@ -133,7 +132,7 @@ export default function App() {
       <div className="setup-screen">
         <div className="setup-card" style={{ alignItems: "center" }}>
           <span className="spinner" style={{ width: 28, height: 28, borderWidth: 3 }} />
-          <p>Connecting to vault server…</p>
+          <p>Loading your key box…</p>
         </div>
       </div>
     );
@@ -153,7 +152,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <span className="logo">🔐 API Vault</span>
+        <span className="logo">🔐 My Secret Keys</span>
         {emptyCount > 0 && (
           <span
             style={{
@@ -165,9 +164,9 @@ export default function App() {
               cursor: "pointer",
             }}
             onClick={() => setNav("keys")}
-            title="Some keys need values"
+            title="You still need to paste your secret keys"
           >
-            {emptyCount} empty
+            {emptyCount} need your key
           </span>
         )}
         {inactiveCount > 0 && (
@@ -181,9 +180,9 @@ export default function App() {
               cursor: "pointer",
             }}
             onClick={() => setNav("keys")}
-            title="Some keys failed their last test"
+            title="Some keys failed the last check"
           >
-            {inactiveCount} inactive
+            {inactiveCount} didn&apos;t work
           </span>
         )}
         <span style={{ flex: 1 }} />
@@ -194,7 +193,7 @@ export default function App() {
           onClick={() => void handleSyncAll()}
         >
           {syncing ? <span className="spinner" /> : null}
-          Sync All
+          Send keys to my apps
         </button>
       </header>
 
@@ -232,12 +231,15 @@ export default function App() {
               keys={keys}
               syncTargets={syncTargets}
               onKeysChanged={setKeys}
+              openKey={keyToEdit}
+              onOpenKeyConsumed={() => setKeyToEdit(null)}
             />
           )}
           {nav === "history" && <HistoryLog />}
           {nav === "sync" && (
             <SyncTargets
               onTargetsChanged={() => void loadAll()}
+              onKeysChanged={setKeys}
             />
           )}
           {nav === "settings" && (

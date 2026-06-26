@@ -128,4 +128,32 @@ describe("groupMatchesByDay", () => {
     expect(tomorrowTimes[0]).toContain("15:00");
     expect(tomorrowTimes[1]).toContain("20:00");
   });
+
+  describe("calendar labelMode", () => {
+    it("does not bucket past matches into Today when includeCompleted is true", () => {
+      const now = new Date(2026, 5, 26, 12, 0, 0);
+      const matches = [
+        makeMatch({ date: "2026-06-11T15:00:00", status: "completed" }),
+        makeMatch({ date: "2026-06-26T20:00:00", status: "scheduled" })
+      ];
+      const groups = groupMatchesByDay(matches, {
+        now,
+        includeCompleted: true,
+        labelMode: "calendar"
+      });
+      expect(groups).toHaveLength(2);
+      expect(groups[0]?.isToday).toBe(false);
+      expect(groups[0]?.label).not.toBe("Today");
+      expect(groups[1]?.isToday).toBe(true);
+      expect(groups[1]?.label).toBe("Today");
+    });
+
+    it("labels only the actual calendar today as Today", () => {
+      const now = new Date(2026, 5, 26, 12, 0, 0);
+      const matches = [makeMatch({ date: "2026-06-26T18:00:00" })];
+      const groups = groupMatchesByDay(matches, { now, labelMode: "calendar" });
+      expect(groups[0]?.isToday).toBe(true);
+      expect(groups[0]?.label).toBe("Today");
+    });
+  });
 });

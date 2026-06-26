@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "RapidAPI Hub - Free API Live Football Data": {
+      "command": "${workspaceFolder}/scripts/mcp-rapidapi-football.sh"
+    },
+    "RapidAPI Hub - Sports Odds Intelligence API": {
+      "command": "${workspaceFolder}/scripts/mcp-rapidapi-odds.sh"
+    },
+    "RapidAPI Hub - Open Weather": {
+      "command": "${workspaceFolder}/scripts/mcp-rapidapi-weather.sh"
+    },
+    "RapidAPI Hub - SofaScore": {
+      "command": "${workspaceFolder}/scripts/mcp-rapidapi-sofascore.sh"
+    },
+    "RapidAPI Hub - World Cup 2026 Live API": {
+      "command": "${workspaceFolder}/scripts/mcp-rapidapi-wc-live.sh"
+    },
+    "RapidAPI Hub - World Cup 2026": {
+      "command": "${workspaceFolder}/scripts/mcp-rapidapi-wc2026.sh"
+    },
+    "RapidAPI Hub - SportAPI": {
+      "command": "${workspaceFolder}/scripts/mcp-rapidapi-sportapi.sh"
+    },
+    "RapidAPI Hub - Zafronix FIFA World Cup API": {
+      "command": "${workspaceFolder}/scripts/mcp-rapidapi-zafronix.sh"
+    }
+  }
+}

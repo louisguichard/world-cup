@@ -35,9 +35,26 @@ import {
   SetupSchema,
   UnlockSchema,
   VaultResetSchema,
+  JsonKeyImportSchema,
+  ProjectRescanSchema,
+  ApplyDiscoveredSchema,
 } from "./schemas.js";
 import { testApiKey } from "./testKey.js";
 import { syncToEnvFile } from "./sync.js";
+import { isPlaceholderValue, parseEnvFile } from "./envParse.js";
+import {
+  importAllKnownProjects,
+  importProjectEnvFile,
+  propagateEnvVarValue,
+} from "./envImport.js";
+import { KNOWN_PROJECTS } from "./projectCatalog.js";
+import { importJsonEntries } from "./jsonKeyImport.js";
+import {
+  applyDiscoveredVars,
+  scanProjectForVault,
+  type ProjectScanResult,
+} from "./projectScan.js";
+import { applyScanUsageUpdates } from "./keyUsage.js";
 import forge from "node-forge";
 
 const router = Router();
@@ -193,8 +210,38 @@ router.put("/keys/:id", async (req, res) => {
     ...existing,
     ...update,
     endpoint: update.endpoint === "" ? undefined : (update.endpoint ?? existing.endpoint),
+    disabledReason:
+      update.disabledReason === null ? undefined : (update.disabledReason ?? existing.disabledReason),
+    disabledAt: update.disabledAt === null ? undefined : (update.disabledAt ?? existing.disabledAt),
+    missingFromProjects:
+      update.missingFromProjects === null
+        ? undefined
+        : (update.missingFromProjects ?? existing.missingFromProjects),
     updatedAt: new Date().toISOString(),
   };
+
+  if (update.disabled === false) {
+    vault.keys[idx].disabled = false;
+    vault.keys[idx].disabledReason = undefined;
+    vault.keys[idx].disabledAt = undefined;
+    vault.keys[idx].missingFromProjects = undefined;
+  }
+
+  if (valueChanged && update.value) {
+    const shared = propagateEnvVarValue(
+      vault,
+      vault.keys[idx].envVarName,
+      update.value,
+      vault.keys[idx].id
+    );
+    if (shared > 0) {
+      vault.history.push(
+        historyEntry("update", vault.keys[idx], {
+          meta: `shared with ${shared} other key slot(s) using ${vault.keys[idx].envVarName}`,
+        })
+      );
+    }
+  }
 
   vault.history.push(
     historyEntry("update", vault.keys[idx], { oldValueHash: oldHash, newValueHash: newHash })
@@ -221,6 +268,18 @@ router.delete("/keys/:id", async (req, res) => {
   // Destructive op → backup before write
   await writeVault(trimHistory(vault), { destructive: true });
   res.json({ ok: true });
+});
+
+router.post("/keys/import-json", async (req, res) => {
+  const parsed = JsonKeyImportSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid JSON import." });
+    return;
+  }
+  const vault = await readVault();
+  const { added, updated } = importJsonEntries(vault, parsed.data.entries);
+  await writeVault(trimHistory(vault));
+  res.json({ added, updated, keys: maskKeys(vault.keys) });
 });
 
 // ─── Reveal ───────────────────────────────────────────────────────────────────
@@ -267,6 +326,110 @@ router.post("/keys/:id/test", async (req, res) => {
   );
   await writeVault(trimHistory(vault));
   res.json(result);
+});
+
+router.post("/keys/test-all", async (req, res) => {
+  const body = (req.body ?? {}) as { includeDisabled?: boolean; onlyUntested?: boolean };
+  const vault = await readVault();
+  const now = new Date().toISOString();
+  const outcomes: Array<{
+    keyId: string;
+    envVarName: string;
+    label: string;
+    ok: boolean;
+    status: number;
+    latencyMs: number;
+    skipped?: string;
+  }> = [];
+
+  for (const key of vault.keys) {
+    if (key.disabled && !body.includeDisabled) {
+      outcomes.push({
+        keyId: key.id,
+        envVarName: key.envVarName,
+        label: key.label,
+        ok: false,
+        status: 0,
+        latencyMs: 0,
+        skipped: "disabled",
+      });
+      continue;
+    }
+    if (isPlaceholderValue(key.value)) {
+      outcomes.push({
+        keyId: key.id,
+        envVarName: key.envVarName,
+        label: key.label,
+        ok: false,
+        status: 0,
+        latencyMs: 0,
+        skipped: "needs key",
+      });
+      continue;
+    }
+    if (!key.endpoint) {
+      outcomes.push({
+        keyId: key.id,
+        envVarName: key.envVarName,
+        label: key.label,
+        ok: false,
+        status: 0,
+        latencyMs: 0,
+        skipped: "no test URL",
+      });
+      continue;
+    }
+    if (body.onlyUntested && key.lastTestedAt) {
+      outcomes.push({
+        keyId: key.id,
+        envVarName: key.envVarName,
+        label: key.label,
+        ok: key.lastTestStatus !== undefined && key.lastTestStatus >= 200 && key.lastTestStatus < 300,
+        status: key.lastTestStatus ?? 0,
+        latencyMs: key.lastTestLatencyMs ?? 0,
+        skipped: "already tested",
+      });
+      continue;
+    }
+
+    const result = await testApiKey(key);
+    const idx = vault.keys.findIndex((k) => k.id === key.id);
+    if (idx >= 0) {
+      vault.keys[idx] = {
+        ...vault.keys[idx],
+        lastTestedAt: now,
+        lastTestStatus: result.status,
+        lastTestLatencyMs: result.latencyMs,
+        updatedAt: now,
+      };
+      vault.history.push(
+        historyEntry("test", vault.keys[idx], {
+          meta: `bulk: ${result.status} ${result.ok ? "OK" : "FAIL"} ${result.latencyMs}ms`,
+        })
+      );
+    }
+    outcomes.push({
+      keyId: key.id,
+      envVarName: key.envVarName,
+      label: key.label,
+      ok: result.ok,
+      status: result.status,
+      latencyMs: result.latencyMs,
+    });
+  }
+
+  await writeVault(trimHistory(vault));
+  const tested = outcomes.filter((o) => !o.skipped);
+  res.json({
+    outcomes,
+    summary: {
+      tested: tested.length,
+      passed: tested.filter((o) => o.ok).length,
+      failed: tested.filter((o) => !o.ok).length,
+      skipped: outcomes.filter((o) => o.skipped).length,
+    },
+    keys: maskKeys(vault.keys),
+  });
 });
 
 // ─── History ──────────────────────────────────────────────────────────────────
@@ -407,22 +570,141 @@ router.post("/vault/reset", async (req, res) => {
 
 // ─── Projects: scan existing .env / create new project ───────────────────────
 
-// Parse a .env file into name/value pairs (ignores comments + blank lines)
-function parseEnvFile(content: string): Array<{ name: string; value: string }> {
-  return content
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith("#"))
-    .flatMap((line) => {
-      const eq = line.indexOf("=");
-      if (eq === -1) return [];
-      const name = line.slice(0, eq).trim();
-      const raw = line.slice(eq + 1).trim();
-      // Strip surrounding quotes
-      const value = raw.replace(/^["']|["']$/g, "");
-      return [{ name, value }];
+router.get("/projects/catalog", (_req, res) => {
+  res.json({ projects: KNOWN_PROJECTS });
+});
+
+// POST /api/projects/import-all — pull real keys from every known project file
+router.post("/projects/import-all", async (_req, res) => {
+  const vault = await readVault();
+  const results = await importAllKnownProjects(vault);
+  await writeVault(trimHistory(vault));
+  const pulled = results.flatMap((r) =>
+    r.vars.filter((v) => v.action === "imported" || v.action === "updated")
+  ).length;
+  res.json({ results, pulled });
+});
+
+// POST /api/projects/push-all — write vault keys to every linked app file
+router.post("/projects/push-all", async (_req, res) => {
+  const vault = await readVault();
+  const { syncToEnvFile } = await import("./sync.js");
+  const outcomes: Array<{ name: string; ok: boolean; keysWritten?: number; error?: string }> = [];
+
+  for (const target of vault.syncTargets) {
+    try {
+      const { keysWritten } = await syncToEnvFile(target, vault);
+      const idx = vault.syncTargets.findIndex((t) => t.id === target.id);
+      vault.syncTargets[idx] = { ...target, lastSyncedAt: new Date().toISOString() };
+      outcomes.push({ name: target.name, ok: true, keysWritten });
+    } catch (e) {
+      outcomes.push({
+        name: target.name,
+        ok: false,
+        error: e instanceof Error ? e.message : "Sync failed",
+      });
+    }
+  }
+
+  await writeVault(trimHistory(vault));
+  res.json({ outcomes });
+});
+
+async function rescanAllProjects(vault: VaultData): Promise<ProjectScanResult[]> {
+  const seen = new Set<string>();
+  const jobs: Array<{ name: string; envFilePath: string; rootPath?: string }> = [];
+
+  for (const project of KNOWN_PROJECTS) {
+    if (seen.has(project.envFilePath)) continue;
+    seen.add(project.envFilePath);
+    jobs.push({
+      name: project.name,
+      envFilePath: project.envFilePath,
+      rootPath: project.rootPath,
     });
+  }
+
+  for (const target of vault.syncTargets) {
+    if (seen.has(target.envFilePath)) continue;
+    seen.add(target.envFilePath);
+    jobs.push({ name: target.name, envFilePath: target.envFilePath });
+  }
+
+  const results: ProjectScanResult[] = [];
+  for (const job of jobs) {
+    results.push(
+      await scanProjectForVault(vault, job.name, job.envFilePath, job.rootPath)
+    );
+  }
+  return results;
 }
+
+// POST /api/projects/rescan — detect env vars used in project source code
+router.post("/projects/rescan", async (req, res) => {
+  const parsed = ProjectRescanSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input" });
+    return;
+  }
+
+  const vault = await readVault();
+  const { targetId, projectName, envFilePath, rootPath } = parsed.data;
+
+  const finishRescan = async (results: ProjectScanResult[]) => {
+    const usage = applyScanUsageUpdates(vault, results);
+    await writeVault(trimHistory(vault));
+    res.json({ results, usage, keys: maskKeys(vault.keys) });
+  };
+
+  if (targetId) {
+    const target = vault.syncTargets.find((t) => t.id === targetId);
+    if (!target) {
+      res.status(404).json({ error: "App not found." });
+      return;
+    }
+    const result = await scanProjectForVault(vault, target.name, target.envFilePath);
+    await finishRescan([result]);
+    return;
+  }
+
+  if (envFilePath && projectName) {
+    const result = await scanProjectForVault(vault, projectName, envFilePath, rootPath);
+    await finishRescan([result]);
+    return;
+  }
+
+  const results = await rescanAllProjects(vault);
+  await finishRescan(results);
+});
+
+// POST /api/projects/apply-discovered — add scanned vars to vault + app assignment
+router.post("/projects/apply-discovered", async (req, res) => {
+  const parsed = ApplyDiscoveredSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input" });
+    return;
+  }
+
+  const vault = await readVault();
+  const { targetId, projectName, envFilePath, varNames, pullValuesFromEnv } = parsed.data;
+
+  if (targetId) {
+    const target = vault.syncTargets.find((t) => t.id === targetId);
+    if (!target) {
+      res.status(404).json({ error: "App not found." });
+      return;
+    }
+  }
+
+  const outcome = await applyDiscoveredVars(vault, projectName, envFilePath, varNames, {
+    pullValuesFromEnv: pullValuesFromEnv ?? true,
+  });
+  const scanResult = await scanProjectForVault(vault, projectName, envFilePath);
+  applyScanUsageUpdates(vault, [scanResult]);
+  await writeVault(trimHistory(vault));
+
+  res.json({ ...outcome, keys: maskKeys(vault.keys) });
+});
 
 // POST /api/projects/scan-env
 // Body: { envFilePath: string }
@@ -446,16 +728,20 @@ router.post("/projects/scan-env", async (req, res) => {
 
   const vars = parsed.map(({ name, value }) => {
     const existing = vault.keys.find((k) => k.envVarName === name);
+    const existingIsPlaceholder = existing
+      ? isPlaceholderValue(existing.value)
+      : null;
+    const canImport =
+      !existing || existingIsPlaceholder
+        ? !isPlaceholderValue(value)
+        : false;
     return {
       name,
       existingKeyId: existing?.id ?? null,
       existingLabel: existing?.label ?? null,
-      existingIsPlaceholder: existing
-        ? ["FILL_ME_IN", ""].includes(existing.value.trim())
-        : null,
-      // Only include the value if it's not already in the vault
-      // (avoids leaking things the user already has encrypted)
-      newValue: existing ? null : value,
+      existingIsPlaceholder,
+      fileValue: canImport ? value : null,
+      newValue: canImport ? value : null,
     };
   });
 
@@ -483,71 +769,26 @@ router.post("/projects/import-env", async (req, res) => {
     return;
   }
 
-  const content = await readFile(envFilePath, "utf8");
-  const allVars = parseEnvFile(content);
   const vault = await readVault();
-  const now = new Date().toISOString();
-
-  const importedKeyIds: string[] = [];
-  const skipped: string[] = [];
-
-  for (const varName of selectedVarNames) {
-    const found = allVars.find((v) => v.name === varName);
-    if (!found) continue;
-
-    const existing = vault.keys.find((k) => k.envVarName === varName);
-    if (existing) {
-      // Update placeholder with real value if it was a placeholder
-      if (["FILL_ME_IN", ""].includes(existing.value.trim())) {
-        const oldHash = hashValue(existing.value);
-        existing.value = found.value;
-        existing.updatedAt = now;
-        vault.history.push(
-          historyEntry("update", existing, {
-            oldValueHash: oldHash,
-            newValueHash: hashValue(found.value),
-            meta: `imported from ${envFilePath}`,
-          })
-        );
-        importedKeyIds.push(existing.id);
-      } else {
-        skipped.push(varName);
-      }
-      continue;
-    }
-
-    const newKey: ApiKey = {
-      id: nanoid(),
-      createdAt: now,
-      updatedAt: now,
-      serviceGroup: projectName,
-      label: `${varName} (${projectName})`,
-      envVarName: varName,
-      value: found.value,
-    };
-    vault.keys.push(newKey);
-    vault.history.push(
-      historyEntry("create", newKey, {
-        newValueHash: hashValue(newKey.value),
-        meta: `imported from ${envFilePath}`,
-      })
-    );
-    importedKeyIds.push(newKey.id);
-  }
-
-  // Create or update a sync target for this project
-  let target = vault.syncTargets.find((t) => t.name === projectName);
-  if (!target) {
-    target = { id: nanoid(), name: projectName, envFilePath, keyIds: importedKeyIds };
-    vault.syncTargets.push(target);
-  } else {
-    // Merge new keyIds
-    const merged = new Set([...target.keyIds, ...importedKeyIds]);
-    target.keyIds = [...merged];
-  }
-
+  const result = await importProjectEnvFile(vault, projectName, envFilePath, {
+    varNames: selectedVarNames,
+  });
   await writeVault(trimHistory(vault));
-  res.json({ ok: true, imported: importedKeyIds.length, skipped, targetId: target.id });
+
+  const imported = result.vars.filter(
+    (v) => v.action === "imported" || v.action === "updated"
+  ).length;
+  const skipped = result.vars
+    .filter((v) => v.action === "skipped_unchanged" || v.action === "skipped_placeholder")
+    .map((v) => v.name);
+
+  res.json({
+    ok: true,
+    imported,
+    skipped,
+    targetId: result.targetId,
+    vars: result.vars,
+  });
 });
 
 // POST /api/projects/create

@@ -1,14 +1,10 @@
 import type { ApiKey } from "./vault.js";
+import { isPlaceholderValue } from "./envParse.js";
 
-const PLACEHOLDER_VALUES = new Set(["FILL_ME_IN", "", "your_key_here", "your-key-here"]);
-
-function isPlaceholderValue(value: string): boolean {
-  return PLACEHOLDER_VALUES.has(value.trim()) || value.trim() === "";
-}
-
-export type KeyStatus = "active" | "inactive" | "untested" | "placeholder";
+export type KeyStatus = "active" | "inactive" | "untested" | "placeholder" | "disabled";
 
 function computeStatus(key: ApiKey): KeyStatus {
+  if (key.disabled) return "disabled";
   if (isPlaceholderValue(key.value)) return "placeholder";
   if (!key.lastTestedAt) return "untested";
 

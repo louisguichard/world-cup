@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { bucketQualificationTeams, buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { rankBestThirds } from "../../lib/bestThirds";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import { useStore } from "../../store";
 import type { QualificationCertainty } from "../../types";
 import { CertaintyBadge, type CertaintyBadgeVariant } from "../shared/CertaintyBadge";
@@ -22,7 +23,7 @@ function QualTeamChip({ teamId, dim }: { teamId: string; dim?: boolean }) {
     [liveMatches, teams]
   );
   const team = teams[teamId];
-  const label = team?.shortName ?? team?.name ?? teamId;
+  const label = teamDisplayName(team, teamId);
   const qual = computeQualificationStatus(teamId, standings, qualContext);
 
   return (
@@ -43,7 +44,7 @@ function QualTeamChip({ teamId, dim }: { teamId: string; dim?: boolean }) {
           {label.slice(0, 3).toUpperCase()}
         </span>
       )}
-      <span className="qual-team-name">{label}</span>
+      <span className="qual-team-name team-name-text">{label}</span>
     </div>
   );
 }

@@ -34,13 +34,14 @@ const SEED_KEYS: SeedKeyDef[] = [
     label: "RapidAPI Shared Key",
     envVarName: "VITE_RAPIDAPI_KEY",
     value: "FILL_ME_IN",
-    endpoint: "https://fotmob.p.rapidapi.com/leagues",
+    endpoint:
+      "https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date?date=20260626",
     testMethod: "GET",
     testHeaders: {
-      "x-rapidapi-host": "fotmob.p.rapidapi.com",
+      "x-rapidapi-host": "free-api-live-football-data.p.rapidapi.com",
     },
     notes:
-      "Shared key for FotMob, SportAPI7, WC2026 Teams, WC2026 Live, Open Weather 13, Sports Odds Intelligence. Used in world-cup dev proxy and Vercel edge proxies.",
+      "Shared RapidAPI key for Football Data, SportAPI7, WC2026 Teams, WC2026 Live, Open Weather, Sports Odds, SofaScore, Zafronix FIFA WC. world-cup: FootballDataClient.ts, SportAPI7Client.ts, WorldCup2026Client.ts, WorldCup2026LiveClient.ts, OddsIntelligenceClient.ts, WeatherClient.ts, SofaScoreClient.ts, dev proxy, Vercel edge proxies.",
   },
 
   // ── World Cup: Zafronix ──────────────────────────────────────────────────
@@ -56,7 +57,24 @@ const SEED_KEYS: SeedKeyDef[] = [
       "X-API-Key": "FILL_ME_IN",
     },
     notes:
-      "Direct auth via X-API-Key header. Separate from RapidAPI. world-cup: ZafronixClient.ts.",
+      "Direct auth via X-API-Key header. Separate from RapidAPI shared key. world-cup: ZafronixClient.ts. RapidAPI mirror also available via zafronix-fifa-world-cup-api.p.rapidapi.com (uses VITE_RAPIDAPI_KEY).",
+  },
+
+  // ── World Cup: Zafronix (RapidAPI hub) ───────────────────────────────────
+  {
+    _seedId: "world-cup:rapidapi-zafronix-wc",
+    serviceGroup: "RapidAPI — Zafronix",
+    label: "Zafronix FIFA World Cup (RapidAPI hub)",
+    envVarName: "VITE_RAPIDAPI_KEY",
+    value: "FILL_ME_IN",
+    endpoint:
+      "https://zafronix-fifa-world-cup-api.p.rapidapi.com/fifa/worldcup/v1/tournaments/2026",
+    testMethod: "GET",
+    testHeaders: {
+      "x-rapidapi-host": "zafronix-fifa-world-cup-api.p.rapidapi.com",
+    },
+    notes:
+      "RapidAPI mirror of Zafronix WC API. Same VITE_RAPIDAPI_KEY as other hubs. Primary app client uses direct VITE_ZAFRONIX_API_KEY.",
   },
 
   // ── World Cup: TheStats ──────────────────────────────────────────────────
@@ -190,7 +208,7 @@ type SeedTarget = {
 
 const SEED_TARGETS: SeedTarget[] = [
   {
-    name: "Road to the World Cup Final 2026",
+    name: "World Cup Tracker",
     envFilePath: join(HOME, "Developer/world-cup/.env.local"),
     seedKeyIds: [
       "world-cup:VITE_RAPIDAPI_KEY",

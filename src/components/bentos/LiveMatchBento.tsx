@@ -1,6 +1,6 @@
 import type { MergedMatch } from "../../types";
 import { useStore } from "../../store";
-import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
+import { BroadcastBar } from "../match/BroadcastBar";
 import { formatLiveClock, formatPeriodLabel } from "../../lib/formatMatchClock";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
@@ -16,8 +16,6 @@ export function LiveMatchBento({ match, variant }: Props) {
   const home = teams[match.homeTeamId];
   const away = teams[match.awayTeamId];
   const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId);
-  const broadcast =
-    (match.matchId ? getBroadcast(match.matchId) : undefined) ?? getBroadcastByKickoff(match.date);
 
   const isLive = match.status === "live";
   const clockLabel = isLive ? formatLiveClock(match) : "FT";
@@ -58,20 +56,7 @@ export function LiveMatchBento({ match, variant }: Props) {
         )}
       </div>
 
-      {broadcast ? (
-        <div className="broadcast-bar broadcast-bar--hero">
-          <span className="network-badge network-badge--en">{broadcast.englishNetwork}</span>
-          <span className="network-badge network-badge--es">{broadcast.spanishNetwork}</span>
-          {broadcast.streaming.map((service) => (
-            <span key={service} className="network-badge network-badge--stream">
-              {service}
-            </span>
-          ))}
-          {broadcast.isConcurrent ? (
-            <span className="network-badge network-badge--warn">Concurrent</span>
-          ) : null}
-        </div>
-      ) : null}
+      <BroadcastBar matchId={match.matchId} kickoffUtc={match.date} variant="hero" />
     </article>
   );
 }

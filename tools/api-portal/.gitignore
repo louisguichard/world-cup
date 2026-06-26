@@ -1,5 +1,6 @@
 .portal-keys.enc
 .portal-keys.enc.bak*
+.portal-key-import.local.json
 *.tmp
 node_modules/
 dist/

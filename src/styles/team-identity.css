@@ -61,6 +61,16 @@
   color: var(--text);
 }
 
+/* Full country names — wrap, never ellipsis */
+.team-name-text {
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
+  text-overflow: unset;
+  line-height: 1.25;
+  min-width: 0;
+}
+
 .bracket-team-themed {
   border-left: 3px solid var(--team-primary);
   background: color-mix(in srgb, var(--team-primary) 8%, var(--surface));

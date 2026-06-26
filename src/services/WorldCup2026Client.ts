@@ -75,6 +75,48 @@ export async function fetchTeams(): Promise<Wc2026Team[]> {
   }
 }
 
+/** Alias for fetchTeams — returns all WC 2026 teams. */
+export async function fetchAllTeams(): Promise<Wc2026Team[]> {
+  return fetchTeams();
+}
+
+/** Fetches a single team by id. */
+export async function fetchTeam(teamId: string): Promise<Wc2026Team | null> {
+  if (worldCup2026SessionDisabled) return null;
+
+  try {
+    const res = await fetch(`${baseUrl()}/world-cup-2026/teams/${encodeURIComponent(teamId)}`, {
+      headers: rapidHeaders(),
+    });
+    if (await handleBlocked(res)) return null;
+    if (!res.ok) return null;
+    return (await res.json()) as Wc2026Team;
+  } catch (error) {
+    logger.warn("WorldCup2026 team fetch failed", "WorldCup2026Client", {
+      error: error instanceof Error ? error.message : String(error),
+      teamId,
+    });
+    return null;
+  }
+}
+
+/** Fetches group assignments (raw). */
+export async function fetchGroups(): Promise<unknown> {
+  if (worldCup2026SessionDisabled) return null;
+
+  try {
+    const res = await fetch(`${baseUrl()}/world-cup-2026/groups`, { headers: rapidHeaders() });
+    if (await handleBlocked(res)) return null;
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    logger.warn("WorldCup2026 groups fetch failed", "WorldCup2026Client", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
 export function mergeTeamMetadata(
   teams: Record<string, Team>,
   wcTeams: Wc2026Team[]

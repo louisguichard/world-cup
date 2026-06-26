@@ -9,6 +9,7 @@
     "dev:client": "vite",
     "build:server": "tsc -p tsconfig.server.json",
     "sync-keys": "tsx server/sync.ts",
+    "pull-envs": "tsx server/pullEnvs.ts",
     "seed": "tsx server/seed.ts",
     "dedupe": "tsx server/dedupe.ts"
   },

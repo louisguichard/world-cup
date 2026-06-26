@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useScrollHeader } from "../../hooks/useScrollHeader";
 import { usePullToRefresh } from "../../hooks/usePullToRefresh";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import { useStore } from "../../store";
 import { useMatchDetailBundle } from "../../hooks/useMatchDetailBundle";
 import { usePageVisibilityPolling } from "../../hooks/usePageVisibilityPolling";
@@ -130,8 +131,8 @@ export function MatchDetailView() {
 
   const homeTeam = match ? teams[match.homeTeamId] : null;
   const awayTeam = match ? teams[match.awayTeamId] : null;
-  const homeTeamName = homeTeam?.shortName ?? match?.homeTeamId ?? "Home";
-  const awayTeamName = awayTeam?.shortName ?? match?.awayTeamId ?? "Away";
+  const homeTeamName = teamDisplayName(homeTeam ?? undefined, match?.homeTeamId ?? "Home");
+  const awayTeamName = teamDisplayName(awayTeam ?? undefined, match?.awayTeamId ?? "Away");
 
   const isLive = match?.status === "live";
   const isDone = match?.status === "completed";

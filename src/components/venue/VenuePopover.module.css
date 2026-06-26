@@ -86,21 +86,28 @@
   color: var(--text-tertiary, #6b7280);
 }
 
+/* Portaled overlays — always above hub, sheets, nav, cards */
+.popoverBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-venue-overlay, 10000);
+  background: transparent;
+}
+
 /* Popover (desktop) */
 .popoverWrap {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 1200;
+  position: fixed;
+  z-index: calc(var(--z-venue-overlay, 10000) + 1);
   min-width: 280px;
-  max-width: 320px;
+  max-width: min(320px, calc(100vw - 16px));
+  pointer-events: auto;
 }
 
 /* Sheet (mobile) */
 .sheetBackdrop {
   position: fixed;
   inset: 0;
-  z-index: 1300;
+  z-index: var(--z-venue-overlay, 10000);
   background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: flex-end;

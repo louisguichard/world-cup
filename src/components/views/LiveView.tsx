@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { BentoErrorBoundary } from "../shared/ErrorBoundary";
 import { LiveMatchBento } from "../bentos/LiveMatchBento";
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
+import { RecentResultsBento } from "../bentos/RecentResultsBento";
 import { QualifiedBento, EliminatedBento, InContentionBento } from "../bentos/QualifiedBento";
 import { groupMatchesByDay } from "../../lib/groupMatchesByDay";
 import { useStore } from "../../store";
@@ -85,6 +86,8 @@ export function LiveView() {
           </div>
         </section>
       )}
+
+      <RecentResultsBento />
 
       <section className="dashboard-section" aria-label="Upcoming fixtures">
         <div className="section-heading compact">

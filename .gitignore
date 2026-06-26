@@ -8,6 +8,8 @@ dist/
 *.log
 .vercel/
 .claude/
+.cursor/mcp-endpoints.active.json
+.cursor/mcp-zafronix.active.json
 .vercel
 tools/api-portal/.portal-keys.enc
 tools/api-portal/.portal-keys.enc.bak*

@@ -3,6 +3,7 @@ import {
   matchThemeToStyle,
   resolveTeamIdentity,
   resolveTeamIdentityFromAbbrev,
+  teamDisplayName,
   teamIdentityToCssVars
 } from "./teamIdentity";
 import { pickOnPrimary } from "../utils/colorContrast";
@@ -19,6 +20,17 @@ function makeTeam(overrides: Partial<Team> = {}): Team {
     ...overrides
   };
 }
+
+describe("teamDisplayName", () => {
+  it("prefers full name over short name", () => {
+    expect(teamDisplayName(makeTeam({ name: "South Africa", shortName: "RSA" }))).toBe("South Africa");
+  });
+
+  it("falls back to short name then fallback", () => {
+    expect(teamDisplayName(makeTeam({ name: "", shortName: "RSA" }), "x")).toBe("RSA");
+    expect(teamDisplayName(undefined, "fallback")).toBe("fallback");
+  });
+});
 
 describe("resolveTeamIdentity", () => {
   it("prefers manual override over ESPN colors", () => {

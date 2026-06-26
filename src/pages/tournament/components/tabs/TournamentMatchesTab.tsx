@@ -18,7 +18,7 @@ export function TournamentMatchesTab() {
   );
 
   const dayGroups: DayGroup[] = useMemo(
-    () => groupMatchesByDay(allMatches, { includeCompleted: true }),
+    () => groupMatchesByDay(allMatches, { includeCompleted: true, labelMode: "calendar" }),
     [allMatches]
   );
 

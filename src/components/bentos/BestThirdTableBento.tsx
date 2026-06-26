@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { rankBestThirds } from "../../lib/bestThirds";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import type { GroupStanding, MergedMatch, TeamRecord } from "../../types";
 import { useStore } from "../../store";
 import { CertaintyBadge } from "../shared/CertaintyBadge";
@@ -132,7 +133,7 @@ export function BestThirdTableBento({ standings }: BestThirdTableBentoProps) {
                   </td>
                   <td className="group-table-team">
                     {team?.logo ? <img src={team.logo} alt="" width={20} height={20} /> : null}
-                    <span>{team?.shortName ?? row.teamId}</span>
+                    <span className="team-name-text">{teamDisplayName(team, row.teamId)}</span>
                   </td>
                   <td>
                     <strong>{row.points}</strong>

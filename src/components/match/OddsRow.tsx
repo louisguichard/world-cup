@@ -1,26 +1,21 @@
-import { useEffect, useState } from "react";
-import { getOdds } from "../../services/OddsCache";
-import type { EventOdds } from "../../services/OddsIntelligenceClient";
+import { useLiveOdds } from "../../hooks/useLiveOdds";
+import type { MatchStatus } from "../../types";
 
-type Props = { espnEventId: string; homeTeam: string; awayTeam: string };
+type Props = {
+  espnEventId: string;
+  homeTeam: string;
+  awayTeam: string;
+  matchId?: string;
+  matchStatus?: MatchStatus;
+};
 
 function formatOdds(val: number | null | undefined): string {
   if (val == null) return "—";
   return val > 0 ? `+${val}` : String(val);
 }
 
-export function OddsRow({ espnEventId, homeTeam, awayTeam }: Props) {
-  const [odds, setOdds] = useState<EventOdds | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    void getOdds(espnEventId).then((data) => {
-      if (!cancelled) setOdds(data);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [espnEventId]);
+export function OddsRow({ espnEventId, homeTeam, awayTeam, matchId, matchStatus }: Props) {
+  const { odds } = useLiveOdds(matchId ?? espnEventId, espnEventId, matchStatus);
 
   if (!odds) return null;
 
@@ -28,11 +23,11 @@ export function OddsRow({ espnEventId, homeTeam, awayTeam }: Props) {
     <div className="odds-row" aria-label="Sportsbook odds">
       <span className="odds-label">Odds</span>
       <span className="odds-cell odds-cell--home" title={homeTeam}>
-        {formatOdds(odds.bestHome)}
+        {formatOdds(odds.homeWin)}
       </span>
-      <span className="odds-cell odds-cell--draw">Draw {formatOdds(odds.bestDraw)}</span>
+      <span className="odds-cell odds-cell--draw">Draw {formatOdds(odds.draw)}</span>
       <span className="odds-cell odds-cell--away" title={awayTeam}>
-        {formatOdds(odds.bestAway)}
+        {formatOdds(odds.awayWin)}
       </span>
     </div>
   );

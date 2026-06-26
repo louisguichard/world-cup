@@ -36,6 +36,7 @@ import { formatPercent } from "../../lib/normalize";
 import { projectTournament, simulateTournamentOutcomes, toTeamsById } from "../../lib/tournament";
 import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
 import { useStore } from "../../store";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_BRAND } from "../../config/appMeta";
 import { TeamLabel } from "../team/TeamLabel";
 import { VenueLabel } from "../venue/VenueLabel";
@@ -504,7 +505,7 @@ export function SimulatorView() {
             {championId ? (
               <span className="stat-chip champion">
                 <Trophy size={13} />
-                Projected winner · {teamsById[championId]?.abbreviation ?? teamsById[championId]?.shortName}
+                Projected winner · {teamDisplayName(teamsById[championId], championId)}
               </span>
             ) : null}
             <span className="updated-at">{data?.loadedAt ? `Updated ${formatDate(data.loadedAt)}` : ""}</span>
@@ -712,7 +713,7 @@ function TournamentView({
               <div className={`third-row ${index < 8 ? "qualified" : ""}`} key={record.teamId}>
                 <span>{index + 1}</span>
                 <img src={team.logo} alt="" />
-                <strong>{team.shortName}</strong>
+                <strong className="team-name-text">{teamDisplayName(team)}</strong>
                 <em>Grp {record.group}</em>
                 <span className="third-gd">{record.goalDifference > 0 ? `+${record.goalDifference}` : record.goalDifference}</span>
                 <b>{record.points} pts</b>
@@ -784,7 +785,7 @@ function GroupPanel({
                 <td>
                   <span className="rank">{index + 1}</span>
                   <img src={team.logo} alt="" />
-                  <strong>{team.shortName}</strong>
+                  <strong className="team-name-text">{teamDisplayName(team)}</strong>
                 </td>
                 <td>{record.points}</td>
                 <td>{record.goalDifference > 0 ? `+${record.goalDifference}` : record.goalDifference}</td>
@@ -919,7 +920,7 @@ function BracketView({
           {champion ? (
             <span className="champion-pill">
               <Trophy size={15} />
-              {teamsById[champion]?.shortName}
+              {teamDisplayName(teamsById[champion], champion ?? "TBD")}
             </span>
           ) : null}
         </div>
@@ -1093,7 +1094,7 @@ function ProbabilityView({
                 >
                   <span className="title-rank">{index + 1}</span>
                   <img src={team.logo} alt="" />
-                  <strong>{team.shortName}</strong>
+                  <strong className="team-name-text">{teamDisplayName(team)}</strong>
                   <div className="title-track">
                     <i style={{ width: `${Math.max(3, (row.probability / maxOdds) * 100)}%` }} />
                   </div>
@@ -1141,7 +1142,7 @@ function ProbabilityView({
           <p className="view-note">
             Real results are locked in; every remaining match is sampled from its market-implied (or model) probabilities, and
             the full bracket is replayed {simulation.iterations.toLocaleString("en-GB")} times. Figures below are how often{" "}
-            {selected ? selected.shortName : "the team"} reaches each round.
+            {selected ? teamDisplayName(selected) : "the team"} reaches each round.
           </p>
 
           <div className="stage-probabilities">
@@ -1175,7 +1176,7 @@ function ProbabilityView({
                   return (
                     <div className={`opponent-row ${team ? "" : "other"}`} key={item.opponentId ?? `${stage}-other`}>
                       {team ? <img src={team.logo} alt="" /> : <span className="opponent-dot" />}
-                      <span>{team?.shortName ?? "Others"}</span>
+                      <span className="team-name-text">{teamDisplayName(team, "Others")}</span>
                       <div>
                         <i style={{ width: `${Math.min(100, item.probability * 100)}%` }} />
                       </div>

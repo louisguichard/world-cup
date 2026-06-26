@@ -258,7 +258,7 @@
 
 .matchCardScoreLine {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
 }
 
@@ -266,9 +266,11 @@
   flex: 1;
   font-size: 13px;
   font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
+  line-height: 1.25;
 }
 
 .matchCardTeam--away {

@@ -17,9 +17,14 @@
     "version:log": "node scripts/version.mjs log",
     "generate:thirds": "node scripts/build-third-place-map.mjs",
     "dev:portal": "cd tools/api-portal && npm run dev",
+    "portal:stop": "lsof -ti:4242,4243 | xargs kill -9 2>/dev/null || true",
     "sync-keys": "cd tools/api-portal && npm run sync-keys",
-    "sync-keys:wc": "cd tools/api-portal && npm run sync-keys -- \"Road to the World Cup Final 2026\"",
-    "seed-vault": "cd tools/api-portal && npm run seed"
+    "sync-keys:wc": "cd tools/api-portal && npm run sync-keys -- \"World Cup Tracker\"",
+    "pull-envs": "cd tools/api-portal && npm run pull-envs",
+    "seed-vault": "cd tools/api-portal && npm run seed",
+    "dedupe-vault": "cd tools/api-portal && npm run dedupe",
+    "mcp:zafronix": "node scripts/mcp-zafronix-config.mjs",
+    "mcp:endpoints": "node scripts/mcp-endpoint-config.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

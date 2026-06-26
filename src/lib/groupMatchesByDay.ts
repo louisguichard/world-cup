@@ -15,6 +15,11 @@ export type GroupMatchesOptions = {
   now?: Date;
   /** Include completed and locked matches (for ScheduleView). Defaults to false. */
   includeCompleted?: boolean;
+  /**
+   * `relative` — Live tab: Tonight window + Today/Tomorrow labels (upcoming only).
+   * `calendar` — Full schedule: bucket by match local date; Today = actual calendar today.
+   */
+  labelMode?: "relative" | "calendar";
 };
 
 function localDateKey(date: Date, timeZone: string): string {
@@ -43,13 +48,14 @@ type Bucket = {
   matches: MergedMatch[];
 };
 
-/** Groups matches by local calendar day with a 4-hour "Tonight" window. */
+/** Groups matches by local calendar day. */
 export function groupMatchesByDay(
   matches: MergedMatch[],
   options?: GroupMatchesOptions
 ): DayGroup[] {
   const now = options?.now ?? new Date();
   const includeCompleted = options?.includeCompleted ?? false;
+  const labelMode = options?.labelMode ?? "relative";
 
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const fourHourCutoff = now.getTime() + FOUR_HOURS_MS;
@@ -74,7 +80,12 @@ export function groupMatchesByDay(
     let isToday = false;
     let isTomorrow = false;
 
-    if (kickoffMs <= fourHourCutoff || matchDateKey === todayKey) {
+    if (labelMode === "calendar") {
+      bucketKey = matchDateKey;
+      isToday = matchDateKey === todayKey;
+      isTomorrow = matchDateKey === tomorrowKey;
+      label = isToday ? "Today" : isTomorrow ? "Tomorrow" : dateLabelFormatter.format(new Date(match.date));
+    } else if (kickoffMs <= fourHourCutoff || matchDateKey === todayKey) {
       bucketKey = todayKey;
       label = "Today";
       isToday = true;

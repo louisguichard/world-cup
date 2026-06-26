@@ -1,6 +1,7 @@
 import type { MergedMatch } from "../../../../types";
 import { formatKickoffTime } from "../../../../lib/formatKickoff";
 import { formatLiveClock } from "../../../../lib/formatMatchClock";
+import { teamDisplayName } from "../../../../lib/teamIdentity";
 import { useStore } from "../../../../store";
 import { VenueLabel } from "../../../../components/venue/VenueLabel";
 import styles from "../../TournamentView.module.css";
@@ -17,8 +18,8 @@ export function TournamentMatchCard({ match }: Props) {
 
   const home = teams[match.homeTeamId];
   const away = teams[match.awayTeamId];
-  const homeTeamName = home?.shortName ?? match.homeTeamId;
-  const awayTeamName = away?.shortName ?? match.awayTeamId;
+  const homeTeamName = teamDisplayName(home, match.homeTeamId);
+  const awayTeamName = teamDisplayName(away, match.awayTeamId);
 
   const isLive = match.status === "live";
   const isDone = match.status === "completed";
@@ -66,7 +67,7 @@ export function TournamentMatchCard({ match }: Props) {
       {/* Score / teams */}
       <div className={styles.matchCardBody}>
         <div className={styles.matchCardScoreLine}>
-          <span className={styles.matchCardTeam}>{homeTeamName}</span>
+          <span className={`${styles.matchCardTeam} team-name-text`}>{homeTeamName}</span>
           {isLive || isDone ? (
             <span className={styles.matchCardScore}>
               <span>{match.homeScore ?? 0}</span>
@@ -76,7 +77,7 @@ export function TournamentMatchCard({ match }: Props) {
           ) : (
             <span className={styles.matchCardVs}>–</span>
           )}
-          <span className={`${styles.matchCardTeam} ${styles["matchCardTeam--away"]}`}>
+          <span className={`${styles.matchCardTeam} ${styles["matchCardTeam--away"]} team-name-text`}>
             {awayTeamName}
           </span>
         </div>

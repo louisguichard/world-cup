@@ -1,31 +1,47 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import type { ApiKey, SyncTarget, KeyStatus } from "../api.js";
 import KeyCard from "./KeyCard.js";
 import AddEditDrawer from "./AddEditDrawer.js";
+import { KEY_STATUS_FILTER_LABELS, PASTE_KEY_STEPS } from "../lib/portalCopy.js";
+import { testAllKeys, ApiError } from "../api.js";
 
 type Props = {
   keys: ApiKey[];
   syncTargets: SyncTarget[];
   onKeysChanged: (keys: ApiKey[]) => void;
+  openKey?: ApiKey | null;
+  onOpenKeyConsumed?: () => void;
 };
 
 type StatusFilter = "all" | KeyStatus;
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "placeholder", label: "Empty" },
-  { value: "untested", label: "Untested" },
-  { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
+  { value: "all", label: KEY_STATUS_FILTER_LABELS.all },
+  { value: "placeholder", label: KEY_STATUS_FILTER_LABELS.placeholder },
+  { value: "untested", label: KEY_STATUS_FILTER_LABELS.untested },
+  { value: "active", label: KEY_STATUS_FILTER_LABELS.active },
+  { value: "inactive", label: KEY_STATUS_FILTER_LABELS.inactive },
+  { value: "disabled", label: KEY_STATUS_FILTER_LABELS.disabled },
 ];
 
-export default function KeyList({ keys, syncTargets, onKeysChanged }: Props) {
+export default function KeyList({ keys, syncTargets, onKeysChanged, openKey, onOpenKeyConsumed }: Props) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [editKey, setEditKey] = useState<ApiKey | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [testingAll, setTestingAll] = useState(false);
+  const [testAllMsg, setTestAllMsg] = useState("");
+  const [hideDisabled, setHideDisabled] = useState(true);
+
+  useEffect(() => {
+    if (openKey) {
+      setEditKey(openKey);
+      setDrawerOpen(true);
+      onOpenKeyConsumed?.();
+    }
+  }, [openKey, onOpenKeyConsumed]);
 
   const existingGroups = useMemo(() => [...new Set(keys.map((k) => k.serviceGroup))], [keys]);
   const projectNames = useMemo(() => syncTargets.map((t) => t.name), [syncTargets]);
@@ -50,11 +66,19 @@ export default function KeyList({ keys, syncTargets, onKeysChanged }: Props) {
     return new Set(target?.keyIds ?? []);
   }, [projectFilter, syncTargets, keys]);
 
+  const envVarCounts = useMemo(() => {
+    const c = new Map<string, number>();
+    for (const k of keys) c.set(k.envVarName, (c.get(k.envVarName) ?? 0) + 1);
+    return c;
+  }, [keys]);
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return keys.filter((k) => {
+      if (hideDisabled && k.disabled) return false;
       if (!keysInProject.has(k.id)) return false;
-      if (statusFilter !== "all" && k.keyStatus !== statusFilter) return false;
+      if (statusFilter === "disabled" && !k.disabled) return false;
+      if (statusFilter !== "all" && statusFilter !== "disabled" && k.keyStatus !== statusFilter) return false;
       if (!q) return true;
       return (
         k.label.toLowerCase().includes(q) ||
@@ -62,7 +86,7 @@ export default function KeyList({ keys, syncTargets, onKeysChanged }: Props) {
         k.serviceGroup.toLowerCase().includes(q)
       );
     });
-  }, [keys, search, statusFilter, keysInProject]);
+  }, [keys, search, statusFilter, keysInProject, hideDisabled]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, ApiKey[]>();
@@ -97,24 +121,78 @@ export default function KeyList({ keys, syncTargets, onKeysChanged }: Props) {
     onKeysChanged(keys.filter((k) => k.id !== id));
   }, [keys, onKeysChanged]);
 
+  const handleKeysImported = useCallback((imported: ApiKey[]) => {
+    const byId = new Map(keys.map((k) => [k.id, k]));
+    for (const k of imported) byId.set(k.id, k);
+    onKeysChanged([...byId.values()]);
+    setDrawerOpen(false);
+    setEditKey(null);
+  }, [keys, onKeysChanged]);
+
   const handleUpdated = useCallback((updated: ApiKey) => {
     onKeysChanged(keys.map((k) => (k.id === updated.id ? updated : k)));
   }, [keys, onKeysChanged]);
 
   // Status counts for the filter bar
   const counts = useMemo(() => {
-    const c = { all: keys.length, active: 0, inactive: 0, untested: 0, placeholder: 0 };
-    for (const k of keys) c[k.keyStatus]++;
+    const c = { all: 0, active: 0, inactive: 0, untested: 0, placeholder: 0, disabled: 0 };
+    for (const k of keys) {
+      if (!keysInProject.has(k.id)) continue;
+      c.all++;
+      if (k.disabled) { c.disabled++; continue; }
+      c[k.keyStatus]++;
+    }
     return c;
-  }, [keys]);
+  }, [keys, keysInProject]);
+
+  const handleTestAll = useCallback(async () => {
+    setTestingAll(true);
+    setTestAllMsg("");
+    try {
+      const { summary, keys: updated } = await testAllKeys();
+      onKeysChanged(updated);
+      setTestAllMsg(
+        `Tested ${summary.tested}: ${summary.passed} work, ${summary.failed} failed` +
+          (summary.skipped > 0 ? `, ${summary.skipped} skipped` : "")
+      );
+    } catch (e) {
+      setTestAllMsg(e instanceof ApiError ? e.message : "Test run failed.");
+    } finally {
+      setTestingAll(false);
+    }
+  }, [onKeysChanged]);
+
+  const placeholderCount = useMemo(
+    () => keys.filter((k) => !k.disabled && k.keyStatus === "placeholder").length,
+    [keys]
+  );
 
   return (
     <div>
+      {placeholderCount > 0 && (
+        <div className="paste-key-banner">
+          <div className="paste-key-banner-title">Your one place for all API keys</div>
+          <p className="paste-key-banner-lead">
+            Paste each key once in this portal. We copy it to every app you link — no more hunting through
+            project folders. Already have keys in an app&apos;s <code>.env.local</code>? Use
+            &nbsp;<strong>Pull from all apps</strong> on the My Apps tab.
+          </p>
+          <ol className="paste-key-steps">
+            {PASTE_KEY_STEPS.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+          <p className="paste-key-banner-foot">
+            {placeholderCount} key{placeholderCount === 1 ? "" : "s"} still waiting for your secret.
+          </p>
+        </div>
+      )}
+
       {/* ── Toolbar ── */}
       <div className="key-list-header" style={{ flexWrap: "wrap", gap: 8 }}>
         <input
           className="search-input"
-          placeholder="Search keys…"
+          placeholder="Search by name…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -124,8 +202,9 @@ export default function KeyList({ keys, syncTargets, onKeysChanged }: Props) {
           value={projectFilter}
           onChange={(e) => setProjectFilter(e.target.value)}
           style={{ height: 30, padding: "0 8px", fontSize: 12 }}
+          aria-label="Show keys for which app"
         >
-          <option value="all">All Projects</option>
+          <option value="all">All apps</option>
           {projectNames.map((n) => <option key={n} value={n}>{n}</option>)}
         </select>
 
@@ -155,19 +234,48 @@ export default function KeyList({ keys, syncTargets, onKeysChanged }: Props) {
         </div>
 
         <button
+          className="btn btn-ghost btn-sm"
+          disabled={testingAll}
+          onClick={() => void handleTestAll()}
+          title="Test every key that has a test URL"
+        >
+          {testingAll ? <span className="spinner" /> : null}
+          Test all keys
+        </button>
+        <label className="hide-disabled-toggle">
+          <input
+            type="checkbox"
+            checked={hideDisabled}
+            onChange={(e) => setHideDisabled(e.target.checked)}
+          />
+          Hide not in use
+        </label>
+        <button
           className="btn btn-primary btn-sm"
           onClick={() => { setEditKey(null); setDrawerOpen(true); }}
         >
-          + Add Key
+          + Add a new key
+        </button>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => { setEditKey(null); setDrawerOpen(true); }}
+        >
+          Paste JSON
         </button>
       </div>
+
+      {testAllMsg && (
+        <div className={`curl-paste-message curl-paste-message--${testAllMsg.includes("failed") && !testAllMsg.includes("0 failed") ? "warn" : "ok"}`}>
+          {testAllMsg}
+        </div>
+      )}
 
       {/* ── Empty state ── */}
       {grouped.size === 0 && (
         <div className="empty-state">
           {search || statusFilter !== "all" || projectFilter !== "all"
-            ? "No keys match the current filters."
-            : "No keys yet. Click \"+ Add Key\" to get started."}
+            ? "No keys match what you searched for. Try changing the filters."
+            : "No keys yet. Click “+ Add a new key” to get started."}
         </div>
       )}
 
@@ -184,15 +292,15 @@ export default function KeyList({ keys, syncTargets, onKeysChanged }: Props) {
               <span>{collapsed ? "▶" : "▼"}</span>
               <span>{group}</span>
               <span className="group-count">{groupKeys.length}</span>
-              {hasEmpty && <span style={{ color: "var(--text-faint)", fontSize: 10 }}>⚠ needs values</span>}
-              {hasInactive && !hasEmpty && <span style={{ color: "var(--red)", fontSize: 10 }}>✗ inactive</span>}
+              {hasEmpty && <span style={{ color: "var(--yellow)", fontSize: 10 }}>⚠ paste your keys</span>}
+              {hasInactive && !hasEmpty && <span style={{ color: "var(--red)", fontSize: 10 }}>✗ test failed</span>}
               <span style={{ flex: 1 }} />
               <button
                 className="btn btn-ghost btn-sm"
                 onClick={(e) => { e.stopPropagation(); setEditKey(null); setDrawerOpen(true); }}
                 style={{ fontSize: 11 }}
               >
-                + Add
+                + Add key
               </button>
             </div>
 
@@ -201,6 +309,7 @@ export default function KeyList({ keys, syncTargets, onKeysChanged }: Props) {
                 key={k.id}
                 apiKey={k}
                 projectsUsingKey={keyProjects.get(k.id) ?? []}
+                sameEnvVarCount={envVarCounts.get(k.envVarName) ?? 1}
                 onEdit={(key) => { setEditKey(key); setDrawerOpen(true); }}
                 onDeleted={handleDeleted}
                 onUpdated={handleUpdated}
@@ -214,7 +323,9 @@ export default function KeyList({ keys, syncTargets, onKeysChanged }: Props) {
         <AddEditDrawer
           editKey={editKey}
           existingGroups={existingGroups}
+          sharedEnvVarCount={editKey ? envVarCounts.get(editKey.envVarName) ?? 1 : 1}
           onSaved={handleSaved}
+          onKeysImported={handleKeysImported}
           onClose={() => { setDrawerOpen(false); setEditKey(null); }}
         />
       )}

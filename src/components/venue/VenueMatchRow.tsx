@@ -1,5 +1,6 @@
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import type { MergedMatch, Team } from "../../types";
 import styles from "./VenueMatchRow.module.css";
 
@@ -21,8 +22,8 @@ function statusBadge(match: MergedMatch): { label: string; className: string } {
 }
 
 export function VenueMatchRow({ match, home, away, onSelect }: Props) {
-  const homeName = home?.shortName ?? match.homeTeamId;
-  const awayName = away?.shortName ?? match.awayTeamId;
+  const homeName = teamDisplayName(home, match.homeTeamId);
+  const awayName = teamDisplayName(away, match.awayTeamId);
   const badge = statusBadge(match);
   const isScored = match.status === "live" || match.status === "completed" || match.locked;
   const stageLabel = match.stage ?? (match.group ? `Group ${match.group}` : match.matchId ?? match.id);

@@ -1,3 +1,6 @@
+import type { MergedMatch, Team } from "../types";
+import { normalizeSportAPI7Match } from "./adapters/normalizeMatch";
+import { normalizeSofaScoreTeam } from "./adapters/normalizeTeam";
 import { logger } from "./Logger";
 
 const BASE = typeof window !== "undefined" ? "/api/sofascore" : "https://api.sofascore.com";
@@ -92,6 +95,58 @@ export async function fetchIncidents(sofaEventId: number): Promise<unknown[]> {
     return data?.incidents ?? [];
   } catch {
     return [];
+  }
+}
+
+/** Fetches live football events. */
+export async function fetchLiveEvents(): Promise<Partial<MergedMatch>[]> {
+  if (sofaScoreSessionDisabled) return [];
+
+  try {
+    const res = await fetch(proxied("/sport/football/events/live"), { headers: SOFA_HEADERS });
+    if (res.status === 403 || res.status === 401) {
+      sofaScoreSessionDisabled = true;
+      return [];
+    }
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    const events: SofaEvent[] = data?.events ?? [];
+    return events.map((e) => normalizeSportAPI7Match(e));
+  } catch (error) {
+    logger.warn("SofaScore live events failed", "SofaScoreClient", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+}
+
+/** Fetches a single event detail. */
+export async function fetchEventDetail(eventId: string): Promise<Partial<MergedMatch> | null> {
+  if (sofaScoreSessionDisabled) return null;
+
+  try {
+    const res = await fetch(proxied(`/event/${eventId}`), { headers: SOFA_HEADERS });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const event = data?.event as SofaEvent | undefined;
+    return event ? normalizeSportAPI7Match(event) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Fetches team details by SofaScore team id. */
+export async function fetchTeamDetails(teamId: string): Promise<Partial<Team> | null> {
+  if (sofaScoreSessionDisabled) return null;
+
+  try {
+    const res = await fetch(proxied(`/team/${teamId}`), { headers: SOFA_HEADERS });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return normalizeSofaScoreTeam(data);
+  } catch {
+    return null;
   }
 }
 

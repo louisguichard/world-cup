@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import type { Lineup, MatchStatisticsBundle, MergedMatch, CommentaryEntry } from "../types";
+import { useMatchEnrichment } from "./useMatchEnrichment";
+import { DataOrchestrator } from "../services/orchestrator/DataOrchestrator";
+import { fetchMatchBundle } from "../services/matchDetail/fetchMatchBundle";
 import { isApiEnabled } from "../config/apiFlags";
-import type { Lineup, MatchStatisticsBundle, MergedMatch } from "../types";
-import type { WcCommentaryEntry } from "../services/WorldCup2026LiveClient";
 import { isWc2026LiveDisabled } from "../services/WorldCup2026LiveClient";
-import { fetchMatchBundle, type MatchBundle } from "../services/matchDetail/fetchMatchBundle";
 
 type BundleState = {
   statistics: MatchStatisticsBundle | null;
   lineups: Lineup[];
-  commentary: WcCommentaryEntry[];
+  commentary: CommentaryEntry[];
   loading: boolean;
   error: string | null;
   fetchedAt: number | null;
@@ -20,58 +21,45 @@ const INITIAL_STATE: BundleState = {
   commentary: [],
   loading: false,
   error: null,
-  fetchedAt: null
+  fetchedAt: null,
 };
 
+/** Match detail bundle — delegates to DataOrchestrator enrichment. */
 export function useMatchDetailBundle(
   match: MergedMatch | null,
   wcMatchId: string | null
 ): BundleState & { refetch: () => void } {
-  const [state, setState] = useState<BundleState>(INITIAL_STATE);
-  const abortRef = useRef<AbortController | null>(null);
+  const matchId = match?.id ?? null;
+  const enrichment = useMatchEnrichment(matchId);
+  const [fetchedAt, setFetchedAt] = useState<number | null>(null);
+  const [forceKey, setForceKey] = useState(0);
 
-  const fetch = useCallback(
-    async (force = false) => {
-      if (!match) return;
-      if (!isApiEnabled("wc2026Live") || isWc2026LiveDisabled()) {
-        setState((s) => ({ ...s, loading: false }));
-        return;
-      }
-
-      abortRef.current?.abort();
-      abortRef.current = new AbortController();
-
-      setState((s) => ({ ...s, loading: true, error: null }));
-
-      try {
-        const bundle: MatchBundle = await fetchMatchBundle(match, wcMatchId, force);
-        setState({
-          statistics: bundle.statistics,
-          lineups: bundle.lineups,
-          commentary: bundle.commentary,
-          loading: false,
-          error: null,
-          fetchedAt: bundle.fetchedAt
-        });
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") return;
-        setState((s) => ({
-          ...s,
-          loading: false,
-          error: err instanceof Error ? err.message : "Failed to load match data"
-        }));
-      }
-    },
-    [match, wcMatchId]
-  );
-
-  // Fetch on mount and when match/wcMatchId changes
   useEffect(() => {
-    void fetch(false);
-    return () => abortRef.current?.abort();
-  }, [fetch]);
+    if (enrichment.enrichment) {
+      setFetchedAt(Date.now());
+    }
+  }, [enrichment.enrichment]);
 
-  const refetch = useCallback(() => { void fetch(true); }, [fetch]);
+  useEffect(() => {
+    if (forceKey === 0 || !match) return;
+    if (!isApiEnabled("wc2026Live") || isWc2026LiveDisabled()) return;
 
-  return { ...state, refetch };
+    void fetchMatchBundle(match, wcMatchId, true).then((bundle) => {
+      setFetchedAt(bundle.fetchedAt);
+    });
+    DataOrchestrator.getInstance().clearEnrichmentCache(match.id);
+    void DataOrchestrator.getInstance().enrichMatch(match.id);
+  }, [forceKey, match, wcMatchId]);
+
+  const refetch = () => setForceKey((k) => k + 1);
+
+  return {
+    statistics: enrichment.statistics,
+    lineups: enrichment.lineups,
+    commentary: enrichment.commentary,
+    loading: enrichment.loading,
+    error: enrichment.error,
+    fetchedAt,
+    refetch,
+  };
 }

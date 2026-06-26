@@ -1,5 +1,5 @@
 import { BracketBento } from "../bentos/BracketBento";
-import { BestThirdsBento } from "../bentos/QualifiedBento";
+import { BestThirdRacePanel } from "../bentos/BestThirdRacePanel";
 import { useStore } from "../../store";
 
 export function BracketView() {
@@ -45,7 +45,7 @@ export function BracketView() {
       </div>
 
       <BracketBento />
-      <BestThirdsBento />
+      <BestThirdRacePanel />
     </div>
   );
 }

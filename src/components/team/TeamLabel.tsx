@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import type { Team } from "../../types";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
+import { teamDisplayName } from "../../lib/teamIdentity";
+import { TeamFlag } from "./TeamFlag";
 
 type Props = {
   team: Team;
@@ -17,8 +19,8 @@ export function TeamLabel({ team, align = "left", className = "" }: Props) {
       style={theme as CSSProperties}
       data-team-id={team.id}
     >
-      {team.logo ? <img src={team.logo} alt="" /> : null}
-      <span>{team.shortName}</span>
+      <TeamFlag team={team} teamId={team.id} />
+      <span className="team-name-text">{teamDisplayName(team)}</span>
     </span>
   );
 }

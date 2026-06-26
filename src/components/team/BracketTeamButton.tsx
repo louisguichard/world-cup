@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Team } from "../../types";
 import { formatPercent } from "../../lib/normalize";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
 import type { TeamThemeStatus } from "./TeamThemeRoot";
 
@@ -40,7 +41,7 @@ export function BracketTeamButton({
       }
     >
       {team ? <img src={team.logo} alt="" /> : <span className="bracket-dot" />}
-      <span>{team?.shortName ?? "TBD"}</span>
+      <span className="team-name-text">{teamDisplayName(team)}</span>
       {typeof probability === "number" ? <b>{formatPercent(probability, 0)}</b> : null}
     </button>
   );

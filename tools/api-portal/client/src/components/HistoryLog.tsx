@@ -35,23 +35,23 @@ export default function HistoryLog() {
 
   return (
     <div>
-      <div className="page-title">History</div>
+      <div className="page-title">What Changed</div>
 
       {error && <div className="error-banner">{error}</div>}
 
       {loading ? (
         <div className="empty-state"><span className="spinner" /></div>
       ) : history.length === 0 ? (
-        <div className="empty-state">No history yet.</div>
+        <div className="empty-state">Nothing has changed yet.</div>
       ) : (
         <>
           <table className="history-table">
             <thead>
               <tr>
-                <th>Time</th>
-                <th>Action</th>
-                <th>Key</th>
-                <th>Change</th>
+                <th>When</th>
+                <th>What happened</th>
+                <th>Which key</th>
+                <th>Details</th>
               </tr>
             </thead>
             <tbody>

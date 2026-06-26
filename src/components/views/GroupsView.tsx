@@ -1,5 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { auditFalseConfirmations, buildQualificationContext } from "../../lib/qualification";
+import { useMemo, useState } from "react";
+import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
+import { StandingThemeRow } from "../team/StandingThemeRow";
+import { TeamThemeRoot } from "../team/TeamThemeRoot";
+import { BentoErrorBoundary } from "../shared/ErrorBoundary";
+import { CertaintyBadge } from "../shared/CertaintyBadge";
+import { MatchScheduleCard } from "../match/MatchScheduleCard";
 import {
   BestThirdsBento,
   EliminatedBento,
@@ -8,19 +13,14 @@ import {
 } from "../bentos/QualifiedBento";
 import { BestThirdTableBento } from "../bentos/BestThirdTableBento";
 import { GroupTableBento } from "../bentos/GroupTableBento";
-import { BentoErrorBoundary } from "../shared/ErrorBoundary";
-import { CertaintyBadge } from "../shared/CertaintyBadge";
-import { MatchScheduleCard } from "../match/MatchScheduleCard";
-import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
-import { StandingThemeRow } from "../team/StandingThemeRow";
-import { TeamThemeRoot } from "../team/TeamThemeRoot";
-import { useStore } from "../../store";
 import {
   filterCompletedMatches,
   useCompletedGroupMatches,
   useUpcomingGroupMatches,
   type ResultsSortOrder
 } from "../../store/selectors/historySelectors";
+import { teamDisplayName } from "../../lib/teamIdentity";
+import { useStore } from "../../store";
 
 export function GroupsView() {
   const standings = useStore((s) => s.groupStandings);
@@ -30,26 +30,6 @@ export function GroupsView() {
     () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
     [liveMatches, teams]
   );
-
-  useEffect(() => {
-    if (!import.meta.env.DEV || standings.length === 0) return;
-    const falsePositives = auditFalseConfirmations(standings, qualContext);
-    if (falsePositives.length === 0) return;
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0b0b0b0b-0000-4000-8000-000000000001", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "02b5af" },
-      body: JSON.stringify({
-        sessionId: "02b5af",
-        location: "GroupsView.tsx:audit",
-        message: "false confirmation audit",
-        data: { falsePositives },
-        timestamp: Date.now(),
-        hypothesisId: "H-audit-sweep"
-      })
-    }).catch(() => {});
-    // #endregion
-  }, [standings, qualContext]);
 
   const groupsViewMode = useStore((s) => s.groupsViewMode);
   const setGroupsViewMode = useStore((s) => s.setGroupsViewMode);
@@ -192,7 +172,7 @@ export function GroupsView() {
                                 />
                               ) : null}
                               {team?.logo ? <img src={team.logo} alt="" width={20} height={20} /> : null}
-                              <strong>{team?.shortName ?? row.teamId}</strong>
+                              <strong className="team-name-text">{teamDisplayName(team, row.teamId)}</strong>
                             </td>
                             <td>{row.played}</td>
                             <td>

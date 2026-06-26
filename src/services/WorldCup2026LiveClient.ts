@@ -149,6 +149,11 @@ export async function fetchStats(id: string | number): Promise<WcStats | null> {
   return fetchJson<WcStats>(`/wc/stats/${id}`);
 }
 
+/** Alias for fetchDraw — returns bracket draw data. */
+export async function fetchBracketDraw(): Promise<unknown> {
+  return fetchDraw();
+}
+
 /** Test-only reset */
 export function resetWc2026LiveSessionForTests(): void {
   wc2026LiveSessionDisabled = false;

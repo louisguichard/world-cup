@@ -120,6 +120,7 @@ export function VenueLabel({ matchId, venueString, compact, inline, className }:
         venue={venue}
         open={open}
         mode={mode}
+        anchorRef={wrapRef}
         onClose={handleClose}
         onOpenHub={handleOpenHub}
       />

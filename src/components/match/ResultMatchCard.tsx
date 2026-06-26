@@ -1,5 +1,6 @@
 import type { MergedMatch } from "../../types";
 import { formatKickoffDate } from "../../lib/formatKickoff";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import { useStore } from "../../store";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
@@ -7,18 +8,20 @@ import { VenueLabel } from "../venue/VenueLabel";
 
 export interface ResultMatchCardProps {
   match: MergedMatch;
+  openTeamOnClick?: boolean;
 }
 
-export function ResultMatchCard({ match }: ResultMatchCardProps) {
+export function ResultMatchCard({ match, openTeamOnClick }: ResultMatchCardProps) {
   const teams = useStore((s) => s.teams);
   const openMatchDetail = useStore((s) => s.openMatchDetail);
+  const openTeamSheet = useStore((s) => s.openTeamSheet);
 
   const home = teams[match.homeTeamId];
   const away = teams[match.awayTeamId];
   const homeScore = match.homeScore ?? 0;
   const awayScore = match.awayScore ?? 0;
-  const homeName = home?.shortName ?? home?.name ?? match.homeTeamId;
-  const awayName = away?.shortName ?? away?.name ?? match.awayTeamId;
+  const homeName = teamDisplayName(home, match.homeTeamId);
+  const awayName = teamDisplayName(away, match.awayTeamId);
   const kickoffDate = formatKickoffDate(match.date);
 
   return (
@@ -27,7 +30,11 @@ export function ResultMatchCard({ match }: ResultMatchCardProps) {
       className="result-match-card"
       role="article"
       aria-label={`${homeName} ${homeScore}–${awayScore} ${awayName}, Final`}
-      onClick={() => openMatchDetail(match.matchId ?? match.id, { from: "results" })}
+      onClick={() =>
+        openTeamOnClick
+          ? openTeamSheet(match.homeTeamId)
+          : openMatchDetail(match.matchId ?? match.id, { from: "results" })
+      }
     >
       <div className="result-match-card-meta">
         <span className="final-pill">FINAL</span>

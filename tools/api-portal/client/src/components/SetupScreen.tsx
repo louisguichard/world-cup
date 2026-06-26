@@ -54,24 +54,24 @@ export default function SetupScreen({ keychainAvailable, onSetupComplete }: Prop
   return (
     <div className="setup-screen">
       <div className="setup-card">
-        <h1>API Vault — First Setup</h1>
+        <h1>Welcome — lock your key box</h1>
 
         <p>
           {keychainAvailable
-            ? "Create a master passphrase. It will be stored securely in your OS keychain and never saved to disk."
-            : "Keychain unavailable (native bindings not built). Enter a passphrase to unlock this session. The vault stays encrypted at rest; you will re-enter this passphrase each server restart."}
+            ? "Pick a password to lock this app. Your computer will remember it safely. Your secret API keys stay locked on your Mac."
+            : "Pick a password to unlock this session. You will type it again if you restart the app."}
         </p>
 
         {error && <div className="error-banner">{error}</div>}
 
         <div className="field">
-          <label htmlFor="passphrase">Passphrase</label>
+          <label htmlFor="passphrase">Your lock password</label>
           <input
             id="passphrase"
             type="password"
             value={passphrase}
             onChange={(e) => setPassphrase(e.target.value)}
-            placeholder="Enter a strong passphrase"
+            placeholder="At least 8 characters"
             autoFocus
             onKeyDown={(e) => { if (e.key === "Enter") void handleSubmit(); }}
           />
@@ -91,13 +91,13 @@ export default function SetupScreen({ keychainAvailable, onSetupComplete }: Prop
         </div>
 
         <div className="field">
-          <label htmlFor="confirm">Confirm Passphrase</label>
+          <label htmlFor="confirm">Type it again</label>
           <input
             id="confirm"
             type="password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
-            placeholder="Repeat passphrase"
+            placeholder="Same password again"
             style={mismatch ? { borderColor: "var(--red)" } : undefined}
             onKeyDown={(e) => { if (e.key === "Enter") void handleSubmit(); }}
           />
@@ -111,12 +111,11 @@ export default function SetupScreen({ keychainAvailable, onSetupComplete }: Prop
           style={{ width: "100%", justifyContent: "center", padding: "10px" }}
         >
           {loading ? <span className="spinner" /> : null}
-          {keychainAvailable ? "Create Vault" : "Unlock Session"}
+          {keychainAvailable ? "Create my key box" : "Unlock"}
         </button>
 
         <div className="setup-warning">
-          If you lose this passphrase, your encrypted keys cannot be recovered.
-          There is no reset without losing all stored keys.
+          If you forget this password, your saved keys cannot be opened. Write it down somewhere safe.
         </div>
       </div>
     </div>

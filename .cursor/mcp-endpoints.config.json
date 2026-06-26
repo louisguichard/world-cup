@@ -1,0 +1,55 @@
+{
+  "apis": {
+    "football-data": {
+      "enabled": [
+        "matches-by-date",
+        "current-live"
+      ]
+    },
+    "odds": {
+      "enabled": [
+        "soccer-live"
+      ]
+    },
+    "weather": {
+      "enabled": [
+        "city-en"
+      ]
+    },
+    "sofascore": {
+      "enabled": [
+        "tournaments",
+        "events-live"
+      ]
+    },
+    "wc-live": {
+      "enabled": [
+        "live",
+        "standings"
+      ]
+    },
+    "wc2026": {
+      "enabled": [
+        "teams"
+      ]
+    },
+    "sportapi": {
+      "enabled": [
+        "wc-scheduled-today",
+        "wc-live"
+      ]
+    },
+    "zafronix": {
+      "enabled": [
+        "tournaments",
+        "tournament-2026",
+        "team-matches",
+        "team-profile",
+        "team-roster",
+        "live-matches",
+        "bracket-2026",
+        "trivia"
+      ]
+    }
+  }
+}

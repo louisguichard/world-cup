@@ -1,12 +1,9 @@
 import { useMemo } from "react";
 import { localDateKey, formatTimeAgo, yesterdayDateKey } from "../../lib/localDate";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import type { MergedMatch, Team } from "../../types";
 import { useStore } from "../../store";
 import { TeamFlag } from "../team/TeamFlag";
-
-function truncateName(name: string, max = 10): string {
-  return name.length > max ? `${name.slice(0, max)}…` : name;
-}
 
 type ResultRowProps = {
   match: MergedMatch;
@@ -16,22 +13,22 @@ type ResultRowProps = {
 };
 
 function ResultRow({ match, home, away, onSelect }: ResultRowProps) {
-  const homeName = truncateName(home?.shortName ?? match.homeTeamId);
-  const awayName = truncateName(away?.shortName ?? match.awayTeamId);
+  const homeName = teamDisplayName(home, match.homeTeamId);
+  const awayName = teamDisplayName(away, match.awayTeamId);
   const ago = formatTimeAgo(match.date);
 
   return (
     <button type="button" className="recent-result-row" onClick={() => onSelect(match.homeTeamId)}>
       <span className="recent-result-team recent-result-team--home">
         <TeamFlag team={home} teamId={match.homeTeamId} />
-        <span>{homeName}</span>
+        <span className="team-name-text">{homeName}</span>
       </span>
       <span className="recent-result-score">
         {match.homeScore ?? 0} – {match.awayScore ?? 0}
       </span>
       <span className="recent-result-team recent-result-team--away">
         <TeamFlag team={away} teamId={match.awayTeamId} />
-        <span>{awayName}</span>
+        <span className="team-name-text">{awayName}</span>
       </span>
       <span className="recent-result-meta">
         <span className="final-pill">FT</span>
@@ -47,52 +44,11 @@ export function RecentResultsBento() {
   const openTeamSheet = useStore((s) => s.openTeamSheet);
   const setActiveTab = useStore((s) => s.setActiveTab);
 
-  const { today, yesterday, total } = useMemo(() => {
+  const { sections, total } = useMemo(() => {
     const now = new Date();
     const todayKey = localDateKey(now);
     const yKey = yesterdayDateKey(now);
 
-    const completed = Object.values(liveMatches)
-      .filter((m) => m.status === "completed" && m.homeScore !== undefined)
-      .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-
-    const todayMatches: MergedMatch[] = [];
-    const yesterdayMatches: MergedMatch[] = [];
-
-    for (const match of completed) {
-      const key = localDateKey(new Date(match.date));
-      if (key === todayKey) todayMatches.push(match);
-      else if (key === yKey) yesterdayMatches.push(match);
-    }
-
-    const capped: { label: string; matches: MergedMatch[] }[] = [];
-    let remaining = 8;
-
-    if (todayMatches.length > 0) {
-      const slice = todayMatches.slice(0, remaining);
-      capped.push({ label: `Today (${todayMatches.length})`, matches: slice });
-      remaining -= slice.length;
-    }
-
-    if (remaining > 0 && yesterdayMatches.length > 0) {
-      capped.push({
-        label: `Yesterday (${yesterdayMatches.length})`,
-        matches: yesterdayMatches.slice(0, remaining)
-      });
-    }
-
-    return {
-      sections: capped,
-      today: todayMatches,
-      yesterday: yesterdayMatches,
-      total: todayMatches.length + yesterdayMatches.length
-    };
-  }, [liveMatches]);
-
-  const sections = useMemo(() => {
-    const now = new Date();
-    const todayKey = localDateKey(now);
-    const yKey = yesterdayDateKey(now);
     const completed = Object.values(liveMatches)
       .filter((m) => m.status === "completed" && m.homeScore !== undefined)
       .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
@@ -102,6 +58,7 @@ export function RecentResultsBento() {
 
     const result: { label: string; matches: MergedMatch[] }[] = [];
     let remaining = 8;
+
     if (todayMatches.length > 0) {
       const slice = todayMatches.slice(0, remaining);
       result.push({ label: `Today (${todayMatches.length})`, matches: slice });
@@ -113,13 +70,14 @@ export function RecentResultsBento() {
         matches: yesterdayMatches.slice(0, remaining)
       });
     }
-    return result;
+
+    return { sections: result, total: todayMatches.length + yesterdayMatches.length };
   }, [liveMatches]);
 
   if (sections.length === 0) return null;
 
   return (
-    <section className="recent-results-bento dashboard-section" aria-label="Recent results">
+    <section className="recent-results-bento" aria-label="Recent results">
       <div className="section-heading compact">
         <div>
           <div className="section-kicker">Results</div>

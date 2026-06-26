@@ -40,19 +40,62 @@ If keytar still fails (rare — e.g. unsupported Node ABI), the portal falls bac
 
 ## Usage
 
+**Important:** `dev:portal` is a long-running process — keep that terminal open. Run `dedupe-vault` and `sync-keys` in a **second** terminal (or stop the portal first).
+
+| URL | What it is |
+|-----|------------|
+| **http://localhost:4243** | Portal UI (open this in your browser) |
+| http://127.0.0.1:4242 | API only (JSON) — not a web page |
+
 Start the portal (server + UI together):
 
 ```bash
 # From repo root
 npm run dev:portal
 
-# Or from this directory
+# Or from tools/api-portal
 npm run dev
+```
+
+If you see `Port 4242/4243 is already in use`, a previous instance is still running:
+
+```bash
+# From repo root (macOS)
+npm run portal:stop
+npm run dev:portal
+```
+
+Maintenance (separate terminal, or after Ctrl+C on dev:portal):
+
+```bash
+npm run dedupe-vault   # remove duplicate vault keys
+npm run sync-keys      # write .env.local for all projects
 ```
 
 Open `http://localhost:4243` in your browser.
 
 On first run, you will be prompted to create a master passphrase. It is derived via PBKDF2 (100k iterations) and stored in the OS keychain — never on disk.
+
+### RapidAPI autofill
+
+When adding a key, paste the **cURL snippet** from RapidAPI’s playground (Code Snippets → cURL) into the autofill box at the top of the drawer. The portal extracts:
+
+- `x-rapidapi-key` → key value (`VITE_RAPIDAPI_KEY` for shared RapidAPI keys)
+- `x-rapidapi-host` → test header
+- `--url` → test endpoint
+- `--request` → GET/POST
+
+Playground chrome like `Target: Shell` or broken quotes is tolerated — click **Autofill from paste**, review the fields, then save and sync.
+
+### Keys per app (My Apps)
+
+1. **My Secret Keys** — paste keys (cURL, JSON bundle, or manual).
+2. **My Apps** — link each project’s `.env.local` and pick which vault keys it receives.
+3. **Send keys to my apps** (header) — writes selected keys to every linked app file.
+
+Each app card lists every assigned key with its env var name, label, and status. Use ✏ on a card to change which keys that app gets.
+
+**Reload & detect keys** scans your app’s source code (`import.meta.env`, `process.env`, `vite-env.d.ts`, `.env.example`) and flags env vars used in code but not yet assigned to that app. You can add them to the vault in one click (values are pulled from `.env.local` when present).
 
 ## CLI Sync
 

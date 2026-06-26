@@ -94,6 +94,18 @@ export function resolveTeamIdentityFromAbbrev(abbrev: string): TeamIdentity | nu
   };
 }
 
+/** User-visible team label — always prefer full country name. */
+export function teamDisplayName(
+  team?: Pick<Team, "name" | "shortName"> | null,
+  fallback = "TBD"
+): string {
+  const name = team?.name?.trim();
+  if (name) return name;
+  const short = team?.shortName?.trim();
+  if (short) return short;
+  return fallback;
+}
+
 export function matchThemeToStyle(
   home: TeamIdentity | null,
   away: TeamIdentity | null,

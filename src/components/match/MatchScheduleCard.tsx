@@ -6,8 +6,10 @@ import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
 import { BroadcastBar } from "./BroadcastBar";
+import { OddsRow } from "./OddsRow";
 import { WeatherBadge } from "./WeatherBadge";
 import { VenueLabel } from "../venue/VenueLabel";
+import { teamDisplayName } from "../../lib/teamIdentity";
 
 type Props = {
   match: MergedMatch;
@@ -44,7 +46,7 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
             </span>
           ) : null}
           <time dateTime={kickoffUtc}>{metaTimeDisplay}</time>
-          {broadcast ? (
+          {(match.matchId || match.venue) ? (
             <>
               {" · "}
               <VenueLabel matchId={match.matchId} venueString={match.venue} inline compact />
@@ -79,9 +81,11 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
 
       {!isDone && !isLive && match.id ? (
         <OddsRow
-          espnEventId={match.id}
-          homeTeam={home?.shortName ?? match.homeTeamId}
-          awayTeam={away?.shortName ?? match.awayTeamId}
+          espnEventId={match.espnEventId ?? match.id}
+          matchId={match.id}
+          matchStatus={match.status}
+          homeTeam={teamDisplayName(home, match.homeTeamId)}
+          awayTeam={teamDisplayName(away, match.awayTeamId)}
         />
       ) : null}
 

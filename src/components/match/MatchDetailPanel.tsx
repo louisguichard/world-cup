@@ -1,15 +1,8 @@
-import { useEffect, useState } from "react";
-import {
-  fetchCommentary,
-  fetchLineups,
-  fetchStats,
-  isWc2026LiveDisabled,
-  type WcCommentaryEntry,
-  type WcLineup,
-  type WcStats,
-} from "../../services/WorldCup2026LiveClient";
-import { isApiEnabled } from "../../config/apiFlags";
+import { useState } from "react";
 import type { MergedMatch } from "../../types";
+import { useMatchEnrichment } from "../../hooks/useMatchEnrichment";
+import { teamDisplayName } from "../../lib/teamIdentity";
+import { useStore } from "../../store";
 
 type Props = {
   match: MergedMatch;
@@ -19,37 +12,13 @@ type Props = {
 
 type DetailTab = "commentary" | "lineups" | "stats";
 
-function useMathDetail(wcMatchId: string | number | undefined) {
-  const [commentary, setCommentary] = useState<WcCommentaryEntry[]>([]);
-  const [lineups, setLineups] = useState<WcLineup | null>(null);
-  const [stats, setStats] = useState<WcStats | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!wcMatchId || !isApiEnabled("wc2026Live") || isWc2026LiveDisabled()) return;
-
-    setLoading(true);
-    void Promise.allSettled([
-      fetchCommentary(wcMatchId),
-      fetchLineups(wcMatchId),
-      fetchStats(wcMatchId),
-    ]).then(([c, l, s]) => {
-      if (c.status === "fulfilled") setCommentary(c.value);
-      if (l.status === "fulfilled") setLineups(l.value);
-      if (s.status === "fulfilled") setStats(s.value);
-      setLoading(false);
-    });
-  }, [wcMatchId]);
-
-  return { commentary, lineups, stats, loading };
-}
-
 export function MatchDetailPanel({ match, wcMatchId, onClose }: Props) {
   const [tab, setTab] = useState<DetailTab>("commentary");
-  const { commentary, lineups, stats, loading } = useMathDetail(wcMatchId);
+  const { commentary, lineups, statistics, loading } = useMatchEnrichment(match.id);
+  const teams = useStore((s) => s.teams);
 
-  const homeTeam = match.homeTeamId;
-  const awayTeam = match.awayTeamId;
+  const homeTeam = teamDisplayName(teams[match.homeTeamId], match.homeTeamId);
+  const awayTeam = teamDisplayName(teams[match.awayTeamId], match.awayTeamId);
 
   return (
     <div className="match-detail-backdrop" role="presentation" onClick={onClose}>
@@ -95,9 +64,7 @@ export function MatchDetailPanel({ match, wcMatchId, onClose }: Props) {
                       ) : (
                         commentary.map((entry, i) => (
                           <li key={i} className="match-commentary-entry">
-                            {entry.minute != null ? (
-                              <span className="commentary-minute">{entry.minute}'</span>
-                            ) : null}
+                            <span className="commentary-minute">{entry.minute}'</span>
                             <span className="commentary-text">{entry.text}</span>
                           </li>
                         ))
@@ -107,26 +74,23 @@ export function MatchDetailPanel({ match, wcMatchId, onClose }: Props) {
 
                   {tab === "lineups" ? (
                     <div className="match-lineups">
-                      {!lineups ? (
+                      {lineups.length === 0 ? (
                         <p>Lineups not available</p>
                       ) : (
                         <div className="lineups-grid">
-                          <div className="lineup-col">
-                            <h3>{homeTeam}</h3>
-                            <ul>
-                              {(lineups.homeTeam?.startingXI ?? []).map((p, i) => (
-                                <li key={i}>{JSON.stringify(p)}</li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div className="lineup-col">
-                            <h3>{awayTeam}</h3>
-                            <ul>
-                              {(lineups.awayTeam?.startingXI ?? []).map((p, i) => (
-                                <li key={i}>{JSON.stringify(p)}</li>
-                              ))}
-                            </ul>
-                          </div>
+                          {lineups.map((lineup) => (
+                            <div key={lineup.team} className="lineup-col">
+                              <h3>{lineup.team === "home" ? homeTeam : awayTeam}</h3>
+                              <ul>
+                                {lineup.startingXI.map((p, i) => (
+                                  <li key={i}>
+                                    {p.player.jerseyNumber ? `${p.player.jerseyNumber}. ` : ""}
+                                    {p.player.displayName}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -134,7 +98,7 @@ export function MatchDetailPanel({ match, wcMatchId, onClose }: Props) {
 
                   {tab === "stats" ? (
                     <div className="match-stats">
-                      {!stats ? (
+                      {!statistics ? (
                         <p>Stats not available</p>
                       ) : (
                         <table className="stats-table">
@@ -146,11 +110,11 @@ export function MatchDetailPanel({ match, wcMatchId, onClose }: Props) {
                             </tr>
                           </thead>
                           <tbody>
-                            {Object.keys(stats.homeTeam ?? {}).map((key) => (
+                            {Object.entries(statistics.home).map(([key, homeVal]) => (
                               <tr key={key}>
-                                <td>{stats.homeTeam?.[key]}</td>
+                                <td>{homeVal}</td>
                                 <td className="stat-label">{key}</td>
-                                <td>{stats.awayTeam?.[key]}</td>
+                                <td>{statistics.away[key as keyof typeof statistics.away]}</td>
                               </tr>
                             ))}
                           </tbody>

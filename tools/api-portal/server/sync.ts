@@ -16,6 +16,7 @@ export async function syncToEnvFile(
   const toWrite = new Map<string, string>();
   for (const keyId of target.keyIds) {
     const apiKey = vault.keys.find((k) => k.id === keyId);
+    if (apiKey && apiKey.disabled) continue;
     if (apiKey) {
       toWrite.set(apiKey.envVarName, apiKey.value);
     }

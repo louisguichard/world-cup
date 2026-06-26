@@ -445,3 +445,87 @@ export const GROUP_STAGE_MATCH_COUNT = 72;
 export const STORAGE_KEY = "world-cup-2026-score-overrides";
 export const PICKS_KEY = "world-cup-2026-bracket-picks";
 export const DATA_CACHE_KEY = "world-cup-2026-data-cache-v3";
+
+// --- API orchestration types ---
+
+export type SourceId =
+  | "wclive"
+  | "espn"
+  | "sportapi7"
+  | "zafronix"
+  | "sofascore"
+  | "freeapi"
+  | "wc2026teams"
+  | "static";
+
+export type CommentaryEntry = {
+  minute: number;
+  text: string;
+  type?: "goal" | "card" | "sub" | "var" | "general";
+};
+
+export type PlayerEntry = {
+  id?: string;
+  name: string;
+  number?: number;
+  position?: string;
+};
+
+export type MatchLineups = {
+  home: { startingXI: PlayerEntry[]; subs: PlayerEntry[] };
+  away: { startingXI: PlayerEntry[]; subs: PlayerEntry[] };
+};
+
+export type MatchStats = {
+  possession?: { home: number; away: number };
+  shots?: { home: number; away: number };
+  shotsOnTarget?: { home: number; away: number };
+  corners?: { home: number; away: number };
+  fouls?: { home: number; away: number };
+  yellowCards?: { home: number; away: number };
+  redCards?: { home: number; away: number };
+};
+
+export type WeatherSnapshot = {
+  city: string;
+  tempC: number;
+  tempF: number;
+  condition: string;
+  icon: string;
+  humidity?: number;
+  windKph?: number;
+  fetchedAt: number;
+};
+
+export type OddsSnapshot = {
+  matchId: string;
+  homeWin: number;
+  draw: number;
+  awayWin: number;
+  fetchedAt: number;
+};
+
+export type FuturesOdds = {
+  teams: { teamId: string; name: string; odds: number }[];
+  fetchedAt: number;
+};
+
+export type TeamFormEntry = {
+  matchId?: string;
+  opponent: string;
+  result: "W" | "D" | "L";
+  goalsFor: number;
+  goalsAgainst: number;
+  date: string;
+  competition?: string;
+};
+
+export type StadiumInfo = {
+  id?: string;
+  name: string;
+  city: string;
+  country: string;
+  capacity?: number;
+  lat?: number;
+  lon?: number;
+};

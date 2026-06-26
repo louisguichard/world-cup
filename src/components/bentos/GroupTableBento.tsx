@@ -1,9 +1,11 @@
 import { useMemo } from "react";
 import type { GroupStanding } from "../../types";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import { useStore } from "../../store";
 import { CertaintyBadge } from "../shared/CertaintyBadge";
 import { StandingThemeRow } from "../team/StandingThemeRow";
+import { TeamFlag } from "../team/TeamFlag";
 
 export interface GroupTableBentoProps {
   standing: GroupStanding;
@@ -19,6 +21,7 @@ export function GroupTableBento({ standing }: GroupTableBentoProps) {
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
   const liveMatches = useStore((s) => s.liveMatches);
+  const openTeamSheet = useStore((s) => s.openTeamSheet);
   const qualContext = useMemo(
     () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
     [liveMatches, teams]
@@ -65,8 +68,14 @@ export function GroupTableBento({ standing }: GroupTableBentoProps) {
                     </div>
                   </td>
                   <td className="group-table-team">
-                    {team?.logo ? <img src={team.logo} alt="" width={20} height={20} /> : null}
-                    <span>{team?.shortName ?? row.teamId}</span>
+                    <button
+                      type="button"
+                      className="group-table-team-btn"
+                      onClick={() => openTeamSheet(row.teamId)}
+                    >
+                      <TeamFlag team={team} teamId={row.teamId} />
+                      <span className="team-name-text">{teamDisplayName(team, row.teamId)}</span>
+                    </button>
                   </td>
                   <td>{row.played}</td>
                   <td>{row.wins}</td>

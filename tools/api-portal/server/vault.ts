@@ -21,6 +21,12 @@ export type ApiKey = {
   lastTestedAt?: string;
   lastTestStatus?: number;
   lastTestLatencyMs?: number;
+  /** Grayed out — not referenced in linked app source (auto-set on scan). */
+  disabled?: boolean;
+  disabledReason?: string;
+  disabledAt?: string;
+  /** Assigned to these apps but env var not found in their last source scan. */
+  missingFromProjects?: string[];
 };
 
 export type VaultHistory = {
@@ -200,7 +206,9 @@ export async function readVault(): Promise<VaultData> {
   const raw = await readFile(VAULT_PATH, "utf8");
   const blob: EncryptedBlob = JSON.parse(raw) as EncryptedBlob;
   const plaintext = decrypt(blob, masterKey);
-  return JSON.parse(plaintext) as VaultData;
+  const data = JSON.parse(plaintext) as VaultData & { mcpApis?: unknown };
+  delete data.mcpApis;
+  return data;
 }
 
 export async function writeVault(

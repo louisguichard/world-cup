@@ -1,4 +1,6 @@
+import type { MergedMatch, Team } from "../types";
 import type { SofaEvent } from "./SofaScoreClient";
+import { normalizeSportAPI7Match } from "./adapters/normalizeMatch";
 import { logger } from "./Logger";
 
 const RAPIDAPI_HOST = "sportapi7.p.rapidapi.com";
@@ -103,6 +105,46 @@ export async function fetchIncidents(eventId: number): Promise<unknown[]> {
     const data = (await res.json()) as { incidents?: unknown[] };
     return data.incidents ?? [];
   } catch {
+    return [];
+  }
+}
+
+/** Alias for fetchScheduledToday. */
+export async function fetchScheduledEvents(dateISO: string): Promise<Partial<MergedMatch>[]> {
+  if (sportApi7SessionDisabled) return [];
+
+  const path = `/api/v1/category/${SPORTAPI_WC_CATEGORY_ID}/scheduled-events/${dateISO}`;
+  try {
+    const res = await fetchJson(path);
+    if (await handleBlocked(res, "scheduled-events")) return [];
+    if (!res.ok) return [];
+
+    const data = (await res.json()) as { events?: SportApiEvent[] };
+    return (data.events ?? []).map((e) => normalizeSportAPI7Match(e));
+  } catch (error) {
+    logger.warn("SportAPI7 scheduled events failed", "SportAPI7Client", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+}
+
+/** Fetches live WC category events. */
+export async function fetchLiveEvents(): Promise<Partial<MergedMatch>[]> {
+  if (sportApi7SessionDisabled) return [];
+
+  const path = `/api/v1/category/${SPORTAPI_WC_CATEGORY_ID}/events/live`;
+  try {
+    const res = await fetchJson(path);
+    if (await handleBlocked(res, "events-live")) return [];
+    if (!res.ok) return [];
+
+    const data = (await res.json()) as { events?: SportApiEvent[] };
+    return (data.events ?? []).map((e) => normalizeSportAPI7Match(e));
+  } catch (error) {
+    logger.warn("SportAPI7 live events failed", "SportAPI7Client", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return [];
   }
 }

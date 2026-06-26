@@ -13,7 +13,12 @@ export const ApiKeyCreateSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const ApiKeyUpdateSchema = ApiKeyCreateSchema.partial();
+export const ApiKeyUpdateSchema = ApiKeyCreateSchema.partial().extend({
+  disabled: z.boolean().optional(),
+  disabledReason: z.string().optional().nullable(),
+  disabledAt: z.string().optional().nullable(),
+  missingFromProjects: z.array(z.string()).optional().nullable(),
+});
 
 export const SyncTargetCreateSchema = z.object({
   name: z.string().min(1),
@@ -31,6 +36,36 @@ export const UnlockSchema = z.object({
 
 export const VaultResetSchema = z.object({
   confirm: z.literal("RESET VAULT"),
+});
+
+export const JsonKeyImportEntrySchema = z.object({
+  envVarName: z.string().regex(/^[A-Z][A-Z0-9_]*$/),
+  label: z.string().min(1),
+  serviceGroup: z.string().min(1),
+  value: z.string().min(1),
+  endpoint: z.string().url().optional().or(z.literal("")),
+  testMethod: z.enum(["GET", "POST"]).optional(),
+  testHeaders: z.record(z.string()).optional(),
+  notes: z.string().optional(),
+});
+
+export const JsonKeyImportSchema = z.object({
+  entries: z.array(JsonKeyImportEntrySchema).min(1),
+});
+
+export const ProjectRescanSchema = z.object({
+  targetId: z.string().optional(),
+  projectName: z.string().optional(),
+  envFilePath: z.string().optional(),
+  rootPath: z.string().optional(),
+});
+
+export const ApplyDiscoveredSchema = z.object({
+  targetId: z.string().optional(),
+  projectName: z.string().min(1),
+  envFilePath: z.string().min(1),
+  varNames: z.array(z.string().regex(/^[A-Z][A-Z0-9_]*$/)).min(1),
+  pullValuesFromEnv: z.boolean().optional(),
 });
 
 export type ApiKeyCreate = z.infer<typeof ApiKeyCreateSchema>;

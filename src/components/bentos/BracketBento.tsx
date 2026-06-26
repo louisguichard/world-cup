@@ -2,6 +2,7 @@ import { useDeferredValue, useMemo } from "react";
 import { knockoutSchedule } from "../../data/knockoutSchedule";
 import { buildQualificationContext, computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
 import { projectTournament } from "../../lib/tournament";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
 import type {
   BracketGhostCandidate,
@@ -39,7 +40,7 @@ function GhostTeamList({
         return (
           <div key={teamId} className="bracket-ghost-team">
             {t?.logo ? <img src={t.logo} alt="" /> : <span className="bracket-dot" style={{ width: 12, height: 12 }} />}
-            <span>{t?.shortName ?? teamId}</span>
+            <span className="team-name-text">{teamDisplayName(t, teamId)}</span>
             {showFrequency ? <span className="bracket-ghost-freq">{Math.round(frequency * 100)}%</span> : null}
           </div>
         );
@@ -158,22 +159,41 @@ function BracketTeamReadonly({
   const resolvedStatus: TeamThemeStatus = winner ? "advancing" : status;
   const visibleGhosts = ghosts?.slice(0, 2) ?? [];
 
-  const showGhosts = mode === "projected" && visibleGhosts.length > 0;
-
   if (effectiveCertainty === "tbd") {
+    if (team) {
+      return (
+        <div className="bracket-team-slot">
+          <div
+            className="bracket-team bracket-team-projected-muted"
+            data-team-id={team.id}
+            style={{ opacity: 0.55 }}
+          >
+            {team.logo
+              ? <img src={team.logo} alt="" className="bracket-team-flag" />
+              : <span className="bracket-dot" />}
+            <span className="team-name-text">{teamDisplayName(team, seedLabel ?? "TBD")}</span>
+          </div>
+          <CertaintyBadge certainty="projected" size="xs" />
+          {visibleGhosts.length > 0 ? (
+            <>
+              <div className="bracket-ghost-label">Also possible</div>
+              <GhostTeamList
+                ghosts={visibleGhosts}
+                teamsById={teamsById}
+                showFrequency={false}
+              />
+            </>
+          ) : null}
+        </div>
+      );
+    }
     return (
       <div className="bracket-team-slot">
         <div className="bracket-team bracket-team-tbd">
           <span className="bracket-dot" />
-          <span>TBD</span>
+          <span>{seedLabel ?? "TBD"}</span>
         </div>
         <CertaintyBadge certainty="tbd" size="xs" />
-        {showGhosts ? (
-          <>
-            <div className="bracket-ghost-label">Possible</div>
-            <GhostTeamList ghosts={visibleGhosts} teamsById={teamsById} showFrequency={false} />
-          </>
-        ) : null}
       </div>
     );
   }
@@ -194,7 +214,7 @@ function BracketTeamReadonly({
         ) : (
           <span className="bracket-dot" />
         )}
-        <span>{team?.shortName ?? seedLabel ?? "TBD"}</span>
+        <span className="team-name-text">{teamDisplayName(team, seedLabel ?? "TBD")}</span>
         {winner ? <b>✓</b> : null}
       </button>
       {effectiveCertainty === "confirmed" ? (
@@ -244,7 +264,7 @@ function BracketCardReadonly({
         <VenueLabel matchId={match.id} inline compact />
       </div>
       <BracketTeamReadonly
-        team={homeConfirmed ? home : mode === "projected" ? home : undefined}
+        team={home}
         seedLabel={match.homeSeedLabel}
         winner={match.winnerTeamId === home?.id}
         slotConfirmed={homeConfirmed}
@@ -254,7 +274,7 @@ function BracketCardReadonly({
         onTeamSelect={onTeamSelect}
       />
       <BracketTeamReadonly
-        team={awayConfirmed ? away : mode === "projected" ? away : undefined}
+        team={away}
         seedLabel={match.awaySeedLabel}
         winner={match.winnerTeamId === away?.id}
         slotConfirmed={awayConfirmed}

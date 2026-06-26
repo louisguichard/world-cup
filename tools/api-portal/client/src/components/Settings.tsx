@@ -15,7 +15,7 @@ export default function Settings({ status, onReset }: Props) {
   const [importSuccess, setImportSuccess] = useState(false);
 
   const handleExport = useCallback(() => {
-    if (!confirm("Export vault as plaintext JSON? Store this file securely and delete it after.")) return;
+    if (!confirm("This downloads a file with ALL your keys in plain text. Save it somewhere safe, then delete the file.")) return;
     void exportVault();
   }, []);
 
@@ -60,24 +60,24 @@ export default function Settings({ status, onReset }: Props) {
 
   return (
     <div>
-      <div className="page-title">Settings</div>
+      <div className="page-title">Lock &amp; Backup</div>
 
       <div className="settings-section">
-        <h3>Keychain Status</h3>
+        <h3>Your computer&apos;s lock</h3>
         <div className="settings-row">
-          <span className="label">Keychain (keytar)</span>
+          <span className="label">Safe storage on Mac</span>
           <span className={status.keychainAvailable ? "status-ok" : "status-warn"}>
-            {status.keychainAvailable ? "✓ Available" : "⚠ Unavailable (session mode)"}
+            {status.keychainAvailable ? "✓ Yes" : "⚠ Not available (session only)"}
           </span>
         </div>
         <div className="settings-row">
-          <span className="label">Master key stored</span>
+          <span className="label">Lock password saved</span>
           <span className={status.keychainSetup ? "status-ok" : "status-warn"}>
             {status.keychainSetup
               ? status.keychainAvailable
-                ? "✓ Stored in OS Keychain"
-                : "✓ Active (session)"
-              : "⚠ Not set up"}
+                ? "✓ Saved on your Mac"
+                : "✓ Unlocked this session"
+              : "⚠ Not set up yet"}
           </span>
         </div>
         {!status.keychainAvailable && (
@@ -90,15 +90,15 @@ export default function Settings({ status, onReset }: Props) {
       </div>
 
       <div className="settings-section">
-        <h3>Vault</h3>
+        <h3>Where keys are stored</h3>
         <div className="settings-row">
-          <span className="label">Vault file</span>
+          <span className="label">Locked file on disk</span>
           <span style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-faint)" }}>
             tools/api-portal/.portal-keys.enc
           </span>
         </div>
         <div className="settings-row">
-          <span className="label">Vault exists</span>
+          <span className="label">File exists</span>
           <span className={status.vaultExists ? "status-ok" : "status-warn"}>
             {status.vaultExists ? "✓ Yes" : "Not created yet"}
           </span>
@@ -106,51 +106,49 @@ export default function Settings({ status, onReset }: Props) {
       </div>
 
       <div className="settings-section">
-        <h3>Export / Import</h3>
+        <h3>Save a backup copy</h3>
         <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 12 }}>
-          Export decrypts all keys to plaintext JSON. Store the file securely and delete it after use.
+          Export makes a file with all your keys in plain text. Keep it somewhere safe, then delete the file.
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button className="btn btn-ghost" onClick={handleExport}>
-            Export Vault as JSON
+            Download backup file
           </button>
           <button className="btn btn-ghost" disabled={importing} onClick={handleImport}>
-            {importing ? <span className="spinner" /> : "Import from JSON"}
+            {importing ? <span className="spinner" /> : "Load from backup file"}
           </button>
         </div>
         {importError && <div className="error-banner" style={{ marginTop: 10 }}>{importError}</div>}
         {importSuccess && (
           <div style={{ marginTop: 10, color: "var(--green)", fontSize: 12 }}>
-            ✓ Import successful. Vault re-encrypted with current master key.
+            ✓ Backup loaded. Your keys are locked again.
           </div>
         )}
       </div>
 
       <div className="settings-section" style={{ borderColor: "rgba(240,82,82,0.3)" }}>
-        <h3 style={{ color: "var(--red)" }}>Danger Zone</h3>
+        <h3 style={{ color: "var(--red)" }}>Danger — delete everything</h3>
         <div className="settings-row">
-          <span className="label">Delete vault and keychain entry</span>
+          <span className="label">Erase all saved keys</span>
           <button
             className="btn btn-danger btn-sm"
             onClick={() => setResetConfirmOpen(true)}
           >
-            Reset Vault
+            Delete my key box
           </button>
         </div>
         <div style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 6 }}>
-          This permanently deletes the encrypted vault file and removes the master key from your
-          OS keychain. All stored API keys will be lost unless you have a backup or export.
+          This deletes every saved key forever unless you made a backup first.
         </div>
       </div>
 
       {resetConfirmOpen && (
         <div className="modal-overlay">
           <div className="modal">
-            <h3 style={{ color: "var(--red)" }}>Reset Vault?</h3>
+            <h3 style={{ color: "var(--red)" }}>Delete everything?</h3>
             <p>
-              This will permanently delete your vault file and OS keychain entry.{" "}
-              <strong>All stored API keys will be unrecoverable</strong> unless you have an export
-              or backup file.
+              This erases all your saved keys.{" "}
+              <strong>You cannot get them back</strong> unless you downloaded a backup.
             </p>
             {resetError && <div className="error-banner">{resetError}</div>}
             <div className="modal-actions">
@@ -166,7 +164,7 @@ export default function Settings({ status, onReset }: Props) {
                 disabled={resetting}
                 onClick={() => void handleReset()}
               >
-                {resetting ? <span className="spinner" /> : "Yes, Reset Everything"}
+                {resetting ? <span className="spinner" /> : "Yes, delete everything"}
               </button>
             </div>
           </div>

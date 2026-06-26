@@ -1,4 +1,7 @@
+import type { MergedMatch, Team } from "../types";
 import type { SofaEvent } from "./SofaScoreClient";
+import { normalizeFreeAPIMatch } from "./adapters/normalizeMatch";
+import { normalizeFreeAPITeam } from "./adapters/normalizeTeam";
 import { logger } from "./Logger";
 
 const RAPIDAPI_HOST = "free-api-live-football-data.p.rapidapi.com";
@@ -161,4 +164,72 @@ export async function fetchIncidents(_eventId: number): Promise<unknown[]> {
 export function resetFootballDataSessionForTests(): void {
   footballDataSessionDisabled = false;
   loggedIncidentsUnavailable = false;
+}
+
+type FotMobTeamResponse = {
+  response?: {
+    id?: number;
+    name?: string;
+    shortName?: string;
+    logo?: string;
+    image?: string;
+  };
+};
+
+/** Fetches matches for a specific date (YYYYMMDD). */
+export async function fetchMatchesByDate(dateYYYYMMDD: string): Promise<Partial<MergedMatch>[]> {
+  if (footballDataSessionDisabled) return [];
+
+  try {
+    const res = await fetchJson(`/football-get-matches-by-date?date=${dateYYYYMMDD}`);
+    if (await handleBlocked(res, "matches-by-date")) return [];
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    return extractMatches(data).map((m) => normalizeFreeAPIMatch(m));
+  } catch (error) {
+    logger.warn("FootballData matches-by-date failed", "FootballDataClient", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+}
+
+/** Fetches currently live matches only. */
+export async function fetchCurrentLive(): Promise<Partial<MergedMatch>[]> {
+  if (footballDataSessionDisabled) return [];
+
+  try {
+    const res = await fetchJson("/football-current-live");
+    if (await handleBlocked(res, "current-live")) return [];
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    return extractMatches(data).map((m) => normalizeFreeAPIMatch(m));
+  } catch (error) {
+    logger.warn("FootballData current-live failed", "FootballDataClient", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+}
+
+/** Fetches team details by FotMob team id. */
+export async function fetchTeamDetails(teamId: string): Promise<Partial<Team> | null> {
+  if (footballDataSessionDisabled) return null;
+
+  try {
+    const res = await fetchJson(`/football-get-team-details?teamId=${encodeURIComponent(teamId)}`);
+    if (await handleBlocked(res, "team-details")) return null;
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as FotMobTeamResponse;
+    return normalizeFreeAPITeam(data);
+  } catch (error) {
+    logger.warn("FootballData team details failed", "FootballDataClient", {
+      error: error instanceof Error ? error.message : String(error),
+      teamId,
+    });
+    return null;
+  }
 }
