@@ -28,7 +28,7 @@ function proxied(path: string, service: "espn" | "poly" | "fifa" | "fifa-api"): 
   }
 
   if (service === "espn") return `/espn${path}`;
-  if (service === "poly") return `/poly${path}`;
+  if (service === "poly") return `https://gamma-api.polymarket.com${path}`;
   if (service === "fifa-api") return `/fifa-api${path}`;
   return `/fifa${path}`;
 }
