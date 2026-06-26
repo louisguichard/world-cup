@@ -37,7 +37,7 @@ import { projectTournament, simulateTournamentOutcomes, toTeamsById } from "./li
 
 const STORAGE_KEY = "world-cup-2026-score-overrides";
 const PICKS_KEY = "world-cup-2026-bracket-picks";
-const DATA_CACHE_KEY = "world-cup-2026-data-cache-v3";
+const DATA_CACHE_KEY = "world-cup-2026-data-cache-v4";
 const MONTE_CARLO_ITERATIONS = 4200;
 const MONTE_CARLO_SEED = 2026;
 const AUTHOR_GITHUB_URL = "https://github.com/louisguichard/world-cup";
