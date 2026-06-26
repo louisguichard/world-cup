@@ -321,7 +321,7 @@ export function SimulatorView() {
       teams: data.teams,
       matches: data.matches,
       knockoutMarkets: data.knockoutMarkets,
-      iterations: MONTE_CARLO_ITERATIONS_PROD,
+      iterations,
       seed: MONTE_CARLO_SEED
     });
 
