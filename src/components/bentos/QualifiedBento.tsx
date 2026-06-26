@@ -1,30 +1,33 @@
 import { useMemo } from "react";
-import { bucketQualificationTeams, computeQualificationStatus } from "../../lib/qualification";
+import { bucketQualificationTeams, buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { rankBestThirds } from "../../lib/bestThirds";
 import { useStore } from "../../store";
+import type { QualificationCertainty } from "../../types";
+import { CertaintyBadge, type CertaintyBadgeVariant } from "../shared/CertaintyBadge";
 import { TeamThemeRoot } from "../team/TeamThemeRoot";
 
-function QualTeamChip({
-  teamId,
-  dim,
-  badge
-}: {
-  teamId: string;
-  dim?: boolean;
-  badge?: string;
-}) {
+function toBadgeCertainty(certainty: QualificationCertainty): CertaintyBadgeVariant {
+  if (certainty === "confirmed") return "confirmed";
+  if (certainty === "projected_strong") return "projected_strong";
+  if (certainty === "projected_weak") return "projected_weak";
+  return "projected";
+}
+
+function QualTeamChip({ teamId, dim }: { teamId: string; dim?: boolean }) {
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
+  const liveMatches = useStore((s) => s.liveMatches);
+  const qualContext = useMemo(
+    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
+    [liveMatches, teams]
+  );
   const team = teams[teamId];
   const label = team?.shortName ?? team?.name ?? teamId;
-  const qual = computeQualificationStatus(teamId, standings);
+  const qual = computeQualificationStatus(teamId, standings, qualContext);
 
   return (
-    <div
-      className={`qual-team-chip ${dim ? "qual-team-chip--dim" : ""}`}
-      title={qual.reason ?? team?.name ?? label}
-    >
-      {badge ? <span className={`qual-team-badge qual-team-badge--${badge}`}>{badge}</span> : null}
+    <div className={`qual-team-chip ${dim ? "qual-team-chip--dim" : ""}`} title={qual.reason ?? team?.name ?? label}>
+      <CertaintyBadge certainty={toBadgeCertainty(qual.certainty)} size="xs" />
       {team?.logo ? (
         <TeamThemeRoot teamId={teamId} className="qual-crest-wrap">
           <img
@@ -49,13 +52,11 @@ function QualSection({
   title,
   hint,
   teamIds,
-  badge,
   dim
 }: {
   title: string;
   hint: string;
   teamIds: string[];
-  badge: string;
   dim?: boolean;
 }) {
   if (teamIds.length === 0) return null;
@@ -68,7 +69,7 @@ function QualSection({
       </div>
       <div className="qual-bento-crests">
         {teamIds.map((id) => (
-          <QualTeamChip key={id} teamId={id} dim={dim} badge={badge} />
+          <QualTeamChip key={id} teamId={id} dim={dim} />
         ))}
       </div>
     </div>
@@ -78,10 +79,15 @@ function QualSection({
 export function QualifiedBento() {
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
+  const liveMatches = useStore((s) => s.liveMatches);
+  const qualContext = useMemo(
+    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
+    [liveMatches, teams]
+  );
 
   const buckets = useMemo(
-    () => bucketQualificationTeams(Object.keys(teams), standings),
-    [teams, standings]
+    () => bucketQualificationTeams(Object.keys(teams), standings, qualContext),
+    [teams, standings, qualContext]
   );
 
   const hasAny = buckets.confirmedThrough.length > 0 || buckets.projectedThrough.length > 0;
@@ -93,16 +99,14 @@ export function QualifiedBento() {
       {hasAny ? (
         <>
           <QualSection
-            title="Confirmed"
-            hint="Mathematically locked in — will advance no matter what happens in remaining matches."
+            title="Through"
+            hint="Mathematically locked in — group stage complete and final rank is top two."
             teamIds={buckets.confirmedThrough}
-            badge="Locked"
           />
           <QualSection
-            title="Projected"
-            hint="Leading the table now, but other teams can still overtake them."
+            title="Projected Through"
+            hint="Currently in the top two, but group stage is not fully complete or position may still change."
             teamIds={buckets.projectedThrough}
-            badge="Leading"
           />
         </>
       ) : (
@@ -115,10 +119,15 @@ export function QualifiedBento() {
 export function EliminatedBento() {
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
+  const liveMatches = useStore((s) => s.liveMatches);
+  const qualContext = useMemo(
+    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
+    [liveMatches, teams]
+  );
 
   const buckets = useMemo(
-    () => bucketQualificationTeams(Object.keys(teams), standings),
-    [teams, standings]
+    () => bucketQualificationTeams(Object.keys(teams), standings, qualContext),
+    [teams, standings, qualContext]
   );
 
   const hasAny = buckets.confirmedOut.length > 0 || buckets.projectedOut.length > 0;
@@ -130,17 +139,15 @@ export function EliminatedBento() {
       {hasAny ? (
         <>
           <QualSection
-            title="Confirmed out"
+            title="Mathematically out"
             hint="Cannot qualify — even maximum points from here would not be enough."
             teamIds={buckets.confirmedOut}
-            badge="Out"
             dim
           />
           <QualSection
-            title="Likely out"
+            title="Likely Out"
             hint="Still playing, but must win out and need other results — not mathematically eliminated yet."
             teamIds={buckets.projectedOut}
-            badge="Unlikely"
             dim
           />
         </>
@@ -154,10 +161,15 @@ export function EliminatedBento() {
 export function InContentionBento() {
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
+  const liveMatches = useStore((s) => s.liveMatches);
+  const qualContext = useMemo(
+    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
+    [liveMatches, teams]
+  );
 
   const inContention = useMemo(
-    () => bucketQualificationTeams(Object.keys(teams), standings).inContention,
-    [teams, standings]
+    () => bucketQualificationTeams(Object.keys(teams), standings, qualContext).inContention,
+    [teams, standings, qualContext]
   );
 
   return (
@@ -167,7 +179,7 @@ export function InContentionBento() {
       {inContention.length > 0 ? (
         <div className="qual-bento-crests">
           {inContention.slice(0, 12).map((id) => (
-            <QualTeamChip key={id} teamId={id} badge="Live" />
+            <QualTeamChip key={id} teamId={id} />
           ))}
         </div>
       ) : (
@@ -187,7 +199,7 @@ export function BestThirdsBento() {
       <p className="qual-bento-lead">Projected top eight third-placed teams (not final until all groups finish).</p>
       <div className="qual-bento-crests">
         {best.map((r) => (
-          <QualTeamChip key={r.teamId} teamId={r.teamId} badge="3rd" />
+          <QualTeamChip key={r.teamId} teamId={r.teamId} />
         ))}
       </div>
     </section>

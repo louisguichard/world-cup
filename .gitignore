@@ -9,3 +9,6 @@ dist/
 .vercel/
 .claude/
 .vercel
+tools/api-portal/.portal-keys.enc
+tools/api-portal/.portal-keys.enc.bak*
+tools/api-portal/node_modules/

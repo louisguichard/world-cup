@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { computeQualificationStatus } from "../../lib/qualification";
+import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { useStore } from "../../store";
 import type { QualificationTier } from "../../types";
 import { TeamThemeRoot } from "../team/TeamThemeRoot";
@@ -20,7 +20,12 @@ export function TeamsView() {
   const [filter, setFilter] = useState<Filter>("all");
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
+  const liveMatches = useStore((s) => s.liveMatches);
   const openTeamSheet = useStore((s) => s.openTeamSheet);
+  const qualContext = useMemo(
+    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
+    [liveMatches, teams]
+  );
 
   const filtered = useMemo(() => {
     return Object.values(teams)
@@ -28,7 +33,7 @@ export function TeamsView() {
         const q = query.toLowerCase();
         const matchesSearch =
           t.name.toLowerCase().includes(q) || t.shortName.toLowerCase().includes(q);
-        const status = computeQualificationStatus(t.id, standings).status;
+        const status = computeQualificationStatus(t.id, standings, qualContext).status;
         const matchesFilter = filter === "all" || status === filter;
         return matchesSearch && matchesFilter;
       })
@@ -40,7 +45,7 @@ export function TeamsView() {
           standings.find((g) => g.group === b.group)?.rows.findIndex((r) => r.teamId === b.id) ?? 99;
         return rankA - rankB;
       });
-  }, [teams, standings, query, filter]);
+  }, [teams, standings, query, filter, qualContext]);
 
   const byGroup = useMemo(() => {
     const map = new Map<string, typeof filtered>();
@@ -93,7 +98,7 @@ export function TeamsView() {
           <summary>Group {group}</summary>
           <ul>
             {list.map((t) => {
-              const status = computeQualificationStatus(t.id, standings);
+              const status = computeQualificationStatus(t.id, standings, qualContext);
               const groupStanding = standings.find((g) => g.group === t.group);
               const row = groupStanding?.rows.find((r) => r.teamId === t.id);
               const rank = row ? (groupStanding?.rows.indexOf(row) ?? 0) + 1 : "—";

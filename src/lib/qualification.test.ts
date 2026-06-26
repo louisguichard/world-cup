@@ -1,20 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  assertBucketMutualExclusion,
   bucketQualificationTeams,
+  buildQualificationContext,
   computeQualificationStatus,
-  groupStageComplete,
+  deriveStandingsIfScored,
   isConfirmedTopTwo,
-  maxPoints
+  matchesInGroup
 } from "./qualification";
 import type { GroupLetter, GroupStanding, TeamRecord } from "../types";
 
-function row(
-  teamId: string,
-  group: GroupLetter,
-  played: number,
-  points: number,
-  gd = 0
-): TeamRecord {
+function row(teamId: string, group: GroupLetter, played: number, points: number, gd = 0): TeamRecord {
   return {
     teamId,
     group,
@@ -35,80 +31,164 @@ function standing(group: GroupLetter, rows: TeamRecord[]): GroupStanding {
   return { group, rows };
 }
 
-describe("qualification certainty", () => {
-  it("marks projected leaders when third can still catch them", () => {
-    const standings = [
-      standing("A", [
-        row("usa", "A", 2, 4),
-        row("mex", "A", 2, 4),
-        row("can", "A", 1, 3),
-        row("jpn", "A", 2, 0)
-      ])
+describe("isConfirmedTopTwo", () => {
+  it("confirms 1st when all teams played 3 and group is complete", () => {
+    const rows = [
+      row("usa", "A", 3, 9),
+      row("mex", "A", 3, 6),
+      row("can", "A", 3, 3),
+      row("jpn", "A", 3, 0)
     ];
-    const usa = computeQualificationStatus("usa", standings);
-    expect(usa.status).toBe("qualified");
-    expect(usa.certainty).toBe("projected");
+    expect(isConfirmedTopTwo(row("usa", "A", 3, 9), rows, { lockedGroupMatchCount: 6 })).toBe(true);
   });
 
-  it("marks confirmed top two when third cannot catch points", () => {
-    const standings = [
-      standing("A", [
-        row("usa", "A", 2, 7),
-        row("mex", "A", 2, 6),
-        row("can", "A", 2, 3),
-        row("jpn", "A", 2, 0)
-      ])
+  it("does not confirm 1st when an opponent still has a match remaining", () => {
+    const rows = [
+      row("usa", "A", 3, 9),
+      row("mex", "A", 3, 6),
+      row("can", "A", 2, 4),
+      row("jpn", "A", 3, 0)
     ];
-    expect(isConfirmedTopTwo(row("usa", "A", 2, 7), standings[0]!.rows)).toBe(true);
-    expect(computeQualificationStatus("usa", standings).certainty).toBe("confirmed");
+    expect(isConfirmedTopTwo(row("usa", "A", 3, 9), rows)).toBe(false);
+    const qual = computeQualificationStatus("usa", [standing("A", rows)]);
+    expect(qual.certainty).not.toBe("confirmed");
+    expect(qual.certainty).toMatch(/projected/);
   });
 
-  it("marks confirmed elimination when max points cannot reach third", () => {
-    const standings = [
-      standing("A", [
-        row("usa", "A", 2, 6),
-        row("mex", "A", 2, 6),
-        row("can", "A", 2, 6),
-        row("jpn", "A", 2, 0)
-      ])
+  it("does not confirm 2nd in progress even when others cannot mathematically pass", () => {
+    const rows = [
+      row("mex", "A", 2, 6),
+      row("usa", "A", 2, 1),
+      row("can", "A", 2, 3),
+      row("jpn", "A", 2, 0)
     ];
-    expect(maxPoints(row("jpn", "A", 2, 0))).toBe(3);
+    expect(isConfirmedTopTwo(row("usa", "A", 2, 1), rows)).toBe(false);
+    const qual = computeQualificationStatus("usa", [standing("A", rows)]);
+    expect(qual.status).toBe("qualified");
+    expect(qual.certainty).toMatch(/projected/);
+  });
+
+  it("requires locked matches for post-group confirmation when count is provided", () => {
+    const rows = [
+      row("usa", "A", 3, 7),
+      row("mex", "A", 3, 4),
+      row("can", "A", 3, 3),
+      row("jpn", "A", 3, 0)
+    ];
+    expect(isConfirmedTopTwo(row("usa", "A", 3, 7), rows, { lockedGroupMatchCount: 4 })).toBe(false);
+    expect(isConfirmedTopTwo(row("usa", "A", 3, 7), rows, { lockedGroupMatchCount: 6 })).toBe(true);
+  });
+});
+
+describe("computeQualificationStatus — group complete", () => {
+  function twelveGroupsThirds(): GroupStanding[] {
+    const groups: GroupLetter[] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
+    return groups.map((group, index) =>
+      standing(group, [
+        row(`t1-${group}`, group, 3, 9),
+        row(`t2-${group}`, group, 3, 6),
+        row(`t3-${group}`, group, 3, 8 - index),
+        row(`t4-${group}`, group, 3, 0)
+      ])
+    );
+  }
+
+  it("labels best-eight third as at_risk with confirmed certainty", () => {
+    const standings = twelveGroupsThirds();
+    const can = computeQualificationStatus("t3-A", standings);
+    expect(can.status).toBe("at_risk");
+    expect(can.certainty).toBe("confirmed");
+  });
+
+  it("labels ninth-best third as eliminated with confirmed certainty", () => {
+    const standings = twelveGroupsThirds();
+    const worst = computeQualificationStatus("t3-L", standings);
+    expect(worst.status).toBe("eliminated");
+    expect(worst.certainty).toBe("confirmed");
+  });
+
+  it("labels 4th place as eliminated confirmed when group is complete", () => {
+    const standings = [standing("A", [row("usa", "A", 3, 9), row("mex", "A", 3, 6), row("can", "A", 3, 4), row("jpn", "A", 3, 1)])];
     const jpn = computeQualificationStatus("jpn", standings);
     expect(jpn.status).toBe("eliminated");
     expect(jpn.certainty).toBe("confirmed");
   });
+});
 
-  it("buckets confirmed vs projected teams", () => {
-    const standings = [
-      standing("A", [
-        row("usa", "A", 2, 7),
-        row("mex", "A", 2, 4),
-        row("can", "A", 2, 3),
-        row("jpn", "A", 2, 0)
-      ])
+describe("locked-only confirmation", () => {
+  it("does not confirm when display standings include unlocked simulated scores", () => {
+    const teams = [
+      { id: "usa", name: "USA", shortName: "USA", abbreviation: "USA", group: "A" as const, rating: 1500 },
+      { id: "mex", name: "MEX", shortName: "MEX", abbreviation: "MEX", group: "A" as const, rating: 1500 },
+      { id: "can", name: "CAN", shortName: "CAN", abbreviation: "CAN", group: "A" as const, rating: 1500 },
+      { id: "jpn", name: "JPN", shortName: "JPN", abbreviation: "JPN", group: "A" as const, rating: 1500 }
     ];
-    const buckets = bucketQualificationTeams(["usa", "mex", "jpn"], standings);
-    expect(buckets.confirmedThrough).toContain("usa");
-    expect(buckets.projectedThrough).toContain("mex");
-    expect(buckets.confirmedOut).toContain("jpn");
+    const baseMatch = {
+      group: "A" as const,
+      date: "2026-06-11T19:00:00Z",
+      status: "completed" as const,
+      homeConduct: 0,
+      awayConduct: 0,
+      source: "espn" as const
+    };
+    const matches = [
+      { ...baseMatch, id: "m1", homeTeamId: "usa", awayTeamId: "mex", homeScore: 2, awayScore: 0, locked: true },
+      { ...baseMatch, id: "m2", homeTeamId: "usa", awayTeamId: "can", homeScore: 2, awayScore: 0, locked: true },
+      { ...baseMatch, id: "m3", homeTeamId: "usa", awayTeamId: "jpn", homeScore: 3, awayScore: 0, locked: false },
+      { ...baseMatch, id: "m4", homeTeamId: "mex", awayTeamId: "can", homeScore: 1, awayScore: 1, locked: true },
+      { ...baseMatch, id: "m5", homeTeamId: "mex", awayTeamId: "jpn", homeScore: 2, awayScore: 0, locked: true },
+      { ...baseMatch, id: "m6", homeTeamId: "can", awayTeamId: "jpn", homeScore: 1, awayScore: 0, locked: true }
+    ];
+    const displayStandings = deriveStandingsIfScored(matches, teams)!;
+    const context = buildQualificationContext(matches, teams);
+    const usa = computeQualificationStatus("usa", displayStandings, context);
+    expect(displayStandings[0]!.rows[0]!.played).toBe(3);
+    expect(context.lockedStandingsByGroup.A?.find((r) => r.teamId === "usa")?.played).toBe(2);
+    expect(usa.certainty).not.toBe("confirmed");
+  });
+
+  it("does not confirm when all scores are unlocked even if display shows played 3", () => {
+    const teams = [
+      { id: "usa", name: "USA", shortName: "USA", abbreviation: "USA", group: "A" as const, rating: 1500 },
+      { id: "mex", name: "MEX", shortName: "MEX", abbreviation: "MEX", group: "A" as const, rating: 1500 },
+      { id: "can", name: "CAN", shortName: "CAN", abbreviation: "CAN", group: "A" as const, rating: 1500 },
+      { id: "jpn", name: "JPN", shortName: "JPN", abbreviation: "JPN", group: "A" as const, rating: 1500 }
+    ];
+    const baseMatch = {
+      group: "A" as const,
+      date: "2026-06-11T19:00:00Z",
+      status: "completed" as const,
+      homeConduct: 0,
+      awayConduct: 0,
+      source: "espn" as const,
+      locked: false
+    };
+    const matches = [
+      { ...baseMatch, id: "m1", homeTeamId: "usa", awayTeamId: "mex", homeScore: 2, awayScore: 0 },
+      { ...baseMatch, id: "m2", homeTeamId: "usa", awayTeamId: "can", homeScore: 2, awayScore: 0 },
+      { ...baseMatch, id: "m3", homeTeamId: "usa", awayTeamId: "jpn", homeScore: 3, awayScore: 0 },
+      { ...baseMatch, id: "m4", homeTeamId: "mex", awayTeamId: "can", homeScore: 1, awayScore: 1 },
+      { ...baseMatch, id: "m5", homeTeamId: "mex", awayTeamId: "jpn", homeScore: 2, awayScore: 0 },
+      { ...baseMatch, id: "m6", homeTeamId: "can", awayTeamId: "jpn", homeScore: 1, awayScore: 0 }
+    ];
+    const displayStandings = deriveStandingsIfScored(matches, teams)!;
+    const context = buildQualificationContext(matches, teams);
+    expect(context.lockedStandingsByGroup.A?.find((r) => r.teamId === "usa")?.played).toBe(0);
+    const usa = computeQualificationStatus("usa", displayStandings, context);
+    expect(usa.certainty).not.toBe("confirmed");
   });
 });
 
-describe("groupStageComplete", () => {
-  it("true at 72 completed group matches", () => {
-    const matches = Array.from({ length: 72 }, (_, i) => ({
-      group: "A",
-      status: "completed" as const,
-      id: String(i)
-    }));
-    expect(groupStageComplete(matches)).toBe(true);
+describe("bucketQualificationTeams", () => {
+  it("buckets stay mutually exclusive", () => {
+    const standings = [
+      standing("A", [row("usa", "A", 2, 4), row("mex", "A", 2, 4), row("can", "A", 2, 3), row("jpn", "A", 2, 0)])
+    ];
+    assertBucketMutualExclusion(bucketQualificationTeams(["usa", "mex", "can", "jpn"], standings));
   });
 
-  it("false below 72", () => {
-    const matches = Array.from({ length: 71 }, () => ({
-      group: "A",
-      status: "completed" as const
-    }));
-    expect(groupStageComplete(matches)).toBe(false);
+  it("matchesInGroup supports withdrawals", () => {
+    expect(matchesInGroup(4)).toBe(6);
+    expect(matchesInGroup(3)).toBe(3);
   });
 });

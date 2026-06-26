@@ -24,7 +24,11 @@ export function BracketView() {
           aria-selected={mode === "projected"}
           onClick={() => setMode("projected")}
         >
-          Projected
+          <span className="bracket-toggle-label">Projected</span>
+          <span className="bracket-toggle-subtitle">
+            Based on current group standings. Teams shown may change as remaining matches are played. Projected teams
+            shown in indigo.
+          </span>
         </button>
         <button
           type="button"
@@ -33,7 +37,10 @@ export function BracketView() {
           aria-selected={mode === "confirmed"}
           onClick={() => setMode("confirmed")}
         >
-          Confirmed
+          <span className="bracket-toggle-label">Confirmed</span>
+          <span className="bracket-toggle-subtitle">
+            Only teams mathematically through after completing all 3 group matches. Unconfirmed slots show as TBD.
+          </span>
         </button>
       </div>
 

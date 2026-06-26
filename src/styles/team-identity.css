@@ -211,6 +211,11 @@
   color: #fff;
 }
 
+.certainty-badge--simulated {
+  background: #64748b;
+  color: #fff;
+}
+
 .bracket-ghost-list {
   display: flex;
   flex-direction: column;
@@ -224,9 +229,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  opacity: 0.18;
+  opacity: 1;
   font-size: 0.65rem;
-  color: var(--text-secondary, #9ca3af);
+  color: rgba(156, 163, 175, 0.85);
+  border: 1px dashed rgba(75, 85, 99, 0.4);
+  border-radius: 4px;
+  padding: 2px 4px;
 }
 
 .bracket-ghost-team img {
@@ -235,6 +243,7 @@
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  filter: grayscale(100%) opacity(0.35);
 }
 
 .bracket-ghost-freq {
@@ -247,6 +256,21 @@
   font-size: 0.55rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-tertiary, #6b7280);
+  color: #6b7280;
   margin: 2px 8px 0;
+}
+
+.qual-team-badge--leading {
+  background: #6366f1;
+  color: #fff;
+}
+
+.qual-team-badge--on-track {
+  background: #d97706;
+  color: #fff;
+}
+
+.qual-team-badge--locked {
+  background: #10b981;
+  color: #fff;
 }

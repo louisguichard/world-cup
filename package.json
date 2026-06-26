@@ -9,7 +9,11 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:apis": "node scripts/test-all-apis.mjs",
-    "generate:thirds": "node scripts/build-third-place-map.mjs"
+    "generate:thirds": "node scripts/build-third-place-map.mjs",
+    "dev:portal": "cd tools/api-portal && npm run dev",
+    "sync-keys": "cd tools/api-portal && npm run sync-keys",
+    "sync-keys:wc": "cd tools/api-portal && npm run sync-keys -- \"World Cup Tracker\"",
+    "seed-vault": "cd tools/api-portal && npm run seed"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

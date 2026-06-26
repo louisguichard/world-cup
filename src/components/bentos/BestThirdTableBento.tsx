@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { rankBestThirds } from "../../lib/bestThirds";
 import type { GroupStanding, MergedMatch, TeamRecord } from "../../types";
 import { useStore } from "../../store";
+import { CertaintyBadge } from "../shared/CertaintyBadge";
 
 export interface BestThirdTableBentoProps {
   standings: GroupStanding[];
@@ -123,7 +124,12 @@ export function BestThirdTableBento({ standings }: BestThirdTableBentoProps) {
               const h2h = h2hByTeam.get(row.teamId) ?? "N/A";
               return (
                 <tr key={row.teamId} className={rowClass(index)}>
-                  <td>{index + 1}</td>
+                  <td>
+                    <div className="group-table-rank">
+                      <span>{index + 1}</span>
+                      {index < 8 ? <CertaintyBadge certainty="projected" size="xs" /> : null}
+                    </div>
+                  </td>
                   <td className="group-table-team">
                     {team?.logo ? <img src={team.logo} alt="" width={20} height={20} /> : null}
                     <span>{team?.shortName ?? row.teamId}</span>

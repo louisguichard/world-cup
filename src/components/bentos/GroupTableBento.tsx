@@ -1,5 +1,8 @@
+import { useMemo } from "react";
 import type { GroupStanding } from "../../types";
+import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { useStore } from "../../store";
+import { CertaintyBadge } from "../shared/CertaintyBadge";
 import { StandingThemeRow } from "../team/StandingThemeRow";
 
 export interface GroupTableBentoProps {
@@ -14,6 +17,12 @@ function rowClass(index: number): string {
 
 export function GroupTableBento({ standing }: GroupTableBentoProps) {
   const teams = useStore((s) => s.teams);
+  const standings = useStore((s) => s.groupStandings);
+  const liveMatches = useStore((s) => s.liveMatches);
+  const qualContext = useMemo(
+    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
+    [liveMatches, teams]
+  );
 
   return (
     <article className="group-table-bento">
@@ -39,13 +48,25 @@ export function GroupTableBento({ standing }: GroupTableBentoProps) {
           <tbody>
             {standing.rows.map((row, index) => {
               const team = teams[row.teamId];
+              const qual = computeQualificationStatus(row.teamId, standings, qualContext);
+              const showBadge = index < 2;
               return (
                 <StandingThemeRow
                   key={row.teamId}
                   teamId={row.teamId}
                   className={rowClass(index)}
                 >
-                  <td>{index + 1}</td>
+                  <td>
+                    <div className="group-table-rank">
+                      <span>{index + 1}</span>
+                      {showBadge ? (
+                        <CertaintyBadge
+                          certainty={qual.certainty === "confirmed" ? "confirmed" : "projected"}
+                          size="xs"
+                        />
+                      ) : null}
+                    </div>
+                  </td>
                   <td className="group-table-team">
                     {team?.logo ? <img src={team.logo} alt="" width={20} height={20} /> : null}
                     <span>{team?.shortName ?? row.teamId}</span>

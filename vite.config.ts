@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { resolve } from "path";
 import type { Server } from "http-proxy";
 
 const SOFA_BROWSER_HEADERS: Record<string, string> = {
@@ -89,17 +88,6 @@ const proxy = {
 
 export default defineConfig({
   plugins: [react],
-  optimizeDeps: {
-    include: ["@vercel/speed-insights/react", "@vercel/analytics/react"],
-    force: true,
-  },
-  resolve: {
-    alias: {
-      "@vercel/speed-insights/react":
-        "@vercel/speed-insights/dist/react/index.mjs",
-      "@vercel/analytics/react": "@vercel/analytics/dist/react/index.mjs",
-    },
-  },
   server: {
     host: "127.0.0.1",
     port: 5173,

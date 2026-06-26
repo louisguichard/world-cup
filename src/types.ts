@@ -196,11 +196,12 @@ export type MatchDetailTab = "summary" | "statistics" | "lineups" | "commentary"
 export type TournamentSubTab = "matches" | "standings" | "bracket" | "stats";
 
 export type NavigationContext = {
-  from: "tournament" | "live" | "schedule" | "results" | "bracket" | "groups";
+  from: "tournament" | "live" | "schedule" | "results" | "bracket" | "groups" | "venue";
   tournamentSubTab?: TournamentSubTab;
   scrollY?: number;
   dateKey?: string;
   bracketRound?: string;
+  venueSlug?: string;
 };
 
 // --- Player types (minimal v1) ---
@@ -327,7 +328,11 @@ export type QualificationTier =
   | "eliminated"
   | "pending";
 
-export type QualificationCertainty = "confirmed" | "projected";
+export type QualificationCertainty =
+  | "confirmed"
+  | "projected_strong"
+  | "projected_weak"
+  | "projected";
 
 export type QualificationStatus = {
   status: QualificationTier;
@@ -415,6 +420,9 @@ export type MatchScheduleEntry = {
     name: string;
     city: string;
     country: string;
+    state?: string | null;
+    fifaOfficialName?: string;
+    capacity?: number;
     ianaTimezone?: string;
   };
   broadcast: {
