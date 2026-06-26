@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpen,
+  CalendarDays,
   ChevronDown,
   Database,
   Dices,
@@ -20,6 +21,7 @@ import type {
   DataLoadResult,
   GroupLetter,
   GroupStanding,
+  Match,
   MatchWithScore,
   OpponentProbability,
   ScoreOverride,
@@ -49,6 +51,27 @@ type SimulationWorkerResponse = {
   requestId: number;
   result?: TournamentSimulationResult;
   error?: string;
+};
+
+type AppTab = "tournament" | "probabilistic" | "upcoming";
+
+type ScheduleEntry = {
+  id: string;
+  date: string;
+  stageLabel: string;
+  venue?: string;
+  homeTeamId?: string;
+  awayTeamId?: string;
+  homeSeedLabel?: string;
+  awaySeedLabel?: string;
+  status?: Match["status"];
+  homeScore?: number;
+  awayScore?: number;
+  prediction?: Match["prediction"];
+  homeWinProbability?: number;
+  marketSlug?: string;
+  kind: "group" | "knockout";
+  group?: GroupLetter;
 };
 
 const stageLabels: Record<Stage, string> = {
@@ -160,6 +183,67 @@ function formatKickoff(value: string): string {
   return `${date} · ${time}`;
 }
 
+function formatScheduleDay(value: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
+  }).format(new Date(value));
+}
+
+function scheduleDateKey(value: string): string {
+  const date = new Date(value);
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
+function buildUpcomingSchedule(
+  matches: Match[],
+  scoredMatches: MatchWithScore[],
+  bracket: BracketMatch[]
+): ScheduleEntry[] {
+  const scoredById = Object.fromEntries(scoredMatches.map((match) => [match.id, match]));
+  const entries: ScheduleEntry[] = [];
+
+  for (const match of matches) {
+    if (match.status === "completed") continue;
+    const scored = scoredById[match.id];
+    entries.push({
+      id: match.id,
+      date: match.date,
+      stageLabel: `Group ${match.group}`,
+      venue: match.venue,
+      group: match.group,
+      homeTeamId: match.homeTeamId,
+      awayTeamId: match.awayTeamId,
+      status: match.status,
+      homeScore: scored?.homeScore,
+      awayScore: scored?.awayScore,
+      prediction: match.prediction,
+      kind: "group"
+    });
+  }
+
+  for (const match of bracket) {
+    const info = knockoutSchedule[match.id];
+    if (!info) continue;
+    entries.push({
+      id: match.id,
+      date: info.date,
+      stageLabel: stageLabels[match.stage],
+      venue: formatVenueTitle(info),
+      homeTeamId: match.homeTeamId,
+      awayTeamId: match.awayTeamId,
+      homeSeedLabel: match.homeSeedLabel,
+      awaySeedLabel: match.awaySeedLabel,
+      homeWinProbability: match.homeWinProbability,
+      marketSlug: match.marketSlug,
+      kind: "knockout"
+    });
+  }
+
+  return entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+}
+
 function formatVenueTitle(info: KnockoutInfo): string {
   const location =
     info.venueCity === info.hostCity ? info.hostCity : `${info.venueCity} (${info.hostCity})`;
@@ -208,8 +292,10 @@ function App() {
   const [data, setData] = useState<DataLoadResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<"tournament" | "probabilistic">("tournament");
+  const [tab, setTab] = useState<AppTab>("tournament");
   const [view, setView] = useState<"app" | "method">("app");
+  const [tournamentOpenGroup, setTournamentOpenGroup] = useState<GroupLetter | null>(null);
+  const [groupFocusRequest, setGroupFocusRequest] = useState(0);
   const [overrides, setOverrides] = useState<Record<string, ScoreOverride>>(() => loadOverrides());
   const [bracketPicks, setBracketPicks] = useState<Record<string, string>>(() => loadPicks());
   const [selectedTeamId, setSelectedTeamId] = useState("");
@@ -360,6 +446,10 @@ function App() {
     };
   }, [data, overrides, bracketPicks]);
   const championId = projection?.bracket.find((match) => match.id === "M104")?.winnerTeamId;
+  const upcomingSchedule = useMemo(
+    () => (data && projection ? buildUpcomingSchedule(data.matches, projection.scoredMatches, projection.bracket) : []),
+    [data, projection]
+  );
 
   const updateScore = (match: MatchWithScore, side: "home" | "away", value: number) => {
     if (match.status === "completed" || match.locked) return;
@@ -398,6 +488,13 @@ function App() {
   const resetAll = () => {
     setOverrides({});
     setBracketPicks({});
+  };
+
+  const navigateToGroup = (group: GroupLetter) => {
+    setView("app");
+    setTab("tournament");
+    setTournamentOpenGroup(group);
+    setGroupFocusRequest((count) => count + 1);
   };
 
   if (loading && !data) {
@@ -464,6 +561,16 @@ function App() {
             >
               <BarChart3 size={16} />
               <span>Probabilities</span>
+            </button>
+            <button
+              className={view === "app" && tab === "upcoming" ? "active" : ""}
+              onClick={() => {
+                setView("app");
+                setTab("upcoming");
+              }}
+            >
+              <CalendarDays size={16} />
+              <span>Upcoming</span>
             </button>
           </div>
           <button
@@ -535,6 +642,9 @@ function App() {
               bracket={projection.bracket}
               bracketPicks={bracketPicks}
               overrides={overrides}
+              openGroup={tournamentOpenGroup}
+              onOpenGroupChange={setTournamentOpenGroup}
+              groupFocusRequest={groupFocusRequest}
               onScoreChange={updateScore}
               onClearGroup={clearGroupOverrides}
               onResetMatch={clearOverride}
@@ -560,6 +670,10 @@ function App() {
               simulation={simulation}
               championOdds={championOdds}
             />
+          ) : null}
+
+          {tab === "upcoming" && data && projection ? (
+            <UpcomingView entries={upcomingSchedule} teamsById={teamsById} onNavigateToGroup={navigateToGroup} />
           ) : null}
         </>
       )}
@@ -596,6 +710,9 @@ function TournamentView({
   bracket,
   bracketPicks,
   overrides,
+  openGroup,
+  onOpenGroupChange,
+  groupFocusRequest,
   onScoreChange,
   onClearGroup,
   onResetMatch,
@@ -610,14 +727,17 @@ function TournamentView({
   bracket: BracketMatch[];
   bracketPicks: Record<string, string>;
   overrides: Record<string, ScoreOverride>;
+  openGroup: GroupLetter | null;
+  onOpenGroupChange: (group: GroupLetter | null) => void;
+  groupFocusRequest: number;
   onScoreChange: (match: MatchWithScore, side: "home" | "away", value: number) => void;
   onClearGroup: (matchIds: string[]) => void;
   onResetMatch: (matchId: string) => void;
   onPickWinner: (matchId: string, teamId?: string, predictedWinnerId?: string) => void;
   onResetBracket: () => void;
 }) {
-  const [openGroup, setOpenGroup] = useState<GroupLetter | null>(null);
   const detailRef = useRef<HTMLDivElement | null>(null);
+  const groupPanelRefs = useRef<Partial<Record<GroupLetter, HTMLElement | null>>>({});
 
   const matchesByGroup = useMemo(() => {
     const map = new Map<GroupLetter, MatchWithScore[]>();
@@ -629,11 +749,15 @@ function TournamentView({
   const columns = useColumnCount();
 
   useEffect(() => {
-    if (openGroup) detailRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, [openGroup]);
+    if (!openGroup) return;
+    groupPanelRefs.current[openGroup]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    window.requestAnimationFrame(() => {
+      detailRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }, [openGroup, groupFocusRequest]);
 
   const toggleGroup = (group: GroupLetter) => {
-    setOpenGroup((current) => (current === group ? null : group));
+    onOpenGroupChange(openGroup === group ? null : group);
   };
 
   const openIndex = openGroup ? groups.findIndex((standing) => standing.group === openGroup) : -1;
@@ -658,6 +782,9 @@ function TournamentView({
               teamsById={teamsById}
               qualifiedThirdGroups={qualifiedThirdGroups}
               active={openGroup === standing.group}
+              panelRef={(node) => {
+                groupPanelRefs.current[standing.group] = node;
+              }}
               onToggle={() => toggleGroup(standing.group)}
             />
             {openGroup && index === insertionIndex ? (
@@ -673,7 +800,7 @@ function TournamentView({
                         Reset group
                       </button>
                     ) : null}
-                    <button className="icon-button sm" onClick={() => setOpenGroup(null)} aria-label="Close">
+                    <button className="icon-button sm" onClick={() => onOpenGroupChange(null)} aria-label="Close">
                       <X size={16} />
                     </button>
                   </div>
@@ -736,12 +863,14 @@ function GroupPanel({
   teamsById,
   qualifiedThirdGroups,
   active,
+  panelRef,
   onToggle
 }: {
   standing: GroupStanding;
   teamsById: Record<string, Team>;
   qualifiedThirdGroups: GroupLetter[];
   active: boolean;
+  panelRef?: (node: HTMLElement | null) => void;
   onToggle: () => void;
 }) {
   const projectedQualifiers = standing.rows
@@ -749,7 +878,7 @@ function GroupPanel({
     .filter((record, index) => index < 2 || qualifiedThirdGroups.includes(record.group));
 
   return (
-    <article className={`group-panel ${active ? "active" : ""}`}>
+    <article className={`group-panel ${active ? "active" : ""}`} ref={panelRef} id={`group-panel-${standing.group}`}>
       <button className="group-header" onClick={onToggle}>
         <div>
           <h2>Group {standing.group}</h2>
@@ -1229,6 +1358,164 @@ function ProbabilityView({
   );
 }
 
+function UpcomingView({
+  entries,
+  teamsById,
+  onNavigateToGroup
+}: {
+  entries: ScheduleEntry[];
+  teamsById: Record<string, Team>;
+  onNavigateToGroup: (group: GroupLetter) => void;
+}) {
+  const groupedDays = useMemo(() => {
+    const groups: Array<{ key: string; label: string; entries: ScheduleEntry[] }> = [];
+    for (const entry of entries) {
+      const key = scheduleDateKey(entry.date);
+      const last = groups[groups.length - 1];
+      if (last?.key === key) {
+        last.entries.push(entry);
+      } else {
+        groups.push({ key, label: formatScheduleDay(entry.date), entries: [entry] });
+      }
+    }
+    return groups;
+  }, [entries]);
+
+  const groupCount = entries.filter((entry) => entry.kind === "group").length;
+  const knockoutCount = entries.filter((entry) => entry.kind === "knockout").length;
+
+  return (
+    <section className="schedule-layout">
+      <div className="section-heading">
+        <div>
+          <span className="section-kicker">Fixtures</span>
+          <h2>Upcoming matches</h2>
+        </div>
+        <span className="quiet-note">
+          {groupCount} group · {knockoutCount} knockout
+        </span>
+      </div>
+      <p className="view-note schedule-note">
+        Scheduled fixtures show a projected scoreline from Polymarket or the strength model. Live matches show the current score.
+      </p>
+
+      {entries.length ? (
+        <div className="schedule-days">
+          {groupedDays.map((day) => (
+            <article className="schedule-day" key={day.key}>
+              <h3>{day.label}</h3>
+              <div className="schedule-list">
+                {day.entries.map((entry) => (
+                  <ScheduleRow key={entry.id} entry={entry} teamsById={teamsById} onNavigateToGroup={onNavigateToGroup} />
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="view-note">No upcoming fixtures are scheduled right now.</p>
+      )}
+    </section>
+  );
+}
+
+function ScheduleTeamLabel({
+  team,
+  label,
+  prob,
+  align = "left"
+}: {
+  team?: Team;
+  label: string;
+  prob?: number;
+  align?: "left" | "right";
+}) {
+  return (
+    <span className={`team-label ${align}`}>
+      {team ? <img src={team.logo} alt="" /> : <span className="schedule-dot" />}
+      <span>{label}</span>
+      {typeof prob === "number" ? <b>{formatPercent(prob, 0)}</b> : null}
+    </span>
+  );
+}
+
+function ScheduleRow({
+  entry,
+  teamsById,
+  onNavigateToGroup
+}: {
+  entry: ScheduleEntry;
+  teamsById: Record<string, Team>;
+  onNavigateToGroup: (group: GroupLetter) => void;
+}) {
+  const home = entry.homeTeamId ? teamsById[entry.homeTeamId] : undefined;
+  const away = entry.awayTeamId ? teamsById[entry.awayTeamId] : undefined;
+  const homeLabel = home?.shortName ?? entry.homeSeedLabel ?? "TBD";
+  const awayLabel = away?.shortName ?? entry.awaySeedLabel ?? "TBD";
+  const marketSlug =
+    entry.kind === "group" && entry.prediction?.method === "polymarket"
+      ? entry.prediction.marketSlug
+      : entry.marketSlug;
+  const marketUrl = polymarketEventUrl(marketSlug);
+  const kickoffTime = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" }).format(new Date(entry.date));
+  const showScore = entry.kind === "group" && typeof entry.homeScore === "number" && typeof entry.awayScore === "number";
+  const projectedScore = showScore && entry.status !== "live";
+  const homeProb = entry.homeWinProbability ?? entry.prediction?.homeWin;
+  const awayProb =
+    typeof entry.homeWinProbability === "number" ? 1 - entry.homeWinProbability : entry.prediction?.awayWin;
+
+  return (
+    <div className={`match-row schedule-row ${entry.status === "live" ? "live" : ""}`}>
+      <div className="match-meta">
+        <span className="schedule-kickoff">
+          {kickoffTime}
+          {entry.status === "live" ? <em className="schedule-live">Live</em> : null}
+        </span>
+        <div className="schedule-meta">
+          {entry.kind === "group" && entry.group ? (
+            <button
+              type="button"
+              className="schedule-stage link"
+              onClick={() => onNavigateToGroup(entry.group!)}
+            >
+              Group {entry.group}
+            </button>
+          ) : (
+            <span className="schedule-stage">{entry.stageLabel}</span>
+          )}
+          {entry.kind === "knockout" ? (
+            <span className="schedule-projected-teams">Projected teams</span>
+          ) : null}
+          {projectedScore ? <span className="schedule-proj-label">Proj. score</span> : null}
+          {entry.venue ? <span className="schedule-venue">{entry.venue}</span> : null}
+          {marketUrl ? (
+            <a className="schedule-market" href={marketUrl} target="_blank" rel="noreferrer">
+              Polymarket
+            </a>
+          ) : null}
+        </div>
+      </div>
+      <div className={`score-line ${projectedScore ? "projected" : ""}`}>
+        <ScheduleTeamLabel team={home} label={homeLabel} prob={homeProb} />
+        {showScore ? (
+          <>
+            <span className="score-display">{entry.homeScore}</span>
+            <span className="score-separator">–</span>
+            <span className="score-display">{entry.awayScore}</span>
+          </>
+        ) : (
+          <>
+            <span className="score-display score-tbd">–</span>
+            <span className="score-separator">vs</span>
+            <span className="score-display score-tbd">–</span>
+          </>
+        )}
+        <ScheduleTeamLabel team={away} label={awayLabel} prob={awayProb} align="right" />
+      </div>
+    </div>
+  );
+}
+
 const methodSections = [
   {
     id: "overview",
@@ -1236,7 +1523,7 @@ const methodSections = [
     title: "Overview",
     body: [
       "The simulator blends five ingredients: real results from ESPN, FIFA points, a small host advantage, per-match Polymarket markets, a Polymarket title-odds force calibration, and a tournament engine that follows the FIFA 2026 regulations.",
-      "Two views sit on top of this engine. The Tournament view is a single editable scenario — you can change any score or knockout winner and watch the whole bracket recompute. The Probabilities view runs the same engine thousands of times to estimate how far a team is likely to go."
+      "Three views sit on top of this engine. The Tournament view is a single editable scenario — you can change any score or knockout winner and watch the whole bracket recompute. The Probabilities view runs the same engine thousands of times to estimate how far a team is likely to go. The Upcoming view lists remaining group fixtures and the projected knockout schedule, with model scorelines labelled as projections."
     ]
   },
   {
