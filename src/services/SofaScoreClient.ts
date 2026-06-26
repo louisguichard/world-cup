@@ -4,9 +4,9 @@ const BASE = typeof window !== "undefined" ? "/api/sofascore" : "https://api.sof
 const API_V1 = "/api/v1";
 
 /**
- * Browser-like headers for SSR / consistency.
- * NOTE: browsers silently ignore User-Agent overrides on fetch().
- * These matter when called server-side (e.g. SSR or the Edge proxy itself).
+ * Browser-like headers so SofaScore's edge doesn't block us with 403.
+ * NOTE: browsers silently ignore User-Agent overrides, but the Vercel proxy
+ * (api/sofascore.ts) forwards these headers server-side where they DO apply.
  */
 const SOFA_HEADERS: HeadersInit = {
   "User-Agent":
