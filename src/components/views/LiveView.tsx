@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { BentoErrorBoundary } from "../shared/ErrorBoundary";
 import { LiveMatchBento } from "../bentos/LiveMatchBento";
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
-import { QualifiedBento, EliminatedBento } from "../bentos/QualifiedBento";
+import { QualifiedBento, EliminatedBento, InContentionBento } from "../bentos/QualifiedBento";
 import { useStore } from "../../store";
 import type { MergedMatch } from "../../types";
 
@@ -109,11 +109,18 @@ export function LiveView() {
           <div>
             <div className="section-kicker">Qualification</div>
             <h2 className="section-title-text">Who&apos;s through</h2>
+            <p className="section-note">
+              <strong>Confirmed</strong> = mathematically locked. <strong>Projected</strong> = based on current
+              standings only.
+            </p>
           </div>
         </div>
         <div className="live-qual-row">
           <BentoErrorBoundary bento="QualifiedBento">
             <QualifiedBento />
+          </BentoErrorBoundary>
+          <BentoErrorBoundary bento="InContentionBento">
+            <InContentionBento />
           </BentoErrorBoundary>
           <BentoErrorBoundary bento="EliminatedBento">
             <EliminatedBento />

@@ -5,7 +5,7 @@ import type { QualificationStatus, QualificationTier } from "../../types";
 
 export function useTeamQualificationStatus(teamId: string): QualificationStatus {
   const standings = useStore((s) => s.groupStandings);
-  return useMemo(() => computeQualificationStatus(teamId, standings, 3), [teamId, standings]);
+  return useMemo(() => computeQualificationStatus(teamId, standings), [teamId, standings]);
 }
 
 export function useTeamQualificationTier(teamId: string): QualificationTier {

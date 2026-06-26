@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import { matchCompositeKey } from "../lib/normalize";
 import {
   buildScheduleLinkIndex,
+  formatKickoffLabel,
   formatKickoffLocal,
-  linkMatchToSchedule
+  linkMatchToSchedule,
+  resolveKickoffByMatchId
 } from "./ScheduleLinker";
-import type { MatchScheduleEntry, Team } from "../types";
+import type { MatchScheduleEntry, MergedMatch, Team } from "../types";
 
 const sampleEntries: MatchScheduleEntry[] = [
   {
@@ -104,5 +106,26 @@ describe("ScheduleLinker", () => {
   it("formats kickoff in local timezone", () => {
     const formatted = formatKickoffLocal("2026-06-11T19:00:00Z");
     expect(formatted.length).toBeGreaterThan(5);
+  });
+
+  it("prefixes kickoff label for display", () => {
+    expect(formatKickoffLabel("2026-06-11T19:00:00Z")).toMatch(/^Kick off · /);
+  });
+
+  it("prefers live feed kickoff over static schedule", () => {
+    const feed: MergedMatch = {
+      id: "espn-1",
+      matchId: "M4",
+      date: "2026-06-13T01:00:00.000Z",
+      homeTeamId: "usa",
+      awayTeamId: "par",
+      status: "scheduled",
+      homeConduct: 0,
+      awayConduct: 0,
+      locked: false,
+      source: "espn"
+    };
+    const resolved = resolveKickoffByMatchId("M4", "2026-06-29T00:00:00.000Z", [feed]);
+    expect(resolved).toBe(feed.date);
   });
 });

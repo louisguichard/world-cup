@@ -173,6 +173,7 @@ export type TournamentSimulationResult = {
 // --- Extended types (Road to WC Final) ---
 
 export type TabId = "live" | "bracket" | "groups" | "simulator" | "teams";
+export type SimulatorMode = "tournament" | "probabilities" | "methodology";
 export type SplashPhase = "loading" | "slow" | "error" | "done";
 export type BracketViewMode = "projected" | "confirmed";
 
@@ -196,10 +197,16 @@ export type QualificationTier =
   | "eliminated"
   | "pending";
 
+export type QualificationCertainty = "confirmed" | "projected";
+
 export type QualificationStatus = {
   status: QualificationTier;
+  /** Whether the outcome is mathematically locked or based on the current table. */
+  certainty: QualificationCertainty;
   eliminationProbability?: number;
   pointsNeeded?: number;
+  /** Short explanation for UI tooltips and section copy. */
+  reason?: string;
 };
 
 export type MatchEventType =

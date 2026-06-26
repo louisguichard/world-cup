@@ -39,12 +39,16 @@ export function AppShell() {
 
   return (
     <div className="wc-chrome">
-      <TopNavBar />
+      <TopNavBar hidden={activeTab === "simulator"} />
       <main ref={mainRef} className="wc-main">
         {activeTab === "live" ? <LiveView /> : null}
         {activeTab === "bracket" ? <BracketView /> : null}
         {activeTab === "groups" ? <GroupsView /> : null}
-        {activeTab === "simulator" ? <SimulatorView /> : null}
+        {activeTab === "simulator" ? (
+          <div className="wc-main-simulator">
+            <SimulatorView />
+          </div>
+        ) : null}
         {activeTab === "teams" ? <TeamsView /> : null}
       </main>
       <BottomTabBar />

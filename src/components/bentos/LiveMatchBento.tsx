@@ -1,8 +1,6 @@
 import type { MergedMatch } from "../../types";
 import { useStore } from "../../store";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
-import { detectKickoffConflict } from "../../lib/scheduleConflict";
-import { ScheduleConflictBadge } from "../shared/ScheduleConflictBadge";
 import { useLiveClock } from "../../hooks/useLiveClock";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
@@ -20,7 +18,6 @@ export function LiveMatchBento({ match, variant }: Props) {
   const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId);
   const broadcast =
     (match.matchId ? getBroadcast(match.matchId) : undefined) ?? getBroadcastByKickoff(match.date);
-  const kickoffConflict = detectKickoffConflict(match);
 
   const clock = useLiveClock(
     match.period ?? (match.status === "live" ? "second_half" : "not_started"),
@@ -58,8 +55,6 @@ export function LiveMatchBento({ match, variant }: Props) {
           <TeamLabelById teamId={match.awayTeamId} align="right" />
         )}
       </div>
-
-      {kickoffConflict ? <ScheduleConflictBadge conflict={kickoffConflict} /> : null}
 
       {broadcast ? (
         <div className="broadcast-bar broadcast-bar--hero">

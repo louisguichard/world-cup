@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { MatchPeriod } from "../types";
 
 export type ClockDisplay = {
@@ -48,22 +48,9 @@ export function useLiveClock(
   running = false
 ): ClockDisplay {
   const [display, setDisplay] = useState(() => computeDisplay(period, minute, extra));
-  const rafRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     setDisplay(computeDisplay(period, minute, extra));
-
-    if (!running) return;
-
-    const tick = () => {
-      setDisplay(computeDisplay(period, minute, extra));
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
   }, [period, minute, extra, running]);
 
   useEffect(() => {

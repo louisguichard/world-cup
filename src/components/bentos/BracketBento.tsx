@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { knockoutSchedule } from "../../data/knockoutSchedule";
 import { projectTournament } from "../../lib/tournament";
-import { formatKickoffLocal } from "../../services/ScheduleLinker";
+import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
 import type { BracketMatch, Stage, Team } from "../../types";
 import { useStore } from "../../store";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
@@ -42,11 +42,15 @@ function BracketCardReadonly({ match, teamsById }: { match: BracketMatch; teamsB
   const home = match.homeTeamId ? teamsById[match.homeTeamId] : undefined;
   const away = match.awayTeamId ? teamsById[match.awayTeamId] : undefined;
   const info = knockoutSchedule[match.id];
+  const liveMatches = useStore((s) => s.liveMatches);
+  const kickoffUtc = info
+    ? resolveKickoffByMatchId(match.id, info.date, Object.values(liveMatches))
+    : undefined;
 
   return (
     <article className="bracket-card">
       <div className="bracket-card-head">
-        <span className="match-date">{info ? formatKickoffLocal(info.date) : match.label}</span>
+        <span className="match-date">{kickoffUtc ? formatKickoffLabel(kickoffUtc) : match.label}</span>
         <span className="match-city">{info?.hostCity ?? match.id}</span>
       </div>
       <BracketTeamReadonly

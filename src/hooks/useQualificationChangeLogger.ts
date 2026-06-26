@@ -8,15 +8,16 @@ export function useQualificationChangeLogger(): void {
   const previousStatuses = useRef<Record<string, QualificationStatus>>({});
   const teams = useStore((s) => s.teams);
   const groupStandings = useStore((s) => s.groupStandings);
-  const liveMatches = useStore((s) => s.liveMatches);
 
   useEffect(() => {
     for (const teamId of Object.keys(teams)) {
-      const current = computeQualificationStatus(teamId, groupStandings, 3);
+      const current = computeQualificationStatus(teamId, groupStandings);
       const previous = previousStatuses.current[teamId];
 
       if (previous && previous.status !== current.status) {
-        const liveGroup = Object.values(liveMatches).filter((m) => m.status === "live" && m.group).length;
+        const liveGroup = Object.values(useStore.getState().liveMatches).filter(
+          (m) => m.status === "live" && m.group
+        ).length;
         logger.info("Qualification status changed", "QualificationChangeLogger", {
           teamId,
           teamName: teams[teamId]?.shortName ?? teamId,
@@ -35,5 +36,5 @@ export function useQualificationChangeLogger(): void {
 
       previousStatuses.current[teamId] = current;
     }
-  }, [liveMatches, teams, groupStandings]);
+  }, [teams, groupStandings]);
 }

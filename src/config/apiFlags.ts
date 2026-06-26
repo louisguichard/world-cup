@@ -73,8 +73,8 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     label: "SofaScore Live",
     lastAudit: "fail",
     lastLatencyMs: 213,
-    failureReason: "HTTP 403 without Edge proxy headers (fixed via api/sofascore/[...path].ts)",
-    disableReason: undefined
+    failureReason: "HTTP 403 from local/dev IPs (works via Vercel Edge in production)",
+    disableReason: "Skipped in Vite dev — polling uses ESPN instead"
   },
   clubElo: {
     enabled: true,
@@ -94,7 +94,10 @@ export const BOOTSTRAP_FLAGS = {
 } as const;
 
 export function isApiEnabled(id: ApiSourceId): boolean {
-  return API_SOURCES[id].enabled;
+  if (!API_SOURCES[id].enabled) return false;
+  // SofaScore blocks non-edge IPs; dev polling uses ESPN to avoid 403 noise.
+  if (id === "sofascore" && import.meta.env.DEV) return false;
+  return true;
 }
 
 export function listDisabledApis(): ApiSourceConfig[] {

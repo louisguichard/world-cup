@@ -2013,12 +2013,20 @@ h2 {
   .segmented button {
     flex: 1;
     min-width: 0;
-    padding: 0 10px;
+    padding: 0 8px;
+    gap: 4px;
   }
 
   .segmented button span,
   .method-link span {
-    display: none;
+    display: inline;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .method-link {
+    padding: 0 10px;
   }
 
   .hero-panel {

@@ -1,6 +1,6 @@
 import { useStore } from "../../store";
 
-export function TopNavBar() {
+export function TopNavBar({ hidden = false }: { hidden?: boolean }) {
   const lastPollAt = useStore((s) => s.lastPollAt);
   const liveCount = useStore((s) => {
     let count = 0;
@@ -9,6 +9,8 @@ export function TopNavBar() {
     }
     return count;
   });
+
+  if (hidden) return null;
 
   return (
     <header className="wc-topbar">

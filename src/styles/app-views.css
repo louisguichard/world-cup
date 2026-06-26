@@ -181,7 +181,8 @@
 /* Schedule cards */
 .schedule-list {
   display: grid;
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
 }
 
 .schedule-list--compact .schedule-card {
@@ -304,6 +305,62 @@
   line-height: 1.4;
 }
 
+.results-heading {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.results-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.results-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.results-control-label {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.results-control select {
+  min-width: 160px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--inset);
+  font-size: 12px;
+}
+
+.results-sort-btn {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.025);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.results-sort-btn:hover {
+  color: var(--text);
+  border-color: var(--line-2);
+}
+
 /* Standings row states */
 .standing-table tr.at-risk td:first-child {
   box-shadow: inset 3px 0 0 var(--warn);
@@ -333,13 +390,157 @@
 }
 
 .qual-bento-title {
-  margin: 0 0 10px;
+  margin: 0 0 6px;
   color: var(--faint);
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.qual-bento-lead {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.qual-bento-empty {
+  margin: 0;
+  color: var(--faint);
+  font-size: 12px;
+}
+
+.qual-bento-section + .qual-bento-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.qual-bento-subtitle {
+  margin: 0;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.qual-bento-hint {
+  margin: 4px 0 0;
+  color: var(--faint);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.qual-bento-section-head {
+  margin-bottom: 10px;
+}
+
+.qual-team-chip {
+  position: relative;
+}
+
+.qual-team-badge {
+  position: absolute;
+  top: -4px;
+  right: -2px;
+  z-index: 2;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.qual-team-badge--Locked {
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.qual-team-badge--Leading {
+  color: var(--sky);
+  background: rgba(111, 183, 255, 0.18);
+  border: 1px solid rgba(111, 183, 255, 0.35);
+}
+
+.qual-team-badge--Out {
+  color: #fff;
+  background: var(--coral);
+}
+
+.qual-team-badge--Unlikely {
+  color: var(--warn);
+  background: rgba(255, 210, 125, 0.15);
+  border: 1px solid rgba(255, 210, 125, 0.35);
+}
+
+.qual-team-badge--Live,
+.qual-team-badge--3rd {
+  color: var(--muted);
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+}
+
+.qual-bento--contention {
+  border-color: rgba(255, 210, 125, 0.25);
+}
+
+.section-note {
+  margin: 6px 0 0;
+  color: var(--faint);
+  font-size: 11px;
+  line-height: 1.45;
+  max-width: 42ch;
+}
+
+.section-note strong {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.qual-bento-crests {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 10px 8px;
+}
+
+.qual-team-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
+}
+
+.qual-team-chip--dim .qual-team-name {
+  opacity: 0.55;
+}
+
+.qual-team-name {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qual-team-fallback {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: var(--inset);
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .qual-bento-crests img {

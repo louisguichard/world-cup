@@ -6,10 +6,12 @@ import type { Match, PolymarketMatchMarket, Team, TournamentSimulationResult } f
 const DEBOUNCE_MS = 2_000;
 const WORKER_ITERATIONS = 10_000;
 const BOOTSTRAP_ITERATIONS = 1_500;
+const DEV_BOOTSTRAP_ITERATIONS = 50;
 const MAX_MAIN_THREAD = 4_200;
+const DEV_MAIN_THREAD_ITERATIONS = 50;
 const WORKER_TIMEOUT_MS = 45_000;
 
-export { BOOTSTRAP_ITERATIONS };
+export { BOOTSTRAP_ITERATIONS, DEV_BOOTSTRAP_ITERATIONS };
 
 export type RunCalibrationOptions = {
   iterations?: number;
@@ -62,11 +64,15 @@ function runSimulationInWorker(
 }
 
 export function scheduleSimulation(): void {
+  if (import.meta.env.DEV) return;
+  if (useStore.getState().simulationRunning) return;
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => void runCalibration(), DEBOUNCE_MS);
 }
 
 export async function runCalibration(options: RunCalibrationOptions = {}): Promise<void> {
+  if (useStore.getState().simulationRunning) return;
+
   const store = useStore.getState();
   store.setSimulationRunning(true);
 
@@ -85,8 +91,12 @@ export async function runCalibration(options: RunCalibrationOptions = {}): Promi
     }
 
     const useWorker = typeof Worker !== "undefined" && import.meta.env.PROD;
-    const iterations =
-      options.iterations ?? (useWorker ? WORKER_ITERATIONS : MAX_MAIN_THREAD);
+    const defaultIterations = useWorker
+      ? WORKER_ITERATIONS
+      : import.meta.env.DEV
+        ? DEV_MAIN_THREAD_ITERATIONS
+        : MAX_MAIN_THREAD;
+    const iterations = options.iterations ?? defaultIterations;
 
     const result = useWorker
       ? await runSimulationInWorker(teams, groupMatches, store.knockoutMarkets, iterations, store.simulationSeed)

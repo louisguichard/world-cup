@@ -5,7 +5,7 @@ import { logger } from "../services/Logger";
 import { fetchScoreboard } from "../services/ESPNClient";
 import { applyLiveScore } from "../services/DataMerger";
 import { enrichMatchWithScheduleId } from "../services/ScheduleLinker";
-import { runCalibration, scheduleSimulation, BOOTSTRAP_ITERATIONS } from "../services/SimulationScheduler";
+import { runCalibration, scheduleSimulation, BOOTSTRAP_ITERATIONS, DEV_BOOTSTRAP_ITERATIONS } from "../services/SimulationScheduler";
 import { startAppServices } from "./appLifecycle";
 import { useStore } from "../store";
 import type { MergedMatch } from "../types";
@@ -95,17 +95,27 @@ export async function bootstrap(): Promise<void> {
 
     store.setSplashProgress(65, "Running simulations...");
 
-    if (BOOTSTRAP_FLAGS.bootstrapSimulation) {
+    const runBootstrapSim = async (): Promise<void> => {
+      if (!BOOTSTRAP_FLAGS.bootstrapSimulation) {
+        logger.warn("Bootstrap simulation skipped (apiFlags.bootstrapSimulation=false)", "Bootstrap");
+        return;
+      }
       try {
-        await runCalibration({ iterations: BOOTSTRAP_ITERATIONS });
+        const bootstrapIterations = import.meta.env.DEV ? DEV_BOOTSTRAP_ITERATIONS : BOOTSTRAP_ITERATIONS;
+        await runCalibration({ iterations: bootstrapIterations });
       } catch (simErr) {
         logger.warn("Simulation skipped during bootstrap", "Bootstrap", {
           reason: simErr instanceof Error ? simErr.message : String(simErr)
         });
         store.setSplashProgress(85, "Simulation unavailable — loading app...");
       }
+    };
+
+    if (import.meta.env.DEV) {
+      // Dev sim (~40s on main thread) runs after splash so Chrome stays interactive during load.
+      void runBootstrapSim();
     } else {
-      logger.warn("Bootstrap simulation skipped (apiFlags.bootstrapSimulation=false)", "Bootstrap");
+      await runBootstrapSim();
     }
 
     await sleep(1200);

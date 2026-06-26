@@ -1,7 +1,8 @@
-import type { BracketViewMode, SplashPhase, TabId } from "../../types";
+import type { BracketViewMode, SimulatorMode, SplashPhase, TabId } from "../../types";
 
 export type UiSliceState = {
   activeTab: TabId;
+  simulatorMode: SimulatorMode;
   splashPhase: SplashPhase;
   splashProgress: number;
   splashMessage: string;
@@ -10,6 +11,7 @@ export type UiSliceState = {
   activeTeamId: string | null;
   teamSheetOpen: boolean;
   setActiveTab: (tab: TabId) => void;
+  setSimulatorMode: (mode: SimulatorMode) => void;
   setSplashPhase: (phase: SplashPhase) => void;
   setSplashProgress: (progress: number, message?: string) => void;
   setPrimaryMatch: (matchId: string | null) => void;
@@ -22,6 +24,7 @@ export const createUiSlice = (
   set: (fn: (state: UiSliceState) => Partial<UiSliceState>) => void
 ): UiSliceState => ({
   activeTab: "live",
+  simulatorMode: "tournament",
   splashPhase: "loading",
   splashProgress: 0,
   splashMessage: "Connecting to live data...",
@@ -31,6 +34,7 @@ export const createUiSlice = (
   teamSheetOpen: false,
 
   setActiveTab: (tab) => set(() => ({ activeTab: tab })),
+  setSimulatorMode: (mode) => set(() => ({ simulatorMode: mode })),
   setSplashPhase: (phase) => set(() => ({ splashPhase: phase })),
   setSplashProgress: (progress, message) =>
     set((state) => ({

@@ -1,15 +1,20 @@
 import type { MergedMatch } from "../types";
-import { deriveStandingsIfScored } from "../lib/qualification";
+import { deriveStandingsIfScored, standingsEqual } from "../lib/qualification";
+import { isApiEnabled } from "../config/apiFlags";
 import { useStore } from "../store";
 import { fetchScoreboard } from "./ESPNClient";
 import { applyLiveScore } from "./DataMerger";
 import { enrichMatchWithScheduleId } from "./ScheduleLinker";
-import { fetchScheduledToday } from "./SofaScoreClient";
+import { fetchScheduledToday, isSofaScoreDisabled } from "./SofaScoreClient";
 import { scheduleSimulation } from "./SimulationScheduler";
 import { logger } from "./Logger";
 
 const LIVE_INTERVAL_MS = 15_000;
 const IDLE_INTERVAL_MS = 300_000;
+
+function hasGroupStageLive(matches: Record<string, MergedMatch>): boolean {
+  return Object.values(matches).some((m) => m.status === "live" && Boolean(m.group));
+}
 
 export function selectPrimaryMatch(
   matches: MergedMatch[],
@@ -35,6 +40,7 @@ class PollingEngine {
   private static instance: PollingEngine | null = null;
   private running = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
+  private loggedEspnFallback = false;
 
   static getInstance(): PollingEngine {
     if (!PollingEngine.instance) {
@@ -74,7 +80,7 @@ class PollingEngine {
     if (!this.running) return;
     if (this.timer) clearTimeout(this.timer);
 
-    const isLive = Object.values(useStore.getState().liveMatches).some((m) => m.status === "live");
+    const isLive = hasGroupStageLive(useStore.getState().liveMatches);
     const delay = isLive ? LIVE_INTERVAL_MS : IDLE_INTERVAL_MS;
 
     if (typeof window !== "undefined" && window.__pollingStatus) {
@@ -90,7 +96,7 @@ class PollingEngine {
     if (teamsList.length === 0) return;
 
     const derived = deriveStandingsIfScored(Object.values(merged), teamsList);
-    if (derived) {
+    if (derived && !standingsEqual(derived, store.groupStandings)) {
       store.setGroupStandings(derived);
     }
     scheduleSimulation();
@@ -101,7 +107,8 @@ class PollingEngine {
     let merged: Record<string, MergedMatch> = { ...store.liveMatches };
     const teams = store.teams;
 
-    const sofaEvents = await fetchScheduledToday();
+    const trySofa = isApiEnabled("sofascore") && !isSofaScoreDisabled();
+    const sofaEvents = trySofa ? await fetchScheduledToday() : [];
     if (sofaEvents.length > 0) {
       for (const ev of sofaEvents) {
         const id = String(ev.id);
@@ -129,7 +136,12 @@ class PollingEngine {
         }, "espn");
         merged[m.id] = enrichMatchWithScheduleId(applied, teams);
       }
-      logger.info("ESPN fallback used", "PollingEngine", { count: espn.matches.length });
+      if (!this.loggedEspnFallback) {
+        this.loggedEspnFallback = true;
+        logger.debug("Polling via ESPN (SofaScore unavailable)", "PollingEngine", {
+          count: espn.matches.length
+        });
+      }
     }
 
     const liveCount = Object.values(merged).filter((m) => m.status === "live" && m.group).length;

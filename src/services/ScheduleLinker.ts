@@ -2,6 +2,8 @@ import { getAllScheduleEntries } from "./BroadcastLookup";
 import { matchCompositeKey, normalizeKickoffUtc, pairKey } from "../lib/normalize";
 import type { MatchScheduleEntry, MergedMatch, Team } from "../types";
 
+export const KICKOFF_LABEL = "Kick off";
+
 export type ScheduleLinkIndices = {
   composite: Record<string, string>;
   pair: Record<string, string>;
@@ -74,6 +76,23 @@ export function formatKickoffLocal(kickoffUtc: string): string {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(
     new Date(kickoffUtc)
   );
+}
+
+/** Display string for match kickoff — always sourced from the live feed (`match.date`). */
+export function formatKickoffLabel(kickoffUtc: string): string {
+  return `${KICKOFF_LABEL} · ${formatKickoffLocal(kickoffUtc)}`;
+}
+
+/** Prefer ESPN/SofaScore kickoff from the live feed when linked by official match id (e.g. M4). */
+export function resolveKickoffByMatchId(
+  officialMatchId: string,
+  fallbackUtc: string,
+  liveMatches: Iterable<MergedMatch>
+): string {
+  for (const m of liveMatches) {
+    if (m.matchId === officialMatchId && m.date) return m.date;
+  }
+  return fallbackUtc;
 }
 
 export { normalizeKickoffUtc };

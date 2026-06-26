@@ -1,14 +1,43 @@
+import { useMemo, useState } from "react";
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
 import { StandingThemeRow } from "../team/StandingThemeRow";
 import { TeamThemeRoot } from "../team/TeamThemeRoot";
 import { useStore } from "../../store";
-import { useCompletedGroupMatches, useUpcomingGroupMatches } from "../../store/selectors/historySelectors";
+import {
+  filterCompletedMatches,
+  useCompletedGroupMatches,
+  useUpcomingGroupMatches,
+  type ResultsSortOrder
+} from "../../store/selectors/historySelectors";
 
 export function GroupsView() {
   const standings = useStore((s) => s.groupStandings);
   const teams = useStore((s) => s.teams);
   const completed = useCompletedGroupMatches();
   const upcoming = useUpcomingGroupMatches().slice(0, 20);
+  const [resultsSort, setResultsSort] = useState<ResultsSortOrder>("newest");
+  const [resultsTeamId, setResultsTeamId] = useState("");
+
+  const resultTeamOptions = useMemo(() => {
+    const ids = new Set<string>();
+    for (const m of completed) {
+      ids.add(m.homeTeamId);
+      ids.add(m.awayTeamId);
+    }
+    return [...ids]
+      .map((id) => teams[id])
+      .filter((t): t is NonNullable<typeof t> => Boolean(t))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [completed, teams]);
+
+  const displayedResults = useMemo(
+    () =>
+      filterCompletedMatches(completed, {
+        teamId: resultsTeamId || undefined,
+        sort: resultsSort
+      }),
+    [completed, resultsSort, resultsTeamId]
+  );
 
   return (
     <div className="groups-view dashboard-view">
@@ -92,14 +121,39 @@ export function GroupsView() {
       </section>
 
       <section aria-label="Recent results" className="dashboard-section">
-        <div className="section-heading compact">
+        <div className="section-heading compact results-heading">
           <div>
             <div className="section-kicker">Results</div>
             <h2 className="section-title-text">Latest scores</h2>
           </div>
+          <div className="results-controls">
+            <label className="results-control">
+              <span className="results-control-label">Team</span>
+              <select
+                value={resultsTeamId}
+                onChange={(e) => setResultsTeamId(e.target.value)}
+                aria-label="Filter results by team"
+              >
+                <option value="">All teams</option>
+                {resultTeamOptions.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              className="results-sort-btn"
+              onClick={() => setResultsSort((s) => (s === "newest" ? "oldest" : "newest"))}
+              aria-label={resultsSort === "newest" ? "Sort oldest first" : "Sort newest first"}
+            >
+              {resultsSort === "newest" ? "Newest first" : "Oldest first"}
+            </button>
+          </div>
         </div>
         <div className="schedule-list schedule-list--compact">
-          {completed.slice(-8).map((m) => (
+          {displayedResults.map((m) => (
             <MatchScheduleCard
               key={m.id}
               match={m}
@@ -108,6 +162,9 @@ export function GroupsView() {
               compact
             />
           ))}
+          {displayedResults.length === 0 ? (
+            <p className="view-note">No completed group matches match this filter.</p>
+          ) : null}
         </div>
       </section>
 

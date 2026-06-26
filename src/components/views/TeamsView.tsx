@@ -28,7 +28,7 @@ export function TeamsView() {
         const q = query.toLowerCase();
         const matchesSearch =
           t.name.toLowerCase().includes(q) || t.shortName.toLowerCase().includes(q);
-        const status = computeQualificationStatus(t.id, standings, 3).status;
+        const status = computeQualificationStatus(t.id, standings).status;
         const matchesFilter = filter === "all" || status === filter;
         return matchesSearch && matchesFilter;
       })
@@ -93,7 +93,7 @@ export function TeamsView() {
           <summary>Group {group}</summary>
           <ul>
             {list.map((t) => {
-              const status = computeQualificationStatus(t.id, standings, 3);
+              const status = computeQualificationStatus(t.id, standings);
               const groupStanding = standings.find((g) => g.group === t.group);
               const row = groupStanding?.rows.find((r) => r.teamId === t.id);
               const rank = row ? (groupStanding?.rows.indexOf(row) ?? 0) + 1 : "—";
@@ -106,6 +106,7 @@ export function TeamsView() {
                       <span>{t.shortName}</span>
                       <span className={`badge badge--${status.status}`}>
                         {filterLabels[status.status as Filter] ?? status.status}
+                        {status.certainty === "confirmed" ? " · locked" : status.certainty === "projected" ? " · projected" : ""}
                       </span>
                       <span className="teams-stats">
                         Rank {rank} · {row?.points ?? 0}pts · {row?.goalDifference ?? 0} GD

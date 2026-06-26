@@ -19,6 +19,17 @@
   padding-bottom: calc(4.75rem + var(--safe-bottom));
 }
 
+.wc-main-simulator {
+  width: min(1420px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.wc-main-simulator .app-shell {
+  width: 100%;
+  margin: 0;
+  padding-bottom: calc(4.75rem + var(--safe-bottom));
+}
+
 /* Glass top bar (matches Simulator .topbar) */
 .wc-topbar {
   position: sticky;

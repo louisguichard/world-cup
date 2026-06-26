@@ -34,14 +34,18 @@ import { knockoutSchedule, type KnockoutInfo } from "../../data/knockoutSchedule
 import { loadWorldCupData } from "../../lib/dataSources";
 import { formatPercent } from "../../lib/normalize";
 import { projectTournament, simulateTournamentOutcomes, toTeamsById } from "../../lib/tournament";
+import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
+import { useStore } from "../../store";
 import { TeamLabel } from "../team/TeamLabel";
 import { BracketTeamButton } from "../team/BracketTeamButton";
 
 const STORAGE_KEY = "world-cup-2026-score-overrides";
 const PICKS_KEY = "world-cup-2026-bracket-picks";
 const DATA_CACHE_KEY = "world-cup-2026-data-cache-v3";
-const MONTE_CARLO_ITERATIONS = 4200;
+const MONTE_CARLO_ITERATIONS_PROD = 4200;
+const MONTE_CARLO_ITERATIONS_DEV = 80;
 const MONTE_CARLO_SEED = 2026;
+const SIM_WORKER_TIMEOUT_MS = 45_000;
 const AUTHOR_GITHUB_URL = "https://github.com/louisguichard/world-cup";
 const AUTHOR_SITE_URL = "https://louisguichard.fr/";
 const POLYMARKET_EVENT_BASE_URL = "https://polymarket.com/event";
@@ -154,14 +158,6 @@ function formatDate(value: string): string {
   }).format(new Date(value));
 }
 
-function formatKickoff(value: string): string {
-  const date = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "2-digit", month: "short" }).format(
-    new Date(value)
-  );
-  const time = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
-  return `${date} · ${time}`;
-}
-
 function formatVenueTitle(info: KnockoutInfo): string {
   const location =
     info.venueCity === info.hostCity ? info.hostCity : `${info.venueCity} (${info.hostCity})`;
@@ -205,11 +201,11 @@ function sourceClass(match: MatchWithScore): string {
 }
 
 export function SimulatorView() {
+  const simulatorMode = useStore((s) => s.simulatorMode);
+  const setSimulatorMode = useStore((s) => s.setSimulatorMode);
   const [data, setData] = useState<DataLoadResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<"tournament" | "probabilistic">("tournament");
-  const [view, setView] = useState<"app" | "method">("app");
   const [overrides, setOverrides] = useState<Record<string, ScoreOverride>>(() => loadOverrides());
   const [bracketPicks, setBracketPicks] = useState<Record<string, string>>(() => loadPicks());
   const [selectedTeamId, setSelectedTeamId] = useState("");
@@ -263,25 +259,33 @@ export function SimulatorView() {
 
     let cancelled = false;
     let fallbackTimer: number | undefined;
+    let workerTimeout: number | undefined;
     const requestId = simulationRequestRef.current + 1;
     simulationRequestRef.current = requestId;
+    const iterations = import.meta.env.PROD ? MONTE_CARLO_ITERATIONS_PROD : MONTE_CARLO_ITERATIONS_DEV;
+    const useWorker = typeof Worker !== "undefined" && import.meta.env.PROD;
 
-    const runFallback = () => {
+    const applyResult = (result: TournamentSimulationResult) => {
+      if (!cancelled && simulationRequestRef.current === requestId) setSimulations(result);
+    };
+
+    const runMainThread = () => {
       fallbackTimer = window.setTimeout(() => {
         if (cancelled) return;
-        const result = simulateTournamentOutcomes(
-          data.teams,
-          data.matches,
-          data.knockoutMarkets,
-          MONTE_CARLO_ITERATIONS,
-          MONTE_CARLO_SEED
+        applyResult(
+          simulateTournamentOutcomes(
+            data.teams,
+            data.matches,
+            data.knockoutMarkets,
+            iterations,
+            MONTE_CARLO_SEED
+          )
         );
-        if (!cancelled && simulationRequestRef.current === requestId) setSimulations(result);
       }, 0);
     };
 
-    if (typeof Worker === "undefined") {
-      runFallback();
+    if (!useWorker) {
+      runMainThread();
       return () => {
         cancelled = true;
         if (fallbackTimer) window.clearTimeout(fallbackTimer);
@@ -290,18 +294,25 @@ export function SimulatorView() {
 
     const worker = new Worker(new URL("../../workers/simulationWorker.ts", import.meta.url), { type: "module" });
 
+    workerTimeout = window.setTimeout(() => {
+      worker.terminate();
+      if (!cancelled) runMainThread();
+    }, SIM_WORKER_TIMEOUT_MS);
+
     worker.onmessage = (event: MessageEvent<SimulationWorkerResponse>) => {
       if (cancelled || event.data.requestId !== requestId) return;
+      if (workerTimeout) window.clearTimeout(workerTimeout);
       if (event.data.result) {
-        setSimulations(event.data.result);
+        applyResult(event.data.result);
       } else {
-        runFallback();
+        runMainThread();
       }
       worker.terminate();
     };
 
     worker.onerror = () => {
-      if (!cancelled) runFallback();
+      if (workerTimeout) window.clearTimeout(workerTimeout);
+      if (!cancelled) runMainThread();
       worker.terminate();
     };
 
@@ -310,13 +321,14 @@ export function SimulatorView() {
       teams: data.teams,
       matches: data.matches,
       knockoutMarkets: data.knockoutMarkets,
-      iterations: MONTE_CARLO_ITERATIONS,
+      iterations: MONTE_CARLO_ITERATIONS_PROD,
       seed: MONTE_CARLO_SEED
     });
 
     return () => {
       cancelled = true;
       if (fallbackTimer) window.clearTimeout(fallbackTimer);
+      if (workerTimeout) window.clearTimeout(workerTimeout);
       worker.terminate();
     };
   }, [data]);
@@ -326,8 +338,18 @@ export function SimulatorView() {
     [data, overrides, bracketPicks]
   );
   const teamsById = useMemo(() => (data ? toTeamsById(data.teams) : {}), [data]);
-  const simulation = selectedTeamId ? simulations?.teamSummaries[selectedTeamId] ?? null : null;
+  const teamSimulation = useMemo(() => {
+    if (!simulations || !selectedTeamId) return null;
+    return simulations.teamSummaries[selectedTeamId] ?? null;
+  }, [simulations, selectedTeamId]);
   const championOdds = simulations?.championOdds ?? [];
+
+  useEffect(() => {
+    if (!simulations || !data) return;
+    if (selectedTeamId && simulations.teamSummaries[selectedTeamId]) return;
+    const fallback = simulations.championOdds[0]?.teamId ?? defaultSelectedTeam(data.teams);
+    setSelectedTeamId(fallback);
+  }, [simulations, data, selectedTeamId]);
 
   const stats = useMemo(() => {
     const matches = data?.matches ?? [];
@@ -412,7 +434,7 @@ export function SimulatorView() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <button className="brand" onClick={() => setView("app")} aria-label="Home">
+        <button className="brand" onClick={() => setSimulatorMode("tournament")} aria-label="Home">
           <span className="brand-mark" aria-hidden="true">
             <Trophy size={22} strokeWidth={2} />
           </span>
@@ -422,31 +444,33 @@ export function SimulatorView() {
           </span>
         </button>
         <div className="topbar-actions">
-          <div className="segmented" role="tablist" aria-label="View">
+          <div className="segmented" role="tablist" aria-label="Simulator views">
             <button
-              className={view === "app" && tab === "tournament" ? "active" : ""}
-              onClick={() => {
-                setView("app");
-                setTab("tournament");
-              }}
+              type="button"
+              role="tab"
+              aria-selected={simulatorMode === "tournament"}
+              className={simulatorMode === "tournament" ? "active" : ""}
+              onClick={() => setSimulatorMode("tournament")}
             >
               <Trophy size={16} />
               <span>Tournament</span>
             </button>
             <button
-              className={view === "app" && tab === "probabilistic" ? "active" : ""}
-              onClick={() => {
-                setView("app");
-                setTab("probabilistic");
-              }}
+              type="button"
+              role="tab"
+              aria-selected={simulatorMode === "probabilities"}
+              className={simulatorMode === "probabilities" ? "active" : ""}
+              onClick={() => setSimulatorMode("probabilities")}
             >
               <BarChart3 size={16} />
               <span>Probabilities</span>
             </button>
           </div>
           <button
-            className={`method-link ${view === "method" ? "active" : ""}`}
-            onClick={() => setView("method")}
+            type="button"
+            className={`method-link ${simulatorMode === "methodology" ? "active" : ""}`}
+            aria-selected={simulatorMode === "methodology"}
+            onClick={() => setSimulatorMode("methodology")}
           >
             <BookOpen size={16} />
             <span>Methodology</span>
@@ -454,8 +478,8 @@ export function SimulatorView() {
         </div>
       </header>
 
-      {view === "method" ? (
-        <MethodView onBack={() => setView("app")} />
+      {simulatorMode === "methodology" ? (
+        <MethodView onBack={() => setSimulatorMode("tournament")} />
       ) : (
         <>
           <section className="hero-panel">
@@ -498,7 +522,7 @@ export function SimulatorView() {
             </section>
           ) : null}
 
-          {tab === "tournament" && data && projection ? (
+          {simulatorMode === "tournament" && data && projection ? (
             <TournamentView
               teamsById={teamsById}
               groups={projection.standings}
@@ -516,21 +540,27 @@ export function SimulatorView() {
             />
           ) : null}
 
-          {tab === "probabilistic" && data && !simulation ? (
+          {simulatorMode === "probabilities" && data && !simulations ? (
             <section className="probability-prep">
               <span className="loader sm" />
               <strong>Preparing Monte Carlo paths…</strong>
-              <p>The bracket is being replayed {MONTE_CARLO_ITERATIONS.toLocaleString("en-GB")} times.</p>
+              <p>
+                The bracket is being replayed{" "}
+                {(import.meta.env.PROD ? MONTE_CARLO_ITERATIONS_PROD : MONTE_CARLO_ITERATIONS_DEV).toLocaleString(
+                  "en-GB"
+                )}{" "}
+                times.
+              </p>
             </section>
           ) : null}
 
-          {tab === "probabilistic" && data && simulation ? (
+          {simulatorMode === "probabilities" && data && simulations && teamSimulation ? (
             <ProbabilityView
               teams={data.teams}
               teamsById={teamsById}
               selectedTeamId={selectedTeamId}
               onSelectTeam={setSelectedTeamId}
-              simulation={simulation}
+              simulation={teamSimulation}
               championOdds={championOdds}
             />
           ) : null}
@@ -791,7 +821,7 @@ function ScoreEditor({
       <div className="match-meta">
         <span>
           {match.locked ? <Lock size={11} /> : null}
-          {formatDate(match.date)}
+          {formatKickoffLabel(match.date)}
         </span>
         {match.source === "manual" ? (
           <button className="match-source manual reset" onClick={() => onReset(match.id)} title="Reset to prediction">
@@ -942,11 +972,15 @@ function BracketCard({
   picked: boolean;
   onPickWinner: (matchId: string, teamId?: string, predictedWinnerId?: string) => void;
 }) {
+  const liveMatches = useStore((s) => s.liveMatches);
   const home = match.homeTeamId ? teamsById[match.homeTeamId] : undefined;
   const away = match.awayTeamId ? teamsById[match.awayTeamId] : undefined;
   const decided = Boolean(home && away);
   const info = knockoutSchedule[match.id];
   const venueTitle = info ? formatVenueTitle(info) : "";
+  const kickoffUtc = info
+    ? resolveKickoffByMatchId(match.id, info.date, Object.values(liveMatches))
+    : undefined;
   const homeProb = match.homeWinProbability;
   const awayProb = typeof homeProb === "number" ? 1 - homeProb : undefined;
   const predictedWinnerId =
@@ -956,7 +990,7 @@ function BracketCard({
     <article className={`bracket-card ${picked ? "picked" : ""}`}>
       <div className="bracket-card-head">
         <span className="match-date" title={venueTitle}>
-          {info ? formatKickoff(info.date) : ""}
+          {kickoffUtc ? formatKickoffLabel(kickoffUtc) : ""}
         </span>
         <span className="match-city" title={venueTitle || match.id}>
           {info ? info.hostCity : match.id}
