@@ -1,0 +1,16 @@
+{
+  "slug": "boston",
+  "hostCity": "Boston",
+  "stadiumName": "Gillette Stadium",
+  "stadiumLocation": "1 Patriot Pl",
+  "city": "Foxborough",
+  "state": "MA",
+  "county": "Norfolk County",
+  "country": "USA",
+  "fifaOfficialName": "Boston Stadium",
+  "formerStadiumName": "Gillette Stadium",
+  "capacity": 64146,
+  "timezone": "America/New_York",
+  "coordinates": { "lat": 42.091, "lon": -71.264 },
+  "aliases": ["Boston Stadium"]
+}

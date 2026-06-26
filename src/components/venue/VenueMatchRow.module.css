@@ -1,0 +1,76 @@
+.venueMatchRow {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-2, #1f2937);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.venueMatchRow:hover {
+  border-color: rgba(99, 102, 241, 0.45);
+}
+
+.venueMatchRowHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.venueMatchTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text, #f3f4f6);
+}
+
+.venueMatchMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statusBadge--live {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.statusBadge--ft {
+  background: rgba(107, 114, 128, 0.25);
+  color: #d1d5db;
+}
+
+.statusBadge--scheduled {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+}
+
+.venueMatchScore {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text, #f3f4f6);
+}
+
+.venueMatchStage {
+  font-size: 0.7rem;
+  color: var(--text-tertiary, #6b7280);
+}

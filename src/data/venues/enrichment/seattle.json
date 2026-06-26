@@ -1,0 +1,16 @@
+{
+  "slug": "seattle",
+  "hostCity": "Seattle",
+  "stadiumName": "Lumen Field",
+  "stadiumLocation": "800 Occidental Ave S",
+  "city": "Seattle",
+  "state": "WA",
+  "county": "King County",
+  "country": "USA",
+  "fifaOfficialName": "Seattle Stadium",
+  "formerStadiumName": "Lumen Field",
+  "capacity": 66925,
+  "timezone": "America/Los_Angeles",
+  "coordinates": { "lat": 47.595, "lon": -122.332 },
+  "aliases": ["Seattle Stadium"]
+}

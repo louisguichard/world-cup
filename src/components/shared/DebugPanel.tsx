@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { API_SOURCES, BOOTSTRAP_FLAGS, listDisabledApis } from "../../config/apiFlags";
+import { formatVersionLabel } from "../../config/appMeta";
 import { logger } from "../../services/Logger";
 
 export function DebugPanel() {
@@ -19,6 +20,10 @@ export function DebugPanel() {
       </button>
       {open ? (
         <div className="debug-panel-body">
+          <div className="debug-log debug-log--info">
+            <span className="debug-log-module">release</span>
+            <span className="debug-log-msg">{formatVersionLabel()}</span>
+          </div>
           <div className="debug-log debug-log--info">
             <span className="debug-log-module">apiFlags</span>
             <span className="debug-log-msg">

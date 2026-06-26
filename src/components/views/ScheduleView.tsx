@@ -5,11 +5,13 @@ import { groupMatchesByDay } from "../../lib/groupMatchesByDay";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import styles from "./ScheduleView.module.css";
+import { VenueLabel } from "../venue/VenueLabel";
+import { APP_BRAND } from "../../config/appMeta";
 
 export function ScheduleView() {
   const teams = useStore((s) => s.teams);
   const liveMatches = useStore((s) => s.liveMatches);
-  const openTeamSheet = useStore((s) => s.openTeamSheet);
+  const openMatchDetail = useStore((s) => s.openMatchDetail);
 
   const allMatches = useMemo(
     () => materializeFullSchedule(teams, liveMatches),
@@ -30,7 +32,7 @@ export function ScheduleView() {
   return (
     <div className={styles.view}>
       <section className="hero-panel hero-panel--compact">
-        <div className="eyebrow">FIFA World Cup 2026™</div>
+        <div className="eyebrow">{APP_BRAND.tournament}</div>
         <h1>
           Full <span className="accent">Schedule.</span>
         </h1>
@@ -70,7 +72,7 @@ export function ScheduleView() {
                     <tr
                       key={m.id}
                       className={styles.tableRow}
-                      onClick={() => openTeamSheet(m.homeTeamId)}
+                      onClick={() => openMatchDetail(m.matchId ?? m.id, { from: "schedule" })}
                     >
                       <td className={styles.timeCell}>
                         {formatKickoffTime(m.date)}
@@ -92,7 +94,17 @@ export function ScheduleView() {
                       <td className={styles.teamCell}>
                         {away?.shortName ?? away?.name ?? m.awayTeamId}
                       </td>
-                      <td className={styles.venueCell}>{m.venue ?? "—"}</td>
+                      <td
+                        className={styles.venueCell}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <VenueLabel
+                          matchId={m.matchId ?? m.id}
+                          venueString={m.venue}
+                          inline
+                          compact
+                        />
+                      </td>
                       <td className={styles.statusCell}>
                         <StatusBadge match={m} />
                       </td>

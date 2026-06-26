@@ -1,0 +1,50 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 700;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: fit-content;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.sm {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+}
+
+.xs {
+  font-size: 0.55rem;
+  padding: 1px 5px;
+}
+
+.confirmed {
+  background: #10b981;
+}
+
+.projected {
+  background: #6366f1;
+}
+
+.onTrack {
+  background: #d97706;
+}
+
+.simulated {
+  background: #64748b;
+}
+
+.onTrack {
+  background: #d97706;
+}
+
+.simulated {
+  background: #64748b;
+}
+
+.tbd {
+  background: #374151;
+}

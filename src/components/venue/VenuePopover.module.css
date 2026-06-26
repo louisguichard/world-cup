@@ -1,0 +1,209 @@
+.venueLabel {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  position: relative;
+  max-width: 100%;
+}
+
+.venueLabelTrigger {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  min-height: 44px;
+  justify-content: center;
+}
+
+@media (hover: hover) {
+  .venueLabelTrigger:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .venueLabelTrigger:hover .venueLabelCity {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+.venueLabelTrigger:focus-visible {
+  outline: 2px solid var(--accent, #6366f1);
+  outline-offset: 2px;
+}
+
+.venueLabelStadium {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text, #f3f4f6);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.venueLabelCity {
+  font-size: 0.7rem;
+  color: var(--text-secondary, #9ca3af);
+  line-height: 1.2;
+}
+
+.venueLabel--compact .venueLabelStadium {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.venueLabel--compact .venueLabelCity {
+  display: none;
+}
+
+.venueLabel--inline {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.venueLabel--inline .venueLabelTrigger {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 4px;
+  min-height: auto;
+  padding: 0 2px;
+  margin: 0;
+}
+
+.venueLabelSep {
+  color: var(--text-tertiary, #6b7280);
+}
+
+/* Popover (desktop) */
+.popoverWrap {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1200;
+  min-width: 280px;
+  max-width: 320px;
+}
+
+/* Sheet (mobile) */
+.sheetBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheetPanel {
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--surface, #111827);
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.popoverPanel {
+  background: var(--surface-2, #1f2937);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.popoverHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.popoverTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text, #f3f4f6);
+}
+
+.popoverClose {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #9ca3af);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.popoverClose:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text, #f3f4f6);
+}
+
+.detailGrid {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.detailRow {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.detailLabel {
+  color: var(--text-tertiary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.65rem;
+}
+
+.detailValue {
+  color: var(--text-secondary, #d1d5db);
+}
+
+.hubCta {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent, #6366f1);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hubCta:hover {
+  filter: brightness(1.08);
+}
+
+@media (min-width: 481px) {
+  .sheetBackdrop {
+    align-items: center;
+  }
+
+  .sheetPanel {
+    max-width: 360px;
+    border-radius: 12px;
+    max-height: 80vh;
+  }
+}

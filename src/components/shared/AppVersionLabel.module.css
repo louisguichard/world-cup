@@ -1,0 +1,11 @@
+.version {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+  color: var(--text-tertiary, #6b7280);
+  white-space: nowrap;
+}
+
+.build {
+  opacity: 0.85;
+}

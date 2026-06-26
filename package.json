@@ -1,7 +1,7 @@
 {
-  "name": "world-cup-2026-simulator",
+  "name": "road-to-wc-final",
   "private": true,
-  "version": "0.1.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,17 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:apis": "node scripts/test-all-apis.mjs",
-    "generate:thirds": "node scripts/build-third-place-map.mjs"
+    "version:show": "node scripts/version.mjs show",
+    "version:build": "node scripts/version.mjs build",
+    "version:patch": "node scripts/version.mjs patch",
+    "version:minor": "node scripts/version.mjs minor",
+    "version:major": "node scripts/version.mjs major",
+    "version:log": "node scripts/version.mjs log",
+    "generate:thirds": "node scripts/build-third-place-map.mjs",
+    "dev:portal": "cd tools/api-portal && npm run dev",
+    "sync-keys": "cd tools/api-portal && npm run sync-keys",
+    "sync-keys:wc": "cd tools/api-portal && npm run sync-keys -- \"Road to the World Cup Final 2026\"",
+    "seed-vault": "cd tools/api-portal && npm run seed"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

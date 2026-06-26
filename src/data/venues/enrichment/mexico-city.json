@@ -1,0 +1,16 @@
+{
+  "slug": "mexico-city",
+  "hostCity": "Mexico City",
+  "stadiumName": "Estadio Azteca",
+  "stadiumLocation": "Calz. de Tlalpan 3465",
+  "city": "Mexico City",
+  "state": "CDMX",
+  "county": "Coyoacán",
+  "country": "Mexico",
+  "fifaOfficialName": "Mexico City Stadium",
+  "formerStadiumName": "Estadio Azteca",
+  "capacity": 80824,
+  "timezone": "America/Mexico_City",
+  "coordinates": { "lat": 19.303, "lon": -99.151 },
+  "aliases": ["Estadio Banorte", "Mexico City Stadium"]
+}

@@ -1,0 +1,16 @@
+{
+  "slug": "new-york-new-jersey",
+  "hostCity": "New York/New Jersey",
+  "stadiumName": "MetLife Stadium",
+  "stadiumLocation": "1 MetLife Stadium Dr",
+  "city": "East Rutherford",
+  "state": "NJ",
+  "county": "Bergen County",
+  "country": "USA",
+  "fifaOfficialName": "New York New Jersey Stadium",
+  "formerStadiumName": "MetLife Stadium",
+  "capacity": 80663,
+  "timezone": "America/New_York",
+  "coordinates": { "lat": 40.814, "lon": -74.074 },
+  "aliases": ["New York New Jersey Stadium"]
+}

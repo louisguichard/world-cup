@@ -3,12 +3,13 @@ import { useStore } from "../../store";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "live", label: "Live" },
+  { id: "tournament", label: "Tourn." },
   { id: "schedule", label: "Schedule" },
   { id: "results", label: "Results" },
   { id: "groups", label: "Groups" },
   { id: "bracket", label: "Bracket" },
   { id: "teams", label: "Teams" },
-  { id: "simulator", label: "Simulator" }
+  { id: "simulator", label: "Sim" }
 ];
 
 export function BottomTabBar() {

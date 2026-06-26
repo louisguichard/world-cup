@@ -12,12 +12,72 @@ function parseStreaming(raw?: string): string[] {
     .filter(Boolean);
 }
 
-function normalizeNetwork(raw: string): string {
-  if (raw.includes("FS1")) return "FS1";
-  if (raw.toUpperCase().includes("FOX")) return "FOX";
-  if (raw.toLowerCase().includes("universo")) return "Universo";
-  if (raw.toLowerCase().includes("telemundo")) return "Telemundo";
+const ENGLISH_PRIORITY = ["FOX", "FS1", "FS2", "Peacock", "TNT", "TBS"] as const;
+const SPANISH_PRIORITY = ["Telemundo", "Universo", "TUDN"] as const;
+
+export type PrimaryBroadcast = {
+  english: string;
+  spanish: string;
+  streamingNote?: string;
+  isConcurrent: boolean;
+};
+
+function normalizeEnglish(raw: string): string {
+  const upper = raw.toUpperCase();
+  if (upper.includes("FS2")) return "FS2";
+  if (upper.includes("FS1")) return "FS1";
+  if (upper.includes("PEACOCK")) return "Peacock";
+  if (upper.includes("TNT")) return "TNT";
+  if (upper.includes("TBS")) return "TBS";
+  if (upper.includes("FOX")) return "FOX";
   return raw.split("(")[0]?.trim() ?? raw;
+}
+
+function normalizeSpanish(raw: string): string {
+  const lower = raw.toLowerCase();
+  if (lower.includes("tudn")) return "TUDN";
+  if (lower.includes("universo")) return "Universo";
+  if (lower.includes("telemundo")) return "Telemundo";
+  return raw.split("(")[0]?.trim() ?? raw;
+}
+
+function normalizeNetwork(raw: string): string {
+  return normalizeEnglish(raw);
+}
+
+function pickFromPriority(candidates: string[], priority: readonly string[]): string {
+  for (const label of priority) {
+    const hit = candidates.find((c) => c.toUpperCase().includes(label.toUpperCase()));
+    if (hit) return label;
+  }
+  return candidates[0] ?? "";
+}
+
+export function getPrimaryBroadcast(matchId?: string, kickoff?: string): PrimaryBroadcast | undefined {
+  const chip = matchId ? getBroadcast(matchId) : kickoff ? getBroadcastByKickoff(kickoff) : undefined;
+  if (!chip) return undefined;
+
+  const englishCandidates = [
+    normalizeEnglish(chip.englishNetwork),
+    ...chip.streaming.map((s) => normalizeEnglish(s))
+  ].filter(Boolean);
+
+  const spanishCandidates = [normalizeSpanish(chip.spanishNetwork)].filter(Boolean);
+
+  const english = pickFromPriority(englishCandidates, ENGLISH_PRIORITY);
+  const spanish = pickFromPriority(spanishCandidates, SPANISH_PRIORITY);
+
+  let streamingNote: string | undefined;
+  if (english === "FS1" || english === "FS2") {
+    streamingNote = "(+ Peacock)";
+  }
+
+  return {
+    english,
+    spanish,
+    streamingNote,
+    isConcurrent: chip.isConcurrent
+  };
 }
 
 export function buildBroadcastIndex(matches: MatchScheduleEntry[]): Record<string, BroadcastChip> {
@@ -69,6 +129,10 @@ export function getAllScheduleEntries(): MatchScheduleEntry[] {
 export function getBroadcastByKickoff(kickoffUtc: string): BroadcastChip | undefined {
   const matchId = kickoffToMatchId[normalizeKickoffUtc(kickoffUtc)];
   return matchId ? broadcastIndex[matchId] : undefined;
+}
+
+export function getVenueByMatchId(matchId: string): BroadcastChip["venue"] | undefined {
+  return getBroadcast(matchId)?.venue;
 }
 
 export { broadcastIndex };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MatchPeriod } from "../types";
 
 export type ClockDisplay = {
@@ -48,22 +48,39 @@ export function useLiveClock(
   running = false
 ): ClockDisplay {
   const [display, setDisplay] = useState(() => computeDisplay(period, minute, extra));
+  // Local counter that advances independently of ESPN poll cadence
+  const localMinRef = useRef(minute);
 
+  // Sync with server-provided authoritative minute on every ESPN poll
   useEffect(() => {
+    localMinRef.current = minute;
     setDisplay(computeDisplay(period, minute, extra));
-    // #region agent log
-    fetch('http://127.0.0.1:7681/ingest/f800a0a9-8d11-45c6-8805-1b187f693046',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'62d96e'},body:JSON.stringify({sessionId:'62d96e',location:'useLiveClock.ts:53',message:'sync-effect fired',data:{period,minute,extra,running},hypothesisId:'B1',runId:'run1',timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-  }, [period, minute, extra, running]);
+  }, [period, minute, extra]);
+
+  // Tick the clock forward every 60 s when the match is running.
+  // This keeps the display moving between ESPN polls (which arrive every ~15 s
+  // but only carry integer-minute granularity, so the raw prop wouldn't change
+  // more than once per minute even under perfect conditions).
+  useEffect(() => {
+    if (!running) return;
+
+    const id = setInterval(() => {
+      localMinRef.current += 1;
+      setDisplay(computeDisplay(period, localMinRef.current, extra));
+    }, 60_000);
+    return () => {
+      clearInterval(id);
+    };
+    // `extra` is intentionally excluded: it is only meaningful for 90+N' injury
+    // time (second_half overflow), and ESPN provides it accurately on each poll.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running, period]);
 
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7681/ingest/f800a0a9-8d11-45c6-8805-1b187f693046',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'62d96e'},body:JSON.stringify({sessionId:'62d96e',location:'useLiveClock.ts:60',message:'no-raf-loop: running flag at mount',data:{running,period,minute},hypothesisId:'B1',runId:'run1',timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-    const onVis = () => setDisplay(computeDisplay(period, minute, extra));
+    const onVis = () => setDisplay(computeDisplay(period, localMinRef.current, extra));
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
-  }, [period, minute, extra]);
+  }, [period, extra]);
 
   return display;
 }

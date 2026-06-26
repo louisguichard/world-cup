@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { auditFalseConfirmations, buildQualificationContext } from "../../lib/qualification";
 import {
   BestThirdsBento,
   EliminatedBento,
@@ -8,7 +9,9 @@ import {
 import { BestThirdTableBento } from "../bentos/BestThirdTableBento";
 import { GroupTableBento } from "../bentos/GroupTableBento";
 import { BentoErrorBoundary } from "../shared/ErrorBoundary";
+import { CertaintyBadge } from "../shared/CertaintyBadge";
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
+import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { StandingThemeRow } from "../team/StandingThemeRow";
 import { TeamThemeRoot } from "../team/TeamThemeRoot";
 import { useStore } from "../../store";
@@ -22,6 +25,32 @@ import {
 export function GroupsView() {
   const standings = useStore((s) => s.groupStandings);
   const teams = useStore((s) => s.teams);
+  const liveMatches = useStore((s) => s.liveMatches);
+  const qualContext = useMemo(
+    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
+    [liveMatches, teams]
+  );
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || standings.length === 0) return;
+    const falsePositives = auditFalseConfirmations(standings, qualContext);
+    if (falsePositives.length === 0) return;
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0b0b0b0b-0000-4000-8000-000000000001", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "02b5af" },
+      body: JSON.stringify({
+        sessionId: "02b5af",
+        location: "GroupsView.tsx:audit",
+        message: "false confirmation audit",
+        data: { falsePositives },
+        timestamp: Date.now(),
+        hypothesisId: "H-audit-sweep"
+      })
+    }).catch(() => {});
+    // #endregion
+  }, [standings, qualContext]);
+
   const groupsViewMode = useStore((s) => s.groupsViewMode);
   const setGroupsViewMode = useStore((s) => s.setGroupsViewMode);
   const completed = useCompletedGroupMatches();
@@ -148,12 +177,20 @@ export function GroupsView() {
                     <tbody>
                       {g.rows.map((row, i) => {
                         const team = teams[row.teamId];
+                        const qual = computeQualificationStatus(row.teamId, standings, qualContext);
                         const rowClass =
                           i < 2 ? "qualified" : i === 2 ? "at-risk" : i === 3 ? "eliminated" : "";
+                        const showBadge = i < 2;
                         return (
                           <StandingThemeRow key={row.teamId} teamId={row.teamId} className={rowClass}>
                             <td>
                               <span className="rank">{i + 1}</span>
+                              {showBadge ? (
+                                <CertaintyBadge
+                                  certainty={qual.certainty === "confirmed" ? "confirmed" : "projected"}
+                                  size="xs"
+                                />
+                              ) : null}
                               {team?.logo ? <img src={team.logo} alt="" width={20} height={20} /> : null}
                               <strong>{team?.shortName ?? row.teamId}</strong>
                             </td>

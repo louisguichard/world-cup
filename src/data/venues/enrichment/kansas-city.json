@@ -1,0 +1,16 @@
+{
+  "slug": "kansas-city",
+  "hostCity": "Kansas City",
+  "stadiumName": "Arrowhead Stadium",
+  "stadiumLocation": "1 Arrowhead Dr",
+  "city": "Kansas City",
+  "state": "MO",
+  "county": "Jackson County",
+  "country": "USA",
+  "fifaOfficialName": "Kansas City Stadium",
+  "formerStadiumName": "GEHA Field at Arrowhead Stadium",
+  "capacity": 69045,
+  "timezone": "America/Chicago",
+  "coordinates": { "lat": 39.049, "lon": -94.484 },
+  "aliases": ["GEHA Field at Arrowhead Stadium", "Kansas City Stadium"]
+}

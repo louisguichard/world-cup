@@ -1,0 +1,16 @@
+{
+  "slug": "atlanta",
+  "hostCity": "Atlanta",
+  "stadiumName": "Mercedes-Benz Stadium",
+  "stadiumLocation": "1 AMB Dr NW",
+  "city": "Atlanta",
+  "state": "GA",
+  "county": "Fulton County",
+  "country": "USA",
+  "fifaOfficialName": "Atlanta Stadium",
+  "formerStadiumName": "Mercedes-Benz Stadium",
+  "capacity": 68239,
+  "timezone": "America/New_York",
+  "coordinates": { "lat": 33.755, "lon": -84.401 },
+  "aliases": ["Atlanta Stadium"]
+}

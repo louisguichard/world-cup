@@ -1,4 +1,6 @@
 import { useStore } from "../../store";
+import { APP_BRAND } from "../../config/appMeta";
+import { AppVersionLabel } from "../shared/AppVersionLabel";
 
 export function TopNavBar({ hidden = false }: { hidden?: boolean }) {
   const lastPollAt = useStore((s) => s.lastPollAt);
@@ -14,16 +16,17 @@ export function TopNavBar({ hidden = false }: { hidden?: boolean }) {
 
   return (
     <header className="wc-topbar">
-      <div className="brand" aria-label="Road to the World Cup Final 2026">
+      <div className="brand" aria-label={APP_BRAND.name}>
         <span className="brand-mark" aria-hidden="true">
-          WC
+          {APP_BRAND.mark}
         </span>
         <span className="brand-text">
-          <strong>Road to the Final</strong>
-          <small>WORLD CUP 2026</small>
+          <strong>{APP_BRAND.shortName}</strong>
+          <small>{APP_BRAND.topBarSubtitle}</small>
         </span>
       </div>
       <div className="wc-topbar-meta">
+        <AppVersionLabel className="wc-topbar-version" />
         {liveCount > 0 ? (
           <span className="stat-chip">
             <span className="live-pill-dot" aria-hidden />

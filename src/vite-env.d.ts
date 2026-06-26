@@ -1,5 +1,9 @@
 /// <reference types="vite/client" />
 
+declare const __APP_VERSION__: string;
+declare const __APP_BUILD__: string;
+declare const __APP_CHANNEL__: string;
+
 interface ImportMetaEnv {
   readonly VITE_BUILD_VERSION?: string;
   readonly VITE_RAPIDAPI_KEY?: string;

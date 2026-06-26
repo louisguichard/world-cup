@@ -1,0 +1,35 @@
+.timeline {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.timelineItem {
+  flex: 0 0 min(260px, 80vw);
+  scroll-snap-align: start;
+}
+
+.timeline--stacked {
+  flex-direction: column;
+  overflow-x: visible;
+}
+
+.timeline--stacked .timelineItem {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .timeline {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+
+  .timelineItem {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}

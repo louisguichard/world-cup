@@ -3,6 +3,7 @@ import { formatKickoffDate } from "../../lib/formatKickoff";
 import { useStore } from "../../store";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
+import { VenueLabel } from "../venue/VenueLabel";
 
 export interface ResultMatchCardProps {
   match: MergedMatch;
@@ -10,7 +11,7 @@ export interface ResultMatchCardProps {
 
 export function ResultMatchCard({ match }: ResultMatchCardProps) {
   const teams = useStore((s) => s.teams);
-  const openTeamSheet = useStore((s) => s.openTeamSheet);
+  const openMatchDetail = useStore((s) => s.openMatchDetail);
 
   const home = teams[match.homeTeamId];
   const away = teams[match.awayTeamId];
@@ -26,11 +27,12 @@ export function ResultMatchCard({ match }: ResultMatchCardProps) {
       className="result-match-card"
       role="article"
       aria-label={`${homeName} ${homeScore}–${awayScore} ${awayName}, Final`}
-      onClick={() => openTeamSheet(match.homeTeamId)}
+      onClick={() => openMatchDetail(match.matchId ?? match.id, { from: "results" })}
     >
       <div className="result-match-card-meta">
         <span className="final-pill">FINAL</span>
         {kickoffDate ? <time dateTime={match.date}>{kickoffDate}</time> : null}
+        <VenueLabel matchId={match.matchId ?? match.id} venueString={match.venue} inline compact />
       </div>
 
       <div className="result-match-card-scoreline">

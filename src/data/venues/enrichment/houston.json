@@ -1,0 +1,16 @@
+{
+  "slug": "houston",
+  "hostCity": "Houston",
+  "stadiumName": "NRG Stadium",
+  "stadiumLocation": "1 NRG Pkwy",
+  "city": "Houston",
+  "state": "TX",
+  "county": "Harris County",
+  "country": "USA",
+  "fifaOfficialName": "Houston Stadium",
+  "formerStadiumName": "NRG Stadium",
+  "capacity": 68777,
+  "timezone": "America/Chicago",
+  "coordinates": { "lat": 29.685, "lon": -95.411 },
+  "aliases": ["Houston Stadium"]
+}

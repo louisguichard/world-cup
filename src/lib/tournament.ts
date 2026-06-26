@@ -1,7 +1,9 @@
 import { thirdPlaceMap } from "../data/thirdPlaceMap";
 import { knockoutSchedule } from "../data/knockoutSchedule";
 import type {
+  BracketGhostCandidate,
   BracketMatch,
+  BracketSlotCertainty,
   GroupLetter,
   GroupStanding,
   Match,
@@ -549,12 +551,244 @@ function buildBracketFromStandings(
   return allMatches;
 }
 
+// ─── Bracket slot certainty annotation ──────────────────────────────────────
+//
+// Avoids importing from qualification.ts (which imports computeStandings from
+// this module) — the logic is a direct copy of the pure helpers there.
+
+// Mirrors qualification helpers without importing (circular dependency).
+
+function expectedMatchesPerTeamBracket(groupSize: number): number {
+  return Math.max(1, groupSize - 1);
+}
+
+function matchesInGroupBracket(groupSize: number): number {
+  return (groupSize * (groupSize - 1)) / 2;
+}
+
+function maxPossiblePoints(record: TeamRecord, expectedPlayed: number): number {
+  const remaining = Math.max(0, expectedPlayed - record.played);
+  return record.points + remaining * 3;
+}
+
+type SlotConfirmedOptions = {
+  lockedGroupMatchCount?: number;
+  groupSize?: number;
+  lockedRows?: TeamRecord[];
+};
+
+function isSlotConfirmed(row: TeamRecord, rows: TeamRecord[], opts: SlotConfirmedOptions = {}): boolean {
+  const groupSize = opts.groupSize ?? (rows.length || 4);
+  const expectedPlayed = expectedMatchesPerTeamBracket(groupSize);
+  const requiredLockedMatches = matchesInGroupBracket(groupSize);
+
+  const confirmRows = opts.lockedRows !== undefined ? opts.lockedRows : rows;
+  if (confirmRows.length === 0) return false;
+  const confirmRow = confirmRows.find((r) => r.teamId === row.teamId);
+  if (!confirmRow || confirmRow.played < expectedPlayed) return false;
+
+  const groupComplete = confirmRows.length > 0 && confirmRows.every((r) => r.played >= expectedPlayed);
+  if (!groupComplete) return false;
+
+  if (
+    opts.lockedRows !== undefined
+      ? (opts.lockedGroupMatchCount ?? 0) < requiredLockedMatches
+      : opts.lockedGroupMatchCount !== undefined &&
+        opts.lockedGroupMatchCount < requiredLockedMatches
+  ) {
+    return false;
+  }
+
+  const finalRank = confirmRows.findIndex((r) => r.teamId === row.teamId);
+  return finalRank >= 0 && finalRank < 2;
+}
+
+/**
+ * Parse a seed label string such as "2A", "1E", "3B" into rank + group.
+ * Returns null for labels that don't match this pattern (e.g. "W74", "3?").
+ */
+function parseSeedLabelToGroupSlot(label: string): { rank: number; group: GroupLetter } | null {
+  if (label.length < 2) return null;
+  const rank = parseInt(label[0], 10);
+  const group = label[1] as GroupLetter;
+  if (isNaN(rank) || rank < 1 || rank > 4 || !/^[A-L]$/.test(group)) return null;
+  return { rank, group };
+}
+
+// Rough probability estimates for ghost candidates ranked below the projected winner.
+const GHOST_FREQ = [0.35, 0.15] as const;
+
+function computeR32SlotAnnotation(
+  projectedTeamId: string,
+  parsed: { rank: number; group: GroupLetter },
+  standingsMap: Map<GroupLetter, TeamRecord[]>,
+  lockedGroupMatchCount?: number,
+  lockedStandingsByGroup: Partial<Record<GroupLetter, TeamRecord[]>> = {}
+): { certainty: BracketSlotCertainty; ghosts: BracketGhostCandidate[] } {
+  const groupRows = standingsMap.get(parsed.group);
+  if (!groupRows) return { certainty: "tbd", ghosts: [] };
+
+  const row = groupRows.find((r) => r.teamId === projectedTeamId);
+  if (!row) return { certainty: "tbd", ghosts: [] };
+
+  const certainty: BracketSlotCertainty = isSlotConfirmed(row, groupRows, {
+    groupSize: groupRows.length,
+    lockedGroupMatchCount,
+    lockedRows: lockedStandingsByGroup[parsed.group]
+  })
+    ? "confirmed"
+    : "projected";
+
+  if (certainty === "confirmed") {
+    return { certainty, ghosts: [] };
+  }
+
+  const projectedIdx = groupRows.findIndex((r) => r.teamId === projectedTeamId);
+
+  const others = groupRows
+    .filter((r) => r.teamId !== projectedTeamId)
+    .map((r) => ({ r, dist: Math.abs(groupRows.findIndex((x) => x.teamId === r.teamId) - projectedIdx) }))
+    .sort((a, b) => a.dist - b.dist || 0)
+    .slice(0, 2);
+
+  const ghosts: BracketGhostCandidate[] = others.map(({ r }, i) => ({
+    teamId: r.teamId,
+    frequency: GHOST_FREQ[i] ?? 0.05
+  }));
+
+  return { certainty, ghosts };
+}
+
+function certaintyForUpstreamWinner(
+  upstream: BracketMatch | undefined,
+  winnerId: string | undefined
+): BracketSlotCertainty {
+  if (!winnerId) return "tbd";
+  if (!upstream) return "projected";
+  if (upstream.homeTeamId === winnerId) {
+    return upstream.homeCertainty ?? "projected";
+  }
+  if (upstream.awayTeamId === winnerId) {
+    return upstream.awayCertainty ?? "projected";
+  }
+  return "projected";
+}
+
+function propagateUpstreamGhost(
+  upstream: BracketMatch | undefined,
+  projectedWinnerId: string | undefined
+): BracketGhostCandidate[] {
+  if (!upstream || !projectedWinnerId) return [];
+  // The loser of the upstream match is the ghost: they could have won instead.
+  const loserId =
+    upstream.homeTeamId === projectedWinnerId ? upstream.awayTeamId : upstream.homeTeamId;
+  if (!loserId) return [];
+  return [{ teamId: loserId, frequency: 0.2 }];
+}
+
+/**
+ * Annotates each BracketMatch with slot certainty ("confirmed" | "projected" |
+ * "tbd") and up to 2 ghost candidates per side.
+ *
+ * R32 slots are derived directly from group standings — no simulation required.
+ * R16+ slots propagate the upstream loser as a single ghost candidate.
+ */
+export function annotateBracketCertainty(
+  bracket: BracketMatch[],
+  standings: GroupStanding[],
+  lockedGroupMatchCount: Partial<Record<GroupLetter, number>> = {},
+  lockedStandingsByGroup: Partial<Record<GroupLetter, TeamRecord[]>> = {}
+): BracketMatch[] {
+  const standingsMap = new Map<GroupLetter, TeamRecord[]>(
+    standings.map((s) => [s.group, s.rows])
+  );
+  const annotatedById = new Map<string, BracketMatch>();
+
+  const annotated: BracketMatch[] = [];
+
+  for (const match of bracket) {
+    if (match.stage === "R32") {
+      const homeParsed = match.homeSeedLabel ? parseSeedLabelToGroupSlot(match.homeSeedLabel) : null;
+      const awayParsed = match.awaySeedLabel ? parseSeedLabelToGroupSlot(match.awaySeedLabel) : null;
+
+      const home =
+        homeParsed && match.homeTeamId
+          ? computeR32SlotAnnotation(
+              match.homeTeamId,
+              homeParsed,
+              standingsMap,
+              lockedGroupMatchCount[homeParsed.group],
+              lockedStandingsByGroup
+            )
+          : { certainty: "tbd" as BracketSlotCertainty, ghosts: [] };
+
+      const away =
+        awayParsed && match.awayTeamId
+          ? computeR32SlotAnnotation(
+              match.awayTeamId,
+              awayParsed,
+              standingsMap,
+              lockedGroupMatchCount[awayParsed.group],
+              lockedStandingsByGroup
+            )
+          : { certainty: "tbd" as BracketSlotCertainty, ghosts: [] };
+
+      annotated.push({
+        ...match,
+        homeCertainty: home.certainty,
+        awayCertainty: away.certainty,
+        homeGhosts: home.ghosts.length > 0 ? home.ghosts : undefined,
+        awayGhosts: away.ghosts.length > 0 ? away.ghosts : undefined
+      });
+      annotatedById.set(match.id, annotated[annotated.length - 1]!);
+      continue;
+    }
+
+    const homeUpstreamId = match.homeSeedLabel?.startsWith("W")
+      ? `M${match.homeSeedLabel.slice(1)}`
+      : null;
+    const awayUpstreamId = match.awaySeedLabel?.startsWith("W")
+      ? `M${match.awaySeedLabel.slice(1)}`
+      : null;
+
+    const homeUpstream = homeUpstreamId ? annotatedById.get(homeUpstreamId) : undefined;
+    const awayUpstream = awayUpstreamId ? annotatedById.get(awayUpstreamId) : undefined;
+
+    const homeCertainty = certaintyForUpstreamWinner(homeUpstream, match.homeTeamId);
+    const awayCertainty = certaintyForUpstreamWinner(awayUpstream, match.awayTeamId);
+
+    const homeGhosts =
+      homeCertainty === "confirmed"
+        ? undefined
+        : propagateUpstreamGhost(homeUpstream, match.homeTeamId) || undefined;
+    const awayGhosts =
+      awayCertainty === "confirmed"
+        ? undefined
+        : propagateUpstreamGhost(awayUpstream, match.awayTeamId) || undefined;
+
+    annotated.push({
+      ...match,
+      homeCertainty,
+      awayCertainty,
+      homeGhosts,
+      awayGhosts
+    });
+    annotatedById.set(match.id, annotated[annotated.length - 1]!);
+  }
+
+  return annotated;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
 export function projectTournament(
   teams: Team[],
   matches: Match[],
   knockoutMarkets: PolymarketMatchMarket[] = [],
   overrides: Record<string, ScoreOverride> = {},
-  bracketPicks: Record<string, string> = {}
+  bracketPicks: Record<string, string> = {},
+  lockedGroupMatchCount: Partial<Record<GroupLetter, number>> = {},
+  lockedStandingsByGroup: Partial<Record<GroupLetter, TeamRecord[]>> = {}
 ): TournamentProjection {
   const teamsById = toTeamsById(teams);
   const scoredMatches = materializeMatches(matches, teamsById, overrides);
@@ -565,7 +799,13 @@ export function projectTournament(
     .map((record) => record.group)
     .sort();
   const bracketTeamsById = toTeamsById(applyProjectedGroupForm(teams, scoredMatches));
-  const bracket = buildBracketFromStandings(standings, bracketTeamsById, knockoutMarkets, undefined, bracketPicks);
+  const rawBracket = buildBracketFromStandings(standings, bracketTeamsById, knockoutMarkets, undefined, bracketPicks);
+  const bracket = annotateBracketCertainty(
+    rawBracket,
+    standings,
+    lockedGroupMatchCount,
+    lockedStandingsByGroup
+  );
 
   return {
     scoredMatches,

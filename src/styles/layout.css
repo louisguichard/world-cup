@@ -74,6 +74,16 @@
   height: 7px;
 }
 
+.wc-topbar-version {
+  opacity: 0.9;
+}
+
+@media (max-width: 520px) {
+  .wc-topbar-version {
+    display: none;
+  }
+}
+
 /* Bottom navigation */
 .bottom-tab-bar {
   position: fixed;
@@ -115,6 +125,22 @@
 .bottom-tab--active {
   color: var(--accent);
   background: var(--accent-soft);
+}
+
+/* Responsive: tighten tab text on narrow screens with 8 tabs */
+@media (max-width: 480px) {
+  .bottom-tab {
+    font-size: 0.6rem;
+    padding: 6px 2px;
+    letter-spacing: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .bottom-tab {
+    font-size: 0.55rem;
+    padding: 5px 1px;
+  }
 }
 
 .bottom-tab-badge {

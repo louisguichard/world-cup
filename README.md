@@ -1,100 +1,122 @@
-# World Cup Lab
+# Road to the World Cup Final 2026
 
-Interactive simulator for the 2026 FIFA World Cup.
+Live scores, qualification tracking, venue hubs, and Monte Carlo tournament intelligence for the 48-team **FIFA World Cup 2026™**.
 
-💡 **This project was developed entirely using AI, primarily Codex (GPT 5.5) for modeling and Claude Code (Opus 4.8) for design. All code, analyses, and explanations were written by the AI (with the sole exception of this paragraph).**
+**Current release:** see [`npm run version:show`](./docs/VERSIONING.md) or [`VERSION_LOG.md`](./VERSION_LOG.md) — [`CHANGELOG.md`](./CHANGELOG.md) covers semver releases.
 
-The app combines live group-stage results, Polymarket match probabilities, FIFA ranking points, host advantage and Monte Carlo simulations to help explore the 48-team format, especially the eight best third-placed teams and the knockout paths that follow.
+## What this is
+
+**Road to the Final** is a progressive web app for following the 2026 World Cup end to end: live match center, full schedule, group standings, knockout bracket (with third-place mapping), results archive, host-city venue pages, and a Monte Carlo simulator with editable scenarios.
+
+The product name in UI copy is **Road to the World Cup Final 2026** (short: **Road to the Final**). Tournament context uses **FIFA World Cup 2026™**. All branding strings live in [`src/config/appMeta.ts`](./src/config/appMeta.ts) — do not hardcode product names in components.
 
 ## Features
 
-- Live group-stage results from ESPN's public scoreboard.
-- Polymarket 1X2 markets for upcoming fixtures.
-- FIFA `DecimalTotalPoints` as the main team-strength baseline.
-- Title-odds force calibration from Polymarket outright-winner odds.
-- Host bonus for the United States, Mexico and Canada.
-- Editable deterministic scenario: change future group scores and bracket winners.
-- Official 2026 Round-of-32 bracket with the 495-combination third-place mapping.
-- Monte Carlo title odds and conditional opponent paths for any team.
-- Score model based on Negative Binomial marginals with a small Dixon-Coles adjustment.
+### Live & schedule
 
-## Model Summary
+- Live scoreboard with polling, match cards, and deep links (`#match/{id}`)
+- SofaScore-style match detail: summary, stats, lineups, commentary, head-to-head
+- Smart schedule grouping by date, stage, and host city
+- TV broadcast lookup (where configured)
 
-Team strength starts from:
+### Tournament hub
 
-```text
-baseRating = FIFA DecimalTotalPoints + host bonus
+- Matches, standings, bracket, and stats sub-tabs
+- Bracket slot certainty: confirmed, projected, and ghost paths
+- Results tab with finished-match archive
+- Groups table toggle and team match history
+
+### Venues
+
+- Host-city venue hub with enrichment data (`#venue/{slug}`)
+- Venue popovers on match cards and bracket rows
+- Per-venue match timeline and metadata
+
+### Simulator
+
+- Editable deterministic scenario (group scores + bracket picks)
+- Monte Carlo title odds and conditional opponent paths
+- Polymarket match markets and FIFA ranking baseline
+- Official 2026 Round-of-32 bracket with 495-combination third-place mapping
+
+### Developer tooling
+
+- Unified API layer with feature flags and dev proxies
+- API audit canvas and `tools/api-portal` key vault sync
+
+## Versioning (v2+)
+
+Every meaningful change set must bump the **build** number and append a line to [`VERSION_LOG.md`](./VERSION_LOG.md):
+
+```bash
+npm run version:build -- --message "Describe what changed"
 ```
 
-The Polymarket outright-winner market is deliberately not used as the initial team-strength baseline because it already contains bracket/path information.
+Semver releases (patch / minor / major) also update [`CHANGELOG.md`](./CHANGELOG.md):
 
-Future Polymarket match markets then reweight teams via:
-
-```text
-E = P(win) + 0.5 * P(draw)
-target rating gap = 180 * logit(E)
+```bash
+npm run version:patch -- --message "Bug fix summary"
+npm run version:minor -- --message "New feature summary"
+npm run version:major -- --message "Breaking change summary"
 ```
 
-Only 50% of the learned market adjustment enters the final strength index.
+Check the current version:
 
-Completed matches apply a small capped Elo-like result adjustment. The rating itself is not bounded; only market/result adjustments and match probabilities are regularized.
-
-For matches without a Polymarket market, the adjusted rating drives 1X2 or knockout-advance probabilities. When a real Polymarket market exists for a known knockout match, the app uses it before falling back to the rating model.
-
-After an initial 3,000-run Monte Carlo pass, raw title probabilities are compared with Polymarket's outright-winner market and converted into a capped force adjustment:
-
-```text
-ΔR_title = clamp(60 * (logit(p_polymarket) - logit(p_model)), -50, +50)
+```bash
+npm run version:show
 ```
 
-The main Monte Carlo simulation then uses the recalibrated ratings. Reported title odds, stage reach and opponent paths are raw Monte Carlo frequencies from that final pass.
+Full workflow: [`docs/VERSIONING.md`](./docs/VERSIONING.md).
 
-The methodology page inside the app contains the detailed version.
+| File | Role |
+|------|------|
+| [`version.json`](./version.json) | Canonical semver + build (committed) |
+| [`scripts/version.mjs`](./scripts/version.mjs) | Bump script |
+| [`VERSION_LOG.md`](./VERSION_LOG.md) | Detailed log of every build |
+| [`CHANGELOG.md`](./CHANGELOG.md) | User-facing release notes |
 
-## Data Sources
+Version and build are injected at build time via Vite (`__APP_VERSION__`, `__APP_BUILD__`) and shown in the top bar and debug panel.
 
-- ESPN public soccer scoreboard for World Cup fixtures, scores and cards.
-- Polymarket Gamma API for match and tournament markets.
-- FIFA public rankings API for `DecimalTotalPoints` and rank.
-
-All APIs are free and keyless at the time this app was built.
-
-## Local Development
+## Local development
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open:
-
-```text
-http://127.0.0.1:5173/
-```
-
-Build:
+Open [http://127.0.0.1:5173/](http://127.0.0.1:5173/).
 
 ```bash
-npm run build
+npm run build    # production build
+npm run preview  # preview production build
+npm test         # vitest
 ```
 
-Preview the production build locally:
+### Environment
+
+Copy `.env.example` to `.env.local` if you need RapidAPI, Zafronix, or other keys. Use the API portal for key management:
 
 ```bash
-npm run preview
+npm run dev:portal
+npm run sync-keys:wc
 ```
 
 ## Deployment
 
-Vercel is the recommended deployment target because the app needs same-origin rewrites for the external data APIs. The included `vercel.json` proxies:
+Vercel is the recommended target. The app relies on same-origin rewrites for external APIs (`vercel.json` proxies ESPN, Polymarket, FIFA, RapidAPI hosts, etc.). GitHub Pages alone is not ideal without a separate proxy.
 
-- `/espn/*` to `https://site.api.espn.com/*`
-- `/poly/*` to `https://gamma-api.polymarket.com/*`
-- `/fifa-api/*` to `https://api.fifa.com/*`
-- `/fifa/*` to `https://inside.fifa.com/*`
+## Data sources
 
-GitHub Pages alone is not ideal unless you add a separate proxy service.
+- ESPN public soccer scoreboard (fixtures, scores, cards)
+- Polymarket Gamma API (match and outright markets)
+- FIFA public rankings (`DecimalTotalPoints`)
+- Static match dataset (`src/data/matchSchedule.json`) and venue enrichment JSON
+- Optional RapidAPI clients (WC 2026 Teams, WC 2026 Live) behind feature flags
+
+## Simulator model (summary)
+
+Team strength starts from FIFA `DecimalTotalPoints` plus a host bonus for USA, Mexico, and Canada. Polymarket match markets partially adjust ratings; completed matches apply a capped Elo-like update. Monte Carlo title odds are calibrated against Polymarket outright-winner markets. The in-app methodology page has the full derivation.
 
 ## Notes
 
-This is a hobby/analytics simulator, not betting advice. The model is intentionally simple and transparent, with Polymarket used for match inputs and title calibration rather than as a black-box source of final answers.
+This is a hobby analytics project, not betting advice. The model is intentionally transparent — markets inform inputs and calibration, not black-box outputs.

@@ -1,0 +1,16 @@
+{
+  "slug": "vancouver",
+  "hostCity": "Vancouver",
+  "stadiumName": "BC Place",
+  "stadiumLocation": "777 Pacific Blvd",
+  "city": "Vancouver",
+  "state": "BC",
+  "county": "Metro Vancouver",
+  "country": "Canada",
+  "fifaOfficialName": "BC Place Vancouver",
+  "formerStadiumName": "BC Place",
+  "capacity": 52497,
+  "timezone": "America/Vancouver",
+  "coordinates": { "lat": 49.277, "lon": -123.112 },
+  "aliases": ["BC Place Vancouver"]
+}

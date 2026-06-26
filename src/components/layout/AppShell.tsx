@@ -13,12 +13,17 @@ import { GroupsView } from "../views/GroupsView";
 import { TeamsView } from "../views/TeamsView";
 import { SimulatorView } from "../simulator/SimulatorView";
 import { ScheduleView } from "../views/ScheduleView";
+import { TournamentView } from "../../pages/tournament/TournamentView";
+import { VenueHubView } from "../../pages/venue/VenueHubView";
+import { MatchDetailView } from "../../pages/match/MatchDetailView";
 import { TeamDetailSheet } from "../team-detail/TeamDetailSheet";
 
 export function AppShell() {
   const activeTab = useStore((s) => s.activeTab);
   const splashPhase = useStore((s) => s.splashPhase);
   const lastGoalAnnouncement = useStore((s) => s.lastGoalAnnouncement);
+  const activeMatchId = useStore((s) => s.activeMatchId);
+  const activeVenueSlug = useStore((s) => s.activeVenueSlug);
   const mainRef = useRef<HTMLElement>(null);
 
   useHashSync();
@@ -41,7 +46,7 @@ export function AppShell() {
 
   return (
     <div className="wc-chrome">
-      <TopNavBar hidden={activeTab === "simulator"} />
+      <TopNavBar hidden={activeTab === "simulator" || !!activeMatchId || !!activeVenueSlug} />
       <main ref={mainRef} className="wc-main">
         {activeTab === "live" ? <LiveView /> : null}
         {activeTab === "results" ? <ResultsView /> : null}
@@ -54,12 +59,16 @@ export function AppShell() {
         ) : null}
         {activeTab === "teams" ? <TeamsView /> : null}
         {activeTab === "schedule" ? <ScheduleView /> : null}
+        {activeTab === "tournament" ? <TournamentView /> : null}
       </main>
       <BottomTabBar />
       <SplashScreen />
       <TeamDetailSheet />
       <DebugPanel />
       <div id="sr-live" className="sr-only" aria-live="polite" />
+      {/* Full-page match detail overlays everything when active */}
+      {activeVenueSlug && !activeMatchId ? <VenueHubView /> : null}
+      {activeMatchId ? <MatchDetailView /> : null}
     </div>
   );
 }

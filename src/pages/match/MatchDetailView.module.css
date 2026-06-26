@@ -1,0 +1,317 @@
+/* SofaScore-style token layer — scoped to match detail pages only */
+.root {
+  --ss-bg: #0a0e1a;
+  --ss-surface: #141b2d;
+  --ss-elevated: #1e2746;
+  --ss-brand: #4c6ef5;
+  --ss-text: #ffffff;
+  --ss-muted: #8b92a8;
+  --ss-success: #40c057;
+  --ss-danger: #fa5252;
+  --ss-warning: #fcc419;
+  --ss-border: rgba(255, 255, 255, 0.08);
+  --ss-header-height: 72px;
+  --ss-header-height-shrunk: 56px;
+  --ss-tab-bar-height: 44px;
+
+  position: fixed;
+  inset: 0;
+  background: var(--ss-bg);
+  color: var(--ss-text);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 200;
+  font-family: inherit;
+}
+
+/* ── Sticky header ────────────────────────────── */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--ss-surface);
+  border-bottom: 1px solid var(--ss-border);
+  transition: padding 0.2s ease, backdrop-filter 0.2s ease;
+}
+
+.header[data-shrunk] {
+  backdrop-filter: blur(12px);
+  background: rgba(20, 27, 45, 0.9);
+}
+
+.header[data-shrunk] .headerTeamFlag {
+  font-size: 20px;
+}
+
+.header[data-shrunk] .headerScoreNum {
+  font-size: 22px;
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--ss-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.backBtn:hover {
+  color: var(--ss-text);
+}
+
+.headerScore {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.headerTeam {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.headerTeamFlag {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.headerTeamName {
+  font-size: 11px;
+  color: var(--ss-muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+.headerScorebox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.headerScoreNum {
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 28px;
+  text-align: center;
+}
+
+.headerScoreSep {
+  font-size: 22px;
+  color: var(--ss-muted);
+  font-weight: 300;
+}
+
+.headerStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.statusLive {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ss-danger);
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ss-danger);
+  animation: pulseDot 1.4s ease-in-out infinite;
+}
+
+.statusText {
+  font-size: 12px;
+  color: var(--ss-muted);
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Context bar ──────────────────────────────── */
+
+.contextBar {
+  background: var(--ss-elevated);
+  padding: 6px 16px;
+  font-size: 11px;
+  color: var(--ss-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.contextSep {
+  color: var(--ss-border);
+}
+
+/* ── Scorers strip ────────────────────────────── */
+
+.scorersStrip {
+  background: var(--ss-elevated);
+  padding: 4px 16px;
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--ss-muted);
+  border-bottom: 1px solid var(--ss-border);
+  overflow: hidden;
+}
+
+.scorerList {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+}
+
+.scorerList--right {
+  text-align: right;
+}
+
+.scorerItem {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scorerItem strong {
+  color: var(--ss-text);
+  font-weight: 500;
+}
+
+/* ── Tab navigation ───────────────────────────── */
+
+.tabNav {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  background: var(--ss-surface);
+  border-bottom: 1px solid var(--ss-border);
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabNav::-webkit-scrollbar {
+  display: none;
+}
+
+.tabBtn {
+  background: none;
+  border: none;
+  color: var(--ss-muted);
+  cursor: pointer;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  position: relative;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.tabBtn:hover {
+  color: var(--ss-text);
+}
+
+.tabBtn--active {
+  color: var(--ss-brand);
+}
+
+.tabBtn--active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ss-brand);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ── Scroll container ─────────────────────────── */
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Tab panels ───────────────────────────────── */
+
+.tabPanel {
+  padding: 16px;
+  animation: fadeInUp 0.2s ease both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Empty / loading states ──────────────────── */
+
+.emptyState {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--ss-muted);
+  font-size: 14px;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--ss-elevated) 25%,
+    rgba(255, 255, 255, 0.05) 50%,
+    var(--ss-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+  height: 16px;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}

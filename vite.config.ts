@@ -1,6 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { readFileSync } from "node:fs";
 import type { Server } from "http-proxy";
+
+const versionMeta = JSON.parse(readFileSync("./version.json", "utf8")) as {
+  version: string;
+  build: number;
+  channel: string;
+};
 
 const SOFA_BROWSER_HEADERS: Record<string, string> = {
   Referer: "https://www.sofascore.com/",
@@ -125,8 +132,11 @@ export default defineConfig({
     },
   },
   define: {
+    __APP_VERSION__: JSON.stringify(versionMeta.version),
+    __APP_BUILD__: JSON.stringify(String(versionMeta.build)),
+    __APP_CHANNEL__: JSON.stringify(versionMeta.channel),
     "import.meta.env.VITE_BUILD_VERSION": JSON.stringify(
-      process.env.npm_package_version ?? "0.1.0"
-    ),
+      `${versionMeta.version}+${versionMeta.build}`
+    )
   },
 });

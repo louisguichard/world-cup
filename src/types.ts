@@ -110,6 +110,14 @@ export type GroupStanding = {
   rows: TeamRecord[];
 };
 
+export type BracketSlotCertainty = "confirmed" | "projected" | "tbd";
+
+export type BracketGhostCandidate = {
+  teamId: string;
+  /** Rough probability (0–1) this team could reach this slot. */
+  frequency: number;
+};
+
 export type BracketMatch = {
   id: string;
   stage: Stage;
@@ -128,6 +136,14 @@ export type BracketMatch = {
   source: "scheduled" | "simulated";
   manual?: boolean;
   note?: string;
+  /** Whether the home slot is confirmed, projected, or unknown. */
+  homeCertainty?: BracketSlotCertainty;
+  /** Whether the away slot is confirmed, projected, or unknown. */
+  awayCertainty?: BracketSlotCertainty;
+  /** Ghost candidates for the home slot, sorted by frequency DESC, max 2. */
+  homeGhosts?: BracketGhostCandidate[];
+  /** Ghost candidates for the away slot, sorted by frequency DESC, max 2. */
+  awayGhosts?: BracketGhostCandidate[];
 };
 
 export type TournamentProjection = {
@@ -172,7 +188,121 @@ export type TournamentSimulationResult = {
 
 // --- Extended types (Road to WC Final) ---
 
-export type TabId = "live" | "results" | "bracket" | "groups" | "simulator" | "teams" | "schedule";
+export type TabId = "live" | "results" | "bracket" | "groups" | "simulator" | "teams" | "schedule" | "tournament";
+
+// --- Match detail + tournament navigation ---
+
+export type MatchDetailTab = "summary" | "statistics" | "lineups" | "commentary" | "h2h";
+export type TournamentSubTab = "matches" | "standings" | "bracket" | "stats";
+
+export type NavigationContext = {
+  from: "tournament" | "live" | "schedule" | "results" | "bracket" | "groups" | "venue";
+  tournamentSubTab?: TournamentSubTab;
+  scrollY?: number;
+  dateKey?: string;
+  bracketRound?: string;
+  venueSlug?: string;
+};
+
+// --- Player types (minimal v1) ---
+
+export type PlayerRef = {
+  id: string;
+  displayName: string;
+  jerseyNumber?: number;
+  headshotUrl?: string;
+  position?: string;
+};
+
+export type LineupPlayer = {
+  player: PlayerRef;
+  gridPosition?: { x: number; y: number };
+  rating?: number;
+  isCaptain?: boolean;
+};
+
+export type Lineup = {
+  team: "home" | "away";
+  formation: string;
+  manager?: string;
+  startingXI: LineupPlayer[];
+  substitutes: LineupPlayer[];
+};
+
+// --- Match statistics (period-aware) ---
+
+export type TeamStats = {
+  ballPossession?: number;
+  expectedGoals?: number;
+  totalShots?: number;
+  shotsOnTarget?: number;
+  shotsOffTarget?: number;
+  blockedShots?: number;
+  bigChances?: number;
+  bigChancesMissed?: number;
+  corners?: number;
+  freeKicks?: number;
+  offsides?: number;
+  fouls?: number;
+  yellowCards?: number;
+  redCards?: number;
+  passAccuracy?: number;
+  totalPasses?: number;
+  tackles?: number;
+  interceptions?: number;
+  saves?: number;
+  goalKicks?: number;
+  throwIns?: number;
+  hitWoodwork?: number;
+};
+
+export type MatchStatisticsBundle = {
+  matchId: string;
+  period: "all" | "first_half" | "second_half";
+  home: TeamStats;
+  away: TeamStats;
+};
+
+// --- Momentum (v1 derived) ---
+
+export type MomentumInterval = {
+  startMinute: number;
+  endMinute: number;
+  homeValue: number;
+  awayValue: number;
+};
+
+// --- H2H ---
+
+export type HistoricalMatch = {
+  id: string;
+  date: string;
+  tournament: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+};
+
+export type H2HBundle = {
+  team1Id: string;
+  team2Id: string;
+  summary: {
+    total: number;
+    team1Wins: number;
+    team2Wins: number;
+    draws: number;
+  };
+  matches: HistoricalMatch[];
+};
+
+// --- Tournament stats ---
+
+export type TournamentPlayerStat = {
+  player: PlayerRef;
+  teamId: string;
+  value: number;
+};
 export type GroupsViewMode = "flags" | "table";
 export type SimulatorMode = "tournament" | "probabilities" | "methodology";
 export type SplashPhase = "loading" | "slow" | "error" | "done";
@@ -198,7 +328,11 @@ export type QualificationTier =
   | "eliminated"
   | "pending";
 
-export type QualificationCertainty = "confirmed" | "projected";
+export type QualificationCertainty =
+  | "confirmed"
+  | "projected_strong"
+  | "projected_weak"
+  | "projected";
 
 export type QualificationStatus = {
   status: QualificationTier;
@@ -286,6 +420,9 @@ export type MatchScheduleEntry = {
     name: string;
     city: string;
     country: string;
+    state?: string | null;
+    fifaOfficialName?: string;
+    capacity?: number;
     ianaTimezone?: string;
   };
   broadcast: {

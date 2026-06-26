@@ -1,13 +1,13 @@
-import type { MergedMatch } from "../../types";
-import type { Team } from "../../types";
+import type { MergedMatch, Team } from "../../types";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
-import { OddsRow } from "./OddsRow";
+import { BroadcastBar } from "./BroadcastBar";
 import { WeatherBadge } from "./WeatherBadge";
+import { VenueLabel } from "../venue/VenueLabel";
 
 type Props = {
   match: MergedMatch;
@@ -44,7 +44,12 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
             </span>
           ) : null}
           <time dateTime={kickoffUtc}>{metaTimeDisplay}</time>
-          {broadcast?.venue.city ? ` · ${broadcast.venue.city}` : null}
+          {broadcast ? (
+            <>
+              {" · "}
+              <VenueLabel matchId={match.matchId} venueString={match.venue} inline compact />
+            </>
+          ) : null}
           {!isDone && broadcast?.venue.city ? (
             <WeatherBadge city={broadcast.venue.city} />
           ) : null}
@@ -80,18 +85,7 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
         />
       ) : null}
 
-      {broadcast ? (
-        <div className="broadcast-bar">
-          <span className="network-badge network-badge--en">{broadcast.englishNetwork}</span>
-          <span className="network-badge network-badge--es">{broadcast.spanishNetwork}</span>
-          {broadcast.isConcurrent ? (
-            <span className="network-badge network-badge--warn">Concurrent</span>
-          ) : null}
-          {!compact && broadcast.streaming.length > 0 ? (
-            <span className="broadcast-stream">{broadcast.streaming.slice(0, 2).join(" · ")}</span>
-          ) : null}
-        </div>
-      ) : null}
+      <BroadcastBar matchId={match.matchId} kickoffUtc={kickoffUtc} />
     </>
   );
 

@@ -1,0 +1,131 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: var(--bg, #0b0f19);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  flex-shrink: 0;
+  padding: 12px 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 15, 25, 0.95);
+  backdrop-filter: blur(12px);
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #9ca3af);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 8px;
+}
+
+.backBtn:hover {
+  color: var(--text, #f3f4f6);
+}
+
+.titleBlock {
+  margin-bottom: 12px;
+}
+
+.titlePrimary {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text, #f3f4f6);
+}
+
+.titleSecondary {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  margin: 0 0 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary, #6b7280);
+}
+
+.expandRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.expandBtn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: var(--text-secondary, #9ca3af);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.expandBtn:hover,
+.expandBtnActive {
+  border-color: var(--accent, #6366f1);
+  color: var(--text, #f3f4f6);
+}
+
+.hubInner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.detailsToggle {
+  margin-bottom: 16px;
+}
+
+.detailsBtn {
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary, #9ca3af);
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.detailsPanel {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-2, #1f2937);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.emptyNote {
+  color: var(--text-secondary, #9ca3af);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .scroll {
+    padding: 12px;
+  }
+}

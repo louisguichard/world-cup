@@ -1,5 +1,6 @@
 import { useStore } from "../../store";
 import { bootstrap } from "../../lib/bootstrap";
+import { APP_BRAND } from "../../config/appMeta";
 
 type SplashErrorCardProps = {
   onRetry: () => void;
@@ -42,8 +43,8 @@ export function SplashScreen() {
         <span className="splash-trophy" aria-hidden>
           🏆
         </span>
-        <h1 className="splash-title">ROAD TO THE</h1>
-        <h2 className="splash-subtitle">WORLD CUP FINAL 2026</h2>
+        <h1 className="splash-title">{APP_BRAND.splashLine1}</h1>
+        <h2 className="splash-subtitle">{APP_BRAND.splashLine2}</h2>
       </div>
 
       {phase === "error" ? (

@@ -1,67 +1,253 @@
-import { useMemo } from "react";
+import { useDeferredValue, useMemo } from "react";
 import { knockoutSchedule } from "../../data/knockoutSchedule";
+import { buildQualificationContext, computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
 import { projectTournament } from "../../lib/tournament";
 import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
-import type { BracketMatch, Stage, Team } from "../../types";
+import type {
+  BracketGhostCandidate,
+  BracketMatch,
+  BracketSlotCertainty,
+  GroupStanding,
+  MergedMatch,
+  Stage,
+  Team
+} from "../../types";
 import { useStore } from "../../store";
+import { VenueLabel } from "../venue/VenueLabel";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
+import { CertaintyBadge } from "../shared/CertaintyBadge";
 import type { TeamThemeStatus } from "../team/TeamThemeRoot";
 
 const bracketStages: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
 const stageColumns: Record<Stage, number> = { R32: 1, R16: 2, QF: 3, SF: 4, Final: 5 };
 
+function GhostTeamList({
+  ghosts,
+  teamsById,
+  showFrequency
+}: {
+  ghosts: BracketGhostCandidate[];
+  teamsById: Record<string, Team>;
+  showFrequency: boolean;
+}) {
+  if (ghosts.length === 0) return null;
+  return (
+    <div className="bracket-ghost-list" aria-hidden="true">
+      {ghosts.map(({ teamId, frequency }) => {
+        const t = teamsById[teamId];
+        return (
+          <div key={teamId} className="bracket-ghost-team">
+            {t?.logo ? <img src={t.logo} alt="" /> : <span className="bracket-dot" style={{ width: 12, height: 12 }} />}
+            <span>{t?.shortName ?? teamId}</span>
+            {showFrequency ? <span className="bracket-ghost-freq">{Math.round(frequency * 100)}%</span> : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function feederWinnerId(feeder: MergedMatch): string | undefined {
+  if (feeder.homeScore === undefined || feeder.awayScore === undefined) return undefined;
+  if (feeder.homeScore > feeder.awayScore) return feeder.homeTeamId;
+  if (feeder.awayScore > feeder.homeScore) return feeder.awayTeamId;
+  return undefined;
+}
+
+function isFeederWinnerConfirmed(
+  seedLabel: string | undefined,
+  teamId: string,
+  liveMatches: Record<string, MergedMatch>
+): boolean {
+  if (!seedLabel?.startsWith("W")) return false;
+  const feederId = `M${seedLabel.slice(1)}`;
+  const feeder = liveMatches[feederId];
+  if (!feeder?.locked || feeder.status !== "completed") return false;
+  return feederWinnerId(feeder) === teamId;
+}
+
+function isTeamSlotConfirmed(
+  teamId: string | undefined,
+  match: BracketMatch,
+  side: "home" | "away",
+  mode: "confirmed" | "projected",
+  standings: GroupStanding[],
+  liveMatches: Record<string, MergedMatch>,
+  qualContext: QualificationMatchContext
+): boolean {
+  if (mode === "projected" || !teamId) return false;
+
+  const live = liveMatches[match.id];
+  if (live?.locked && live.status === "completed" && live.homeScore !== undefined) {
+    return true;
+  }
+
+  if (match.stage === "R32") {
+    return computeQualificationStatus(teamId, standings, qualContext).certainty === "confirmed";
+  }
+
+  const seedLabel = side === "home" ? match.homeSeedLabel : match.awaySeedLabel;
+  return isFeederWinnerConfirmed(seedLabel, teamId, liveMatches);
+}
+
+function isSlotConfirmed(
+  match: BracketMatch,
+  mode: "confirmed" | "projected",
+  standings: GroupStanding[],
+  liveMatches: Record<string, MergedMatch>,
+  qualContext: QualificationMatchContext
+): { homeConfirmed: boolean; awayConfirmed: boolean } {
+  if (mode === "projected") {
+    return { homeConfirmed: false, awayConfirmed: false };
+  }
+
+  const live = liveMatches[match.id];
+  if (live?.locked && live.status === "completed" && live.homeScore !== undefined) {
+    return { homeConfirmed: true, awayConfirmed: true };
+  }
+
+  const homeConfirmed = isTeamSlotConfirmed(
+    match.homeTeamId,
+    match,
+    "home",
+    mode,
+    standings,
+    liveMatches,
+    qualContext
+  );
+  const awayConfirmed = isTeamSlotConfirmed(
+    match.awayTeamId,
+    match,
+    "away",
+    mode,
+    standings,
+    liveMatches,
+    qualContext
+  );
+
+  return { homeConfirmed, awayConfirmed };
+}
+
 function BracketTeamReadonly({
   team,
   seedLabel,
   winner,
+  slotConfirmed,
+  ghosts,
+  mode,
+  teamsById,
   status = "default"
 }: {
   team?: Team;
   seedLabel?: string;
   winner?: boolean;
+  slotConfirmed: boolean;
+  ghosts?: BracketGhostCandidate[];
+  mode: "confirmed" | "projected";
+  teamsById: Record<string, Team>;
   status?: TeamThemeStatus;
 }) {
   const theme = useTeamTheme(team?.id);
+
+  const effectiveCertainty: BracketSlotCertainty =
+    mode === "confirmed" && !slotConfirmed ? "tbd" : slotConfirmed ? "confirmed" : "projected";
+
   const resolvedStatus: TeamThemeStatus = winner ? "advancing" : status;
+  const visibleGhosts = ghosts?.slice(0, 2) ?? [];
+
+  const showGhosts = mode === "projected" && visibleGhosts.length > 0;
+
+  if (effectiveCertainty === "tbd") {
+    return (
+      <div className="bracket-team-slot">
+        <div className="bracket-team bracket-team-tbd">
+          <span className="bracket-dot" />
+          <span>TBD</span>
+        </div>
+        <CertaintyBadge certainty="tbd" size="xs" />
+        {showGhosts ? (
+          <>
+            <div className="bracket-ghost-label">Possible</div>
+            <GhostTeamList ghosts={visibleGhosts} teamsById={teamsById} showFrequency={false} />
+          </>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={`bracket-team bracket-team-themed ${winner ? "winner" : ""}`}
-      style={team ? theme : undefined}
-      data-team-id={team?.id}
-      data-status={resolvedStatus === "default" ? undefined : resolvedStatus}
-    >
-      {team?.logo ? <img src={team.logo} alt="" /> : <span className="bracket-dot" />}
-      <span>{team?.shortName ?? seedLabel ?? "TBD"}</span>
-      {winner ? <b>✓</b> : null}
+    <div className="bracket-team-slot">
+      <div
+        className={`bracket-team bracket-team-themed ${winner ? "winner" : ""}`}
+        style={team ? theme : undefined}
+        data-team-id={team?.id}
+        data-status={resolvedStatus === "default" ? undefined : resolvedStatus}
+      >
+        {team?.logo ? <img src={team.logo} alt="" /> : <span className="bracket-dot" />}
+        <span>{team?.shortName ?? seedLabel ?? "TBD"}</span>
+        {winner ? <b>✓</b> : null}
+      </div>
+      {effectiveCertainty === "confirmed" ? (
+        <>
+          <CertaintyBadge certainty="confirmed" size="xs" />
+        </>
+      ) : null}
+      {effectiveCertainty === "projected" && mode === "projected" ? (
+        <CertaintyBadge certainty="projected" size="xs" />
+      ) : null}
+      {effectiveCertainty === "projected" && mode === "projected" && !slotConfirmed && visibleGhosts.length > 0 ? (
+        <GhostTeamList ghosts={visibleGhosts} teamsById={teamsById} showFrequency={true} />
+      ) : null}
     </div>
   );
 }
 
-function BracketCardReadonly({ match, teamsById }: { match: BracketMatch; teamsById: Record<string, Team> }) {
+function BracketCardReadonly({
+  match,
+  teamsById,
+  mode,
+  standings,
+  liveMatches,
+  qualContext
+}: {
+  match: BracketMatch;
+  teamsById: Record<string, Team>;
+  mode: "confirmed" | "projected";
+  standings: GroupStanding[];
+  liveMatches: Record<string, MergedMatch>;
+  qualContext: QualificationMatchContext;
+}) {
   const home = match.homeTeamId ? teamsById[match.homeTeamId] : undefined;
   const away = match.awayTeamId ? teamsById[match.awayTeamId] : undefined;
   const info = knockoutSchedule[match.id];
-  const liveMatches = useStore((s) => s.liveMatches);
   const kickoffUtc = info
     ? resolveKickoffByMatchId(match.id, info.date, Object.values(liveMatches))
     : undefined;
+  const { homeConfirmed, awayConfirmed } = isSlotConfirmed(match, mode, standings, liveMatches, qualContext);
 
   return (
     <article className="bracket-card">
       <div className="bracket-card-head">
         <span className="match-date">{kickoffUtc ? formatKickoffLabel(kickoffUtc) : match.label}</span>
-        <span className="match-city">{info?.hostCity ?? match.id}</span>
+        <VenueLabel matchId={match.id} inline compact />
       </div>
       <BracketTeamReadonly
-        team={home}
+        team={homeConfirmed ? home : mode === "projected" ? home : undefined}
         seedLabel={match.homeSeedLabel}
         winner={match.winnerTeamId === home?.id}
+        slotConfirmed={homeConfirmed}
+        ghosts={homeConfirmed ? undefined : match.homeGhosts}
+        mode={mode}
+        teamsById={teamsById}
       />
       <BracketTeamReadonly
-        team={away}
+        team={awayConfirmed ? away : mode === "projected" ? away : undefined}
         seedLabel={match.awaySeedLabel}
         winner={match.winnerTeamId === away?.id}
+        slotConfirmed={awayConfirmed}
+        ghosts={awayConfirmed ? undefined : match.awayGhosts}
+        mode={mode}
+        teamsById={teamsById}
       />
       {match.homeScore !== undefined && match.awayScore !== undefined ? (
         <div className="bracket-scoreline">
@@ -80,20 +266,35 @@ export function BracketBento() {
   const matches = useMemo(() => Object.values(liveMatchesMap), [liveMatchesMap]);
   const markets = useStore((s) => s.knockoutMarkets);
   const overrides = useStore((s) => s.scoreOverrides);
+  const qualContext = useMemo(
+    () => buildQualificationContext(matches, teams),
+    [matches, teams]
+  );
 
   const scored = useMemo(
     () =>
       matches.filter((m) => {
         if (m.homeScore === undefined || m.awayScore === undefined) return false;
-        if (mode === "confirmed") return m.status === "completed";
+        if (mode === "confirmed") return m.status === "completed" && m.locked;
         return true;
       }) as Parameters<typeof projectTournament>[1],
     [matches, mode]
   );
 
-  const projection = teams.length
-    ? projectTournament(teams, scored, markets, overrides)
-    : null;
+  const deferredScored = useDeferredValue(scored);
+
+  const projection = useMemo(() => {
+    if (!teams.length) return null;
+    return projectTournament(
+      teams,
+      deferredScored,
+      markets,
+      overrides,
+      {},
+      qualContext.lockedGroupMatchCount,
+      qualContext.lockedStandingsByGroup
+    );
+  }, [teams, deferredScored, markets, overrides, qualContext.lockedGroupMatchCount, qualContext.lockedStandingsByGroup]);
 
   const orderedByStage = useMemo(() => {
     const map: Record<Stage, BracketMatch[]> = {
@@ -114,13 +315,13 @@ export function BracketBento() {
       <div className="section-title">
         <div>
           <div className="section-kicker">Knockout</div>
-          <h2>{mode === "confirmed" ? "Confirmed results" : "Projected bracket"}</h2>
+          <h2>{mode === "confirmed" ? "Confirmed" : "Projected"}</h2>
         </div>
       </div>
       <p className="bracket-hint">
         {mode === "confirmed"
-          ? "Only completed knockout ties with final scores. Switch to Projected for live standings-driven paths."
-          : "Built from group standings and best-third cut line. Open Simulator to pick winners and run Monte Carlo paths."}
+          ? "Only teams mathematically through after completing all 3 group matches. Unconfirmed slots show as TBD."
+          : "Based on current group standings. Teams shown may change as remaining matches are played. Projected teams shown in indigo."}
       </p>
       {!projection ? (
         <p className="view-note">Bracket loads after tournament data is available.</p>
@@ -138,7 +339,14 @@ export function BracketBento() {
               <div className={`bracket-round ${stage === "Final" ? "is-final" : ""}`} key={stage}>
                 {orderedByStage[stage].map((match) => (
                   <div className="bracket-cell" key={match.id}>
-                    <BracketCardReadonly match={match} teamsById={teamsMap} />
+                    <BracketCardReadonly
+                      match={match}
+                      teamsById={teamsMap}
+                      mode={mode}
+                      standings={projection.standings}
+                      liveMatches={liveMatchesMap}
+                      qualContext={qualContext}
+                    />
                   </div>
                 ))}
               </div>

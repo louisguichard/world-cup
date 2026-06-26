@@ -30,13 +30,15 @@ import type {
   TournamentSimulationResult
 } from "../../types";
 import { groupLetters } from "../../types";
-import { knockoutSchedule, type KnockoutInfo } from "../../data/knockoutSchedule";
+import { knockoutSchedule } from "../../data/knockoutSchedule";
 import { loadWorldCupData } from "../../lib/dataSources";
 import { formatPercent } from "../../lib/normalize";
 import { projectTournament, simulateTournamentOutcomes, toTeamsById } from "../../lib/tournament";
 import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
 import { useStore } from "../../store";
+import { APP_BRAND } from "../../config/appMeta";
 import { TeamLabel } from "../team/TeamLabel";
+import { VenueLabel } from "../venue/VenueLabel";
 import { BracketTeamButton } from "../team/BracketTeamButton";
 
 const STORAGE_KEY = "world-cup-2026-score-overrides";
@@ -156,12 +158,6 @@ function formatDate(value: string): string {
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(value));
-}
-
-function formatVenueTitle(info: KnockoutInfo): string {
-  const location =
-    info.venueCity === info.hostCity ? info.hostCity : `${info.venueCity} (${info.hostCity})`;
-  return `${info.stadium}, ${location}, ${info.country}`;
 }
 
 function polymarketEventUrl(marketSlug?: string): string | undefined {
@@ -406,7 +402,7 @@ export function SimulatorView() {
         <span className="brand-mark loading-mark" aria-hidden="true">
           <Trophy size={26} strokeWidth={2} />
         </span>
-        <strong>World Cup Lab</strong>
+        <strong>{APP_BRAND.shortName}</strong>
         <span className="app-loading-note">
           <span className="loader sm" />
           Loading live scores and markets…
@@ -439,8 +435,8 @@ export function SimulatorView() {
             <Trophy size={22} strokeWidth={2} />
           </span>
           <span className="brand-text">
-            <strong>World Cup Lab</strong>
-            <small>WC 2026 · Simulator</small>
+            <strong>{APP_BRAND.shortName}</strong>
+            <small>{APP_BRAND.pwaShortName} · Simulator</small>
           </span>
         </button>
         <div className="topbar-actions">
@@ -977,7 +973,6 @@ function BracketCard({
   const away = match.awayTeamId ? teamsById[match.awayTeamId] : undefined;
   const decided = Boolean(home && away);
   const info = knockoutSchedule[match.id];
-  const venueTitle = info ? formatVenueTitle(info) : "";
   const kickoffUtc = info
     ? resolveKickoffByMatchId(match.id, info.date, Object.values(liveMatches))
     : undefined;
@@ -989,12 +984,10 @@ function BracketCard({
   return (
     <article className={`bracket-card ${picked ? "picked" : ""}`}>
       <div className="bracket-card-head">
-        <span className="match-date" title={venueTitle}>
+        <span className="match-date">
           {kickoffUtc ? formatKickoffLabel(kickoffUtc) : ""}
         </span>
-        <span className="match-city" title={venueTitle || match.id}>
-          {info ? info.hostCity : match.id}
-        </span>
+        <VenueLabel matchId={match.id} inline compact />
       </div>
       <BracketTeamButton
         team={home}
