@@ -15,6 +15,7 @@ import type {
 import { useStore } from "../../store";
 import { VenueLabel } from "../venue/VenueLabel";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
+import { TeamFlag } from "../team/TeamFlag";
 import { CertaintyBadge } from "../shared/CertaintyBadge";
 import type { TeamThemeStatus } from "../team/TeamThemeRoot";
 
@@ -136,7 +137,8 @@ function BracketTeamReadonly({
   ghosts,
   mode,
   teamsById,
-  status = "default"
+  status = "default",
+  onTeamSelect
 }: {
   team?: Team;
   seedLabel?: string;
@@ -146,6 +148,7 @@ function BracketTeamReadonly({
   mode: "confirmed" | "projected";
   teamsById: Record<string, Team>;
   status?: TeamThemeStatus;
+  onTeamSelect?: (teamId: string) => void;
 }) {
   const theme = useTeamTheme(team?.id);
 
@@ -177,16 +180,23 @@ function BracketTeamReadonly({
 
   return (
     <div className="bracket-team-slot">
-      <div
-        className={`bracket-team bracket-team-themed ${winner ? "winner" : ""}`}
+      <button
+        type="button"
+        className={`bracket-team bracket-team-themed ${winner ? "winner" : ""} ${team?.id ? "bracket-team--clickable" : ""}`}
         style={team ? theme : undefined}
         data-team-id={team?.id}
         data-status={resolvedStatus === "default" ? undefined : resolvedStatus}
+        disabled={!team?.id}
+        onClick={() => team?.id && onTeamSelect?.(team.id)}
       >
-        {team?.logo ? <img src={team.logo} alt="" /> : <span className="bracket-dot" />}
+        {team ? (
+          <TeamFlag team={team} teamId={team.id} />
+        ) : (
+          <span className="bracket-dot" />
+        )}
         <span>{team?.shortName ?? seedLabel ?? "TBD"}</span>
         {winner ? <b>✓</b> : null}
-      </div>
+      </button>
       {effectiveCertainty === "confirmed" ? (
         <>
           <CertaintyBadge certainty="confirmed" size="xs" />
@@ -208,7 +218,8 @@ function BracketCardReadonly({
   mode,
   standings,
   liveMatches,
-  qualContext
+  qualContext,
+  onTeamSelect
 }: {
   match: BracketMatch;
   teamsById: Record<string, Team>;
@@ -216,6 +227,7 @@ function BracketCardReadonly({
   standings: GroupStanding[];
   liveMatches: Record<string, MergedMatch>;
   qualContext: QualificationMatchContext;
+  onTeamSelect: (teamId: string) => void;
 }) {
   const home = match.homeTeamId ? teamsById[match.homeTeamId] : undefined;
   const away = match.awayTeamId ? teamsById[match.awayTeamId] : undefined;
@@ -239,6 +251,7 @@ function BracketCardReadonly({
         ghosts={homeConfirmed ? undefined : match.homeGhosts}
         mode={mode}
         teamsById={teamsById}
+        onTeamSelect={onTeamSelect}
       />
       <BracketTeamReadonly
         team={awayConfirmed ? away : mode === "projected" ? away : undefined}
@@ -248,6 +261,7 @@ function BracketCardReadonly({
         ghosts={awayConfirmed ? undefined : match.awayGhosts}
         mode={mode}
         teamsById={teamsById}
+        onTeamSelect={onTeamSelect}
       />
       {match.homeScore !== undefined && match.awayScore !== undefined ? (
         <div className="bracket-scoreline">
@@ -260,6 +274,7 @@ function BracketCardReadonly({
 
 export function BracketBento() {
   const mode = useStore((s) => s.bracketViewMode);
+  const openTeamSheet = useStore((s) => s.openTeamSheet);
   const teamsMap = useStore((s) => s.teams);
   const liveMatchesMap = useStore((s) => s.liveMatches);
   const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
@@ -346,6 +361,7 @@ export function BracketBento() {
                       standings={projection.standings}
                       liveMatches={liveMatchesMap}
                       qualContext={qualContext}
+                      onTeamSelect={openTeamSheet}
                     />
                   </div>
                 ))}
