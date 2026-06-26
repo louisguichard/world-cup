@@ -5,6 +5,7 @@ import { groupMatchesByDay } from "../../lib/groupMatchesByDay";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import styles from "./ScheduleView.module.css";
+import { VenueLabel } from "../venue/VenueLabel";
 
 export function ScheduleView() {
   const teams = useStore((s) => s.teams);
@@ -92,7 +93,17 @@ export function ScheduleView() {
                       <td className={styles.teamCell}>
                         {away?.shortName ?? away?.name ?? m.awayTeamId}
                       </td>
-                      <td className={styles.venueCell}>{m.venue ?? "—"}</td>
+                      <td
+                        className={styles.venueCell}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <VenueLabel
+                          matchId={m.matchId ?? m.id}
+                          venueString={m.venue}
+                          inline
+                          compact
+                        />
+                      </td>
                       <td className={styles.statusCell}>
                         <StatusBadge match={m} />
                       </td>

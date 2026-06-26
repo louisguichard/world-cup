@@ -1,0 +1,16 @@
+{
+  "slug": "los-angeles",
+  "hostCity": "Los Angeles",
+  "stadiumName": "SoFi Stadium",
+  "stadiumLocation": "1001 S Stadium Dr",
+  "city": "Inglewood",
+  "state": "CA",
+  "county": "Los Angeles County",
+  "country": "USA",
+  "fifaOfficialName": "Los Angeles Stadium",
+  "formerStadiumName": "SoFi Stadium",
+  "capacity": 70492,
+  "timezone": "America/Los_Angeles",
+  "coordinates": { "lat": 33.953, "lon": -118.339 },
+  "aliases": ["Los Angeles Stadium"]
+}

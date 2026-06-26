@@ -1,0 +1,16 @@
+{
+  "slug": "guadalajara",
+  "hostCity": "Guadalajara",
+  "stadiumName": "Estadio Akron",
+  "stadiumLocation": "Av. Circuito JVC 2800",
+  "city": "Guadalajara",
+  "state": "Jalisco",
+  "county": "Zapopan",
+  "country": "Mexico",
+  "fifaOfficialName": "Estadio Guadalajara",
+  "formerStadiumName": "Estadio Akron",
+  "capacity": 45664,
+  "timezone": "America/Mexico_City",
+  "coordinates": { "lat": 20.679, "lon": -103.467 },
+  "aliases": ["Estadio Guadalajara"]
+}

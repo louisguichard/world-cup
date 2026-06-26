@@ -1,0 +1,16 @@
+{
+  "slug": "toronto",
+  "hostCity": "Toronto",
+  "stadiumName": "BMO Field",
+  "stadiumLocation": "170 Princes' Blvd",
+  "city": "Toronto",
+  "state": "ON",
+  "county": "Toronto",
+  "country": "Canada",
+  "fifaOfficialName": "Toronto Stadium",
+  "formerStadiumName": "BMO Field",
+  "capacity": 43036,
+  "timezone": "America/Toronto",
+  "coordinates": { "lat": 43.633, "lon": -79.418 },
+  "aliases": ["Toronto Stadium"]
+}

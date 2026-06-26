@@ -1,0 +1,16 @@
+{
+  "slug": "monterrey",
+  "hostCity": "Monterrey",
+  "stadiumName": "Estadio BBVA",
+  "stadiumLocation": "Av. Pablo Livas 2011",
+  "city": "Guadalupe",
+  "state": "Nuevo León",
+  "county": "Guadalupe",
+  "country": "Mexico",
+  "fifaOfficialName": "Estadio Monterrey",
+  "formerStadiumName": "Estadio BBVA",
+  "capacity": 51243,
+  "timezone": "America/Mexico_City",
+  "coordinates": { "lat": 25.669, "lon": -100.246 },
+  "aliases": ["Estadio Monterrey"]
+}

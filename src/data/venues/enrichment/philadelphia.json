@@ -1,0 +1,16 @@
+{
+  "slug": "philadelphia",
+  "hostCity": "Philadelphia",
+  "stadiumName": "Lincoln Financial Field",
+  "stadiumLocation": "1 Lincoln Financial Field Way",
+  "city": "Philadelphia",
+  "state": "PA",
+  "county": "Philadelphia County",
+  "country": "USA",
+  "fifaOfficialName": "Philadelphia Stadium",
+  "formerStadiumName": "Lincoln Financial Field",
+  "capacity": 68324,
+  "timezone": "America/New_York",
+  "coordinates": { "lat": 39.901, "lon": -75.168 },
+  "aliases": ["Philadelphia Stadium"]
+}

@@ -1,0 +1,16 @@
+{
+  "slug": "dallas",
+  "hostCity": "Dallas",
+  "stadiumName": "AT&T Stadium",
+  "stadiumLocation": "1 AT&T Way",
+  "city": "Arlington",
+  "state": "TX",
+  "county": "Tarrant County",
+  "country": "USA",
+  "fifaOfficialName": "Dallas Stadium",
+  "formerStadiumName": "AT&T Stadium",
+  "capacity": 70649,
+  "timezone": "America/Chicago",
+  "coordinates": { "lat": 32.748, "lon": -97.093 },
+  "aliases": ["Dallas Stadium"]
+}

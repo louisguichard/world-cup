@@ -71,4 +71,8 @@ export function getBroadcastByKickoff(kickoffUtc: string): BroadcastChip | undef
   return matchId ? broadcastIndex[matchId] : undefined;
 }
 
+export function getVenueByMatchId(matchId: string): BroadcastChip["venue"] | undefined {
+  return getBroadcast(matchId)?.venue;
+}
+
 export { broadcastIndex };

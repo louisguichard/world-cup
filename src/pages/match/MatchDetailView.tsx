@@ -6,7 +6,7 @@ import { useMatchDetailBundle } from "../../hooks/useMatchDetailBundle";
 import { usePageVisibilityPolling } from "../../hooks/usePageVisibilityPolling";
 import { useLiveClock } from "../../hooks/useLiveClock";
 import { clearReturnContext } from "../../store/slices/navigationSlice";
-import { buildTournamentHash } from "../../hooks/useHashSync";
+import { buildTournamentHash, buildVenueHash } from "../../hooks/useHashSync";
 import { resolveMatchIds } from "../../services/matchDetail/resolveMatchIds";
 import { materializeFullSchedule } from "../../lib/materializeFullSchedule";
 import { MatchSummaryTab } from "./components/tabs/MatchSummaryTab";
@@ -15,6 +15,7 @@ import { MatchLineupsTab } from "./components/tabs/MatchLineupsTab";
 import { MatchCommentaryTab } from "./components/tabs/MatchCommentaryTab";
 import { MatchH2HTab } from "./components/tabs/MatchH2HTab";
 import type { MatchDetailTab, MatchEvent } from "../../types";
+import { VenueLabel } from "../../components/venue/VenueLabel";
 import styles from "./MatchDetailView.module.css";
 
 const TABS: { id: MatchDetailTab; label: string }[] = [
@@ -98,6 +99,10 @@ export function MatchDetailView() {
     clearReturnContext();
 
     if (ctx) {
+      if (ctx.from === "venue" && ctx.venueSlug) {
+        window.history.replaceState(null, "", buildVenueHash(ctx.venueSlug));
+        return;
+      }
       if (ctx.from === "tournament") {
         setActiveTab("tournament");
         if (ctx.tournamentSubTab) setTournamentSubTab(ctx.tournamentSubTab);
@@ -226,6 +231,17 @@ export function MatchDetailView() {
             <>
               <span className={styles.contextSep}>·</span>
               <span style={{ color: "var(--ss-brand)" }}>{activeMatchId}</span>
+            </>
+          ) : null}
+          {match ? (
+            <>
+              <span className={styles.contextSep}>·</span>
+              <VenueLabel
+                matchId={activeMatchId ?? undefined}
+                venueString={match.venue}
+                inline
+                compact
+              />
             </>
           ) : null}
         </div>

@@ -5,12 +5,15 @@ const NAV_RETURN_KEY = "wc-nav-return";
 export type NavigationSliceState = {
   activeMatchId: string | null;
   activeMatchTab: MatchDetailTab;
+  activeVenueSlug: string | null;
   returnContext: NavigationContext | null;
   tournamentSubTab: TournamentSubTab;
   selectedDateKey: string | null;
   selectedBracketRound: string | null;
   openMatchDetail: (matchId: string, context?: NavigationContext) => void;
   closeMatchDetail: () => void;
+  openVenueHub: (slug: string, context?: NavigationContext) => void;
+  closeVenueHub: () => void;
   setMatchTab: (tab: MatchDetailTab) => void;
   setTournamentSubTab: (tab: TournamentSubTab) => void;
   setSelectedDateKey: (key: string | null) => void;
@@ -47,6 +50,7 @@ export const createNavigationSlice = (
 ): NavigationSliceState => ({
   activeMatchId: null,
   activeMatchTab: "summary",
+  activeVenueSlug: null,
   returnContext: null,
   tournamentSubTab: "matches",
   selectedDateKey: null,
@@ -63,6 +67,18 @@ export const createNavigationSlice = (
 
   closeMatchDetail: () => {
     set(() => ({ activeMatchId: null, activeMatchTab: "summary" }));
+  },
+
+  openVenueHub: (slug, context) => {
+    if (context) saveReturnContext(context);
+    set(() => ({
+      activeVenueSlug: slug,
+      returnContext: context ?? null
+    }));
+  },
+
+  closeVenueHub: () => {
+    set(() => ({ activeVenueSlug: null }));
   },
 
   setMatchTab: (tab) => set(() => ({ activeMatchTab: tab })),

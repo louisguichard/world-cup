@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildAppHash, buildMatchHash, buildTournamentHash, parseAppHash } from "./useHashSync";
+import { buildAppHash, buildMatchHash, buildTournamentHash, buildVenueHash, parseAppHash } from "./useHashSync";
 
 describe("parseAppHash", () => {
   describe("standard tabs", () => {
@@ -63,6 +63,20 @@ describe("parseAppHash", () => {
         matchId: "M1",
         matchTab: "summary"
       });
+    });
+  });
+
+  describe("venue routes", () => {
+    it("parses #venue/{slug}", () => {
+      expect(parseAppHash("#venue/los-angeles")).toMatchObject({
+        venueSlug: "los-angeles",
+        matchId: null,
+        tab: "live"
+      });
+    });
+
+    it("returns null venueSlug for standard tabs", () => {
+      expect(parseAppHash("#live").venueSlug).toBeNull();
     });
   });
 
@@ -157,5 +171,12 @@ describe("buildTournamentHash", () => {
 
   it("does not append date for non-matches sub-tabs", () => {
     expect(buildTournamentHash("standings", "2026-06-25")).toBe("#tournament/standings");
+  });
+});
+
+describe("buildVenueHash", () => {
+  it("builds venue hub hash", () => {
+    expect(buildVenueHash("los-angeles")).toBe("#venue/los-angeles");
+    expect(buildVenueHash("mexico-city")).toBe("#venue/mexico-city");
   });
 });

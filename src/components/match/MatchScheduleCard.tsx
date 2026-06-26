@@ -8,6 +8,7 @@ import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
 import { OddsRow } from "./OddsRow";
 import { WeatherBadge } from "./WeatherBadge";
+import { VenueLabel } from "../venue/VenueLabel";
 
 type Props = {
   match: MergedMatch;
@@ -44,7 +45,12 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
             </span>
           ) : null}
           <time dateTime={kickoffUtc}>{metaTimeDisplay}</time>
-          {broadcast?.venue.city ? ` · ${broadcast.venue.city}` : null}
+          {broadcast ? (
+            <>
+              {" · "}
+              <VenueLabel matchId={match.matchId} venueString={match.venue} inline compact />
+            </>
+          ) : null}
           {!isDone && broadcast?.venue.city ? (
             <WeatherBadge city={broadcast.venue.city} />
           ) : null}

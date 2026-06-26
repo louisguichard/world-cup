@@ -2,6 +2,7 @@ import type { MergedMatch } from "../../../../types";
 import { formatKickoffTime } from "../../../../lib/formatKickoff";
 import { formatLiveClock } from "../../../../lib/formatMatchClock";
 import { useStore } from "../../../../store";
+import { VenueLabel } from "../../../../components/venue/VenueLabel";
 import styles from "../../TournamentView.module.css";
 
 type Props = {
@@ -55,6 +56,11 @@ export function TournamentMatchCard({ match }: Props) {
             {formatKickoffTime(match.date)}
           </span>
         )}
+        <VenueLabel
+          matchId={match.matchId ?? match.id}
+          venueString={match.venue}
+          compact
+        />
       </div>
 
       {/* Score / teams */}

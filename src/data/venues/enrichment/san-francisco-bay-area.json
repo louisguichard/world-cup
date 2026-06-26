@@ -1,0 +1,16 @@
+{
+  "slug": "san-francisco-bay-area",
+  "hostCity": "San Francisco Bay Area",
+  "stadiumName": "Levi's Stadium",
+  "stadiumLocation": "4900 Marie P DeBartolo Way",
+  "city": "Santa Clara",
+  "state": "CA",
+  "county": "Santa Clara County",
+  "country": "USA",
+  "fifaOfficialName": "San Francisco Bay Area Stadium",
+  "formerStadiumName": "Levi's Stadium",
+  "capacity": 68827,
+  "timezone": "America/Los_Angeles",
+  "coordinates": { "lat": 37.403, "lon": -121.97 },
+  "aliases": ["San Francisco Bay Area Stadium"]
+}

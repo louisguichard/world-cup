@@ -3,6 +3,7 @@ import { formatKickoffDate } from "../../lib/formatKickoff";
 import { useStore } from "../../store";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
+import { VenueLabel } from "../venue/VenueLabel";
 
 export interface ResultMatchCardProps {
   match: MergedMatch;
@@ -31,6 +32,7 @@ export function ResultMatchCard({ match }: ResultMatchCardProps) {
       <div className="result-match-card-meta">
         <span className="final-pill">FINAL</span>
         {kickoffDate ? <time dateTime={match.date}>{kickoffDate}</time> : null}
+        <VenueLabel matchId={match.matchId ?? match.id} venueString={match.venue} inline compact />
       </div>
 
       <div className="result-match-card-scoreline">

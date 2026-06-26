@@ -25,6 +25,7 @@ export type ParsedAppHash = {
   matchTab: MatchDetailTab;
   tournamentSubTab: TournamentSubTab;
   dateKey: string | null;
+  venueSlug: string | null;
 };
 
 export function parseAppHash(hash: string): ParsedAppHash {
@@ -49,7 +50,21 @@ export function parseAppHash(hash: string): ParsedAppHash {
       matchId: secondary,
       matchTab,
       tournamentSubTab: "matches",
-      dateKey: null
+      dateKey: null,
+      venueSlug: null
+    };
+  }
+
+  // Venue hub route: #venue/{slug}
+  if (primary === "venue" && secondary) {
+    return {
+      tab: "live",
+      simulatorMode: "tournament",
+      matchId: null,
+      matchTab: "summary",
+      tournamentSubTab: "matches",
+      dateKey: null,
+      venueSlug: secondary
     };
   }
 
@@ -65,7 +80,8 @@ export function parseAppHash(hash: string): ParsedAppHash {
       matchTab: "summary",
       tournamentSubTab: subTab,
       // date query param only applies to the Matches sub-tab
-      dateKey: subTab === "matches" ? dateKey : null
+      dateKey: subTab === "matches" ? dateKey : null,
+      venueSlug: null
     };
   }
 
@@ -82,7 +98,8 @@ export function parseAppHash(hash: string): ParsedAppHash {
     matchId: null,
     matchTab: "summary",
     tournamentSubTab: "matches",
-    dateKey: null
+    dateKey: null,
+    venueSlug: null
   };
 }
 
@@ -111,11 +128,16 @@ export function buildTournamentHash(subTab?: TournamentSubTab, dateKey?: string)
   return base;
 }
 
+export function buildVenueHash(slug: string): string {
+  return `#venue/${slug}`;
+}
+
 export function useHashSync(): void {
   const activeTab = useStore((s) => s.activeTab);
   const simulatorMode = useStore((s) => s.simulatorMode);
   const activeMatchId = useStore((s) => s.activeMatchId);
   const activeMatchTab = useStore((s) => s.activeMatchTab);
+  const activeVenueSlug = useStore((s) => s.activeVenueSlug);
   const tournamentSubTab = useStore((s) => s.tournamentSubTab);
   const selectedDateKey = useStore((s) => s.selectedDateKey);
 
@@ -123,6 +145,8 @@ export function useHashSync(): void {
   const setSimulatorMode = useStore((s) => s.setSimulatorMode);
   const openMatchDetail = useStore((s) => s.openMatchDetail);
   const closeMatchDetail = useStore((s) => s.closeMatchDetail);
+  const openVenueHub = useStore((s) => s.openVenueHub);
+  const closeVenueHub = useStore((s) => s.closeVenueHub);
   const setMatchTab = useStore((s) => s.setMatchTab);
   const setTournamentSubTab = useStore((s) => s.setTournamentSubTab);
   const setSelectedDateKey = useStore((s) => s.setSelectedDateKey);
@@ -136,7 +160,11 @@ export function useHashSync(): void {
       const ctx = loadReturnContext() ?? undefined;
       openMatchDetail(parsed.matchId, ctx);
       setMatchTab(parsed.matchTab);
+    } else if (parsed.venueSlug) {
+      const ctx = loadReturnContext() ?? undefined;
+      openVenueHub(parsed.venueSlug, ctx);
     } else {
+      closeVenueHub();
       setActiveTab(parsed.tab);
       setSimulatorMode(parsed.simulatorMode);
       if (parsed.tab === "tournament") {
@@ -149,7 +177,7 @@ export function useHashSync(): void {
       restoredRef.current = true;
       logger.info("Route restored from URL hash", "HashSync", parsed);
     }
-  }, [setActiveTab, setSimulatorMode, openMatchDetail, setMatchTab, setTournamentSubTab, setSelectedDateKey]);
+  }, [setActiveTab, setSimulatorMode, openMatchDetail, openVenueHub, closeVenueHub, setMatchTab, setTournamentSubTab, setSelectedDateKey]);
 
   // Handle browser back/forward
   useEffect(() => {
@@ -159,8 +187,13 @@ export function useHashSync(): void {
         const ctx = loadReturnContext() ?? undefined;
         openMatchDetail(parsed.matchId, ctx);
         setMatchTab(parsed.matchTab);
+      } else if (parsed.venueSlug) {
+        closeMatchDetail();
+        const ctx = loadReturnContext() ?? undefined;
+        openVenueHub(parsed.venueSlug, ctx);
       } else {
         closeMatchDetail();
+        closeVenueHub();
         setActiveTab(parsed.tab);
         setSimulatorMode(parsed.simulatorMode);
         if (parsed.tab === "tournament") {
@@ -173,13 +206,15 @@ export function useHashSync(): void {
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [closeMatchDetail, openMatchDetail, setActiveTab, setMatchTab, setSimulatorMode, setTournamentSubTab, setSelectedDateKey]);
+  }, [closeMatchDetail, closeVenueHub, openMatchDetail, openVenueHub, setActiveTab, setMatchTab, setSimulatorMode, setTournamentSubTab, setSelectedDateKey]);
 
   // Sync store state → URL hash
   useEffect(() => {
     let newHash: string;
     if (activeMatchId) {
       newHash = buildMatchHash(activeMatchId, activeMatchTab);
+    } else if (activeVenueSlug) {
+      newHash = buildVenueHash(activeVenueSlug);
     } else if (activeTab === "tournament") {
       newHash = buildTournamentHash(tournamentSubTab, selectedDateKey ?? undefined);
     } else {
@@ -189,13 +224,13 @@ export function useHashSync(): void {
     if (window.location.hash !== newHash) {
       // Use pushState when entering match detail so Back button works;
       // replaceState for all other tab/sub-tab switches.
-      if (activeMatchId) {
+      if (activeMatchId || activeVenueSlug) {
         window.history.pushState(null, "", newHash);
       } else {
         window.history.replaceState(null, "", newHash);
       }
     }
-  }, [activeTab, simulatorMode, activeMatchId, activeMatchTab, tournamentSubTab, selectedDateKey]);
+  }, [activeTab, simulatorMode, activeMatchId, activeMatchTab, activeVenueSlug, tournamentSubTab, selectedDateKey]);
 }
 
 /** Navigation helper: open a match detail page with return context saved */
