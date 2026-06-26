@@ -9,7 +9,7 @@ import styles from "./ScheduleView.module.css";
 export function ScheduleView() {
   const teams = useStore((s) => s.teams);
   const liveMatches = useStore((s) => s.liveMatches);
-  const openTeamSheet = useStore((s) => s.openTeamSheet);
+  const openMatchDetail = useStore((s) => s.openMatchDetail);
 
   const allMatches = useMemo(
     () => materializeFullSchedule(teams, liveMatches),
@@ -70,7 +70,7 @@ export function ScheduleView() {
                     <tr
                       key={m.id}
                       className={styles.tableRow}
-                      onClick={() => openTeamSheet(m.homeTeamId)}
+                      onClick={() => openMatchDetail(m.matchId ?? m.id, { from: "schedule" })}
                     >
                       <td className={styles.timeCell}>
                         {formatKickoffTime(m.date)}

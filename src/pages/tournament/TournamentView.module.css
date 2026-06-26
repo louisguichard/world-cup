@@ -1,0 +1,414 @@
+/* SofaScore token layer — scoped to tournament page */
+.root {
+  --ss-bg: #0a0e1a;
+  --ss-surface: #141b2d;
+  --ss-elevated: #1e2746;
+  --ss-brand: #4c6ef5;
+  --ss-text: #ffffff;
+  --ss-muted: #8b92a8;
+  --ss-success: #40c057;
+  --ss-danger: #fa5252;
+  --ss-warning: #fcc419;
+  --ss-border: rgba(255, 255, 255, 0.08);
+
+  min-height: 100%;
+  background: var(--ss-bg);
+  color: var(--ss-text);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ───────────────────────────────────── */
+
+.header {
+  background: var(--ss-surface);
+  border-bottom: 1px solid var(--ss-border);
+  padding: 16px;
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ss-text);
+  margin: 0;
+}
+
+.headerSubtitle {
+  font-size: 12px;
+  color: var(--ss-muted);
+  margin: 4px 0 0;
+}
+
+/* ── Tab nav ──────────────────────────────────── */
+
+.tabNav {
+  background: var(--ss-surface);
+  border-bottom: 1px solid var(--ss-border);
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.tabNav::-webkit-scrollbar {
+  display: none;
+}
+
+.tabBtn {
+  background: none;
+  border: none;
+  color: var(--ss-muted);
+  cursor: pointer;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  position: relative;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.tabBtn:hover {
+  color: var(--ss-text);
+}
+
+.tabBtn--active {
+  color: var(--ss-brand);
+}
+
+.tabBtn--active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ss-brand);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ── Content area ─────────────────────────────── */
+
+.content {
+  flex: 1;
+}
+
+.tabPanel {
+  animation: fadeIn 0.2s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Date navigator ───────────────────────────── */
+
+.dateNav {
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 12px 16px;
+  display: flex;
+  gap: 8px;
+  background: var(--ss-surface);
+  border-bottom: 1px solid var(--ss-border);
+  position: sticky;
+  top: 44px;
+  z-index: 4;
+}
+
+.dateNav::-webkit-scrollbar {
+  display: none;
+}
+
+.datePill {
+  flex-shrink: 0;
+  background: var(--ss-elevated);
+  border: 1px solid var(--ss-border);
+  color: var(--ss-muted);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.datePill:hover {
+  color: var(--ss-text);
+}
+
+.datePill--active {
+  background: var(--ss-brand);
+  color: #fff;
+  border-color: var(--ss-brand);
+}
+
+.datePill--today {
+  border-color: var(--ss-brand);
+  color: var(--ss-brand);
+}
+
+.datePill--today.datePill--active {
+  background: var(--ss-brand);
+  color: #fff;
+}
+
+/* ── Match list ───────────────────────────────── */
+
+.matchList {
+  padding-bottom: 24px;
+}
+
+.daySection {
+  margin-bottom: 0;
+}
+
+.daySectionHeader {
+  position: sticky;
+  top: 88px;
+  z-index: 3;
+  background: var(--ss-elevated);
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ss-muted);
+  border-bottom: 1px solid var(--ss-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.todayBadge {
+  background: var(--ss-brand);
+  color: #fff;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+/* ── Tournament match card ────────────────────── */
+
+.matchCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ss-border);
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  color: var(--ss-text);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.matchCard:hover {
+  background: var(--ss-elevated);
+}
+
+.matchCardTime {
+  width: 42px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.matchCardTimeLive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.matchCardLiveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ss-danger);
+  animation: pulseDot 1.4s ease-in-out infinite;
+}
+
+.matchCardLiveClock {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ss-danger);
+}
+
+.matchCardTimeLabel {
+  font-size: 11px;
+  color: var(--ss-muted);
+}
+
+.matchCardFt {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ss-muted);
+}
+
+.matchCardBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.matchCardScoreLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.matchCardTeam {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.matchCardTeam--away {
+  text-align: right;
+}
+
+.matchCardScore {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.matchCardScoreSep {
+  font-size: 14px;
+  color: var(--ss-muted);
+}
+
+.matchCardVs {
+  font-size: 13px;
+  color: var(--ss-muted);
+  min-width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.matchCardArrow {
+  color: var(--ss-muted);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Empty / loading ──────────────────────────── */
+
+.emptyState {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--ss-muted);
+  font-size: 14px;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--ss-elevated) 25%,
+    rgba(255, 255, 255, 0.05) 50%,
+    var(--ss-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+  height: 60px;
+  margin-bottom: 1px;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* ── Standings ────────────────────────────────── */
+
+.standingsSection {
+  margin-bottom: 24px;
+}
+
+.standingsSectionTitle {
+  padding: 12px 16px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ss-muted);
+  background: var(--ss-elevated);
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.standingsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.standingsTable th,
+.standingsTable td {
+  padding: 8px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.standingsTable th {
+  color: var(--ss-muted);
+  font-weight: 600;
+  background: var(--ss-surface);
+}
+
+.standingsTable td:first-child,
+.standingsTable th:first-child {
+  text-align: left;
+  padding-left: 16px;
+  width: 36px;
+}
+
+.standingsTable td:nth-child(2),
+.standingsTable th:nth-child(2) {
+  text-align: left;
+  min-width: 120px;
+}
+
+.standingsPts {
+  font-weight: 700;
+  color: var(--ss-text);
+}
+
+/* ── Stats leaderboard ────────────────────────── */
+
+.statsSection {
+  padding: 16px;
+}
+
+.statsSectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ss-text);
+  margin-bottom: 12px;
+}
+
+.statsPlaceholder {
+  background: var(--ss-elevated);
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  color: var(--ss-muted);
+  font-size: 13px;
+}

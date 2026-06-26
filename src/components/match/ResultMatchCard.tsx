@@ -10,7 +10,7 @@ export interface ResultMatchCardProps {
 
 export function ResultMatchCard({ match }: ResultMatchCardProps) {
   const teams = useStore((s) => s.teams);
-  const openTeamSheet = useStore((s) => s.openTeamSheet);
+  const openMatchDetail = useStore((s) => s.openMatchDetail);
 
   const home = teams[match.homeTeamId];
   const away = teams[match.awayTeamId];
@@ -26,7 +26,7 @@ export function ResultMatchCard({ match }: ResultMatchCardProps) {
       className="result-match-card"
       role="article"
       aria-label={`${homeName} ${homeScore}–${awayScore} ${awayName}, Final`}
-      onClick={() => openTeamSheet(match.homeTeamId)}
+      onClick={() => openMatchDetail(match.matchId ?? match.id, { from: "results" })}
     >
       <div className="result-match-card-meta">
         <span className="final-pill">FINAL</span>

@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { createMatchSlice, type MatchSliceState } from "./slices/matchSlice";
+import { createNavigationSlice, type NavigationSliceState } from "./slices/navigationSlice";
 import { createSimulationSlice, type SimulationSliceState } from "./slices/simulationSlice";
 import { createTournamentSlice, type TournamentSliceState } from "./slices/tournamentSlice";
 import { createUiSlice, type UiSliceState } from "./slices/uiSlice";
 
-export type AppStore = MatchSliceState & TournamentSliceState & SimulationSliceState & UiSliceState;
+export type AppStore = MatchSliceState & TournamentSliceState & SimulationSliceState & UiSliceState & NavigationSliceState;
 
 export const useStore = create<AppStore>()(
   devtools(
@@ -19,7 +20,8 @@ export const useStore = create<AppStore>()(
         () => get() as TournamentSliceState & { liveMatches: Record<string, import("../types").MergedMatch> }
       ),
       ...createSimulationSlice((fn) => set((state) => fn(state as SimulationSliceState))),
-      ...createUiSlice((fn) => set((state) => fn(state as UiSliceState)))
+      ...createUiSlice((fn) => set((state) => fn(state as UiSliceState))),
+      ...createNavigationSlice((fn) => set((state) => fn(state as NavigationSliceState)))
     }),
     { enabled: import.meta.env.DEV, name: "world-cup" }
   )

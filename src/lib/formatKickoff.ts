@@ -5,13 +5,14 @@ function parseIso(isoDate: string): Date | null {
   return date;
 }
 
-const dateFormatter = new Intl.DateTimeFormat(undefined, {
+const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
   weekday: "short",
   month: "short",
-  day: "numeric"
+  day: "numeric",
+  timeZone: localTimeZone
 });
-
-const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const timeFormatter = new Intl.DateTimeFormat("en-US", {
   hour: "numeric",

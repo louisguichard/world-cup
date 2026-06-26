@@ -1,7 +1,9 @@
 import { thirdPlaceMap } from "../data/thirdPlaceMap";
 import { knockoutSchedule } from "../data/knockoutSchedule";
 import type {
+  BracketGhostCandidate,
   BracketMatch,
+  BracketSlotCertainty,
   GroupLetter,
   GroupStanding,
   Match,
@@ -549,6 +551,152 @@ function buildBracketFromStandings(
   return allMatches;
 }
 
+// ─── Bracket slot certainty annotation ──────────────────────────────────────
+//
+// Avoids importing from qualification.ts (which imports computeStandings from
+// this module) — the logic is a direct copy of the pure helpers there.
+
+const GROUP_MATCHES_PER_TEAM_BRACKET = 3;
+
+function maxPossiblePoints(record: TeamRecord): number {
+  const remaining = Math.max(0, GROUP_MATCHES_PER_TEAM_BRACKET - record.played);
+  return record.points + remaining * 3;
+}
+
+/**
+ * Mirror of isConfirmedTopTwo from qualification.ts, inlined here to avoid a
+ * circular import (qualification.ts imports computeStandings from this file).
+ */
+function isSlotConfirmed(row: TeamRecord, rows: TeamRecord[]): boolean {
+  if (row.played >= GROUP_MATCHES_PER_TEAM_BRACKET) {
+    return rows.findIndex((r) => r.teamId === row.teamId) < 2;
+  }
+  const teamsThatCanPass = rows.filter(
+    (other) => other.teamId !== row.teamId && maxPossiblePoints(other) > row.points
+  ).length;
+  return teamsThatCanPass < 2;
+}
+
+/**
+ * Parse a seed label string such as "2A", "1E", "3B" into rank + group.
+ * Returns null for labels that don't match this pattern (e.g. "W74", "3?").
+ */
+function parseSeedLabelToGroupSlot(label: string): { rank: number; group: GroupLetter } | null {
+  if (label.length < 2) return null;
+  const rank = parseInt(label[0], 10);
+  const group = label[1] as GroupLetter;
+  if (isNaN(rank) || rank < 1 || rank > 4 || !/^[A-L]$/.test(group)) return null;
+  return { rank, group };
+}
+
+// Rough probability estimates for ghost candidates ranked below the projected winner.
+const GHOST_FREQ = [0.35, 0.15] as const;
+
+function computeR32SlotAnnotation(
+  projectedTeamId: string,
+  parsed: { rank: number; group: GroupLetter },
+  standingsMap: Map<GroupLetter, TeamRecord[]>
+): { certainty: BracketSlotCertainty; ghosts: BracketGhostCandidate[] } {
+  const groupRows = standingsMap.get(parsed.group);
+  if (!groupRows) return { certainty: "tbd", ghosts: [] };
+
+  const row = groupRows.find((r) => r.teamId === projectedTeamId);
+  if (!row) return { certainty: "tbd", ghosts: [] };
+
+  const certainty: BracketSlotCertainty = isSlotConfirmed(row, groupRows) ? "confirmed" : "projected";
+  const projectedIdx = groupRows.findIndex((r) => r.teamId === projectedTeamId);
+
+  // Ghost candidates = the teams closest in rank to the projected winner
+  // (they are most likely to swap positions before the group stage ends).
+  const others = groupRows
+    .filter((r) => r.teamId !== projectedTeamId)
+    .map((r) => ({ r, dist: Math.abs(groupRows.findIndex((x) => x.teamId === r.teamId) - projectedIdx) }))
+    .sort((a, b) => a.dist - b.dist || 0)
+    .slice(0, 2);
+
+  const ghosts: BracketGhostCandidate[] = others.map(({ r }, i) => ({
+    teamId: r.teamId,
+    frequency: GHOST_FREQ[i] ?? 0.05
+  }));
+
+  return { certainty, ghosts };
+}
+
+function propagateUpstreamGhost(
+  upstream: BracketMatch | undefined,
+  projectedWinnerId: string | undefined
+): BracketGhostCandidate[] {
+  if (!upstream || !projectedWinnerId) return [];
+  // The loser of the upstream match is the ghost: they could have won instead.
+  const loserId =
+    upstream.homeTeamId === projectedWinnerId ? upstream.awayTeamId : upstream.homeTeamId;
+  if (!loserId) return [];
+  return [{ teamId: loserId, frequency: 0.2 }];
+}
+
+/**
+ * Annotates each BracketMatch with slot certainty ("confirmed" | "projected" |
+ * "tbd") and up to 2 ghost candidates per side.
+ *
+ * R32 slots are derived directly from group standings — no simulation required.
+ * R16+ slots propagate the upstream loser as a single ghost candidate.
+ */
+export function annotateBracketCertainty(
+  bracket: BracketMatch[],
+  standings: GroupStanding[]
+): BracketMatch[] {
+  const standingsMap = new Map<GroupLetter, TeamRecord[]>(
+    standings.map((s) => [s.group, s.rows])
+  );
+  const bracketById = new Map<string, BracketMatch>(bracket.map((m) => [m.id, m]));
+
+  return bracket.map((match) => {
+    if (match.stage === "R32") {
+      const homeParsed = match.homeSeedLabel ? parseSeedLabelToGroupSlot(match.homeSeedLabel) : null;
+      const awayParsed = match.awaySeedLabel ? parseSeedLabelToGroupSlot(match.awaySeedLabel) : null;
+
+      const home =
+        homeParsed && match.homeTeamId
+          ? computeR32SlotAnnotation(match.homeTeamId, homeParsed, standingsMap)
+          : { certainty: "tbd" as BracketSlotCertainty, ghosts: [] };
+
+      const away =
+        awayParsed && match.awayTeamId
+          ? computeR32SlotAnnotation(match.awayTeamId, awayParsed, standingsMap)
+          : { certainty: "tbd" as BracketSlotCertainty, ghosts: [] };
+
+      return {
+        ...match,
+        homeCertainty: home.certainty,
+        awayCertainty: away.certainty,
+        homeGhosts: home.ghosts.length > 0 ? home.ghosts : undefined,
+        awayGhosts: away.ghosts.length > 0 ? away.ghosts : undefined
+      };
+    }
+
+    // R16, QF, SF, Final — resolve upstream feeder matches via seed labels "W74" → M74
+    const homeUpstreamId = match.homeSeedLabel?.startsWith("W")
+      ? `M${match.homeSeedLabel.slice(1)}`
+      : null;
+    const awayUpstreamId = match.awaySeedLabel?.startsWith("W")
+      ? `M${match.awaySeedLabel.slice(1)}`
+      : null;
+
+    const homeUpstream = homeUpstreamId ? bracketById.get(homeUpstreamId) : undefined;
+    const awayUpstream = awayUpstreamId ? bracketById.get(awayUpstreamId) : undefined;
+
+    return {
+      ...match,
+      homeCertainty: match.homeTeamId ? "projected" : "tbd",
+      awayCertainty: match.awayTeamId ? "projected" : "tbd",
+      homeGhosts: propagateUpstreamGhost(homeUpstream, match.homeTeamId) || undefined,
+      awayGhosts: propagateUpstreamGhost(awayUpstream, match.awayTeamId) || undefined
+    };
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
 export function projectTournament(
   teams: Team[],
   matches: Match[],
@@ -565,7 +713,8 @@ export function projectTournament(
     .map((record) => record.group)
     .sort();
   const bracketTeamsById = toTeamsById(applyProjectedGroupForm(teams, scoredMatches));
-  const bracket = buildBracketFromStandings(standings, bracketTeamsById, knockoutMarkets, undefined, bracketPicks);
+  const rawBracket = buildBracketFromStandings(standings, bracketTeamsById, knockoutMarkets, undefined, bracketPicks);
+  const bracket = annotateBracketCertainty(rawBracket, standings);
 
   return {
     scoredMatches,
