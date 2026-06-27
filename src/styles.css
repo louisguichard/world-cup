@@ -156,6 +156,7 @@ select:focus-visible,
 .opponent-row b,
 .bracket-team b,
 .score-input,
+.score-display,
 .confidence,
 .match-meta,
 .updated-at,
@@ -648,7 +649,8 @@ h1 .accent {
    ========================================================================= */
 
 .tournament-layout,
-.probability-layout {
+.probability-layout,
+.schedule-layout {
   display: grid;
   gap: 22px;
 }
@@ -1121,6 +1123,35 @@ h2 {
   cursor: default;
 }
 
+.score-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  background: var(--inset);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.score-display.score-tbd {
+  color: var(--faint);
+}
+
+.score-line.projected .score-display {
+  color: var(--faint);
+}
+
+.team-label b {
+  flex-shrink: 0;
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .score-separator {
   color: var(--faint);
   text-align: center;
@@ -1442,6 +1473,160 @@ h2 {
   height: 8px;
   margin: 0 auto;
   border-radius: 999px;
+  border: 1px dashed var(--line-strong);
+}
+
+/* =========================================================================
+   Upcoming schedule
+   ========================================================================= */
+
+.schedule-days {
+  display: grid;
+  gap: 18px;
+}
+
+.schedule-note {
+  margin-top: -8px;
+}
+
+.schedule-day {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.schedule-day h3 {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.schedule-list {
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+}
+
+.schedule-row.live {
+  background: linear-gradient(90deg, rgba(255, 92, 92, 0.08), var(--surface) 28%);
+}
+
+.schedule-kickoff {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.schedule-live {
+  display: inline-flex;
+  width: fit-content;
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: #ffb4b4;
+  background: rgba(255, 92, 92, 0.14);
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.schedule-meta-start,
+.schedule-meta-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
+}
+
+.schedule-meta-start {
+  flex: 1 1 auto;
+  justify-content: flex-start;
+}
+
+.schedule-meta-end {
+  flex: 0 1 auto;
+  justify-content: flex-end;
+  margin-left: auto;
+  color: var(--faint);
+  font-size: 11.5px;
+}
+
+.schedule-stage {
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.schedule-projected-teams {
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 210, 125, 0.28);
+  color: var(--warn);
+  background: var(--gold-soft);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.schedule-proj-label {
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--faint);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+button.schedule-stage.link {
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+button.schedule-stage.link:hover {
+  color: var(--accent);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.schedule-venue {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-market {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.schedule-dot {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  border-radius: 50%;
   border: 1px dashed var(--line-strong);
 }
 
