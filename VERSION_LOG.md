@@ -39,6 +39,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 15 — 2026-06-27 (build)
+- 11 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 11 files changed, 197 insertions(+), 160 deletions(-)
+
+## [4.0.0] build 14 — 2026-06-27 (build)
+- Unify standings and simulation on canonical dataset
+
 ## [4.0.0] build 13 — 2026-06-27 (build)
 - 15 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 15 files changed, 570 insertions(+), 143 deletions(-)
 

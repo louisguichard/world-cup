@@ -1,28 +1,33 @@
 import { useMemo } from "react";
 import type { GroupLetter, MergedMatch } from "../types";
-import { computeLiveGroupStanding, liveTeamIdsInGroup } from "../lib/buildLiveGroupStandings";
 import { useStore } from "../store";
 
 export function useLiveGroupStandings(group: GroupLetter | undefined) {
   const liveMatchesMap = useStore((s) => s.liveMatches);
-  const teamsRecord = useStore((s) => s.teams);
+  const groupStandings = useStore((s) => s.groupStandings);
 
   return useMemo(() => {
     if (!group) return null;
 
     const matches = Object.values(liveMatchesMap);
-    const teams = Object.values(teamsRecord);
-    const standing = computeLiveGroupStanding(group, matches, teams);
+    const standing = groupStandings.find((entry) => entry.group === group);
     if (!standing) return null;
+
+    const liveTeamIds = new Set<string>();
+    for (const match of matches) {
+      if (match.group !== group || match.status !== "live") continue;
+      liveTeamIds.add(match.homeTeamId);
+      liveTeamIds.add(match.awayTeamId);
+    }
 
     return {
       standing,
-      liveTeamIds: liveTeamIdsInGroup(matches, group),
+      liveTeamIds,
       liveMatchCount: matches.filter(
         (match) => match.group === group && match.status === "live"
       ).length,
     };
-  }, [group, liveMatchesMap, teamsRecord]);
+  }, [group, liveMatchesMap, groupStandings]);
 }
 
 export function useLiveGroupsWithMatches(live: MergedMatch[]) {

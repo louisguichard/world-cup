@@ -8,6 +8,8 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 15** (2026-06-27): 11 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 11 files changed, 197 insertions(+), 160 deletions(-)
+- **4.0.0 build 14** (2026-06-27): Unify standings and simulation on canonical dataset
 - **4.0.0 build 13** (2026-06-27): 15 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 15 files changed, 570 insertions(+), 143 deletions(-)
 - **4.0.0 build 12** (2026-06-27): Wire Boggio Football Prediction API v2 endpoints for match tips and accuracy stats
 - **4.0.0 build 11** (2026-06-27): 14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, version.json — 14 files changed, 512 insertions(+), 64 deletions(-)

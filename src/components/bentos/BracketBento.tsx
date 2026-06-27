@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo } from "react";
 import { knockoutSchedule } from "../../data/knockoutSchedule";
 import { buildQualificationContext, computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
+import { buildCanonicalTournamentDataset } from "../../lib/canonicalTournamentDataset";
 import { projectTournament } from "../../lib/tournament";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
@@ -314,39 +315,55 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
   const openTeamSheet = useStore((s) => s.openTeamSheet);
   const teamsMap = useStore((s) => s.teams);
   const liveMatchesMap = useStore((s) => s.liveMatches);
-  const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
-  const matches = useMemo(() => Object.values(liveMatchesMap), [liveMatchesMap]);
   const markets = useStore((s) => s.knockoutMarkets);
   const overrides = useStore((s) => s.scoreOverrides);
+  const canonical = useMemo(
+    () =>
+      buildCanonicalTournamentDataset({
+        teams: teamsMap,
+        liveMatches: liveMatchesMap,
+        knockoutMarkets: markets,
+      }),
+    [teamsMap, liveMatchesMap, markets]
+  );
+  const teams = canonical.teams;
+  const matches = canonical.matches;
   const qualContext = useMemo(
     () => buildQualificationContext(matches, teams),
     [matches, teams]
   );
 
-  const scored = useMemo(
+  const projectionMatches = useMemo(
     () =>
       matches.filter((m) => {
-        if (m.homeScore === undefined || m.awayScore === undefined) return false;
-        if (mode === "confirmed") return m.status === "completed" && m.locked;
-        return true;
+        if (mode === "confirmed") {
+          return (
+            m.homeScore !== undefined &&
+            m.awayScore !== undefined &&
+            m.status === "completed" &&
+            m.locked
+          );
+        }
+        if (m.group) return true;
+        return m.homeScore !== undefined && m.awayScore !== undefined;
       }) as Parameters<typeof projectTournament>[1],
     [matches, mode]
   );
 
-  const deferredScored = useDeferredValue(scored);
+  const deferredProjectionMatches = useDeferredValue(projectionMatches);
 
   const projection = useMemo(() => {
     if (!teams.length) return null;
     return projectTournament(
       teams,
-      deferredScored,
+      deferredProjectionMatches,
       markets,
       overrides,
       {},
       qualContext.lockedGroupMatchCount,
       qualContext.lockedStandingsByGroup
     );
-  }, [teams, deferredScored, markets, overrides, qualContext.lockedGroupMatchCount, qualContext.lockedStandingsByGroup]);
+  }, [teams, deferredProjectionMatches, markets, overrides, qualContext.lockedGroupMatchCount, qualContext.lockedStandingsByGroup]);
 
   const orderedByStage = useMemo(() => {
     const map: Record<Stage, BracketMatch[]> = {

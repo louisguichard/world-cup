@@ -160,7 +160,10 @@ function applyConsensusToMatch(
   }
 }
 
-function refreshStandingsAndSimulation(merged: Record<string, MergedMatch>): void {
+function refreshStandingsAndSimulation(
+  merged: Record<string, MergedMatch>,
+  options: { scheduleSimulationRun: boolean }
+): void {
   const store = useStore.getState();
   const teamsList = Object.values(store.teams);
   if (teamsList.length === 0) return;
@@ -177,7 +180,9 @@ function refreshStandingsAndSimulation(merged: Record<string, MergedMatch>): voi
     store.setGroupStandings(next);
     writeStandingsCache(next);
   }
-  scheduleSimulation();
+  if (options.scheduleSimulationRun) {
+    scheduleSimulation();
+  }
 }
 
 /** Live poll tick: consensus scores + enrichment cascade (light = ESPN only when idle). */
@@ -253,10 +258,8 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
     store.setPrimaryMatch(primary);
   }
 
-  if (!options?.light) {
-    refreshStandingsAndSimulation(merged);
-    store.touchModuleFreshness(MODULE_IDS.groupStandings);
-  }
+  refreshStandingsAndSimulation(merged, { scheduleSimulationRun: !options?.light });
+  store.touchModuleFreshness(MODULE_IDS.groupStandings);
 
   const intervalMs = pollIntervalMs(liveCount > 0);
 

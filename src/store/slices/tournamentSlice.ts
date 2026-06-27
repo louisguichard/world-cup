@@ -1,4 +1,5 @@
 import { GROUP_STAGE_MATCH_COUNT } from "../../types";
+import { mergeTeamsWithCatalog } from "../../data/wc2026TeamCatalog";
 import { deriveStandingsIfScored, standingsEqual } from "../../lib/qualification";
 import { applyTeamLogoOverrides } from "../../lib/resolveTeamLogo";
 import { mergeStandingsPartials, normalizeStandingsTeamIds } from "../../services/adapters/normalizeStandings";
@@ -43,8 +44,12 @@ export const createTournamentSlice = (
     set((state) => {
       const derived = deriveStandingsIfScored(data.matches, data.teams);
       const groupStandings = mergeStandingsPartials(state.groupStandings, derived ?? []);
-      const teams = applyTeamLogoOverrides(
-        Object.fromEntries(data.teams.map((t) => [t.id, t]))
+      const incomingTeams = Object.fromEntries(data.teams.map((t) => [t.id, t]));
+      const teams = mergeTeamsWithCatalog(
+        applyTeamLogoOverrides({
+          ...state.teams,
+          ...incomingTeams,
+        })
       );
       return {
         teams,
@@ -56,7 +61,10 @@ export const createTournamentSlice = (
       };
     }),
 
-  setTeams: (teams) => set(() => ({ teams })),
+  setTeams: (teams) =>
+    set(() => ({
+      teams: mergeTeamsWithCatalog(applyTeamLogoOverrides(teams)),
+    })),
 
   setScoreOverrides: (overrides) => set(() => ({ scoreOverrides: overrides })),
   setBracketPicks: (picks) => set(() => ({ bracketPicks: picks })),
