@@ -1,26 +1,9 @@
 import type { GroupStanding } from "../../types";
-import { isApiEnabled } from "../../config/apiFlags";
-import { deriveStandingsIfScored } from "../../lib/qualification";
+import { writeStandingsCache } from "../../lib/standingsCache";
 import { useStore } from "../../store";
-import {
-  fetchBracket as fetchZafronixBracket,
-  fetchStandings as fetchZafronixStandings,
-} from "../ZafronixClient";
-import {
-  fetchStandings as fetchWcLiveStandings,
-  isWc2026LiveDisabled,
-} from "../WorldCup2026LiveClient";
-import { fetchGroups, isWorldCup2026Disabled } from "../WorldCup2026Client";
-import {
-  buildStandingsFromTeamGroups,
-  mergeStandingsPartials,
-  normalizeStandingsTeamIds,
-  normalizeWCLiveStandings,
-  normalizeWC2026Groups,
-  normalizeZafronixBracket,
-  normalizeZafronixStandings,
-} from "../adapters/normalizeStandings";
-import { fetchWithFallback, STANDINGS_SOURCE_PRIORITY } from "./FallbackChain";
+import { fetchBracket as fetchZafronixBracket } from "../ZafronixClient";
+import { normalizeZafronixBracket } from "../adapters/normalizeStandings";
+import { resolveGroupStandings } from "../standings/resolveGroupStandings";
 import {
   enqueue,
   getResult,
@@ -68,39 +51,18 @@ export class DataOrchestrator {
   async refreshStandings(): Promise<void> {
     const store = useStore.getState();
     const teamsList = Object.values(store.teams);
-    const matches = Object.values(store.liveMatches);
-    const derived = deriveStandingsIfScored(matches, teamsList);
-    const seeded = buildStandingsFromTeamGroups(teamsList);
-    const fallback = derived ?? (seeded.length > 0 ? seeded : []);
-    const teamsById = Object.fromEntries(teamsList.map((t) => [t.id, t]));
+    if (teamsList.length === 0) return;
 
-    const { data } = await fetchWithFallback(
-      STANDINGS_SOURCE_PRIORITY,
-      {
-        wclive: async () =>
-          isApiEnabled("wc2026Live") && !isWc2026LiveDisabled()
-            ? normalizeWCLiveStandings(await fetchWcLiveStandings())
-            : [],
-        zafronix: async () => {
-          const fromStandings = normalizeZafronixStandings(await fetchZafronixStandings(2026));
-          if (fromStandings.length > 0) return fromStandings;
-          return normalizeZafronixBracket(await fetchZafronixBracket(2026));
-        },
-        wc2026teams: async () =>
-          isApiEnabled("wc2026Teams") && !isWorldCup2026Disabled()
-            ? normalizeWC2026Groups(await fetchGroups())
-            : [],
-        static: async () => fallback,
-      },
-      fallback
-    );
+    const standings = await resolveGroupStandings({
+      matches: Object.values(store.liveMatches),
+      teamsList,
+      currentStandings: store.groupStandings,
+      includeRemote: true,
+    });
 
-    if (Array.isArray(data) && data.length > 0) {
-      store.setGroupStandings(
-        normalizeStandingsTeamIds(mergeStandingsPartials(derived ?? [], data), teamsById)
-      );
-    } else if (fallback.length > 0) {
-      store.setGroupStandings(normalizeStandingsTeamIds(fallback, teamsById));
+    if (standings.length > 0) {
+      store.setGroupStandings(standings);
+      writeStandingsCache(standings);
     }
     store.touchModuleFreshness(MODULE_IDS.groupStandings);
   }

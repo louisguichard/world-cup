@@ -37,6 +37,19 @@ describe("fetchWithFallback", () => {
     expect(result.data).toBe(fallback);
   });
 
+  it("skips empty arrays and uses the next source", async () => {
+    const result = await fetchWithFallback(
+      ["wclive", "espn", "static"],
+      {
+        wclive: async () => [],
+        espn: async () => [{ id: "1" }],
+      },
+      []
+    );
+    expect(result.source).toBe("espn");
+    expect(result.data).toEqual([{ id: "1" }]);
+  });
+
   it("logs failures without throwing", async () => {
     const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
     await fetchWithFallback(

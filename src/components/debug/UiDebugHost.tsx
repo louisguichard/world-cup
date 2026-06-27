@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePlatform } from "../../hooks/usePlatform";
 import { useUiDebug } from "../../hooks/useUiDebug";
 import { scanUiLayoutIssues } from "../../lib/uiDebugScan";
-import { isUiDebugAvailable } from "../../lib/uiDebug";
+import { isUiDebugAvailable, isViewportSimScanReliable } from "../../lib/uiDebug";
+import { registerUiDebugScanBridge } from "../../lib/uiDebugBridge";
 import { UiDebugOverlay } from "./UiDebugOverlay";
 import { UiDebugToolbar } from "./UiDebugToolbar";
 import { UiDebugViewportShell } from "./UiDebugViewportShell";
@@ -20,24 +21,20 @@ export function UiDebugHost({ children, scanKey }: Props) {
 
   const handleRescan = useCallback(() => {
     const root = document.querySelector(".wc-chrome");
-    if (!(root instanceof HTMLElement)) {
+    if (!(root instanceof HTMLElement) || !isViewportSimScanReliable(settings.viewportSim)) {
       setIssueCount(0);
       return;
     }
     setIssueCount(scanUiLayoutIssues(root).length);
+  }, [settings.viewportSim]);
+
+  useEffect(() => {
+    if (!isUiDebugAvailable()) return;
+    registerUiDebugScanBridge();
   }, []);
 
   if (!isUiDebugAvailable()) {
     return <>{children}</>;
-  }
-
-  if (typeof window !== "undefined") {
-    (window as Window & { __wcUiDebugScan?: () => ReturnType<typeof scanUiLayoutIssues> }).__wcUiDebugScan =
-      () => {
-        const root = document.querySelector(".wc-chrome");
-        if (!(root instanceof HTMLElement)) return [];
-        return scanUiLayoutIssues(root);
-      };
   }
 
   return (

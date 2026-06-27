@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildQualificationSnapshot } from "../../lib/qualificationView";
 import type { Team } from "../../types";
-import { buildStandingsFromTeamGroups, normalizeStandingsTeamIds } from "./normalizeStandings";
+import { buildStandingsFromTeamGroups, mergeStandingsPartials, normalizeStandingsTeamIds } from "./normalizeStandings";
 
 function team(id: string, group: Team["group"], fifaRank: number): Team {
   return {
@@ -72,5 +72,42 @@ describe("normalizeStandingsTeamIds", () => {
       teams
     );
     expect(normalized[0]!.rows[0]!.teamId).toBe("mex");
+  });
+});
+
+describe("mergeStandingsPartials", () => {
+  it("keeps cached stats when a later source only seeds zero-point rows", () => {
+    const cached = [
+      {
+        group: "A" as const,
+        rows: [
+          {
+            teamId: "mex",
+            group: "A" as const,
+            played: 2,
+            wins: 2,
+            draws: 0,
+            losses: 0,
+            goalsFor: 5,
+            goalsAgainst: 1,
+            goalDifference: 4,
+            points: 6,
+            conduct: 0,
+            rating: 1500,
+          },
+        ],
+      },
+    ];
+    const seeded = buildStandingsFromTeamGroups([
+      team("mex", "A", 14),
+      team("usa", "A", 11),
+      team("can", "A", 40),
+      team("jpn", "A", 18),
+    ]);
+
+    const merged = mergeStandingsPartials(cached, seeded);
+    const mex = merged[0]!.rows.find((row) => row.teamId === "mex");
+    expect(mex?.points).toBe(6);
+    expect(mex?.played).toBe(2);
   });
 });

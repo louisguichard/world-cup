@@ -1,4 +1,4 @@
-import type { GroupStanding, MergedMatch, Team } from "../../types";
+import type { MergedMatch, Team } from "../../types";
 import { BOOTSTRAP_FLAGS, isApiEnabled } from "../../config/apiFlags";
 import { loadWorldCupData } from "../../lib/dataSources";
 import {
@@ -25,20 +25,14 @@ import { mergeEspnMatchIntoStore } from "../espnMatchMerge";
 import { publishMatchEvents } from "../matchDetail/fetchMatchEvents";
 import {
   fetchAllTeams as fetchZafronixTeams,
-  fetchBracket as fetchZafronixBracket,
-  fetchStandings as fetchZafronixStandings,
   isZafronixDisabled,
 } from "../ZafronixClient";
 import {
   fetchAllTeams as fetchWc2026Teams,
-  fetchGroups,
   isWorldCup2026Disabled,
   mergeTeamMetadata,
 } from "../WorldCup2026Client";
-import {
-  fetchStandings as fetchWcLiveStandings,
-  isWc2026LiveDisabled,
-} from "../WorldCup2026LiveClient";
+import { resolveGroupStandings } from "../standings/resolveGroupStandings";
 import {
   runCalibration,
   scheduleSimulation,
@@ -47,25 +41,13 @@ import {
 } from "../SimulationScheduler";
 import { getAllScheduleEntries } from "../BroadcastLookup";
 import { normalizeZafronixTeam, normalizeWC2026Team, mergeTeamPartials } from "../adapters/normalizeTeam";
-import {
-  buildStandingsFromTeamGroups,
-  mergeStandingsPartials,
-  normalizeStandingsTeamIds,
-  normalizeWCLiveStandings,
-  normalizeWC2026Groups,
-  normalizeZafronixBracket,
-  normalizeZafronixStandings,
-} from "../adapters/normalizeStandings";
+import { buildStandingsFromTeamGroups, mergeStandingsPartials } from "../adapters/normalizeStandings";
 import { applyTeamLogoOverrides } from "../../lib/resolveTeamLogo";
 import {
   mergeTeamsWithCatalog,
   resolveCatalogTeamIdByName,
 } from "../../data/wc2026TeamCatalog";
 import { logger } from "../Logger";
-import {
-  fetchWithFallback,
-  STANDINGS_SOURCE_PRIORITY,
-} from "./FallbackChain";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -155,44 +137,41 @@ async function mergeTeamsFromCascade(
   return applyTeamLogoOverrides(teams);
 }
 
-async function loadStandingsWithFallback(
-  espnMatches: MergedMatch[],
-  teamsList: Team[]
-): Promise<GroupStanding[] | null> {
-  const derived = deriveStandingsIfScored(espnMatches, teamsList);
-  const seeded = buildStandingsFromTeamGroups(teamsList);
-  const fallback = derived ?? (seeded.length > 0 ? seeded : []);
-
-  const { data } = await fetchWithFallback(
-    STANDINGS_SOURCE_PRIORITY,
-    {
-      wclive: async () =>
-        isApiEnabled("wc2026Live") && !isWc2026LiveDisabled()
-          ? normalizeWCLiveStandings(await fetchWcLiveStandings())
-          : [],
-      zafronix: async () => {
-        const fromStandings = normalizeZafronixStandings(await fetchZafronixStandings(2026));
-        if (fromStandings.length > 0) return fromStandings;
-        return normalizeZafronixBracket(await fetchZafronixBracket(2026));
-      },
-      wc2026teams: async () => {
-        const raw = await fetchGroups();
-        return normalizeWC2026Groups(raw);
-      },
-      static: async () => fallback,
-    },
-    fallback
-  );
-
-  const teamsById = Object.fromEntries(teamsList.map((t) => [t.id, t]));
-  if (Array.isArray(data) && data.length > 0) {
-    return normalizeStandingsTeamIds(
-      mergeStandingsPartials(derived ?? [], data),
-      teamsById
+async function runDeferredEnrichment(
+  espnTeamsMap: Record<string, Team>,
+  liveMatches: MergedMatch[]
+): Promise<void> {
+  startBootPhase("deferred-enrichment");
+  const store = useStore.getState();
+  try {
+    startBootPhase("teams-merge");
+    const teams = await mergeTeamsFromCascade(
+      Object.keys(store.teams).length ? store.teams : espnTeamsMap
     );
+    store.setTeams(teams);
+    endBootPhase("teams-merge");
+
+    const teamsList = Object.values(teams);
+    const standings = await resolveGroupStandings({
+      matches: liveMatches,
+      teamsList,
+      currentStandings: store.groupStandings,
+      includeRemote: true,
+    });
+    if (standings.length > 0) {
+      store.setGroupStandings(standings);
+    }
+
+    await runBootstrapSim();
+    endBootPhase("deferred-enrichment", "complete");
+
+    persistBootCache(store.teams, store.liveMatches, store.groupStandings);
+  } catch (error) {
+    endBootPhase("deferred-enrichment", "partial failure");
+    logger.warn("Deferred enrichment failed", "DataOrchestrator.boot", {
+      reason: error instanceof Error ? error.message : String(error),
+    });
   }
-  const result = derived ?? (seeded.length > 0 ? seeded : null);
-  return result ? normalizeStandingsTeamIds(result, teamsById) : null;
 }
 
 function startBackgroundEnrichment(): void {
@@ -225,38 +204,6 @@ async function runBootstrapSim(): Promise<void> {
       reason: simErr instanceof Error ? simErr.message : String(simErr),
     });
     useStore.getState().setSplashProgress(85, "Simulation unavailable — loading app...");
-  }
-}
-
-async function runDeferredEnrichment(
-  espnTeamsMap: Record<string, Team>,
-  liveMatches: MergedMatch[]
-): Promise<void> {
-  startBootPhase("deferred-enrichment");
-  const store = useStore.getState();
-  try {
-    startBootPhase("teams-merge");
-    const teams = await mergeTeamsFromCascade(
-      Object.keys(store.teams).length ? store.teams : espnTeamsMap
-    );
-    store.setTeams(teams);
-    endBootPhase("teams-merge");
-
-    const teamsList = Object.values(teams);
-    const standings = await loadStandingsWithFallback(liveMatches, teamsList);
-    if (standings) {
-      store.setGroupStandings(standings);
-    }
-
-    await runBootstrapSim();
-    endBootPhase("deferred-enrichment", "complete");
-
-    persistBootCache(store.teams, store.liveMatches, store.groupStandings);
-  } catch (error) {
-    endBootPhase("deferred-enrichment", "partial failure");
-    logger.warn("Deferred enrichment failed", "DataOrchestrator.boot", {
-      reason: error instanceof Error ? error.message : String(error),
-    });
   }
 }
 
@@ -362,15 +309,22 @@ export async function runBoot(): Promise<void> {
 
     startBootPhase("standings-load");
     const teamsList = Object.values(useStore.getState().teams);
-    const derivedStandings = deriveStandingsIfScored(Object.values(liveMatches), teamsList);
-    const seededStandings =
-      derivedStandings ?? (teamsList.length > 0 ? buildStandingsFromTeamGroups(teamsList) : null);
+    const matchList = Object.values(liveMatches);
+    const bootStandings = mergeStandingsPartials(
+      cached.standings,
+      deriveStandingsIfScored(matchList, teamsList) ?? [],
+      buildStandingsFromTeamGroups(teamsList)
+    );
     endBootPhase(
       "standings-load",
-      derivedStandings ? "derived locally (APIs deferred)" : seededStandings ? "seeded from groups" : "empty"
+      bootStandings.some((g) => g.rows.some((r) => r.played > 0))
+        ? "merged cache + local scores"
+        : bootStandings.length > 0
+          ? "seeded from groups (cache preserved)"
+          : "empty"
     );
-    if (seededStandings && seededStandings.length > 0) {
-      store.setGroupStandings(seededStandings);
+    if (bootStandings.length > 0) {
+      store.setGroupStandings(bootStandings);
     }
 
     store.setSplashProgress(deferHeavy ? 80 : 65, deferHeavy ? "Almost ready..." : "Running simulations...");

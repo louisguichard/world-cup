@@ -3,6 +3,7 @@ import { applyPlatformAttributes } from "../lib/platform";
 import {
   DEFAULT_UI_DEBUG_SETTINGS,
   readUiDebugSettings,
+  syncViewportSimMeta,
   writeUiDebugSettings,
   type UiDebugSettings,
   type ViewportSimulation,
@@ -45,6 +46,8 @@ export function useUiDebug(platform: PlatformSnapshot) {
     root.dataset.uiDebugSpacing = enabled && showSpacing ? "true" : "false";
     root.dataset.uiViewportSim = enabled ? viewportSim : "native";
 
+    syncViewportSimMeta(enabled, viewportSim);
+
     if (enabled && viewportSim === "mobile") {
       applyPlatformAttributes(platform.platform, platform.displayMode, true);
     } else if (enabled && viewportSim === "desktop") {
@@ -54,6 +57,7 @@ export function useUiDebug(platform: PlatformSnapshot) {
     }
 
     return () => {
+      syncViewportSimMeta(false, "native");
       delete root.dataset.uiDebug;
       delete root.dataset.uiDebugBoundaries;
       delete root.dataset.uiDebugSpacing;

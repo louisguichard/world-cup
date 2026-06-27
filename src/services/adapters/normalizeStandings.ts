@@ -1,4 +1,4 @@
-import { resolveCanonicalTeamId } from "../../data/wc2026TeamCatalog";
+import { resolveCanonicalTeamId, resolveCatalogTeamIdByName } from "../../data/wc2026TeamCatalog";
 import type { GroupLetter, GroupStanding, Team, TeamRecord } from "../../types";
 import { groupLetters } from "../../types";
 import type { WcStanding } from "../WorldCup2026LiveClient";
@@ -29,7 +29,7 @@ export function normalizeWCLiveStandings(raw: unknown): GroupStanding[] {
     if (!group || !Array.isArray(standing.teams)) continue;
 
     const rows: TeamRecord[] = standing.teams.map((t) => ({
-      teamId: slugTeamId(t.name),
+      teamId: resolveCatalogTeamIdByName(t.name) ?? slugTeamId(t.name),
       group,
       played: t.played ?? 0,
       wins: t.won ?? 0,
@@ -76,7 +76,7 @@ export function normalizeZafronixBracket(raw: unknown): GroupStanding[] {
       const row = isRecord(t) ? t : {};
       const name = String(row.name ?? row.team ?? `team-${idx}`);
       return {
-        teamId: slugTeamId(name),
+        teamId: resolveCatalogTeamIdByName(name) ?? slugTeamId(name),
         group,
         played: Number(row.played ?? row.p ?? 0),
         wins: Number(row.wins ?? row.w ?? row.won ?? 0),
@@ -210,7 +210,9 @@ export function mergeStandingsPartials(...sources: GroupStanding[][]): GroupStan
 
       for (const row of g.rows) {
         const existing = teamMap.get(row.teamId);
-        if (!existing || row.played > existing.played) {
+        const rowScore = row.played * 100 + row.points;
+        const existingScore = existing ? existing.played * 100 + existing.points : -1;
+        if (!existing || rowScore > existingScore) {
           teamMap.set(row.teamId, row);
         }
       }

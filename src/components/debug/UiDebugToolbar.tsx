@@ -1,5 +1,12 @@
 import { useMemo } from "react";
-import { isUiDebugAvailable, viewportSimLabel, type ViewportSimulation } from "../../lib/uiDebug";
+import {
+  isUiDebugAvailable,
+  isViewportSimScanReliable,
+  UI_DEBUG_VIEWPORTS,
+  viewportSimLabel,
+  viewportSimScanHint,
+  type ViewportSimulation,
+} from "../../lib/uiDebug";
 import type { UiDebugIssueKind } from "../../lib/uiDebugScan";
 import type { UiDebugSettings } from "../../lib/uiDebug";
 
@@ -32,9 +39,12 @@ export function UiDebugToolbar({
   const available = isUiDebugAvailable();
 
   const issueSummary = useMemo(() => {
-    if (!settings.scanOverflow || issueCount === 0) return "No layout issues detected";
+    if (!settings.scanOverflow) return "Overflow scan off";
+    const scanHint = viewportSimScanHint(settings.viewportSim);
+    if (scanHint) return scanHint;
+    if (issueCount === 0) return "No layout issues detected";
     return `${issueCount} layout issue${issueCount === 1 ? "" : "s"} detected`;
-  }, [issueCount, settings.scanOverflow]);
+  }, [issueCount, settings.scanOverflow, settings.viewportSim]);
 
   if (!available) return null;
 
@@ -72,6 +82,13 @@ export function UiDebugToolbar({
               ))}
             </div>
             <span className="ui-debug-panel-hint">{viewportSimLabel(settings.viewportSim)}</span>
+            {settings.viewportSim !== "native" ? (
+              <span className="ui-debug-panel-hint ui-debug-panel-hint--sim">
+                {isViewportSimScanReliable(settings.viewportSim)
+                  ? `Layout viewport ~${UI_DEBUG_VIEWPORTS[settings.viewportSim].width}px — matches ui:debug-sweep.`
+                  : `CSS frame preview only until window ≈ ${UI_DEBUG_VIEWPORTS[settings.viewportSim].width}px wide. Use Native or run the sweep.`}
+              </span>
+            ) : null}
           </div>
 
           <div className="ui-debug-panel-section ui-debug-panel-toggles">

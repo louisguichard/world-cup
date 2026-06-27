@@ -108,6 +108,8 @@
 
 .ui-debug-panel-status {
   color: var(--text-secondary);
+  line-height: 1.4;
+  max-width: 100%;
 }
 
 .ui-debug-panel-section {
@@ -149,6 +151,16 @@
   display: block;
   margin-top: 6px;
   color: var(--text-muted);
+}
+
+.ui-debug-panel-hint--sim {
+  color: #ecff43;
+  line-height: 1.45;
+}
+
+.ui-debug-panel-hint--sim code {
+  color: inherit;
+  font-size: inherit;
 }
 
 .ui-debug-panel-toggles {

@@ -1,7 +1,8 @@
 import type { MergedMatch } from "../../types";
 import { deriveStandingsIfScored, standingsEqual } from "../../lib/qualification";
 import { writeLiveMatchCache } from "../../lib/liveMatchCache";
-import { writeStandingsCache } from "../../lib/standingsCache";
+import { readStandingsCache, writeStandingsCache } from "../../lib/standingsCache";
+import { mergeStandingsPartials } from "../adapters/normalizeStandings";
 import { useStore } from "../../store";
 import { fetchScoreboard } from "../ESPNClient";
 import { applyLiveScore } from "../DataMerger";
@@ -164,10 +165,17 @@ function refreshStandingsAndSimulation(merged: Record<string, MergedMatch>): voi
   const teamsList = Object.values(store.teams);
   if (teamsList.length === 0) return;
 
-  const derived = deriveStandingsIfScored(Object.values(merged), teamsList);
-  if (derived && !standingsEqual(derived, store.groupStandings)) {
-    store.setGroupStandings(derived);
-    writeStandingsCache(derived);
+  const matchList = Object.values(merged);
+  const derived = deriveStandingsIfScored(matchList, teamsList);
+  const next = mergeStandingsPartials(
+    readStandingsCache() ?? [],
+    store.groupStandings,
+    derived ?? []
+  );
+
+  if (next.length > 0 && !standingsEqual(next, store.groupStandings)) {
+    store.setGroupStandings(next);
+    writeStandingsCache(next);
   }
   scheduleSimulation();
 }

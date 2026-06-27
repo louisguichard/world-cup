@@ -5,7 +5,7 @@ import {
   scanUiLayoutIssues,
   type UiDebugIssue,
 } from "../../lib/uiDebugScan";
-import type { UiDebugSettings } from "../../lib/uiDebug";
+import { isViewportSimScanReliable, type UiDebugSettings } from "../../lib/uiDebug";
 import { viewportFrameLabel } from "./UiDebugViewportShell";
 
 type Props = {
@@ -39,7 +39,7 @@ export function UiDebugOverlay({ settings, scanKey, onIssuesChange }: Props) {
         clearLayoutContainerMarks(root);
       }
 
-      if (settings.scanOverflow) {
+      if (settings.scanOverflow && isViewportSimScanReliable(settings.viewportSim)) {
         const found = scanUiLayoutIssues(root);
         setIssues(found);
         onIssuesChange?.(found.length);
@@ -65,11 +65,18 @@ export function UiDebugOverlay({ settings, scanKey, onIssuesChange }: Props) {
 
   if (!settings.enabled) return null;
 
+  const scanPaused =
+    settings.scanOverflow && !isViewportSimScanReliable(settings.viewportSim);
+
   return (
     <>
       <div className="ui-debug-viewport-badge" aria-live="polite">
         {viewportFrameLabel(settings.viewportSim)}
-        {issues.length > 0 ? ` · ${issues.length} issue${issues.length === 1 ? "" : "s"}` : ""}
+        {scanPaused
+          ? " · scan paused"
+          : issues.length > 0
+            ? ` · ${issues.length} issue${issues.length === 1 ? "" : "s"}`
+            : ""}
       </div>
 
       {settings.scanOverflow

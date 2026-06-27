@@ -34,6 +34,12 @@ export type FallbackResult<T> = {
   usedFallback: boolean;
 };
 
+function isUsableFallbackResult<T>(data: T): boolean {
+  if (data === null || data === undefined) return false;
+  if (Array.isArray(data)) return data.length > 0;
+  return true;
+}
+
 /** Tries sources in priority order; returns first success or static fallback. */
 export async function fetchWithFallback<T>(
   sources: SourceId[],
@@ -50,7 +56,7 @@ export async function fetchWithFallback<T>(
 
     try {
       const data = await fetcher();
-      if (data !== null && data !== undefined) {
+      if (isUsableFallbackResult(data)) {
         return { data, source, usedFallback: false };
       }
     } catch (error) {
