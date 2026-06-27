@@ -12,6 +12,10 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+## [3.0.0] build 8 — 2026-06-27 (build)
+- Live dashboard shadow bleed so glow halos and feather edges no longer clip on desktop
+
 ## [3.0.0] build 7 — 2026-06-27 (build)
 - Cache-first boot, incremental polls, lazy live sections
 
