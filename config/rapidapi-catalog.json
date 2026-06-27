@@ -401,6 +401,71 @@
     ]
   },
   {
+    "id": "footApi7",
+    "label": "FootAPI7",
+    "host": "footapi7.p.rapidapi.com",
+    "marketplaceSlug": "fluis.lacasse/api/footapi7",
+    "client": "FootApi7Client.ts",
+    "devProxyPrefix": "/api/footapi7",
+    "testPath": "/api/tournament/17/season/76986/groups",
+    "endpoints": [
+      {
+        "id": "groups",
+        "fn": "fetchFootApi7Groups",
+        "path": "/api/tournament/17/season/76986/groups",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "standings",
+        "fn": "fetchFootApi7Standings",
+        "path": "/api/tournament/17/season/76986/standings",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "teams",
+        "fn": "fetchFootApi7Teams",
+        "path": "/api/tournament/17/season/76986/teams",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "rounds",
+        "fn": "fetchFootApi7Rounds",
+        "path": "/api/tournament/17/season/76986/rounds",
+        "acceptStatuses": [200, 403, 404, 429]
+      },
+      {
+        "id": "knockout",
+        "fn": "fetchFootApi7Knockout",
+        "path": "/api/tournament/17/season/76986/knockout",
+        "acceptStatuses": [200, 403, 404, 429]
+      },
+      {
+        "id": "matchesByDate",
+        "fn": "fetchFootApi7MatchesByDate",
+        "path": "/api/matches/{todayIso}",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "matchesLive",
+        "fn": "fetchFootApi7LiveMatches",
+        "path": "/api/matches/live",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "matchIncidents",
+        "fn": "fetchFootApi7Incidents",
+        "path": "/api/match/1/incidents",
+        "acceptStatuses": [200, 403, 404, 429]
+      },
+      {
+        "id": "leagues",
+        "fn": "fetchFootApi7Leagues",
+        "path": "/api/leagues",
+        "acceptStatuses": [200, 403, 429]
+      }
+    ]
+  },
+  {
     "id": "oddsIntelligence",
     "label": "Sports Odds Intelligence",
     "host": "sports-odds-intelligence-api.p.rapidapi.com",

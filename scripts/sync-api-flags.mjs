@@ -14,6 +14,7 @@ const FLAGS_PATH = join(ROOT, "src/config/apiFlags.ts");
 const PROVIDER_TO_FLAG = {
   footballData: "footballDataApi",
   sportApi7: "sportApi7",
+  footApi7: "footApi7",
   wc2026Teams: "wc2026Teams",
   wc2026Live: "wc2026Live",
   zafronix: "zafronix",

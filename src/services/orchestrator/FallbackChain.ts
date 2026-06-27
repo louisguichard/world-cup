@@ -4,6 +4,7 @@ import { logger } from "../Logger";
 export const MATCH_SOURCE_PRIORITY: SourceId[] = [
   "wclive",
   "espn",
+  "footapi7",
   "sportapi7",
   "zafronix",
   "sofascore",
@@ -13,6 +14,7 @@ export const MATCH_SOURCE_PRIORITY: SourceId[] = [
 
 export const STANDINGS_SOURCE_PRIORITY: SourceId[] = [
   "wclive",
+  "footapi7",
   "espn",
   "zafronix",
   "wc2026teams",

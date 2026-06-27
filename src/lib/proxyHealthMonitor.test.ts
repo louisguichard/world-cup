@@ -10,6 +10,10 @@ vi.mock("../config/apiFlags", () => ({
   isApiEnabled: () => true,
 }));
 
+vi.mock("../services/FootApi7Client", () => ({
+  isFootApi7Disabled: () => false,
+}));
+
 vi.mock("../services/SportAPI7Client", () => ({
   isSportAPI7Disabled: () => false,
 }));

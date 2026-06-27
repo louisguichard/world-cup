@@ -11,6 +11,7 @@ export type ApiSourceId =
   | "fifaRankings"
   | "footballDataApi"
   | "sportApi7"
+  | "footApi7"
   | "wc2026Teams"
   | "wc2026Live"
   | "sofascore"
@@ -91,6 +92,14 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     label: "SofaScore6 RapidAPI (SportAPI7 alias)",
     lastAudit: "pass",
     lastLatencyMs: 260,
+  },
+  footApi7: {
+    enabled: true,
+    splashPath: false,
+    label: "FootAPI7 (SofaScore backup)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — groups, standings, live matches",
   },
   wc2026Teams: {
     enabled: true,

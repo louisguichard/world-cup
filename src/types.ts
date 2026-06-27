@@ -497,6 +497,7 @@ export type SourceId =
   | "wclive"
   | "espn"
   | "sportapi7"
+  | "footapi7"
   | "zafronix"
   | "sofascore"
   | "freeapi"
