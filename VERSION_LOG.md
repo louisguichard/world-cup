@@ -31,6 +31,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 7 — 2026-06-27 (build)
+- 9 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 9 files changed, 141 insertions(+), 2 deletions(-)
+
+## [4.0.0] build 6 — 2026-06-27 (build)
+- Add uiDebugBridge for sweep; skip SVG collision false positives; 0-issue uidebug gate
+
 ## [4.0.0] build 5 — 2026-06-27 (build)
 - Fix UI debug sweep scan bridge timing; archive sweep runs under .cursor/ui-debug-runs
 

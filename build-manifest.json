@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-27T07:54:32.584Z",
+  "updatedAt": "2026-06-27T14:28:25.293Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 7,
+      "kind": "build",
+      "message": "9 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 9 files changed, 141 insertions(+), 2 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:27:17.398Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 6,
+      "kind": "build",
+      "message": "Add uiDebugBridge for sweep; skip SVG collision false positives; 0-issue uidebug gate",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:27:05.516Z"
+    },
     {
       "version": "4.0.0",
       "build": 5,
@@ -123,6 +139,30 @@
     }
   ],
   "commits": [
+    {
+      "hash": "5393ac0fa19d43fc2bda0e679efe62244ed69eb0",
+      "shortHash": "5393ac0",
+      "message": "Sync build-manifest commit record for cd21e5f.",
+      "version": "4.0.0",
+      "build": 7,
+      "timestamp": "2026-06-27T14:28:25.293Z"
+    },
+    {
+      "hash": "cd21e5f0aa599e5832e794147cc7267a02b4cf29",
+      "shortHash": "cd21e5f",
+      "message": "Sync build-manifest commit record for cb36242.",
+      "version": "4.0.0",
+      "build": 7,
+      "timestamp": "2026-06-27T14:28:01.873Z"
+    },
+    {
+      "hash": "cb362421d091099af32856d8792e701df7cda704",
+      "shortHash": "cb36242",
+      "message": "Fix uiDebugBridge missing module and reach 0-issue uidebug gate",
+      "version": "4.0.0",
+      "build": 7,
+      "timestamp": "2026-06-27T14:27:17.487Z"
+    },
     {
       "hash": "aa7e77d590ee1c7c7dad95d2632ed28352ffd164",
       "shortHash": "aa7e77d",
@@ -338,30 +378,6 @@
       "version": "3.0.0",
       "build": 17,
       "timestamp": "2026-06-27T06:51:26.426Z"
-    },
-    {
-      "hash": "098eab2aef3c17d4220b80c8f9ac97f9e34b2bb1",
-      "shortHash": "098eab2",
-      "message": "Polish team click targets in groups and tournament stats; add SLS normalize helpers.",
-      "version": "3.0.0",
-      "build": 16,
-      "timestamp": "2026-06-27T06:48:34.812Z"
-    },
-    {
-      "hash": "d470c93009219c16dc187d5f93855fbf253c809f",
-      "shortHash": "d470c93",
-      "message": "Record production deploy for v3.0.0 build 15.",
-      "version": "3.0.0",
-      "build": 15,
-      "timestamp": "2026-06-27T06:44:26.836Z"
-    },
-    {
-      "hash": "4af133f2908447719e3c0277a7a9c129e092af00",
-      "shortHash": "4af133f",
-      "message": "Fix third-place bubble teams showing as projected out in live qualification layout.",
-      "version": "3.0.0",
-      "build": 14,
-      "timestamp": "2026-06-27T06:39:25.660Z"
     }
   ],
   "deploys": [
