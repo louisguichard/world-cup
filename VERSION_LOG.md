@@ -11,6 +11,10 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+## [3.0.0] build 7 — 2026-06-27 (build)
+- Cache-first boot, incremental polls, lazy live sections
+
 ## [3.0.0] build 6 — 2026-06-27 (build)
 - Visual UI debug mode: viewport simulation (mobile/desktop), layout boundaries, overflow scan, and dev toolbar.
 

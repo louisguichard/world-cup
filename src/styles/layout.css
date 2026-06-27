@@ -110,7 +110,8 @@
 
 .wc-topbar .brand-text strong {
   font-family: var(--font-brand);
-  font-weight: 400;
+  font-weight: var(--heading-weight);
+  font-synthesis: weight;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--text-primary);
@@ -502,7 +503,8 @@
   color: var(--fwc-sky-blue);
   font-family: var(--font-brand);
   font-size: clamp(0.75rem, 2.8vw, 0.9rem);
-  font-weight: 400;
+  font-weight: var(--heading-weight);
+  font-synthesis: weight;
   letter-spacing: 0.32em;
   text-transform: uppercase;
   text-shadow: 0 0 20px color-mix(in srgb, var(--fwc-royal-blue) 40%, transparent);
@@ -513,7 +515,8 @@
   color: var(--text-primary);
   font-family: var(--font-brand);
   font-size: clamp(1.65rem, 7vw, 2.85rem);
-  font-weight: 400;
+  font-weight: var(--heading-weight);
+  font-synthesis: weight;
   line-height: 1.08;
   letter-spacing: 0.04em;
   text-transform: uppercase;

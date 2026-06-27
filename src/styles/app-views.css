@@ -2,6 +2,7 @@
 
 .dashboard-view {
   animation: fade 0.4s ease both;
+  overflow: visible;
 }
 
 .dashboard-view h1 {
@@ -27,7 +28,8 @@
   margin: 6px 0 0;
   font-family: var(--font-brand);
   font-size: 1.35rem;
-  font-weight: 400;
+  font-weight: var(--heading-weight);
+  font-synthesis: weight;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--text);
@@ -40,6 +42,9 @@
   gap: 14px;
   align-items: start;
   margin-bottom: 14px;
+  overflow: visible;
+  padding-block: calc(var(--fixture-glow-bleed) / 2);
+  margin-block: calc(var(--fixture-glow-bleed) / -2);
 }
 
 .live-command-hero {
@@ -297,8 +302,10 @@
 .live-now-strip {
   display: flex;
   margin-top: 12px;
-  padding-bottom: 4px;
+  padding-block: calc(var(--fixture-glow-bleed) / 2 + 4px);
+  margin-block: calc(var(--fixture-glow-bleed) / -2);
   overflow-x: auto;
+  overflow-y: visible;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   align-items: stretch;
@@ -1303,7 +1310,7 @@
   color: var(--faint);
   font-family: var(--font-brand);
   font-size: 10px;
-  font-weight: 400;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -1509,12 +1516,18 @@
 }
 
 .live-bracket-embed__panel {
-  padding: 16px;
+  padding: calc(16px + var(--surface-shadow-bleed) / 2);
   border: 1px solid var(--line);
   border-radius: var(--r);
   background: var(--surface);
   box-shadow: var(--shadow);
-  overflow: hidden;
+  overflow: visible;
+}
+
+.live-bracket-embed__panel .bracket-scroll {
+  margin-inline: calc(-1 * var(--surface-shadow-bleed) / 2);
+  padding-inline: calc(var(--surface-shadow-bleed) / 2);
+  scroll-padding-inline: calc(var(--surface-shadow-bleed) / 2);
 }
 
 .live-bracket-embed .bracket-section--embedded {
@@ -1555,7 +1568,8 @@
   color: var(--text);
   font-family: var(--font-brand);
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: var(--heading-weight);
+  font-synthesis: weight;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
@@ -2251,6 +2265,12 @@ tr.qual-row--in-contention {
   max-width: 100%;
 }
 
+.match-goal-scorers-item--card {
+  font-size: 0.85em;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
 .live-hero-card .match-goal-scorers {
   padding: 0;
 }
@@ -2389,7 +2409,8 @@ tr.qual-row--in-contention {
   padding: 12px 16px;
   border-bottom: 1px solid var(--line);
   font-family: var(--font-brand);
-  font-weight: 400;
+  font-weight: var(--heading-weight);
+  font-synthesis: weight;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
