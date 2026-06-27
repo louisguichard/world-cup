@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-27T07:20:43.594Z",
+  "updatedAt": "2026-06-27T07:22:02.260Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 1,
+      "kind": "major",
+      "message": "Major v4 release: universal team identity, live qualification standings seed, Mexico crest fix, hash navigation refactor, and build 22 feature set.",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T07:22:02.260Z"
+    },
     {
       "version": "3.0.0",
       "build": 22,
@@ -91,6 +99,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "8e35966ff3ac3759294e0bd6b8584721f24b1317",
+      "shortHash": "8e35966",
+      "message": "Sync build-manifest commit record for 2f674bd.",
+      "version": "3.0.0",
+      "build": 22,
+      "timestamp": "2026-06-27T07:20:55.142Z"
+    },
     {
       "hash": "2f674bdb93b6ba7a8959522f87760af8ce014c14",
       "shortHash": "2f674bd",

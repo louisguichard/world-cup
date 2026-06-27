@@ -26,6 +26,10 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+## [4.0.0] build 1 — 2026-06-27 (major)
+- Major v4 release: universal team identity, live qualification standings seed, Mexico crest fix, hash navigation refactor, and build 22 feature set.
+
 ## [3.0.0] build 22 — 2026-06-27 (build)
 - 14 file(s) in build-manifest.json, src — 14 files changed, 436 insertions(+), 191 deletions(-)
 

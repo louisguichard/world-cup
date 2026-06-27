@@ -1,19 +1,13 @@
 # Changelog
 
+## [4.0.0] — 2026-06-27
+
+### Changed
+- Major v4 release: universal team identity, live qualification standings seed, Mexico crest fix, hash navigation refactor, and build 22 feature set.
+
 ## [Unreleased]
 
 ### Builds
-- **3.0.0 build 22** (2026-06-27): 14 file(s) in build-manifest.json, src — 14 files changed, 436 insertions(+), 191 deletions(-)
-- **3.0.0 build 21** (2026-06-27): 2 file(s) in build-manifest.json, src — 2 files changed, 11 insertions(+), 3 deletions(-)
-- **3.0.0 build 20** (2026-06-27): 21 file(s) in build-manifest.json, scripts, src — 21 files changed, 348 insertions(+), 56 deletions(-)
-- **3.0.0 build 19** (2026-06-27): 8 file(s) in build-manifest.json, src — 8 files changed, 187 insertions(+), 19 deletions(-)
-- **3.0.0 build 18** (2026-06-27): 8 file(s) in build-manifest.json, src — 8 files changed, 240 insertions(+), 10 deletions(-)
-- **3.0.0 build 17** (2026-06-27): 8 file(s) in src — 8 files changed, 157 insertions(+), 33 deletions(-)
-- **3.0.0 build 16** (2026-06-27): 13 file(s) in .cursor, src — 13 files changed, 415 insertions(+), 11 deletions(-)
-- **3.0.0 build 15** (2026-06-27): 3 file(s) in build-manifest.json, src — 3 files changed, 24 insertions(+), 4 deletions(-)
-- **3.0.0 build 14** (2026-06-27): 6 file(s) in build-manifest.json, src — 6 files changed, 66 insertions(+), 19 deletions(-)
-- **3.0.0 build 13** (2026-06-27): 87 file(s) in .cursor, .githooks, build-manifest.json, docs, package.json, public — 87 files changed, 4970 insertions(+), 900 deletions(-)
-- **3.0.0 build 12** (2026-06-27): Auto version pipeline: git hooks, build-manifest, release dashboard canvas, CHANGELOG [Unreleased] builds, agent rule + version-bump skill
 
 ## [3.0.0] — 2026-06-27
 
