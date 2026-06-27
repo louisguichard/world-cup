@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  findWorldCupLeague,
+  isWorldCupPrediction,
   normalizeLeagues,
   normalizePerformanceStats,
   normalizePredictionMatch,
@@ -100,5 +102,28 @@ describe("FootballPredictionClient normalize", () => {
     });
     expect(perf?.date).toBe("2026-06-27");
     expect(perf?.featured.classic?.winningPercentage).toBe(100);
+  });
+
+  it("finds world cup league from catalog list", () => {
+    const league = findWorldCupLeague([
+      { id: "1", name: "Premier League", country: "England" },
+      { id: "wc", name: "FIFA World Cup", country: "International" },
+    ]);
+    expect(league?.id).toBe("wc");
+  });
+
+  it("flags world cup predictions", () => {
+    expect(
+      isWorldCupPrediction({
+        id: "1",
+        homeTeam: "Brazil",
+        awayTeam: "France",
+        date: "2026-06-27",
+        leagueId: "FIFA World Cup",
+        prediction: "1",
+        isFinished: false,
+        competitionName: "World Cup",
+      })
+    ).toBe(true);
   });
 });

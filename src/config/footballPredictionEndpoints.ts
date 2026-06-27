@@ -111,4 +111,14 @@ export const footballPredictionEndpoints = {
     `${FOOTBALL_PREDICTION_API_PREFIX}/away-league-stats/${id}`,
   homeLast10: (id: string | number) => `${FOOTBALL_PREDICTION_API_PREFIX}/home-last-10/${id}`,
   awayLast10: (id: string | number) => `${FOOTBALL_PREDICTION_API_PREFIX}/away-last-10/${id}`,
+
+  /** Connectivity check. */
+  connectionTest: () => `${FOOTBALL_PREDICTION_API_PREFIX}/test`,
 } as const;
+
+/** League name hints for World Cup discovery via list-leagues. */
+export const FOOTBALL_PREDICTION_WC_LEAGUE_HINTS = [
+  "world cup",
+  "fifa world cup",
+  "wc 2026",
+] as const;

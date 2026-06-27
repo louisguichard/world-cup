@@ -34,6 +34,7 @@ const ENDPOINTS = [
   { id: "listFederations", path: "/api/v2/list-federations" },
   { id: "listMarkets", path: "/api/v2/list-markets" },
   { id: "listCountries", path: "/api/v2/list-countries" },
+  { id: "connectionTest", path: "/api/v2/test" },
   { id: "listLeagues", path: "/api/v2/list-leagues?federation=UEFA" },
   { id: "performanceStats", path: "/api/v2/performance-stats?market=classic" },
   { id: "performanceStatsBtts", path: "/api/v2/performance-stats?market=btts" },

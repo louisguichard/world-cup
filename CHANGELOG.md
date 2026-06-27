@@ -8,7 +8,8 @@
 ## [Unreleased]
 
 ### Builds
-- **4.0.0 build 25** (2026-06-27): 41 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 41 files changed, 550 insertions(+), 162 deletions(-)
+- **4.0.0 build 26** (2026-06-27): 18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, config, scripts, src — 18 files changed, 399 insertions(+), 49 deletions(-)
+- **4.0.0 build 25** (2026-06-27): Wire Boggio Football Prediction v2 into WC sync and match index
 - **4.0.0 build 24** (2026-06-27): Always show team names and flags; hide backend ids from UI
 - **4.0.0 build 23** (2026-06-27): 10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, vercel.json — 10 files changed, 59 insertions(+), 13 deletions(-)
 - **4.0.0 build 22** (2026-06-27): Bust client caches (boot v4, SW v5, quota reset) and no-cache shell headers
