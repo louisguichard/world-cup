@@ -1,63 +1,92 @@
 import { useCallback, useEffect, useState } from "react";
-import type { BeforeInstallPromptEvent } from "../lib/platform";
-import { detectDisplayMode, detectPlatform } from "../lib/platform";
-
-const DISMISS_KEY = "wc-pwa-install-dismissed";
+import { detectDisplayMode } from "../lib/platform";
+import {
+  canTriggerNativeInstall,
+  dismissPwaInstall,
+  getDeferredInstallPrompt,
+  isPwaInstallDismissed,
+  resolveInstallGuideKind,
+  subscribePwaInstall,
+  triggerNativeInstall,
+  waitForInstallPrompt,
+  type InstallGuideKind,
+  type InstallTriggerResult,
+} from "../lib/pwaInstallController";
+import { detectPlatform } from "../lib/platform";
 
 export function usePwaInstall() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [dismissed, setDismissed] = useState(
-    () => typeof localStorage !== "undefined" && localStorage.getItem(DISMISS_KEY) === "1"
-  );
+  const [dismissed, setDismissed] = useState(isPwaInstallDismissed);
+  const [canInstall, setCanInstall] = useState(canTriggerNativeInstall);
   const [installing, setInstalling] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [guideKind, setGuideKind] = useState<InstallGuideKind>(() => resolveInstallGuideKind());
 
   const platform = detectPlatform();
   const isStandalone = detectDisplayMode() === "standalone";
   const isIos = platform === "ios";
 
   useEffect(() => {
-    const onBeforeInstall = (event: Event) => {
-      event.preventDefault();
-      setDeferredPrompt(event as BeforeInstallPromptEvent);
+    const sync = () => {
+      setDismissed(isPwaInstallDismissed());
+      setCanInstall(canTriggerNativeInstall());
+      setGuideKind(resolveInstallGuideKind());
     };
 
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
-    return () => window.removeEventListener("beforeinstallprompt", onBeforeInstall);
+    sync();
+    return subscribePwaInstall(sync);
   }, []);
 
   const dismiss = useCallback(() => {
-    localStorage.setItem(DISMISS_KEY, "1");
+    dismissPwaInstall();
     setDismissed(true);
   }, []);
 
-  const install = useCallback(async (): Promise<boolean> => {
-    if (!deferredPrompt) return false;
+  const closeGuide = useCallback(() => {
+    setGuideOpen(false);
+  }, []);
+
+  const openGuide = useCallback(() => {
+    setGuideKind(resolveInstallGuideKind());
+    setGuideOpen(true);
+  }, []);
+
+  const install = useCallback(async (): Promise<InstallTriggerResult | "guided"> => {
+    if (isStandalone) return "unavailable";
+
     setInstalling(true);
     try {
-      await deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      setDeferredPrompt(null);
-      if (choice.outcome === "accepted") {
-        localStorage.setItem(DISMISS_KEY, "1");
-        setDismissed(true);
-        return true;
+      if (getDeferredInstallPrompt()) {
+        return await triggerNativeInstall();
       }
-      return false;
+
+      const ready = await waitForInstallPrompt(isIos ? 1_500 : 4_000);
+      if (ready && getDeferredInstallPrompt()) {
+        return await triggerNativeInstall();
+      }
+
+      openGuide();
+      return "guided";
     } finally {
       setInstalling(false);
     }
-  }, [deferredPrompt]);
+  }, [isIos, isStandalone, openGuide]);
 
   const showBanner =
-    !isStandalone && !dismissed && !import.meta.env.DEV && (Boolean(deferredPrompt) || isIos);
+    !isStandalone &&
+    !dismissed &&
+    (!import.meta.env.DEV || new URLSearchParams(window.location.search).has("pwa"));
 
   return {
     showBanner,
-    canInstall: Boolean(deferredPrompt),
+    canInstall,
     isIos,
     isStandalone,
     installing,
+    guideOpen,
+    guideKind,
     install,
     dismiss,
+    openGuide,
+    closeGuide,
   };
 }

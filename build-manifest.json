@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-27T14:40:33.567Z",
+  "updatedAt": "2026-06-27T14:50:18.050Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 11,
+      "kind": "build",
+      "message": "14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, version.json — 14 files changed, 512 insertions(+), 64 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:50:18.050Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 10,
+      "kind": "build",
+      "message": "Fix PWA install: early SW + beforeinstallprompt capture, one-tap install on desktop/Android",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:50:11.170Z"
+    },
     {
       "version": "4.0.0",
       "build": 9,

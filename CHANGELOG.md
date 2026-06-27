@@ -8,6 +8,8 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 11** (2026-06-27): 14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, version.json — 14 files changed, 512 insertions(+), 64 deletions(-)
+- **4.0.0 build 10** (2026-06-27): Fix PWA install: early SW + beforeinstallprompt capture, one-tap install on desktop/Android
 - **4.0.0 build 9** (2026-06-27): 14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 14 files changed, 186 insertions(+), 61 deletions(-)
 - **4.0.0 build 8** (2026-06-27): Full-app copy sweep via appCopy.ts; fix best-third race status labels
 - **4.0.0 build 7** (2026-06-27): 9 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 9 files changed, 141 insertions(+), 2 deletions(-)

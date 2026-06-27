@@ -446,10 +446,59 @@ export const APP_COPY = {
     installBodyMobile: "Add to your home screen for a full-screen app with live scores.",
     installBodyDesktop: "Install on your computer for quick access from the dock or taskbar.",
     installButton: "Install app",
+    installButtonWorking: "Opening installer…",
     installIosTitle: "Add to Home Screen",
-    installIosBody: "Tap the Share button, then choose \"Add to Home Screen\".",
+    installIosBody: "Tap Install — we'll show the quick steps to add this app to your home screen.",
     dismiss: "Not now",
     refreshing: "Updating scores…",
+    guide: {
+      close: "Close",
+      done: "Got it",
+      ios: {
+        title: "Add to Home Screen",
+        lead: "Safari does not allow one-tap install. These two steps add the app to your home screen.",
+        steps: [
+          "Tap the Share button at the bottom of Safari (square with an arrow).",
+          "Scroll down and tap Add to Home Screen, then tap Add.",
+        ],
+      },
+      android: {
+        title: "Install the app",
+        lead: "If the installer did not open automatically, use your browser menu:",
+        steps: [
+          "Tap the menu button (⋮) in Chrome.",
+          "Tap Install app or Add to Home screen.",
+          "Confirm Install when asked.",
+        ],
+      },
+      desktopChrome: {
+        title: "Install on your computer",
+        lead: "If the installer did not open, use the install control in your address bar:",
+        steps: [
+          "Look for the install icon in the address bar (monitor with a down arrow, or a plus).",
+          "Click Install or Add to dock.",
+          "Confirm — the app will open from your dock, taskbar, or Start menu.",
+        ],
+      },
+      desktopSafari: {
+        title: "Add to Dock",
+        lead: "Safari on Mac can pin this site as an app in your Dock:",
+        steps: [
+          "Open the File menu in Safari.",
+          "Choose Add to Dock.",
+          "Launch Road to the Final from your Dock like any other app.",
+        ],
+      },
+      desktopOther: {
+        title: "Install the app",
+        lead: "Use your browser's install or shortcut option for this site:",
+        steps: [
+          "Open the browser menu (often ⋮ or ☰).",
+          "Look for Install app, Add to Home screen, or Create shortcut.",
+          "Confirm — you can then open the app from your dock, desktop, or home screen.",
+        ],
+      },
+    },
   },
 
   simulator: {
