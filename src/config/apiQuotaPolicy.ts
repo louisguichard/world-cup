@@ -177,4 +177,58 @@ export const API_QUOTA_POLICY: Record<ApiSourceId, ApiQuotaPolicy> = {
     minIntervalMs: { live: 30_000, background: 600_000, test: 120_000, boot: 0 },
     note: "FlashLive live scores/events; use events/changes for polling.",
   },
+  footApi7: {
+    dailyLimit: 100,
+    reserveForLive: 10,
+    minIntervalMs: { live: 60_000, background: 600_000, test: 120_000, boot: 0 },
+    note: "FootAPI7 SofaScore backup; use sparingly.",
+  },
+  todayFootballPrediction: {
+    dailyLimit: 100,
+    reserveForLive: 10,
+    minIntervalMs: { live: 300_000, background: 3_600_000, test: 300_000, boot: 0 },
+    note: "Today Football Prediction daily sync.",
+  },
+  plData: {
+    dailyLimit: 100,
+    reserveForLive: 10,
+    minIntervalMs: { live: 120_000, background: 3_600_000, test: 300_000, boot: 0 },
+    note: "PL Data player/team/fixture lookups.",
+  },
+  gettyImages: {
+    dailyLimit: 50,
+    reserveForLive: 5,
+    minIntervalMs: { live: 600_000, background: 7_200_000, test: 600_000, boot: 0 },
+    note: "Getty editorial images; expensive — cache aggressively.",
+  },
+  fifaFootballData: {
+    dailyLimit: 100,
+    reserveForLive: 10,
+    minIntervalMs: { live: 300_000, background: 3_600_000, test: 300_000, boot: 0 },
+    note: "FIFA match clips and stats.",
+  },
+  aiSportsHighlights: {
+    dailyLimit: 20,
+    reserveForLive: 3,
+    minIntervalMs: { live: 600_000, background: 7_200_000, test: 600_000, boot: 0 },
+    note: "AI highlight generation is costly; post-match only.",
+  },
+  allSportsApi2: {
+    dailyLimit: 100,
+    reserveForLive: 15,
+    minIntervalMs: { live: 60_000, background: 600_000, test: 120_000, boot: 0 },
+    note: "AllSportsAPI2 multi-sport data.",
+  },
+  tvproApi: {
+    dailyLimit: 50,
+    reserveForLive: 5,
+    minIntervalMs: { live: 600_000, background: 7_200_000, test: 600_000, boot: 0 },
+    note: "TVPro broadcast channel lookup.",
+  },
+  youtubeMatchVideos: {
+    dailyLimit: 100,
+    reserveForLive: 10,
+    minIntervalMs: { live: 300_000, background: 3_600_000, test: 300_000, boot: 0 },
+    note: "YouTube/Google API31 video search for highlights.",
+  },
 };

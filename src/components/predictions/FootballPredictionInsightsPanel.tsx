@@ -94,8 +94,7 @@ export function FootballPredictionInsightsPanel() {
         <h3>{copy.insightsTitle}</h3>
         <p className="fp-insights-meta">{copy.insightsExplain}</p>
         <p className="fp-insights-meta">
-          {indexSize} merged tips · {bundle.todayDaily.length} Today · {bundle.boggioDaily.length}{" "}
-          Boggio · updated {new Date(bundle.fetchedAt).toLocaleDateString()}
+          {indexSize} merged tips · updated {new Date(bundle.fetchedAt).toLocaleDateString()}
         </p>
       </header>
 

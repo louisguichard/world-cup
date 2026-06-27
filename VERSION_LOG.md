@@ -65,6 +65,10 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+## [4.0.0] build 40 — 2026-06-27 (build)
+- Integrate all feature branches via consolidated rapid proxy
+
 ## [4.0.0] build 39 — 2026-06-27 (build)
 - 13 file(s) in api, config, package.json, scripts, src, vercel.json — 13 files changed, 784 insertions(+), 2 deletions(-)
 

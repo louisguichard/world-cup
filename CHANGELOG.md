@@ -8,6 +8,7 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 40** (2026-06-27): Integrate all feature branches via consolidated rapid proxy
 - **4.0.0 build 39** (2026-06-27): 13 file(s) in api, config, package.json, scripts, src, vercel.json — 13 files changed, 784 insertions(+), 2 deletions(-)
 - **4.0.0 build 38** (2026-06-27): 7 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, vercel.json, version.json — 7 files changed, 56 insertions(+), 45 deletions(-)
 - **4.0.0 build 37** (2026-06-27): Use path query param for Vercel rapid rewrites

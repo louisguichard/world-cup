@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-27T20:27:48.117Z",
+  "updatedAt": "2026-06-27T20:45:03.500Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 40,
+      "kind": "build",
+      "message": "Integrate all feature branches via consolidated rapid proxy",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T20:45:03.500Z"
+    },
     {
       "version": "4.0.0",
       "build": 39,
@@ -312,14 +320,6 @@
       "message": "14 file(s) in build-manifest.json, src — 14 files changed, 436 insertions(+), 191 deletions(-)",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T07:20:01.115Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 21,
-      "kind": "build",
-      "message": "2 file(s) in build-manifest.json, src — 2 files changed, 11 insertions(+), 3 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T07:11:17.721Z"
     }
   ],
   "commits": [
