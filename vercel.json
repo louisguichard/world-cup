@@ -1,76 +1,76 @@
 {
   "rewrites": [
     {
-      "source": "/api/wc-live/:path*",
-      "destination": "/api/rapid?service=wc-live&upstream=:path*"
+      "source": "/api/wc-live/:upstream*",
+      "destination": "/api/rapid?service=wc-live"
     },
     {
-      "source": "/api/wc2026/:path*",
-      "destination": "/api/rapid?service=wc2026&upstream=:path*"
+      "source": "/api/wc2026/:upstream*",
+      "destination": "/api/rapid?service=wc2026"
     },
     {
-      "source": "/api/footballdata/:path*",
-      "destination": "/api/rapid?service=footballdata&upstream=:path*"
+      "source": "/api/footballdata/:upstream*",
+      "destination": "/api/rapid?service=footballdata"
     },
     {
-      "source": "/api/sportapi/:path*",
-      "destination": "/api/rapid?service=sportapi&upstream=:path*"
+      "source": "/api/sportapi/:upstream*",
+      "destination": "/api/rapid?service=sportapi"
     },
     {
-      "source": "/api/sofascore6/:path*",
-      "destination": "/api/rapid?service=sofascore6&upstream=:path*"
+      "source": "/api/sofascore6/:upstream*",
+      "destination": "/api/rapid?service=sofascore6"
     },
     {
-      "source": "/api/sofascore-rapid/:path*",
-      "destination": "/api/rapid?service=sofascore-rapid&upstream=:path*"
+      "source": "/api/sofascore-rapid/:upstream*",
+      "destination": "/api/rapid?service=sofascore-rapid"
     },
     {
-      "source": "/api/weather/:path*",
-      "destination": "/api/rapid?service=weather&upstream=:path*"
+      "source": "/api/weather/:upstream*",
+      "destination": "/api/rapid?service=weather"
     },
     {
-      "source": "/api/odds/:path*",
-      "destination": "/api/rapid?service=odds&upstream=:path*"
+      "source": "/api/odds/:upstream*",
+      "destination": "/api/rapid?service=odds"
     },
     {
-      "source": "/api/football-prediction/:path*",
-      "destination": "/api/rapid?service=football-prediction&upstream=:path*"
+      "source": "/api/football-prediction/:upstream*",
+      "destination": "/api/rapid?service=football-prediction"
     },
     {
-      "source": "/api/world-cup-history/:path*",
-      "destination": "/api/rapid?service=world-cup-history&upstream=:path*"
+      "source": "/api/world-cup-history/:upstream*",
+      "destination": "/api/rapid?service=world-cup-history"
     },
     {
-      "source": "/api/sport-highlights/:path*",
-      "destination": "/api/rapid?service=sport-highlights&upstream=:path*"
+      "source": "/api/sport-highlights/:upstream*",
+      "destination": "/api/rapid?service=sport-highlights"
     },
     {
-      "source": "/api/sports-live-scores/:path*",
-      "destination": "/api/rapid?service=sports-live-scores&upstream=:path*"
+      "source": "/api/sports-live-scores/:upstream*",
+      "destination": "/api/rapid?service=sports-live-scores"
     },
     {
-      "source": "/api/all-sport-live-stream/:path*",
-      "destination": "/api/rapid?service=all-sport-live-stream&upstream=:path*"
+      "source": "/api/all-sport-live-stream/:upstream*",
+      "destination": "/api/rapid?service=all-sport-live-stream"
     },
     {
-      "source": "/api/free-daily-xtream-iptv/:path*",
-      "destination": "/api/rapid?service=free-daily-xtream-iptv&upstream=:path*"
+      "source": "/api/free-daily-xtream-iptv/:upstream*",
+      "destination": "/api/rapid?service=free-daily-xtream-iptv"
     },
     {
-      "source": "/api/cloud-api-hub-iptv/:path*",
-      "destination": "/api/rapid?service=cloud-api-hub-iptv&upstream=:path*"
+      "source": "/api/cloud-api-hub-iptv/:upstream*",
+      "destination": "/api/rapid?service=cloud-api-hub-iptv"
     },
     {
-      "source": "/api/tvview/:path*",
-      "destination": "/api/rapid?service=tvview&upstream=:path*"
+      "source": "/api/tvview/:upstream*",
+      "destination": "/api/rapid?service=tvview"
     },
     {
-      "source": "/api/zafronix/:path*",
-      "destination": "/api/rapid?service=zafronix&upstream=:path*"
+      "source": "/api/zafronix/:upstream*",
+      "destination": "/api/rapid?service=zafronix"
     },
     {
-      "source": "/api/espn-web/:path*",
-      "destination": "/api/proxy?upstream=:path*"
+      "source": "/api/espn-web/:upstream*",
+      "destination": "/api/proxy"
     },
     {
       "source": "/espn/:path*",

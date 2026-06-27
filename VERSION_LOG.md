@@ -60,6 +60,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 36 — 2026-06-27 (build)
+- 1 file(s) in vercel.json — 1 file changed, 36 insertions(+), 36 deletions(-)
+
+## [4.0.0] build 35 — 2026-06-27 (build)
+- Fix vercel rewrite syntax for rapid proxy query passthrough
+
 ## [4.0.0] build 34 — 2026-06-27 (build)
 - 7 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, vercel.json, version.json — 7 files changed, 76 insertions(+), 46 deletions(-)
 

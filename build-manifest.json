@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-27T19:25:59.221Z",
+  "updatedAt": "2026-06-27T19:29:55.564Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 36,
+      "kind": "build",
+      "message": "1 file(s) in vercel.json — 1 file changed, 36 insertions(+), 36 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:29:55.564Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 35,
+      "kind": "build",
+      "message": "Fix vercel rewrite syntax for rapid proxy query passthrough",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:29:55.517Z"
+    },
     {
       "version": "4.0.0",
       "build": 34,
@@ -304,25 +320,17 @@
       "message": "8 file(s) in build-manifest.json, src — 8 files changed, 240 insertions(+), 10 deletions(-)",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T06:56:47.980Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 17,
-      "kind": "build",
-      "message": "8 file(s) in src — 8 files changed, 157 insertions(+), 33 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T06:51:25.940Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 16,
-      "kind": "build",
-      "message": "13 file(s) in .cursor, src — 13 files changed, 415 insertions(+), 11 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T06:48:33.340Z"
     }
   ],
   "commits": [
+    {
+      "hash": "8b3c16d9f5d4c7aa67ca826775e7f3ee2b2eac3e",
+      "shortHash": "8b3c16d",
+      "message": "Fix Vercel rewrites: pass service/upstream query params to api/rapid",
+      "version": "4.0.0",
+      "build": 34,
+      "timestamp": "2026-06-27T19:25:59.301Z"
+    },
     {
       "hash": "19ec866e94cc70689a34a9dd7a47ef9298309158",
       "shortHash": "19ec866",
@@ -554,14 +562,6 @@
       "version": "3.0.0",
       "build": 20,
       "timestamp": "2026-06-27T07:07:51.982Z"
-    },
-    {
-      "hash": "42d823db590223ac810747151040774a395d4b61",
-      "shortHash": "42d823d",
-      "message": "Record build-manifest metadata for def1814.",
-      "version": "3.0.0",
-      "build": 20,
-      "timestamp": "2026-06-27T07:06:21.780Z"
     }
   ],
   "deploys": [
