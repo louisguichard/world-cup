@@ -8,6 +8,7 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 42** (2026-06-27): Sync match schedule from ESPN; bump boot cache v5 for fresh standings
 - **4.0.0 build 41** (2026-06-27): Remove duplicate sofascore6 rewrite; document Getty/YouTube env vars
 - **4.0.0 build 40** (2026-06-27): Integrate all feature branches via consolidated rapid proxy
 - **4.0.0 build 39** (2026-06-27): 13 file(s) in api, config, package.json, scripts, src, vercel.json — 13 files changed, 784 insertions(+), 2 deletions(-)

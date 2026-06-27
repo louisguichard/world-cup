@@ -62,6 +62,7 @@ export const TEAM_NAME_TO_ABBREV: Record<string, string> = {
   belgium: "BEL",
   bosnia: "BIH",
   "bosnia and herzegovina": "BIH",
+  "bosnia herzegovina": "BIH",
   brazil: "BRA",
   canada: "CAN",
   "ivory coast": "CIV",

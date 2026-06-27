@@ -67,6 +67,10 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+## [4.0.0] build 42 — 2026-06-27 (build)
+- Sync match schedule from ESPN; bump boot cache v5 for fresh standings
+
 ## [4.0.0] build 41 — 2026-06-27 (build)
 - Remove duplicate sofascore6 rewrite; document Getty/YouTube env vars
 

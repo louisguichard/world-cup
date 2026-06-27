@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-27T21:00:03.328Z",
+  "updatedAt": "2026-06-27T21:12:45.530Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 42,
+      "kind": "build",
+      "message": "Sync match schedule from ESPN; bump boot cache v5 for fresh standings",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T21:12:45.530Z"
+    },
     {
       "version": "4.0.0",
       "build": 41,
@@ -312,14 +320,6 @@
       "message": "4 file(s) in src — 4 files changed, 16 insertions(+), 7 deletions(-)",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T07:35:33.868Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 1,
-      "kind": "major",
-      "message": "Major v4 release: universal team identity, live qualification standings seed, Mexico crest fix, hash navigation refactor, and build 22 feature set.",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T07:22:02.260Z"
     }
   ],
   "commits": [

@@ -24,6 +24,7 @@
     "test:allsportsapi2": "node scripts/test-allsportsapi2.mjs",
     "test:tvpro-api": "node scripts/test-tvpro-api.mjs",
     "test:youtube-match-videos": "node scripts/test-youtube-match-videos.mjs",
+    "sync:match-schedule": "node scripts/sync-match-schedule-from-espn.mjs",
     "test:world-cup-history": "node scripts/test-world-cup-history.mjs",
     "test:wc2026-teams": "node scripts/test-wc2026-teams.mjs",
     "test:wc-live": "node scripts/test-wc-live.mjs",
