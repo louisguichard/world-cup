@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-27T07:22:23.643Z",
+  "updatedAt": "2026-06-27T07:24:35.744Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -99,6 +99,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "a0dfcbb922a062c7a958ed24ae32a5c0db44deb9",
+      "shortHash": "a0dfcbb",
+      "message": "Record build-manifest metadata for v4.0.0 release commit.",
+      "version": "4.0.0",
+      "build": 1,
+      "timestamp": "2026-06-27T07:22:31.650Z"
+    },
     {
       "hash": "f89a221c711d20b7180a67030b78ce8ffeb0ae98",
       "shortHash": "f89a221",
@@ -293,6 +301,14 @@
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "4.0.0",
+      "build": 1,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-27T07:24:35.743Z"
+    },
     {
       "url": "",
       "environment": "production",
