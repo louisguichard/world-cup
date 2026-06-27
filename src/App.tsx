@@ -1396,7 +1396,7 @@ function UpcomingView({
         </span>
       </div>
       <p className="view-note schedule-note">
-        Scheduled fixtures show a projected scoreline from Polymarket or the strength model. Live matches show the current score.
+        Scheduled fixtures show win probabilities from Polymarket or the strength model. Live matches show the current score.
       </p>
 
       {entries.length ? (
@@ -1422,20 +1422,51 @@ function UpcomingView({
 function ScheduleTeamLabel({
   team,
   label,
-  prob,
   align = "left"
 }: {
   team?: Team;
   label: string;
-  prob?: number;
   align?: "left" | "right";
 }) {
   return (
     <span className={`team-label ${align}`}>
       {team ? <img src={team.logo} alt="" /> : <span className="schedule-dot" />}
       <span>{label}</span>
-      {typeof prob === "number" ? <b>{formatPercent(prob, 0)}</b> : null}
     </span>
+  );
+}
+
+function ScheduleProbCenter({ entry }: { entry: ScheduleEntry }) {
+  if (entry.status === "live" && typeof entry.homeScore === "number" && typeof entry.awayScore === "number") {
+    return (
+      <>
+        <span className="score-display">{entry.homeScore}</span>
+        <span className="score-separator">–</span>
+        <span className="score-display">{entry.awayScore}</span>
+      </>
+    );
+  }
+  const homeP = entry.homeWinProbability ?? entry.prediction?.homeWin;
+  const drawP = entry.prediction?.draw;
+  const awayP =
+    typeof entry.homeWinProbability === "number" ? 1 - entry.homeWinProbability : entry.prediction?.awayWin;
+  if (typeof homeP !== "number" || typeof awayP !== "number") {
+    return <span className="prob-vs">vs</span>;
+  }
+  return (
+    <div className="prob-bar">
+      <div className="prob-segment home" style={{ flex: homeP }}>
+        {formatPercent(homeP, 0)}
+      </div>
+      {typeof drawP === "number" && drawP > 0 ? (
+        <div className="prob-segment draw" style={{ flex: drawP }}>
+          {formatPercent(drawP, 0)}
+        </div>
+      ) : null}
+      <div className="prob-segment away" style={{ flex: awayP }}>
+        {formatPercent(awayP, 0)}
+      </div>
+    </div>
   );
 }
 
@@ -1450,19 +1481,14 @@ function ScheduleRow({
 }) {
   const home = entry.homeTeamId ? teamsById[entry.homeTeamId] : undefined;
   const away = entry.awayTeamId ? teamsById[entry.awayTeamId] : undefined;
-  const homeLabel = home?.shortName ?? entry.homeSeedLabel ?? "TBD";
-  const awayLabel = away?.shortName ?? entry.awaySeedLabel ?? "TBD";
+  const homeLabel = home?.name ?? entry.homeSeedLabel ?? "TBD";
+  const awayLabel = away?.name ?? entry.awaySeedLabel ?? "TBD";
   const marketSlug =
     entry.kind === "group" && entry.prediction?.method === "polymarket"
       ? entry.prediction.marketSlug
       : entry.marketSlug;
   const marketUrl = polymarketEventUrl(marketSlug);
   const kickoffTime = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" }).format(new Date(entry.date));
-  const showScore = entry.kind === "group" && typeof entry.homeScore === "number" && typeof entry.awayScore === "number";
-  const projectedScore = showScore && entry.status !== "live";
-  const homeProb = entry.homeWinProbability ?? entry.prediction?.homeWin;
-  const awayProb =
-    typeof entry.homeWinProbability === "number" ? 1 - entry.homeWinProbability : entry.prediction?.awayWin;
 
   return (
     <div className={`match-row schedule-row ${entry.status === "live" ? "live" : ""}`}>
@@ -1488,7 +1514,6 @@ function ScheduleRow({
           {entry.kind === "knockout" ? (
             <span className="schedule-projected-teams">Projected teams</span>
           ) : null}
-          {projectedScore ? <span className="schedule-proj-label">Proj. score</span> : null}
           {entry.venue ? <span className="schedule-venue">{entry.venue}</span> : null}
           {marketUrl ? (
             <a className="schedule-market" href={marketUrl} target="_blank" rel="noreferrer">
@@ -1497,22 +1522,10 @@ function ScheduleRow({
           ) : null}
         </div>
       </div>
-      <div className={`score-line ${projectedScore ? "projected" : ""}`}>
-        <ScheduleTeamLabel team={home} label={homeLabel} prob={homeProb} />
-        {showScore ? (
-          <>
-            <span className="score-display">{entry.homeScore}</span>
-            <span className="score-separator">–</span>
-            <span className="score-display">{entry.awayScore}</span>
-          </>
-        ) : (
-          <>
-            <span className="score-display score-tbd">–</span>
-            <span className="score-separator">vs</span>
-            <span className="score-display score-tbd">–</span>
-          </>
-        )}
-        <ScheduleTeamLabel team={away} label={awayLabel} prob={awayProb} align="right" />
+      <div className="score-line">
+        <ScheduleTeamLabel team={home} label={homeLabel} />
+        <ScheduleProbCenter entry={entry} />
+        <ScheduleTeamLabel team={away} label={awayLabel} align="right" />
       </div>
     </div>
   );
@@ -1525,7 +1538,7 @@ const methodSections = [
     title: "Overview",
     body: [
       "The simulator blends five ingredients: real results from ESPN, FIFA points, a small host advantage, per-match Polymarket markets, a Polymarket title-odds force calibration, and a tournament engine that follows the FIFA 2026 regulations.",
-      "Three views sit on top of this engine. The Tournament view is a single editable scenario — you can change any score or knockout winner and watch the whole bracket recompute. The Probabilities view runs the same engine thousands of times to estimate how far a team is likely to go. The Upcoming view lists remaining group fixtures and the projected knockout schedule, with model scorelines labelled as projections."
+      "Three views sit on top of this engine. The Tournament view is a single editable scenario — you can change any score or knockout winner and watch the whole bracket recompute. The Probabilities view runs the same engine thousands of times to estimate how far a team is likely to go. The Upcoming view lists remaining group fixtures and the projected knockout schedule, with win probabilities from Polymarket or the strength model."
     ]
   },
   {
