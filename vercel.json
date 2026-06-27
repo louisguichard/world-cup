@@ -66,7 +66,7 @@
     },
     {
       "source": "/api/flashlive/:path*",
-      "destination": "/api/rapid/flashlive/:path*"
+      "destination": "/api/rapid?service=flashlive"
     },
     {
       "source": "/api/zafronix/:path*",
