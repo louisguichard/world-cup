@@ -5,12 +5,24 @@ type EspnParticipant = {
   type?: string;
 };
 
+type EspnAthleteInvolved = {
+  id?: string;
+  displayName?: string;
+  shortName?: string;
+  fullName?: string;
+  team?: { id?: string };
+};
+
 type EspnDetail = {
   type?: { text?: string; id?: string };
   clock?: { displayValue?: string; value?: number };
   team?: { id?: string };
   participants?: EspnParticipant[];
+  athletesInvolved?: EspnAthleteInvolved[];
   athlete?: { displayName?: string };
+  ownGoal?: boolean;
+  redCard?: boolean;
+  yellowCard?: boolean;
   text?: string;
 };
 
@@ -30,13 +42,16 @@ function parseClock(displayValue?: string, value?: number): { minute: number; mi
   return { minute: 0 };
 }
 
-function eventTypeFromText(text: string): MatchEventType | null {
+function eventTypeFromDetail(text: string, detail: EspnDetail): MatchEventType | null {
   const t = text.toLowerCase();
-  if (t.includes("own goal")) return "own_goal";
+  if (detail.ownGoal || t.includes("own goal")) return "own_goal";
   if (t.includes("goal") || t.includes("scores")) return "goal";
+  if (detail.redCard && detail.yellowCard) return "yellow_red_card";
   if (t.includes("yellow") && t.includes("red")) return "yellow_red_card";
-  if (t.includes("red card") || (t.includes("red") && t.includes("card"))) return "red_card";
-  if (t.includes("yellow")) return "yellow_card";
+  if (detail.redCard || t.includes("red card") || (t.includes("red") && t.includes("card"))) {
+    return "red_card";
+  }
+  if (detail.yellowCard || t.includes("yellow")) return "yellow_card";
   if (t.includes("substitution") || t.includes("subbed") || t.includes(" replaces ")) return "substitution";
   if (t.includes("var")) return "var_review";
   if (t.includes("penalty missed")) return "penalty_missed";
@@ -50,6 +65,50 @@ function participantName(parts: EspnParticipant[] | undefined, role: string): st
   return hit?.athlete?.displayName ?? hit?.athlete?.shortName;
 }
 
+function athleteInvolvedName(athletes: EspnAthleteInvolved[] | undefined, index = 0): string | undefined {
+  const athlete = athletes?.[index];
+  if (!athlete) return undefined;
+  return athlete.displayName ?? athlete.fullName ?? athlete.shortName;
+}
+
+function resolvePlayerName(detail: EspnDetail): string {
+  return (
+    participantName(detail.participants, "scorer") ??
+    participantName(detail.participants, "player") ??
+    athleteInvolvedName(detail.athletesInvolved, 0) ??
+    detail.athlete?.displayName ??
+    detail.participants?.[0]?.athlete?.displayName ??
+    "Unknown"
+  );
+}
+
+function resolveAssistName(detail: EspnDetail, type: MatchEventType): string | undefined {
+  if (type === "substitution") {
+    return (
+      participantName(detail.participants, "playerOut") ??
+      participantName(detail.participants, "replaced") ??
+      athleteInvolvedName(detail.athletesInvolved, 1)
+    );
+  }
+  return (
+    participantName(detail.participants, "assist") ?? athleteInvolvedName(detail.athletesInvolved, 1)
+  );
+}
+
+function resolveTeamId(
+  detail: EspnDetail,
+  homeTeamId: string,
+  awayTeamId: string
+): string {
+  const espnTeamId = detail.team?.id;
+  if (espnTeamId === homeTeamId) return homeTeamId;
+  if (espnTeamId === awayTeamId) return awayTeamId;
+  const involvedTeamId = detail.athletesInvolved?.[0]?.team?.id;
+  if (involvedTeamId === homeTeamId) return homeTeamId;
+  if (involvedTeamId === awayTeamId) return awayTeamId;
+  return homeTeamId;
+}
+
 function detailToEvent(
   detail: EspnDetail,
   espnEventId: string,
@@ -58,29 +117,14 @@ function detailToEvent(
   index: number
 ): MatchEvent | null {
   const text = String(detail.type?.text ?? detail.text ?? "");
-  const type = eventTypeFromText(text);
+  const type = eventTypeFromDetail(text, detail);
   if (!type) return null;
 
   const { minute, minuteExtra } = parseClock(detail.clock?.displayValue, detail.clock?.value);
-  const teamId =
-    detail.team?.id === homeTeamId
-      ? homeTeamId
-      : detail.team?.id === awayTeamId
-        ? awayTeamId
-        : homeTeamId;
-
-  const playerName =
-    participantName(detail.participants, "scorer") ??
-    participantName(detail.participants, "player") ??
-    detail.athlete?.displayName ??
-    detail.participants?.[0]?.athlete?.displayName ??
-    "Unknown";
-
-  const assistName =
-    type === "substitution"
-      ? participantName(detail.participants, "playerOut") ??
-        participantName(detail.participants, "replaced")
-      : participantName(detail.participants, "assist");
+  const teamId = resolveTeamId(detail, homeTeamId, awayTeamId);
+  const playerName = resolvePlayerName(detail);
+  const assistName = resolveAssistName(detail, type);
+  const athleteId = detail.athletesInvolved?.[0]?.id;
 
   return {
     providerId: `espn-${espnEventId}-${index}-${type}-${minute}`,
@@ -90,6 +134,7 @@ function detailToEvent(
     type,
     teamId,
     playerName,
+    playerId: athleteId != null ? String(athleteId) : undefined,
     assistName,
   };
 }

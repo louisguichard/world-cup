@@ -36,4 +36,17 @@ describe("mapCommentaryToEvents", () => {
     );
     expect(events[0].type).toBe("yellow_card");
   });
+
+  it("parses single-word player names from commentary text", () => {
+    const events = mapCommentaryToEvents(
+      [{ minute: 55, text: "Yellow card for Neymar" }],
+      "BRA",
+      "SRB",
+      "Brazil",
+      "Serbia"
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("yellow_card");
+    expect(events[0].playerName).toBe("Neymar");
+  });
 });

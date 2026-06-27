@@ -43,19 +43,42 @@ function inferTeamId(
   return homeTeamId;
 }
 
+const PLAYER_NAME = "([A-Z][a-z]+(?:\\s+[A-Z][a-z'-]+)*)";
+const SKIP_PLAYER_NAMES = /^(Goal|Yellow|Red|Card|Substitution|VAR|Penalty|Missed|Saved)$/i;
+
+function firstCapitalizedName(text: string): string | undefined {
+  const matches = text.matchAll(new RegExp(`\\b${PLAYER_NAME}\\b`, "g"));
+  for (const match of matches) {
+    const name = match[1]?.trim();
+    if (name && !SKIP_PLAYER_NAMES.test(name)) return name;
+  }
+  return undefined;
+}
+
 function extractPlayer(text: string, type: MatchEventType): { playerName: string; assistName?: string } {
   if (type === "substitution") {
     const subMatch = text.match(/(.+?)\s+(?:replaces|on for|comes on for)\s+(.+?)(?:\.|$)/i);
     if (subMatch) return { playerName: subMatch[1].trim(), assistName: subMatch[2].trim() };
   }
 
-  const goalMatch = text.match(/(?:goal(?:!)?\s*(?:for\s+[^!]+!?\s*)?[-–:]?\s*)?([A-Z][a-z]+(?:\s+[A-Z][a-z'-]+)+)/);
-  const cardMatch = text.match(/(?:yellow|red)\s+card\s+(?:for\s+)?([A-Z][a-z]+(?:\s+[A-Z][a-z'-]+)+)/i);
-  const genericMatch = text.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z'-]+)+)/);
+  let playerName: string | undefined;
 
-  const playerName = goalMatch?.[1] ?? cardMatch?.[1] ?? genericMatch?.[1] ?? "Unknown";
-  const assistMatch = text.match(/assist(?:ed by|:)?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z'-]+)+)/i);
-  return { playerName, assistName: assistMatch?.[1] };
+  if (type === "yellow_card" || type === "red_card" || type === "yellow_red_card") {
+    const cardMatch = text.match(new RegExp(`(?:yellow|red)\\s+card\\s+(?:for\\s+)?${PLAYER_NAME}`, "i"));
+    playerName = cardMatch?.[1];
+  } else if (type === "goal" || type === "own_goal") {
+    const scoresMatch = text.match(new RegExp(`${PLAYER_NAME}\\s+scores`, "i"));
+    const goalMatch = text.match(
+      new RegExp(`(?:goal(?:!)?\\s*(?:for\\s+[^!]+!?\\s*)?[-–:]?\\s*)${PLAYER_NAME}`, "i")
+    );
+    playerName = scoresMatch?.[1] ?? goalMatch?.[1];
+  }
+
+  const assistMatch = text.match(new RegExp(`assist(?:ed by|:)?\\s+${PLAYER_NAME}`, "i"));
+  return {
+    playerName: playerName ?? firstCapitalizedName(text) ?? "Unknown",
+    assistName: assistMatch?.[1],
+  };
 }
 
 /** Fallback: derive structured events from WC Live commentary text. */
