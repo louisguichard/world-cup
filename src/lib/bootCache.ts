@@ -17,8 +17,14 @@ export const BOOT_TEAMS_CACHE_KEY = `wc-boot-teams-v${BOOT_CACHE_VERSION}`;
 
 const LEGACY_CACHE_KEYS = [
   "wc-boot-teams-v1",
+  "wc-boot-teams-v2",
+  "wc-boot-teams-v3",
   "wc-live-matches-v1",
+  "wc-live-matches-v2",
+  "wc-live-matches-v3",
   "wc-standings-v1",
+  "wc-standings-v2",
+  "wc-standings-v3",
 ] as const;
 
 type BootTeamsCacheStore = {

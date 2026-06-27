@@ -2,7 +2,7 @@ import type { ApiSourceId } from "../config/apiFlags";
 import { API_QUOTA_POLICY, type ApiRequestIntent } from "../config/apiQuotaPolicy";
 import { logger } from "./Logger";
 
-const STORAGE_KEY = "wc-api-quota-governor-v1";
+const STORAGE_KEY = "wc-api-quota-governor-v2";
 const LIVE_CRITICAL_SOURCES: ApiSourceId[] = ["espnScoreboard", "wc2026Live", "sportApi7"];
 
 type UsageRow = {

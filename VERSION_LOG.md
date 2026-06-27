@@ -47,6 +47,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 23 — 2026-06-27 (build)
+- 10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, vercel.json — 10 files changed, 59 insertions(+), 13 deletions(-)
+
+## [4.0.0] build 22 — 2026-06-27 (build)
+- Bust client caches (boot v4, SW v5, quota reset) and no-cache shell headers
+
 ## [4.0.0] build 21 — 2026-06-27 (build)
 - 14 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 14 files changed, 235 insertions(+), 22 deletions(-)
 

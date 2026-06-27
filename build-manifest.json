@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-27T17:02:26.938Z",
+  "updatedAt": "2026-06-27T17:27:59.634Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 23,
+      "kind": "build",
+      "message": "10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, vercel.json — 10 files changed, 59 insertions(+), 13 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T17:27:59.634Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 22,
+      "kind": "build",
+      "message": "Bust client caches (boot v4, SW v5, quota reset) and no-cache shell headers",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T17:27:44.550Z"
+    },
     {
       "version": "4.0.0",
       "build": 21,
