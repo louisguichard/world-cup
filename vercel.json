@@ -137,10 +137,6 @@
       "destination": "https://inside.fifa.com/:path*"
     },
     {
-      "source": "/api/sofascore6/:path*",
-      "destination": "/api/sofascore6/:path*"
-    },
-    {
       "source": "/api/sofascore/:path*",
       "destination": "/api/sofascore?path=:path*"
     },

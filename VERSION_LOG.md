@@ -66,6 +66,10 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+## [4.0.0] build 41 — 2026-06-27 (build)
+- Remove duplicate sofascore6 rewrite; document Getty/YouTube env vars
+
 ## [4.0.0] build 40 — 2026-06-27 (build)
 - Integrate all feature branches via consolidated rapid proxy
 
