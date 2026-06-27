@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { liveCardNameForAbbrev } from "../data/teamLiveCardNames";
 import { TEAM_IDENTITY_OVERRIDES } from "../data/teamIdentityOverrides";
 import { resolveTeamLogoByAbbrev } from "../data/wc2026TeamCatalog";
 import type { CrestProfile } from "../data/teamCrestDisplay";
@@ -137,14 +138,17 @@ export function teamLiveCardName(
   const short = team?.shortName?.trim();
   const abbrev = team?.abbreviation?.trim()?.toUpperCase();
 
-  if (short && name && short.localeCompare(name, undefined, { sensitivity: "accent" }) !== 0) {
+  if (
+    short &&
+    name &&
+    short.length > 3 &&
+    short.localeCompare(name, undefined, { sensitivity: "accent" }) !== 0
+  ) {
     return short;
   }
 
-  const maxFullNameLength = 12;
-  if (name && abbrev && name.length > maxFullNameLength) {
-    return abbrev;
-  }
+  const curated = liveCardNameForAbbrev(abbrev);
+  if (curated) return curated;
 
   if (name) return name;
   if (short) return short;

@@ -205,7 +205,6 @@
 
 .live-hero-card .team-name-text {
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 1.25;
   font-family: var(--font-brand);
@@ -221,7 +220,6 @@
   font-size: var(--text-sm);
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .live-hero-card--secondary .team-flag-badge {
@@ -544,7 +542,6 @@
 
 .schedule-card.is-live .team-name-text {
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 

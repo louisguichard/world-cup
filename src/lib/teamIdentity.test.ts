@@ -60,11 +60,17 @@ describe("teamLiveCardName", () => {
       teamLiveCardName(
         makeTeam({
           name: "Bosnia and Herzegovina",
-          shortName: "Bosnia and Herzegovina",
+          shortName: "BIH",
           abbreviation: "BIH",
         })
       )
-    ).toBe("BIH");
+    ).toBe("Bosnia-Herz");
+  });
+
+  it("uses curated USA label instead of full country name", () => {
+    expect(
+      teamLiveCardName(makeTeam({ name: "United States", shortName: "USA", abbreviation: "USA" }))
+    ).toBe("USA");
   });
 });
 
