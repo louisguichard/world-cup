@@ -12,7 +12,9 @@ import {
 } from "../WorldCup2026LiveClient";
 import { fetchGroups, isWorldCup2026Disabled } from "../WorldCup2026Client";
 import {
+  buildStandingsFromTeamGroups,
   mergeStandingsPartials,
+  normalizeStandingsTeamIds,
   normalizeWCLiveStandings,
   normalizeWC2026Groups,
   normalizeZafronixBracket,
@@ -68,7 +70,9 @@ export class DataOrchestrator {
     const teamsList = Object.values(store.teams);
     const matches = Object.values(store.liveMatches);
     const derived = deriveStandingsIfScored(matches, teamsList);
-    const fallback = derived ?? [];
+    const seeded = buildStandingsFromTeamGroups(teamsList);
+    const fallback = derived ?? (seeded.length > 0 ? seeded : []);
+    const teamsById = Object.fromEntries(teamsList.map((t) => [t.id, t]));
 
     const { data } = await fetchWithFallback(
       STANDINGS_SOURCE_PRIORITY,
@@ -92,10 +96,11 @@ export class DataOrchestrator {
     );
 
     if (Array.isArray(data) && data.length > 0) {
-      const merged = mergeStandingsPartials(derived ?? [], data);
-      store.setGroupStandings(merged);
-    } else if (derived) {
-      store.setGroupStandings(derived);
+      store.setGroupStandings(
+        normalizeStandingsTeamIds(mergeStandingsPartials(derived ?? [], data), teamsById)
+      );
+    } else if (fallback.length > 0) {
+      store.setGroupStandings(normalizeStandingsTeamIds(fallback, teamsById));
     }
     store.touchModuleFreshness(MODULE_IDS.groupStandings);
   }

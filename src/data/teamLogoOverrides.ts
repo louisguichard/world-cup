@@ -36,7 +36,7 @@ export const TEAM_LOGO_OVERRIDES: Record<string, string> = {
   KOR: "https://upload.wikimedia.org/wikipedia/commons/0/09/Flag_of_South_Korea.svg",
   KSA: "https://upload.wikimedia.org/wikipedia/commons/0/0d/Flag_of_Saudi_Arabia.svg",
   MAR: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Flag_of_Morocco.svg",
-  MEX: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Federaci%C3%B3n_Mexicana_de_F%C3%BAtbol_logo_%282025%29.svg",
+  MEX: "https://upload.wikimedia.org/wikipedia/en/3/3f/Mexico_national_football_team_crest.svg",
   NED: "https://upload.wikimedia.org/wikipedia/commons/2/20/Flag_of_the_Netherlands.svg",
   NOR: "https://upload.wikimedia.org/wikipedia/commons/d/d9/Flag_of_Norway.svg",
   NZL: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Flag_of_New_Zealand.svg",

@@ -1,4 +1,4 @@
-import { buildAppHash } from "../hooks/useHashSync";
+import { buildAppHash } from "../lib/appHash";
 import { clearReturnContext } from "../store/slices/navigationSlice";
 import { useStore } from "../store";
 import type { TabId } from "../types";

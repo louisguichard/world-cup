@@ -1,4 +1,5 @@
-import type { GroupLetter, GroupStanding, TeamRecord } from "../../types";
+import { resolveCanonicalTeamId } from "../../data/wc2026TeamCatalog";
+import type { GroupLetter, GroupStanding, Team, TeamRecord } from "../../types";
 import { groupLetters } from "../../types";
 import type { WcStanding } from "../WorldCup2026LiveClient";
 
@@ -134,6 +135,68 @@ export function normalizeWC2026Groups(raw: unknown): GroupStanding[] {
   }
 
   return result;
+}
+
+/** Zero-point tables from team.group — used before any match results exist. */
+export function buildStandingsFromTeamGroups(teams: Team[]): GroupStanding[] {
+  const byGroup = new Map<GroupLetter, Team[]>();
+
+  for (const team of teams) {
+    if (!team.group) continue;
+    const list = byGroup.get(team.group) ?? [];
+    list.push(team);
+    byGroup.set(team.group, list);
+  }
+
+  const result: GroupStanding[] = [];
+
+  for (const group of groupLetters) {
+    const groupTeams = byGroup.get(group);
+    if (!groupTeams?.length) continue;
+
+    const rows: TeamRecord[] = groupTeams
+      .map((team) => ({
+        teamId: resolveCanonicalTeamId(team.id, team),
+        group,
+        played: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0,
+        points: 0,
+        conduct: 0,
+        rating: team.rating,
+        fifaRank: team.fifaRank,
+      }))
+      .sort(
+        (a, b) =>
+          (a.fifaRank ?? 999) - (b.fifaRank ?? 999) ||
+          b.rating - a.rating ||
+          a.teamId.localeCompare(b.teamId)
+      );
+
+    result.push({ group, rows });
+  }
+
+  return result;
+}
+
+/** Collapse ESPN / API ids onto catalog ids (bra, mex, …) for qualification bucketing. */
+export function normalizeStandingsTeamIds(
+  standings: GroupStanding[],
+  teams: Record<string, Team>
+): GroupStanding[] {
+  return standings.map((standing) => ({
+    group: standing.group,
+    rows: standing.rows
+      .map((row) => {
+        const canonicalId = resolveCanonicalTeamId(row.teamId, teams[row.teamId]);
+        return canonicalId === row.teamId ? row : { ...row, teamId: canonicalId };
+      })
+      .sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference),
+  }));
 }
 
 /** Merges standings from multiple sources — higher-played rows win per group/team. */

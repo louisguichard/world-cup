@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { uniqueCanonicalTeamIds } from "../../data/wc2026TeamCatalog";
+import { uniqueCanonicalTeamIds, resolveTeamForDisplay } from "../../data/wc2026TeamCatalog";
 import {
   buildQualificationSnapshot,
   buildTeamQualificationView,
@@ -45,7 +45,9 @@ export function useTeamQualificationView(teamId: string): TeamQualificationView 
   const context = useQualificationContext();
 
   return useMemo(() => {
-    if (!teamId || !teams[teamId]) return null;
+    if (!teamId) return null;
+    const team = teams[teamId] ?? resolveTeamForDisplay(teamId);
+    if (!team && !teams[teamId]) return null;
     return buildTeamQualificationView(teamId, standings, context);
   }, [teamId, teams, standings, context]);
 }

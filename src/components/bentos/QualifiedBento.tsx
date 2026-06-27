@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { buildQualificationContext } from "../../lib/qualification";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
+import { resolveTeamForDisplay } from "../../data/wc2026TeamCatalog";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import { useQualificationSnapshot, useTeamQualificationView } from "../../store/selectors/qualificationSelectors";
@@ -30,7 +31,7 @@ function QualTeamChip({
 }) {
   const teams = useStore((s) => s.teams);
   const view = useTeamQualificationView(teamId);
-  const team = teams[teamId];
+  const team = teams[teamId] ?? resolveTeamForDisplay(teamId);
   const label = teamDisplayName(team, teamId);
   const rankHint = thirdRankHint(view?.bestThirdRank);
   const title = [view?.status.reason ?? team?.name ?? label, rankHint].filter(Boolean).join(" · ");

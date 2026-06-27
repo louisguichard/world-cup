@@ -1,5 +1,6 @@
 import type { BracketViewMode, GroupsViewMode, SimulatorMode, SplashPhase, TabId } from "../../types";
 import type { OpenTeamSheetOptions, TeamDrawerTab } from "../../lib/teamDrawer";
+import { readInitialAppHash } from "../../lib/appHash";
 import {
   readStoredColorScheme,
   writeStoredColorScheme,
@@ -36,9 +37,11 @@ export type UiSliceState = {
 
 export const createUiSlice = (
   set: (fn: (state: UiSliceState) => Partial<UiSliceState>) => void
-): UiSliceState => ({
-  activeTab: "live",
-  simulatorMode: "tournament",
+): UiSliceState => {
+  const initialRoute = readInitialAppHash();
+  return {
+  activeTab: initialRoute.tab,
+  simulatorMode: initialRoute.simulatorMode,
   splashPhase: "loading",
   splashProgress: 0,
   splashMessage: "Connecting to live data...",
@@ -77,4 +80,5 @@ export const createUiSlice = (
     set((state) => ({
       moduleFreshness: { ...state.moduleFreshness, [moduleId]: Date.now() },
     })),
-});
+};
+};

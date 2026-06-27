@@ -1,4 +1,5 @@
 import type { MatchDetailTab, NavigationContext, TournamentSubTab } from "../../types";
+import { readInitialAppHash } from "../../lib/appHash";
 
 const NAV_RETURN_KEY = "wc-nav-return";
 
@@ -47,13 +48,15 @@ export function clearReturnContext(): void {
 
 export const createNavigationSlice = (
   set: (fn: (state: NavigationSliceState) => Partial<NavigationSliceState>) => void
-): NavigationSliceState => ({
-  activeMatchId: null,
-  activeMatchTab: "summary",
-  activeVenueSlug: null,
+): NavigationSliceState => {
+  const initialRoute = readInitialAppHash();
+  return {
+  activeMatchId: initialRoute.matchId,
+  activeMatchTab: initialRoute.matchTab,
+  activeVenueSlug: initialRoute.venueSlug,
   returnContext: null,
-  tournamentSubTab: "matches",
-  selectedDateKey: null,
+  tournamentSubTab: initialRoute.tournamentSubTab,
+  selectedDateKey: initialRoute.dateKey,
   selectedBracketRound: null,
 
   openMatchDetail: (matchId, context) => {
@@ -88,4 +91,5 @@ export const createNavigationSlice = (
   setSelectedDateKey: (key) => set(() => ({ selectedDateKey: key })),
 
   setSelectedBracketRound: (round) => set(() => ({ selectedBracketRound: round }))
-});
+};
+};

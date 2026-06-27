@@ -1,144 +1,25 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import {
+  buildAppHash,
+  buildMatchHash,
+  buildTournamentHash,
+  buildVenueHash,
+  parseAppHash,
+  type ParsedAppHash,
+} from "../lib/appHash";
 import { logger } from "../services/Logger";
 import { clearReturnContext, loadReturnContext } from "../store/slices/navigationSlice";
 import { useStore } from "../store";
-import type { MatchDetailTab, NavigationContext, SimulatorMode, TabId, TournamentSubTab } from "../types";
+import type { NavigationContext } from "../types";
 
-const VALID_TABS: TabId[] = [
-  "live",
-  "results",
-  "bracket",
-  "groups",
-  "simulator",
-  "teams",
-  "schedule",
-  "tournament"
-];
-const VALID_SIMULATOR_MODES: SimulatorMode[] = ["tournament", "probabilities", "methodology"];
-const VALID_MATCH_TABS: MatchDetailTab[] = [
-  "summary",
-  "watch",
-  "highlights",
-  "statistics",
-  "lineups",
-  "commentary",
-  "h2h",
-];
-const VALID_TOURNAMENT_SUB_TABS: TournamentSubTab[] = ["matches", "standings", "bracket", "stats", "history"];
-
-export type ParsedAppHash = {
-  tab: TabId;
-  simulatorMode: SimulatorMode;
-  matchId: string | null;
-  matchTab: MatchDetailTab;
-  tournamentSubTab: TournamentSubTab;
-  dateKey: string | null;
-  venueSlug: string | null;
-};
-
-export function parseAppHash(hash: string): ParsedAppHash {
-  const stripped = hash.replace(/^#/, "");
-  // Separate query string from hash path
-  const [pathPart, queryPart] = stripped.split("?");
-  const parts = pathPart.split("/");
-  const [primary, secondary, tertiary] = parts;
-
-  const dateKey = queryPart
-    ? (new URLSearchParams(queryPart).get("date") ?? null)
-    : null;
-
-  // Match detail route: #match/{matchId} or #match/{matchId}/{tab}
-  if (primary === "match" && secondary) {
-    const matchTab = VALID_MATCH_TABS.includes(tertiary as MatchDetailTab)
-      ? (tertiary as MatchDetailTab)
-      : "summary";
-    return {
-      tab: "live",
-      simulatorMode: "tournament",
-      matchId: secondary,
-      matchTab,
-      tournamentSubTab: "matches",
-      dateKey: null,
-      venueSlug: null
-    };
-  }
-
-  // Venue hub route: #venue/{slug}
-  if (primary === "venue" && secondary) {
-    return {
-      tab: "live",
-      simulatorMode: "tournament",
-      matchId: null,
-      matchTab: "summary",
-      tournamentSubTab: "matches",
-      dateKey: null,
-      venueSlug: secondary
-    };
-  }
-
-  // Tournament route: #tournament or #tournament/{subTab}
-  if (primary === "tournament") {
-    const subTab = VALID_TOURNAMENT_SUB_TABS.includes(secondary as TournamentSubTab)
-      ? (secondary as TournamentSubTab)
-      : "matches";
-    return {
-      tab: "tournament",
-      simulatorMode: "tournament",
-      matchId: null,
-      matchTab: "summary",
-      tournamentSubTab: subTab,
-      // date query param only applies to the Matches sub-tab
-      dateKey: subTab === "matches" ? dateKey : null,
-      venueSlug: null
-    };
-  }
-
-  // Standard tab route
-  const tab = VALID_TABS.includes(primary as TabId) ? (primary as TabId) : "live";
-  const simulatorMode =
-    tab === "simulator" && VALID_SIMULATOR_MODES.includes(secondary as SimulatorMode)
-      ? (secondary as SimulatorMode)
-      : "tournament";
-
-  return {
-    tab,
-    simulatorMode,
-    matchId: null,
-    matchTab: "summary",
-    tournamentSubTab: "matches",
-    dateKey: null,
-    venueSlug: null
-  };
-}
-
-export function buildAppHash(tab: TabId, simulatorMode: SimulatorMode): string {
-  if (tab === "simulator" && simulatorMode !== "tournament") {
-    return `#simulator/${simulatorMode}`;
-  }
-  if (tab === "simulator") {
-    return "#simulator";
-  }
-  return `#${tab}`;
-}
-
-export function buildMatchHash(matchId: string, tab?: MatchDetailTab): string {
-  if (tab && tab !== "summary") {
-    return `#match/${matchId}/${tab}`;
-  }
-  return `#match/${matchId}`;
-}
-
-export function buildTournamentHash(subTab?: TournamentSubTab, dateKey?: string): string {
-  const base = subTab && subTab !== "matches" ? `#tournament/${subTab}` : "#tournament";
-  if (dateKey && (!subTab || subTab === "matches")) {
-    return `${base}?date=${dateKey}`;
-  }
-  return base;
-}
-
-export function buildVenueHash(slug: string): string {
-  return `#venue/${slug}`;
-}
+export type { ParsedAppHash };
+export {
+  buildAppHash,
+  buildMatchHash,
+  buildTournamentHash,
+  buildVenueHash,
+  parseAppHash,
+} from "../lib/appHash";
 
 export function useHashSync(): void {
   const activeTab = useStore((s) => s.activeTab);
@@ -160,34 +41,49 @@ export function useHashSync(): void {
   const setSelectedDateKey = useStore((s) => s.setSelectedDateKey);
 
   const restoredRef = useRef(false);
+  const hashHydratedRef = useRef(false);
 
-  // Restore state from initial hash on mount
-  useEffect(() => {
-    const parsed = parseAppHash(window.location.hash);
+  const applyParsedHash = (parsed: ParsedAppHash, withReturnContext: boolean) => {
     if (parsed.matchId) {
-      const ctx = loadReturnContext() ?? undefined;
+      const ctx = withReturnContext ? (loadReturnContext() ?? undefined) : undefined;
       openMatchDetail(parsed.matchId, ctx);
       setMatchTab(parsed.matchTab);
-    } else if (parsed.venueSlug) {
-      const ctx = loadReturnContext() ?? undefined;
-      openVenueHub(parsed.venueSlug, ctx);
-    } else {
-      closeVenueHub();
-      setActiveTab(parsed.tab);
-      setSimulatorMode(parsed.simulatorMode);
-      if (parsed.tab === "tournament") {
-        setTournamentSubTab(parsed.tournamentSubTab);
-        if (parsed.dateKey) setSelectedDateKey(parsed.dateKey);
-      }
+      return;
     }
+    if (parsed.venueSlug) {
+      const ctx = withReturnContext ? (loadReturnContext() ?? undefined) : undefined;
+      openVenueHub(parsed.venueSlug, ctx);
+      return;
+    }
+    closeVenueHub();
+    setActiveTab(parsed.tab);
+    setSimulatorMode(parsed.simulatorMode);
+    if (parsed.tab === "tournament") {
+      setTournamentSubTab(parsed.tournamentSubTab);
+      if (parsed.dateKey) setSelectedDateKey(parsed.dateKey);
+    }
+  };
 
+  // Reconcile overlays / tournament sub-routes from hash before paint.
+  useLayoutEffect(() => {
+    const parsed = parseAppHash(window.location.hash);
+    applyParsedHash(parsed, true);
+    hashHydratedRef.current = true;
     if (!restoredRef.current) {
       restoredRef.current = true;
       logger.info("Route restored from URL hash", "HashSync", parsed);
     }
-  }, [setActiveTab, setSimulatorMode, openMatchDetail, openVenueHub, closeVenueHub, setMatchTab, setTournamentSubTab, setSelectedDateKey]);
+  }, [
+    setActiveTab,
+    setSimulatorMode,
+    openMatchDetail,
+    openVenueHub,
+    closeVenueHub,
+    setMatchTab,
+    setTournamentSubTab,
+    setSelectedDateKey,
+  ]);
 
-  // Handle browser back/forward
   useEffect(() => {
     const handlePopState = () => {
       const parsed = parseAppHash(window.location.hash);
@@ -214,10 +110,21 @@ export function useHashSync(): void {
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [closeMatchDetail, closeVenueHub, openMatchDetail, openVenueHub, setActiveTab, setMatchTab, setSimulatorMode, setTournamentSubTab, setSelectedDateKey]);
+  }, [
+    closeMatchDetail,
+    closeVenueHub,
+    openMatchDetail,
+    openVenueHub,
+    setActiveTab,
+    setMatchTab,
+    setSimulatorMode,
+    setTournamentSubTab,
+    setSelectedDateKey,
+  ]);
 
-  // Sync store state → URL hash
   useEffect(() => {
+    if (!hashHydratedRef.current) return;
+
     let newHash: string;
     if (activeMatchId) {
       newHash = buildMatchHash(activeMatchId, activeMatchTab);
@@ -230,15 +137,21 @@ export function useHashSync(): void {
     }
 
     if (window.location.hash !== newHash) {
-      // Use pushState when entering match detail so Back button works;
-      // replaceState for all other tab/sub-tab switches.
       if (activeMatchId || activeVenueSlug) {
         window.history.pushState(null, "", newHash);
       } else {
         window.history.replaceState(null, "", newHash);
       }
     }
-  }, [activeTab, simulatorMode, activeMatchId, activeMatchTab, activeVenueSlug, tournamentSubTab, selectedDateKey]);
+  }, [
+    activeTab,
+    simulatorMode,
+    activeMatchId,
+    activeMatchTab,
+    activeVenueSlug,
+    tournamentSubTab,
+    selectedDateKey,
+  ]);
 }
 
 /** Navigation helper: open a match detail page with return context saved */

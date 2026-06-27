@@ -48,7 +48,9 @@ import {
 import { getAllScheduleEntries } from "../BroadcastLookup";
 import { normalizeZafronixTeam, normalizeWC2026Team, mergeTeamPartials } from "../adapters/normalizeTeam";
 import {
+  buildStandingsFromTeamGroups,
   mergeStandingsPartials,
+  normalizeStandingsTeamIds,
   normalizeWCLiveStandings,
   normalizeWC2026Groups,
   normalizeZafronixBracket,
@@ -158,7 +160,8 @@ async function loadStandingsWithFallback(
   teamsList: Team[]
 ): Promise<GroupStanding[] | null> {
   const derived = deriveStandingsIfScored(espnMatches, teamsList);
-  const fallback = derived ?? [];
+  const seeded = buildStandingsFromTeamGroups(teamsList);
+  const fallback = derived ?? (seeded.length > 0 ? seeded : []);
 
   const { data } = await fetchWithFallback(
     STANDINGS_SOURCE_PRIORITY,
@@ -181,10 +184,15 @@ async function loadStandingsWithFallback(
     fallback
   );
 
+  const teamsById = Object.fromEntries(teamsList.map((t) => [t.id, t]));
   if (Array.isArray(data) && data.length > 0) {
-    return mergeStandingsPartials(derived ?? [], data);
+    return normalizeStandingsTeamIds(
+      mergeStandingsPartials(derived ?? [], data),
+      teamsById
+    );
   }
-  return derived;
+  const result = derived ?? (seeded.length > 0 ? seeded : null);
+  return result ? normalizeStandingsTeamIds(result, teamsById) : null;
 }
 
 function startBackgroundEnrichment(): void {
@@ -354,10 +362,15 @@ export async function runBoot(): Promise<void> {
 
     startBootPhase("standings-load");
     const teamsList = Object.values(useStore.getState().teams);
-    const standings = deriveStandingsIfScored(Object.values(liveMatches), teamsList);
-    endBootPhase("standings-load", standings ? "derived locally (APIs deferred)" : "empty");
-    if (standings) {
-      store.setGroupStandings(standings);
+    const derivedStandings = deriveStandingsIfScored(Object.values(liveMatches), teamsList);
+    const seededStandings =
+      derivedStandings ?? (teamsList.length > 0 ? buildStandingsFromTeamGroups(teamsList) : null);
+    endBootPhase(
+      "standings-load",
+      derivedStandings ? "derived locally (APIs deferred)" : seededStandings ? "seeded from groups" : "empty"
+    );
+    if (seededStandings && seededStandings.length > 0) {
+      store.setGroupStandings(seededStandings);
     }
 
     store.setSplashProgress(deferHeavy ? 80 : 65, deferHeavy ? "Almost ready..." : "Running simulations...");

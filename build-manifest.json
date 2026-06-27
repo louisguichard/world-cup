@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-27T07:11:18.150Z",
+  "updatedAt": "2026-06-27T07:20:01.115Z",
   "builds": [
+    {
+      "version": "3.0.0",
+      "build": 22,
+      "kind": "build",
+      "message": "14 file(s) in build-manifest.json, src — 14 files changed, 436 insertions(+), 191 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T07:20:01.115Z"
+    },
     {
       "version": "3.0.0",
       "build": 21,
@@ -83,6 +91,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "6d9295d92db7159cf31910c825e0baac5091fd27",
+      "shortHash": "6d9295d",
+      "message": "Fix flaky SportHighlights test and sync final debug manifest.",
+      "version": "3.0.0",
+      "build": 21,
+      "timestamp": "2026-06-27T07:11:23.653Z"
+    },
     {
       "hash": "f66b19b933752ace6d9656b6a88a5ecc70fceaaf",
       "shortHash": "f66b19b",
