@@ -8,6 +8,10 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+## [3.0.0] build 4 — 2026-06-27 (build)
+- Unified navigateToTab helper, compact top bar, home buttons on match/venue overlays
+
 ## [3.0.0] build 3 — 2026-06-27 (build)
 - Migrate SofaScore proxy to edge runtime (fixes Vercel TS build)
 

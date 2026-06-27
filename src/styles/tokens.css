@@ -12,6 +12,7 @@
   --layout-section-gap: clamp(16px, 2.5vw, 28px);
   --touch-target-min: 44px;
   --content-readable: min(100%, 72ch);
+  --chrome-bottom-nav: calc(56px + var(--safe-bottom));
 
   /* Bracket columns shrink on narrow viewports, expand on wide */
   --bracket-col-width: clamp(140px, 14vw, 208px);

@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { materializeFullSchedule } from "../../lib/materializeFullSchedule";
 import { resolveVenueBySlug } from "../../lib/venue/resolveVenue";
 import { buildVenueMatchSlice } from "../../lib/venue/venueMatches";
+import { navigateHome } from "../../lib/navigateToTab";
+import { APP_COPY } from "../../lib/appCopy";
 import { clearReturnContext } from "../../store/slices/navigationSlice";
 import { useStore } from "../../store";
 import { VenueMatchRow } from "../../components/venue/VenueMatchRow";
@@ -62,9 +64,19 @@ export function VenueHubView() {
   return (
     <div className={styles.overlay} role="dialog" aria-labelledby={titleId}>
       <header className={styles.header}>
-        <button type="button" className={styles.backBtn} onClick={handleBack}>
-          ← Back
-        </button>
+        <div className={styles.headerNav}>
+          <button type="button" className={styles.backBtn} onClick={handleBack}>
+            ← Back
+          </button>
+          <button
+            type="button"
+            className={styles.homeBtn}
+            onClick={navigateHome}
+            aria-label={APP_COPY.tabs.live}
+          >
+            {APP_COPY.tabs.live}
+          </button>
+        </div>
         <div className={styles.titleBlock}>
           <h1 id={titleId} className={styles.titlePrimary}>
             {venue.displayPrimary}

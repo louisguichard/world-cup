@@ -48,20 +48,35 @@
   padding: 10px 16px;
 }
 
-.backBtn {
+.backBtn,
+.homeBtn {
   background: none;
   border: none;
   color: var(--ss-muted);
   cursor: pointer;
-  padding: 6px;
+  padding: 6px 8px;
   border-radius: 6px;
   display: flex;
   align-items: center;
+  font-size: 0.85rem;
   transition: color 0.15s;
   flex-shrink: 0;
+  min-width: 3.5rem;
 }
 
-.backBtn:hover {
+.backBtn {
+  justify-content: flex-start;
+}
+
+.homeBtn {
+  justify-content: flex-end;
+  font-family: var(--font-brand);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.backBtn:hover,
+.homeBtn:hover {
   color: var(--ss-text);
 }
 
@@ -272,6 +287,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--chrome-bottom-nav) + 12px);
 }
 
 /* ── Tab panels ───────────────────────────────── */

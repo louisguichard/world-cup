@@ -75,7 +75,7 @@ export function AppShell() {
   return (
     <div className="wc-chrome">
       <ApiSetupBanner />
-      <TopNavBar hidden={activeTab === "simulator" || !!activeMatchId || !!activeVenueSlug} />
+      <TopNavBar compact={activeTab === "simulator"} />
       <main
         ref={mainRef}
         className={`wc-main${refreshing ? " is-refreshing" : ""}`}

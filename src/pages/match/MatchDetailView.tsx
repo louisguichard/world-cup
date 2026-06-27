@@ -6,7 +6,7 @@ import { useStore } from "../../store";
 import { useMatchDetailBundle } from "../../hooks/useMatchDetailBundle";
 import { usePageVisibilityPolling } from "../../hooks/usePageVisibilityPolling";
 import { useLiveClock } from "../../hooks/useLiveClock";
-import { clearReturnContext } from "../../store/slices/navigationSlice";
+import { navigateHome } from "../../lib/navigateToTab";
 import { buildTournamentHash, buildVenueHash } from "../../hooks/useHashSync";
 import { resolveMatchIds } from "../../services/matchDetail/resolveMatchIds";
 import { materializeFullSchedule } from "../../lib/materializeFullSchedule";
@@ -16,7 +16,9 @@ import { MatchLineupsTab } from "./components/tabs/MatchLineupsTab";
 import { MatchCommentaryTab } from "./components/tabs/MatchCommentaryTab";
 import { MatchH2HTab } from "./components/tabs/MatchH2HTab";
 import type { MatchDetailTab, MatchEvent } from "../../types";
+import { clearReturnContext } from "../../store/slices/navigationSlice";
 import { APP_BRAND } from "../../config/appMeta";
+import { APP_COPY } from "../../lib/appCopy";
 import { VenueLabel } from "../../components/venue/VenueLabel";
 import { OddsRow } from "../../components/match/OddsRow";
 import { WeatherBadge } from "../../components/match/WeatherBadge";
@@ -232,6 +234,15 @@ export function MatchDetailView() {
               <span className={`${styles.headerTeamName} team-name-text`}>{awayTeamName}</span>
             </div>
           </div>
+
+          <button
+            type="button"
+            className={styles.homeBtn}
+            onClick={navigateHome}
+            aria-label={APP_COPY.tabs.live}
+          >
+            {APP_COPY.tabs.live}
+          </button>
         </div>
 
         {/* Context bar */}

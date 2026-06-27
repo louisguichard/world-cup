@@ -2,6 +2,7 @@ import type { TabId } from "../../types";
 import { useStore } from "../../store";
 import { ThemeToggle } from "../shared/ThemeToggle";
 import { APP_COPY } from "../../lib/appCopy";
+import { navigateToTab } from "../../lib/navigateToTab";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "live", label: APP_COPY.tabs.live },
@@ -16,7 +17,6 @@ const TABS: { id: TabId; label: string }[] = [
 
 export function BottomTabBar() {
   const activeTab = useStore((s) => s.activeTab);
-  const setActiveTab = useStore((s) => s.setActiveTab);
   const liveCount = useStore((s) => {
     let count = 0;
     for (const match of Object.values(s.liveMatches)) {
@@ -35,7 +35,7 @@ export function BottomTabBar() {
           key={tab.id}
           type="button"
           className={`bottom-tab ${activeTab === tab.id ? "bottom-tab--active" : ""}`}
-          onClick={() => setActiveTab(tab.id)}
+          onClick={() => navigateToTab(tab.id)}
           aria-current={activeTab === tab.id ? "page" : undefined}
         >
           {tab.label}
