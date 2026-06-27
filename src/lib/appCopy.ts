@@ -476,6 +476,103 @@ export const APP_COPY = {
     model: "Our guess",
     market: "Betting",
   },
+
+  splash: {
+    loadingAria: "Loading",
+    simulationError: "Simulation could not complete",
+    liveDataError: "Could not reach live match data",
+    connectionHint: "Check your connection and try again",
+    retryAria: "Retry loading match data",
+    retryButton: "Try again",
+  },
+
+  errors: {
+    sectionUnavailable: "This section is not available right now",
+    somethingWrong: "Something went wrong",
+    sectionFailed: "This section could not load.",
+    tryAgain: "Try again",
+  },
+
+  certainty: {
+    confirmed: "Locked in",
+    projected: "Best guess",
+    projectedStrong: "Leading",
+    projectedWeak: "On track",
+    simulated: "Simulated",
+    tbd: "TBD",
+  },
+
+  goalScorer: {
+    age: "Age",
+    hometown: "Home town",
+    club: "Club",
+    tournamentGoals: "Goals this World Cup",
+    internationalGoals: "Career goals",
+    internationalCaps: "Career caps",
+    ownGoalBadge: "OG",
+    placeholderNote:
+      "Player photo and career stats will show up when roster data is available.",
+    goalBy: (name: string) => `Goal by ${name}`,
+  },
+
+  dataFreshness: {
+    stale: (time: string) => `Scores may be out of date — last update ${time}`,
+    proxyDeadPrefix: "Data source unavailable",
+  },
+
+  predictions: {
+    ariaLabel: "Match tips",
+    loading: "Loading today's tips…",
+    marketClassic: "Who wins the game?",
+    marketOverUnder: "Total goals over or under 2.5",
+    marketBothScore: "Both teams score",
+    guessColumn: "What they guessed",
+    winsLosses: (won: number, lost: number) => `${won} wins · ${lost} losses`,
+    featuredPerformance: "Featured tips — how they did",
+    allPerformance: "All tips — how they did",
+    wcTeamsToday: "World Cup teams playing today",
+    tipPrefix: "Tip:",
+    confidence: (pct: number) => ` · about ${pct}% sure`,
+    noWcTips: (leagueCount: number) =>
+      `No World Cup team tips in today's list yet — we track ${leagueCount} leagues. Tips show up here when this team has a game today.`,
+    extraFeatured: "Extra featured tips",
+    paidPlanNote: "Extra featured tips need a paid plan on this tips website.",
+  },
+
+  aria: {
+    mainNav: "Main navigation",
+    qualifiedTeams: "Teams moving on",
+    eliminatedTeams: "Teams out of the tournament",
+    contentionTeams: "Teams still in the race",
+    knockoutBracket: "Knockout bracket",
+    bestThirdRankings: "Best third-place rankings",
+    bestThirdTimeline: "Best third ranking positions over time",
+    timelinePosition: "Timeline position",
+    goalScorers: "Goal scorers",
+    goalsAndCards: "Goals and cards",
+    matchDetail: "Match detail",
+    close: "Close",
+    concurrentBroadcast: "Also on another channel",
+    standingsViewMode: "Standings view mode",
+    qualificationFlags: "Qualification flags",
+    groupStandings: "Group standings",
+    groupTables: "Group tables",
+    recentResults: "Recent results",
+    filterResultsByTeam: "Filter results by team",
+    upcomingMatches: "Upcoming matches",
+    liveNow: "Live now",
+    upcomingFixtures: "Upcoming games",
+    qualification: "Who moves on",
+    scheduleFilters: "Schedule filters",
+    viewMode: "View mode",
+    dayNavigation: "Day navigation",
+    selectMatchDate: "Select match date",
+    searchTeams: "Search teams",
+    filterByQualification: "Filter by status",
+    winDrawLoss: "Win, tie, and loss breakdown",
+    colorTheme: "Color theme",
+    footballStreams: "Football live streams",
+  },
 } as const;
 
 /** Qualification display strings — used by qualificationDisplay.ts */

@@ -18,6 +18,14 @@ function statusLabel(
   qualContext: ReturnType<typeof buildQualificationContext>
 ): { text: string; className: string } {
   const race = APP_COPY.bestThirdRace;
+
+  if (rank <= 8) {
+    return {
+      text: rank === 8 ? race.statusCutLine : race.statusMovingOn,
+      className: rank === 8 ? "best-third-status--cut" : "best-third-status--in",
+    };
+  }
+
   const qual = computeQualificationStatus(teamId, standings, qualContext);
   const display = resolveQualificationDisplay(qual);
   if (display.variant === "confirmed-eliminated") {
@@ -25,14 +33,6 @@ function statusLabel(
   }
   if (display.variant === "projected-eliminated") {
     return { text: race.statusLikelyOut, className: "best-third-status--warn" };
-  }
-  if (display.variant === "projected-qualified" || display.variant === "confirmed-qualified") {
-    if (rank <= 8) {
-      return {
-        text: rank === 8 ? race.statusCutLine : race.statusMovingOn,
-        className: rank === 8 ? "best-third-status--cut" : "best-third-status--in",
-      };
-    }
   }
   return { text: race.statusStillIn, className: "best-third-status--warn" };
 }

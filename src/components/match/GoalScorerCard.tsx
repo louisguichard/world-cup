@@ -1,6 +1,9 @@
 import type { GoalScorerProfile } from "../../types";
+import { APP_COPY } from "../../lib/appCopy";
 import { PlayerPhoto } from "../player/PlayerPhoto";
 import styles from "./GoalScorersPanel.module.css";
+
+const gs = APP_COPY.goalScorer;
 
 type Props = {
   profile: GoalScorerProfile;
@@ -57,13 +60,13 @@ export function GoalScorerCard({ profile, teamName, loading, compact }: Props) {
   }
 
   return (
-    <article className={styles.card} aria-label={`Goal by ${profile.displayName}`}>
+    <article className={styles.card} aria-label={gs.goalBy(profile.displayName)}>
       <div className={styles.cardHeader}>
         <PlayerAvatar profile={profile} loading={loading} />
         <div className={styles.headerText}>
           <h3 className={styles.playerName}>
             {profile.displayName}
-            {profile.isOwnGoal ? <span className={styles.ogBadge}>OG</span> : null}
+            {profile.isOwnGoal ? <span className={styles.ogBadge}>{gs.ownGoalBadge}</span> : null}
           </h3>
           <p className={styles.metaLine}>
             {teamName}
@@ -75,18 +78,16 @@ export function GoalScorerCard({ profile, teamName, loading, compact }: Props) {
       </div>
 
       <div className={styles.statsGrid}>
-        <StatCell label="Age" value={profile.age} />
-        <StatCell label="Hometown" value={profile.hometown} />
-        <StatCell label="Club" value={profile.currentClub} />
-        <StatCell label="WC 2026 goals" value={profile.tournamentGoals} />
-        <StatCell label="Intl. goals" value={profile.internationalGoals} />
-        <StatCell label="Intl. caps" value={profile.internationalAppearances} />
+        <StatCell label={gs.age} value={profile.age} />
+        <StatCell label={gs.hometown} value={profile.hometown} />
+        <StatCell label={gs.club} value={profile.currentClub} />
+        <StatCell label={gs.tournamentGoals} value={profile.tournamentGoals} />
+        <StatCell label={gs.internationalGoals} value={profile.internationalGoals} />
+        <StatCell label={gs.internationalCaps} value={profile.internationalAppearances} />
       </div>
 
       {!profile.photoUrl && !profile.age && !profile.currentClub ? (
-        <p className={styles.placeholderNote}>
-          Player photo and career stats will appear when roster data is available from the feed.
-        </p>
+        <p className={styles.placeholderNote}>{gs.placeholderNote}</p>
       ) : null}
     </article>
   );

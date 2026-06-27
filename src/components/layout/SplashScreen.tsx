@@ -1,7 +1,10 @@
 import { useStore } from "../../store";
 import { bootstrap } from "../../lib/bootstrap";
 import { APP_BRAND } from "../../config/appMeta";
+import { APP_COPY } from "../../lib/appCopy";
 import { BrandLogo } from "../shared/BrandLogo";
+
+const splash = APP_COPY.splash;
 
 type SplashErrorCardProps = {
   onRetry: () => void;
@@ -17,11 +20,11 @@ function SplashErrorCard({ onRetry }: SplashErrorCardProps) {
         ⚠️
       </span>
       <p className="splash-error-title">
-        {isSimulation ? "Simulation could not complete" : "Could not reach live match data"}
+        {isSimulation ? splash.simulationError : splash.liveDataError}
       </p>
-      <p className="splash-error-subtitle">{message || "Check your connection and retry"}</p>
-      <button type="button" className="splash-retry-btn" onClick={onRetry} aria-label="Retry loading match data">
-        ↻ Try Again
+      <p className="splash-error-subtitle">{message || splash.connectionHint}</p>
+      <button type="button" className="splash-retry-btn" onClick={onRetry} aria-label={splash.retryAria}>
+        ↻ {splash.retryButton}
       </button>
     </div>
   );
@@ -39,7 +42,7 @@ export function SplashScreen() {
   };
 
   return (
-    <div className={`splash-screen splash-screen--${phase}`} role="dialog" aria-label="Loading">
+    <div className={`splash-screen splash-screen--${phase}`} role="dialog" aria-label={splash.loadingAria}>
       <div className="splash-celebration-bg" aria-hidden>
         <span className="splash-celebration-orbit splash-celebration-orbit--a" />
         <span className="splash-celebration-orbit splash-celebration-orbit--b" />

@@ -33,6 +33,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 9 — 2026-06-27 (build)
+- 14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 14 files changed, 186 insertions(+), 61 deletions(-)
+
+## [4.0.0] build 8 — 2026-06-27 (build)
+- Full-app copy sweep via appCopy.ts; fix best-third race status labels
+
 ## [4.0.0] build 7 — 2026-06-27 (build)
 - 9 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 9 files changed, 141 insertions(+), 2 deletions(-)
 

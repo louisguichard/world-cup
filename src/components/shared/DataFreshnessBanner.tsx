@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import {
   listDeadProxies,
@@ -33,7 +34,7 @@ export function DataFreshnessBanner() {
 
   const staleLabel = useMemo(() => {
     if (!isStale || lastPollAt == null) return null;
-    return `Data may be stale — last live update ${formatTime(lastPollAt)}`;
+    return APP_COPY.dataFreshness.stale(formatTime(lastPollAt));
   }, [isStale, lastPollAt]);
 
   if (!hasDeadProxy && !isStale) return null;
@@ -47,7 +48,7 @@ export function DataFreshnessBanner() {
       {hasDeadProxy
         ? deadProxies.map((proxy) => (
             <span key={proxy.id} className="data-freshness-banner__item">
-              <strong>[PROXY DEAD]</strong> {proxy.label}
+              <strong>[{APP_COPY.dataFreshness.proxyDeadPrefix}]</strong> {proxy.label}
               {proxy.reason ? ` — ${proxy.reason}` : ""}
             </span>
           ))

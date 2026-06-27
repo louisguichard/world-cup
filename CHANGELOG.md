@@ -8,6 +8,8 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 9** (2026-06-27): 14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 14 files changed, 186 insertions(+), 61 deletions(-)
+- **4.0.0 build 8** (2026-06-27): Full-app copy sweep via appCopy.ts; fix best-third race status labels
 - **4.0.0 build 7** (2026-06-27): 9 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 9 files changed, 141 insertions(+), 2 deletions(-)
 - **4.0.0 build 6** (2026-06-27): Add uiDebugBridge for sweep; skip SVG collision false positives; 0-issue uidebug gate
 - **4.0.0 build 5** (2026-06-27): Fix UI debug sweep scan bridge timing; archive sweep runs under .cursor/ui-debug-runs

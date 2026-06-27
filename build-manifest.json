@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-27T14:28:25.293Z",
+  "updatedAt": "2026-06-27T14:40:01.445Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 9,
+      "kind": "build",
+      "message": "14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 14 files changed, 186 insertions(+), 61 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:40:01.444Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 8,
+      "kind": "build",
+      "message": "Full-app copy sweep via appCopy.ts; fix best-third race status labels",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:39:55.092Z"
+    },
     {
       "version": "4.0.0",
       "build": 7,

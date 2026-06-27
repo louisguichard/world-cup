@@ -1,4 +1,7 @@
 import styles from "./CertaintyBadge.module.css";
+import { APP_COPY } from "../../lib/appCopy";
+
+const certaintyCopy = APP_COPY.certainty;
 
 export type CertaintyBadgeVariant =
   | "confirmed"
@@ -13,22 +16,22 @@ export interface CertaintyBadgeProps {
   size?: "sm" | "xs";
 }
 
-function badgeLabel(certainty: CertaintyBadgeVariant): string {
-  switch (certainty) {
+function badgeLabel(variant: CertaintyBadgeVariant): string {
+  switch (variant) {
     case "confirmed":
-      return "Confirmed";
+      return certaintyCopy.confirmed;
     case "projected":
-      return "Projected";
+      return certaintyCopy.projected;
     case "projected_strong":
-      return "Leading";
+      return certaintyCopy.projectedStrong;
     case "projected_weak":
-      return "On track";
+      return certaintyCopy.projectedWeak;
     case "simulated":
-      return "Simulated";
+      return certaintyCopy.simulated;
     case "tbd":
-      return "TBD";
+      return certaintyCopy.tbd;
     default: {
-      const _exhaustive: never = certainty;
+      const _exhaustive: never = variant;
       return _exhaustive;
     }
   }
