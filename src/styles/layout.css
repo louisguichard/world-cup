@@ -230,51 +230,38 @@
   animation: fadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.splash-brand::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(420px, 92vw);
-  height: min(420px, 92vw);
-  transform: translate(-50%, -58%);
-  pointer-events: none;
-  border-radius: 50%;
-  background:
-    conic-gradient(
-      from 200deg at 50% 50%,
-      transparent 0deg,
-      color-mix(in srgb, var(--fwc-royal-blue) 32%, transparent) 40deg,
-      transparent 74deg,
-      color-mix(in srgb, var(--fwc-bright-red) 26%, transparent) 118deg,
-      transparent 152deg,
-      color-mix(in srgb, var(--fwc-green) 24%, transparent) 196deg,
-      transparent 230deg,
-      color-mix(in srgb, var(--fwc-lime) 22%, transparent) 264deg,
-      transparent 298deg,
-      color-mix(in srgb, var(--fwc-sky-blue) 20%, transparent) 332deg,
-      transparent 360deg
-    ),
-    radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--fwc-royal-blue) 30%, transparent), transparent 68%),
-    radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--fwc-gold) 18%, transparent), transparent 52%);
-  filter: blur(26px) saturate(1.2);
-  opacity: 0.92;
+.splash-trophy-logo.brand-logo-shell {
+  width: min(240px, 58vw);
+  height: min(240px, 58vw);
+  isolation: auto;
+}
+
+.splash-trophy-logo .brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  -webkit-mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 58%, transparent 100%);
+  mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 58%, transparent 100%);
+  filter:
+    drop-shadow(0 0 10px color-mix(in srgb, var(--fwc-gold) 42%, transparent))
+    drop-shadow(0 0 22px color-mix(in srgb, var(--fwc-royal-blue) 22%, transparent))
+    drop-shadow(0 0 36px color-mix(in srgb, var(--fwc-sky-blue) 12%, transparent));
+}
+
+.brand-logo-shell--blend-edges {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.brand-logo-shell--blend-edges .brand-logo-accents {
+  display: none;
 }
 
 .splash-trophy-logo {
   display: inline-grid;
   margin: 0 auto 0.75rem;
   animation: splashTrophyIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.splash-trophy-logo .brand-logo {
-  filter: var(--trophy-glow-filter-hero);
-}
-
-.splash-trophy-logo .brand-logo-accents {
-  inset: -32%;
-  filter: blur(28px) saturate(1.25);
-  opacity: 1;
 }
 
 @keyframes splashTrophyIn {

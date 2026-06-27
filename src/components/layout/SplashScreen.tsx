@@ -41,7 +41,13 @@ export function SplashScreen() {
   return (
     <div className={`splash-screen splash-screen--${phase}`} role="dialog" aria-label="Loading">
       <div className="splash-brand">
-        <BrandLogo size="xl" variant="full" className="splash-trophy-logo" alt="" />
+        <BrandLogo
+          size="xl"
+          variant="full"
+          blendEdges
+          className="splash-trophy-logo"
+          alt=""
+        />
         <h1 className="splash-title">{APP_BRAND.splashLine1}</h1>
         <h2 className="splash-subtitle">{APP_BRAND.splashLine2}</h2>
       </div>

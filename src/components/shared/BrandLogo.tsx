@@ -6,6 +6,8 @@ type BrandLogoProps = {
   variant?: "mark" | "full";
   className?: string;
   alt?: string;
+  /** Splash/marketing: hide accent plate and feather into page background */
+  blendEdges?: boolean;
 };
 
 const SIZE_PX: Record<NonNullable<BrandLogoProps["size"]>, number> = {
@@ -25,6 +27,7 @@ export function BrandLogo({
   variant = "mark",
   className = "",
   alt = APP_BRAND.logoAlt,
+  blendEdges = false,
 }: BrandLogoProps) {
   const px = SIZE_PX[size];
   const src = SRC[variant];
@@ -32,6 +35,7 @@ export function BrandLogo({
     "brand-logo-shell",
     `brand-logo-shell--${size}`,
     `brand-logo-shell--${variant}`,
+    blendEdges ? "brand-logo-shell--blend-edges" : "",
     className,
   ]
     .filter(Boolean)
@@ -39,7 +43,7 @@ export function BrandLogo({
 
   return (
     <span className={shellClass}>
-      <span className="brand-logo-accents" aria-hidden="true" />
+      {!blendEdges ? <span className="brand-logo-accents" aria-hidden="true" /> : null}
       <img
         src={src}
         srcSet={variant === "mark" ? `${APP_BRAND.logoMark} 1x, /logo/wc-trophy-mark@2x.png 2x` : undefined}

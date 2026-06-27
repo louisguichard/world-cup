@@ -6,6 +6,10 @@ Use `npm run version:build -- --message "what changed"` after each meaningful ch
 Use `npm run version:patch|minor|major` for semver releases.
 
 
+
+## [3.0.0] build 2 — 2026-06-27 (build)
+- Splash logo blend-edges for cleaner trophy hero on load
+
 ## [3.0.0] build 1 — 2026-06-27 (major)
 - V3 — unified multi-API match detail (stats, lineups, commentary, H2H)
 - Live kickoff countdown, trophy branding refresh, and full deploy hardening
