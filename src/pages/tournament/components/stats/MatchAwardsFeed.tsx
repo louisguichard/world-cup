@@ -3,6 +3,8 @@ import { teamDisplayName } from "../../../../lib/teamIdentity";
 import { formatKickoffDate } from "../../../../lib/formatKickoff";
 import { awardKindLabel, type CompletedMatchAwards } from "../../../../lib/deriveMatchAwards";
 import { TeamFlag } from "../../../../components/team/TeamFlag";
+import { TeamClickTarget } from "../../../../components/team/TeamClickTarget";
+import { PlayerPhoto } from "../../../../components/player/PlayerPhoto";
 import styles from "../../TournamentView.module.css";
 
 type Props = {
@@ -52,9 +54,13 @@ export function MatchAwardsFeed({ rows, teams, onOpenMatch }: Props) {
                 </div>
                 <div className={styles.awardsFeedScoreline}>
                   <TeamFlag team={home} teamId={match.homeTeamId} size="sm" />
-                  <span className={styles.awardsFeedTeam}>{homeName}</span>
+                  <TeamClickTarget teamId={match.homeTeamId} className={styles.awardsFeedTeamBtn}>
+                    <span className={styles.awardsFeedTeam}>{homeName}</span>
+                  </TeamClickTarget>
                   <span className={styles.awardsFeedScore}>{score}</span>
-                  <span className={styles.awardsFeedTeam}>{awayName}</span>
+                  <TeamClickTarget teamId={match.awayTeamId} className={styles.awardsFeedTeamBtn}>
+                    <span className={styles.awardsFeedTeam}>{awayName}</span>
+                  </TeamClickTarget>
                   <TeamFlag team={away} teamId={match.awayTeamId} size="sm" />
                 </div>
               </button>
@@ -63,6 +69,7 @@ export function MatchAwardsFeed({ rows, teams, onOpenMatch }: Props) {
                 {awards.length > 0 ? (
                   awards.map((award) => (
                     <div key={`${award.kind}-${award.playerName}`} className={styles.awardBadge}>
+                      <PlayerPhoto name={award.playerName} size="md" />
                       <span className={styles.awardBadgeKind}>{awardKindLabel(award.kind)}</span>
                       <span className={styles.awardBadgePlayer}>{award.playerName}</span>
                       {award.detail ? (

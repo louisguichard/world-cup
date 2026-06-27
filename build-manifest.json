@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-27T06:39:24.592Z",
+  "updatedAt": "2026-06-27T06:40:45.547Z",
   "builds": [
+    {
+      "version": "3.0.0",
+      "build": 15,
+      "kind": "build",
+      "message": "3 file(s) in build-manifest.json, src — 3 files changed, 24 insertions(+), 4 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T06:40:45.547Z"
+    },
     {
       "version": "3.0.0",
       "build": 14,
@@ -27,6 +35,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "4af133f2908447719e3c0277a7a9c129e092af00",
+      "shortHash": "4af133f",
+      "message": "Fix third-place bubble teams showing as projected out in live qualification layout.",
+      "version": "3.0.0",
+      "build": 14,
+      "timestamp": "2026-06-27T06:39:25.660Z"
+    },
     {
       "hash": "daad4c241952aee206d080a1d1c4c75d75b35976",
       "shortHash": "daad4c2",

@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Builds
+- **3.0.0 build 15** (2026-06-27): 3 file(s) in build-manifest.json, src — 3 files changed, 24 insertions(+), 4 deletions(-)
 - **3.0.0 build 14** (2026-06-27): 6 file(s) in build-manifest.json, src — 6 files changed, 66 insertions(+), 19 deletions(-)
 - **3.0.0 build 13** (2026-06-27): 87 file(s) in .cursor, .githooks, build-manifest.json, docs, package.json, public — 87 files changed, 4970 insertions(+), 900 deletions(-)
 - **3.0.0 build 12** (2026-06-27): Auto version pipeline: git hooks, build-manifest, release dashboard canvas, CHANGELOG [Unreleased] builds, agent rule + version-bump skill
