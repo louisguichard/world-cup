@@ -2,7 +2,7 @@ import { useMemo, useState, type CSSProperties } from "react";
 import { buildQualificationContext } from "../../lib/qualification";
 import { useQualificationSnapshot, useTeamQualificationView } from "../../store/selectors/qualificationSelectors";
 import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, resolveTeamFromStore } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import type { GroupLetter } from "../../types";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
@@ -39,7 +39,7 @@ function TeamRow({
   const teams = useStore((s) => s.teams);
   const teamProfiles = useStore((s) => s.teamProfiles);
   const openTeamSheet = useStore((s) => s.openTeamSheet);
-  const team = teams[teamId];
+  const team = resolveTeamFromStore(teamId, teams);
   const theme = useTeamTheme(teamId);
   const view = useTeamQualificationView(teamId);
   const abbrev = team?.abbreviation?.toUpperCase() ?? "";
@@ -56,7 +56,7 @@ function TeamRow({
         onClick={() => openTeamSheet(teamId)}
       >
         <TeamFlag team={team} teamId={teamId} />
-        <span className="teams-row-name team-name-text">{teamDisplayName(team, teamId)}</span>
+        <span className="teams-row-name team-name-text">{teamDisplayNameFromId(teamId, teams)}</span>
         <QualificationStatusBadge qual={view.status} size="xs" />
         <span className="teams-stats">
           {APP_COPY.teams.rankLabel(rank, points, gd)}

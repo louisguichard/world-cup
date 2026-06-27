@@ -2,6 +2,7 @@ import type { GroupStanding, MatchEvent, MergedMatch, Team } from "../types";
 import { rankAliveBestThirds } from "./bestThirds";
 import { buildRankingTimeline, type RankingSnapshot } from "./buildRankingTimeline";
 import { computeQualificationStatus } from "./qualification";
+import { teamDisplayNameFromId } from "./matchTeamDisplay";
 import { teamDisplayName } from "./teamIdentity";
 import type { QualificationMatchContext } from "./thirdPlaceQualification";
 
@@ -35,8 +36,8 @@ export type BuildEliminationStoryInput = {
 
 function formatDecidingLabel(snapshot: RankingSnapshot, teams: Team[]): string {
   const teamsById: Record<string, Team> = Object.fromEntries(teams.map((t) => [t.id, t]));
-  const home = teamDisplayName(teamsById[snapshot.homeTeamId], snapshot.homeTeamId);
-  const away = teamDisplayName(teamsById[snapshot.awayTeamId], snapshot.awayTeamId);
+  const home = teamDisplayNameFromId(snapshot.homeTeamId, teamsById);
+  const away = teamDisplayNameFromId(snapshot.awayTeamId, teamsById);
   return `${snapshot.label || `${home} ${snapshot.homeScore}–${snapshot.awayScore} ${away}`}`;
 }
 

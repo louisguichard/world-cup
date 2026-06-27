@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { liveCardNameForAbbrev } from "../data/teamLiveCardNames";
 import { TEAM_IDENTITY_OVERRIDES } from "../data/teamIdentityOverrides";
-import { resolveCatalogTeamName, resolveTeamLogoByAbbrev } from "../data/wc2026TeamCatalog";
+import { resolveCatalogTeamName, resolveTeamLogoByAbbrev, resolveTeamForDisplay } from "../data/wc2026TeamCatalog";
 import type { CrestProfile } from "../data/teamCrestDisplay";
 import type { Team } from "../types";
 import { crestDisplayToCssVars, resolveCrestDisplay } from "./resolveCrestDisplay";
@@ -24,6 +24,15 @@ export type TeamIdentity = {
 
 const DEFAULT_PRIMARY = "#6B7280";
 const DEFAULT_SECONDARY = "#9CA3AF";
+
+/** True when a string is a backend id (ESPN numeric or catalog abbrev), not user-facing text. */
+export function isInternalTeamId(value: string | undefined | null): boolean {
+  const v = value?.trim();
+  if (!v) return false;
+  if (/^\d+$/.test(v)) return true;
+  if (/^[a-z]{3}$/i.test(v) && resolveTeamForDisplay(v)) return true;
+  return false;
+}
 
 export function resolveTeamIdentity(team: Team | undefined, primaryOverride?: string): TeamIdentity | null {
   if (!team) return null;
@@ -117,24 +126,38 @@ export function resolveTeamIdentityFromAbbrev(abbrev: string): TeamIdentity | nu
   };
 }
 
-/** User-visible team label — always prefer full country name. */
+/** User-visible team label — always prefer full country name; never show backend ids. */
 export function teamDisplayName(
-  team?: Pick<Team, "name" | "shortName"> | null,
-  fallback = "TBD"
+  team?: Pick<Team, "name" | "shortName" | "abbreviation" | "id"> | null,
+  fallback = "TBD",
+  nameHint?: string
 ): string {
   const name = team?.name?.trim();
   if (name) return name;
+
   const short = team?.shortName?.trim();
   if (short) return short;
+
+  const hint = nameHint?.trim();
+  if (hint) return hint;
+
+  const catalogTeam = resolveTeamForDisplay(fallback, team as Team | undefined);
+  if (catalogTeam?.name) return catalogTeam.name;
+
   const fromCatalog = resolveCatalogTeamName(fallback);
   if (fromCatalog) return fromCatalog;
-  return fallback;
+
+  const fb = fallback.trim();
+  if (fb && !isInternalTeamId(fb)) return fb;
+
+  return "TBD";
 }
 
 /** Compact label for live hero/schedule cards — ESPN short name or FIFA abbrev when shorter. */
 export function teamLiveCardName(
-  team?: Pick<Team, "name" | "shortName" | "abbreviation"> | null,
-  fallback = "TBD"
+  team?: Pick<Team, "name" | "shortName" | "abbreviation" | "id"> | null,
+  fallback = "TBD",
+  nameHint?: string
 ): string {
   const name = team?.name?.trim();
   const short = team?.shortName?.trim();
@@ -144,6 +167,7 @@ export function teamLiveCardName(
     short &&
     name &&
     short.length > 3 &&
+    !isInternalTeamId(short) &&
     short.localeCompare(name, undefined, { sensitivity: "accent" }) !== 0
   ) {
     return short;
@@ -154,8 +178,25 @@ export function teamLiveCardName(
 
   if (name) return name;
   if (short) return short;
-  if (abbrev) return abbrev;
-  return fallback;
+  if (abbrev && abbrev.length > 3) return abbrev;
+
+  const hint = nameHint?.trim();
+  if (hint) return hint;
+
+  const catalogTeam = resolveTeamForDisplay(fallback, team as Team | undefined);
+  if (catalogTeam) {
+    const curatedFromCatalog = liveCardNameForAbbrev(catalogTeam.abbreviation);
+    if (curatedFromCatalog) return curatedFromCatalog;
+    if (catalogTeam.name) return catalogTeam.name;
+  }
+
+  const fromCatalog = resolveCatalogTeamName(fallback);
+  if (fromCatalog) return fromCatalog;
+
+  const fb = fallback.trim();
+  if (fb && !isInternalTeamId(fb)) return fb;
+
+  return "TBD";
 }
 
 export function matchThemeToStyle(

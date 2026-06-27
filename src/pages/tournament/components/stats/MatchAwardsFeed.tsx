@@ -1,5 +1,9 @@
 import type { Team } from "../../../../types";
-import { teamDisplayName } from "../../../../lib/teamIdentity";
+import {
+  flagTeamIdForMatch,
+  resolveMatchTeam,
+  teamDisplayNameForMatch,
+} from "../../../../lib/matchTeamDisplay";
 import { formatKickoffDate } from "../../../../lib/formatKickoff";
 import { awardKindLabel, type CompletedMatchAwards } from "../../../../lib/deriveMatchAwards";
 import { TeamFlag } from "../../../../components/team/TeamFlag";
@@ -34,10 +38,10 @@ export function MatchAwardsFeed({ rows, teams, onOpenMatch }: Props) {
       </p>
       <ul className={styles.awardsFeed}>
         {rows.map(({ match, matchId, awards }) => {
-          const home = teams[match.homeTeamId];
-          const away = teams[match.awayTeamId];
-          const homeName = teamDisplayName(home, match.homeTeamId);
-          const awayName = teamDisplayName(away, match.awayTeamId);
+          const home = resolveMatchTeam(match, "home", teams);
+          const away = resolveMatchTeam(match, "away", teams);
+          const homeName = teamDisplayNameForMatch(match, "home", teams);
+          const awayName = teamDisplayNameForMatch(match, "away", teams);
           const score = `${match.homeScore ?? 0}–${match.awayScore ?? 0}`;
 
           return (
@@ -53,15 +57,15 @@ export function MatchAwardsFeed({ rows, teams, onOpenMatch }: Props) {
                   {match.stage ? <span>{match.stage}</span> : null}
                 </div>
                 <div className={styles.awardsFeedScoreline}>
-                  <TeamFlag team={home} teamId={match.homeTeamId} size="sm" />
-                  <TeamClickTarget teamId={match.homeTeamId} className={styles.awardsFeedTeamBtn}>
+                  <TeamFlag team={home} teamId={flagTeamIdForMatch(match, "home", teams)} size="sm" />
+                  <TeamClickTarget teamId={home?.id ?? match.homeTeamId} className={styles.awardsFeedTeamBtn}>
                     <span className={styles.awardsFeedTeam}>{homeName}</span>
                   </TeamClickTarget>
                   <span className={styles.awardsFeedScore}>{score}</span>
-                  <TeamClickTarget teamId={match.awayTeamId} className={styles.awardsFeedTeamBtn}>
+                  <TeamClickTarget teamId={away?.id ?? match.awayTeamId} className={styles.awardsFeedTeamBtn}>
                     <span className={styles.awardsFeedTeam}>{awayName}</span>
                   </TeamClickTarget>
-                  <TeamFlag team={away} teamId={match.awayTeamId} size="sm" />
+                  <TeamFlag team={away} teamId={flagTeamIdForMatch(match, "away", teams)} size="sm" />
                 </div>
               </button>
 

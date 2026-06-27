@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { groupResultsByDay, filterCompletedResults, type ResultsSort } from "../../lib/resultsView";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import type { GroupLetter, Stage } from "../../types";
@@ -38,8 +38,8 @@ export function ResultsView() {
     const q = search.trim().toLowerCase();
     if (!q) return base;
     return base.filter((m) => {
-      const home = teamDisplayName(teams[m.homeTeamId], m.homeTeamId);
-      const away = teamDisplayName(teams[m.awayTeamId], m.awayTeamId);
+      const home = teamDisplayNameFromId(m.homeTeamId, teams);
+      const away = teamDisplayNameFromId(m.awayTeamId, teams);
       return home.toLowerCase().includes(q) || away.toLowerCase().includes(q);
     });
   }, [liveMatchesMap, sort, stage, group, search, teams]);

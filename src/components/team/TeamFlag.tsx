@@ -8,6 +8,8 @@ import {
   resolveTeamLogoByAbbrev,
   resolveTeamLogoFromHint,
 } from "../../lib/resolveTeamLogo";
+import { resolveTeamFromStore } from "../../lib/matchTeamDisplay";
+import { teamDisplayName } from "../../lib/teamIdentity";
 import { useStore } from "../../store";
 import { getTeamWorldCupTitles } from "../../lib/worldCupTitles";
 import { TeamThemeRoot } from "./TeamThemeRoot";
@@ -16,6 +18,8 @@ import { WorldCupStars } from "./WorldCupStars";
 type Props = {
   team?: Team;
   teamId: string;
+  /** Schedule / bracket placeholder when teamId is not yet known (e.g. "2nd Group A"). */
+  nameHint?: string;
   size?: "sm" | "lg" | "xl";
   /** Hide WC stars and tighten frame for compact live cards */
   compact?: boolean;
@@ -36,15 +40,21 @@ const innerSizeClass: Record<NonNullable<Props["size"]>, string> = {
   xl: "xl",
 };
 
-export function TeamFlag({ team, teamId, size = "sm", compact, dim, className }: Props) {
-  const storeTeam = useStore((s) => s.teams[teamId]);
-  const effectiveTeam = resolveTeamForDisplay(teamId, team ?? storeTeam);
+export function TeamFlag({ team, teamId, nameHint, size = "sm", compact, dim, className }: Props) {
+  const teams = useStore((s) => s.teams);
+  const storeTeam = resolveTeamFromStore(teamId, teams);
+  const effectiveTeam =
+    resolveTeamForDisplay(teamId, team ?? storeTeam) ??
+    (nameHint ? resolveTeamForDisplay(nameHint) : undefined);
   const id = effectiveTeam?.id ?? teamId;
   const abbrev =
     resolveTeamAbbrevFromHint(teamId) ??
+    resolveTeamAbbrevFromHint(nameHint) ??
     resolveTeamAbbrevFromHint(effectiveTeam?.abbreviation) ??
     resolveTeamAbbrevFromHint(effectiveTeam?.name);
-  const label = effectiveTeam?.abbreviation ?? effectiveTeam?.shortName ?? abbrev ?? teamId;
+  const label =
+    teamDisplayName(effectiveTeam, teamId || nameHint || "TBD", nameHint).slice(0, 3).toUpperCase() ||
+    "TBD";
   const logo =
     resolveTeamLogo(effectiveTeam) ??
     resolveTeamLogoFromHint(teamId) ??

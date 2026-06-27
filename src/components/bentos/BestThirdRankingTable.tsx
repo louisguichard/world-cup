@@ -9,7 +9,7 @@ import {
 import { buildThirdPlaceCutoffScenario, CUTOFF_RANK } from "../../lib/thirdPlaceCutoffScenario";
 import type { QualificationMatchContext } from "../../lib/thirdPlaceQualification";
 import { buildQualificationContext } from "../../lib/qualification";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import type { GroupStanding, Team, TeamRecord } from "../../types";
 import { useStore } from "../../store";
@@ -76,7 +76,7 @@ function RankTableRow({
         <TeamClickTarget teamId={row.teamId} className={styles.teamCellBtn} options={{ tab: "context" }}>
           <div className={styles.teamCell}>
             <TeamFlag team={team} teamId={row.teamId} size="sm" />
-            <span className="team-name-text">{teamDisplayName(team, row.teamId)}</span>
+            <span className="team-name-text">{teamDisplayNameFromId(row.teamId, teams)}</span>
           </div>
         </TeamClickTarget>
         <div

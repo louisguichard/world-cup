@@ -5,7 +5,7 @@ import {
   type Team,
   type TeamRecord,
 } from "../../../../types";
-import { teamDisplayName } from "../../../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../../../lib/matchTeamDisplay";
 import { useStore } from "../../../../store";
 import styles from "../../TournamentView.module.css";
 
@@ -49,7 +49,7 @@ function GroupTable({
             >
               <td style={{ color: "var(--ss-muted)" }}>{index + 1}</td>
               <td style={{ fontWeight: 500, color: "var(--ss-text)" }}>
-                {teamDisplayName(teams[row.teamId], row.teamId)}
+                {teamDisplayNameFromId(row.teamId, teams)}
               </td>
               <td>{row.played}</td>
               <td>{row.wins}</td>

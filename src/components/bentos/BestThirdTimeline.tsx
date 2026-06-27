@@ -1,7 +1,7 @@
 /** Best-third ranking timeline slider with chart, playback, and snapshot table. */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRankingTimeline } from "../../hooks/useRankingTimeline";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { TeamFlag } from "../team/TeamFlag";
@@ -256,7 +256,7 @@ export function BestThirdTimeline() {
             <TeamFlag team={teams[snapshot.scoringTeamId]} teamId={snapshot.scoringTeamId} size="sm" />
             <span>
               {tl.scored(
-                teamDisplayName(teams[snapshot.scoringTeamId], snapshot.scoringTeamId),
+                teamDisplayNameFromId(snapshot.scoringTeamId, teams),
                 `${snapshot.homeScore}–${snapshot.awayScore}`,
                 Math.round(snapshot.minute)
               )}
@@ -272,8 +272,8 @@ export function BestThirdTimeline() {
         {snapshot.type === "match-start" ? (
           <span>
             {tl.matchStart(
-              teamDisplayName(teams[snapshot.homeTeamId], snapshot.homeTeamId),
-              teamDisplayName(teams[snapshot.awayTeamId], snapshot.awayTeamId),
+              teamDisplayNameFromId(snapshot.homeTeamId, teams),
+              teamDisplayNameFromId(snapshot.awayTeamId, teams),
               snapshot.group
             )}
           </span>
@@ -282,9 +282,9 @@ export function BestThirdTimeline() {
         {snapshot.type === "final-whistle" ? (
           <span>
             {tl.fullTime(
-              teamDisplayName(teams[snapshot.homeTeamId], snapshot.homeTeamId),
+              teamDisplayNameFromId(snapshot.homeTeamId, teams),
               `${snapshot.homeScore}–${snapshot.awayScore}`,
-              teamDisplayName(teams[snapshot.awayTeamId], snapshot.awayTeamId),
+              teamDisplayNameFromId(snapshot.awayTeamId, teams),
               snapshot.deltas.filter((delta) => delta.positionBefore !== delta.positionAfter).length
             )}
           </span>
@@ -307,7 +307,7 @@ export function BestThirdTimeline() {
           <span key={teamId} className={styles.legendItem}>
             <span className={styles.legendSwatch} style={{ background: color }} aria-hidden />
             <TeamFlag team={teams[teamId]} teamId={teamId} size="sm" compact />
-            {teamDisplayName(teams[teamId], teamId)}
+            {teamDisplayNameFromId(teamId, teams)}
           </span>
         ))}
       </div>

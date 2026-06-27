@@ -3,6 +3,7 @@ import { knockoutSchedule } from "../../data/knockoutSchedule";
 import { buildQualificationContext, computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
 import { buildCanonicalTournamentDataset } from "../../lib/canonicalTournamentDataset";
 import { projectTournament } from "../../lib/tournament";
+import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
@@ -47,7 +48,7 @@ function GhostTeamList({
         return (
           <div key={teamId} className="bracket-ghost-team">
             <TeamFlag team={t} teamId={teamId} size="sm" compact />
-            <span className="team-name-text">{teamDisplayName(t, teamId)}</span>
+            <span className="team-name-text">{teamDisplayNameFromId(teamId, teamsById)}</span>
             {showFrequency ? <span className="bracket-ghost-freq">{Math.round(frequency * 100)} conf.</span> : null}
           </div>
         );
@@ -184,7 +185,7 @@ function BracketTeamReadonly({
               <span className="bracket-dot" />
             )}
             <span className="team-name-text">
-              {teamDisplayName(team, seedLabel ?? resolvedTeamId ?? "TBD")}
+              {teamDisplayName(team, "TBD", seedLabel ?? undefined)}
             </span>
           </div>
           <CertaintyBadge certainty="projected" size="xs" />
@@ -229,7 +230,7 @@ function BracketTeamReadonly({
           <span className="bracket-dot" />
         )}
         <span className="team-name-text">
-          {teamDisplayName(team, seedLabel ?? resolvedTeamId ?? "TBD")}
+          {teamDisplayName(team, "TBD", seedLabel ?? undefined)}
         </span>
         {winner ? <b>✓</b> : null}
       </button>

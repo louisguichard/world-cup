@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type 
 import { createPortal } from "react-dom";
 import { APP_COPY } from "../../lib/appCopy";
 import type { CutoffScenario } from "../../lib/thirdPlaceCutoffScenario";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import type { Team } from "../../types";
 import { TeamFlag } from "../team/TeamFlag";
 import venueStyles from "../venue/VenuePopover.module.css";
@@ -73,7 +73,7 @@ function CutoffPopoverPanel({ scenario, teams, titleId, onClose }: PanelProps) {
                 {scenario.watchTeams.map((w) => (
                   <li key={w.teamId}>
                     <TeamFlag team={teams[w.teamId]} teamId={w.teamId} size="sm" compact />{" "}
-                    {teamDisplayName(teams[w.teamId], w.teamId)} — #{w.rank}, {w.points} pts
+                    {teamDisplayNameFromId(w.teamId, teams)} — #{w.rank}, {w.points} pts
                   </li>
                 ))}
               </ul>

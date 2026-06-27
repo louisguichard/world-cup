@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import type { GroupStanding, MergedMatch, TeamRecord } from "../../types";
 import { useStore } from "../../store";
@@ -148,7 +148,7 @@ export function BestThirdTableBento({ standings }: BestThirdTableBentoProps) {
                   </td>
                   <td className="group-table-team">
                     <TeamFlag team={team} teamId={row.teamId} size="sm" />
-                    <span className="team-name-text">{teamDisplayName(team, row.teamId)}</span>
+                    <span className="team-name-text">{teamDisplayNameFromId(row.teamId, teams)}</span>
                   </td>
                   <td>
                     <strong>{row.points}</strong>

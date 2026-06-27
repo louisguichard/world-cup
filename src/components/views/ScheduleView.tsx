@@ -17,7 +17,7 @@ import styles from "./ScheduleView.module.css";
 import { FootballPredictionInsightsPanel } from "../predictions/FootballPredictionInsightsPanel";
 import { VenueLabel } from "../venue/VenueLabel";
 import { TeamFlag } from "../team/TeamFlag";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameForMatch, flagTeamIdForMatch, scheduleNameHintForMatch, resolveMatchTeam } from "../../lib/matchTeamDisplay";
 import { APP_BRAND } from "../../config/appMeta";
 import { APP_COPY } from "../../lib/appCopy";
 import type { MergedMatch, Team } from "../../types";
@@ -280,8 +280,8 @@ function ScheduleMatchTable({ matches, teams, onOpenMatch }: ScheduleMatchTableP
         </thead>
         <tbody>
           {matches.map((m) => {
-            const home = teams[m.homeTeamId];
-            const away = teams[m.awayTeamId];
+            const home = resolveMatchTeam(m, "home", teams);
+            const away = resolveMatchTeam(m, "away", teams);
             return (
               <tr
                 key={m.id}
@@ -291,8 +291,14 @@ function ScheduleMatchTable({ matches, teams, onOpenMatch }: ScheduleMatchTableP
                 <td className={styles.timeCell}>{formatKickoffTime(m.date)}</td>
                 <td className={`${styles.teamCell} ${styles["teamCell--home"]}`}>
                   <span className={styles.teamCellInner}>
-                    <TeamFlag team={home} teamId={m.homeTeamId} size="sm" compact />
-                    <span className="team-name-text">{teamDisplayName(home, m.homeTeamId)}</span>
+                    <TeamFlag
+                      team={home}
+                      teamId={flagTeamIdForMatch(m, "home", teams)}
+                      nameHint={scheduleNameHintForMatch(m, "home")}
+                      size="sm"
+                      compact
+                    />
+                    <span className="team-name-text">{teamDisplayNameForMatch(m, "home", teams)}</span>
                   </span>
                 </td>
                 <td className={styles.scoreCell}>
@@ -308,8 +314,14 @@ function ScheduleMatchTable({ matches, teams, onOpenMatch }: ScheduleMatchTableP
                 </td>
                 <td className={styles.teamCell}>
                   <span className={styles.teamCellInner}>
-                    <TeamFlag team={away} teamId={m.awayTeamId} size="sm" compact />
-                    <span className="team-name-text">{teamDisplayName(away, m.awayTeamId)}</span>
+                    <TeamFlag
+                      team={away}
+                      teamId={flagTeamIdForMatch(m, "away", teams)}
+                      nameHint={scheduleNameHintForMatch(m, "away")}
+                      size="sm"
+                      compact
+                    />
+                    <span className="team-name-text">{teamDisplayNameForMatch(m, "away", teams)}</span>
                   </span>
                 </td>
                 <td className={styles.venueCell} onClick={(e) => e.stopPropagation()}>

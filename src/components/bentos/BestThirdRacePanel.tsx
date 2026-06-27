@@ -5,7 +5,7 @@ import { getThirdPlaceBubbleState } from "../../lib/thirdPlaceLiveStatus";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import type { GroupStanding, MergedMatch, TeamRecord } from "../../types";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { TeamFlag } from "../team/TeamFlag";
@@ -62,8 +62,8 @@ export function BestThirdRacePanel() {
       const nearCut =
         (homeRank >= 5 && homeRank <= 10) || (awayRank >= 5 && awayRank <= 10);
 
-      const home = teamDisplayName(teams[match.homeTeamId], match.homeTeamId);
-      const away = teamDisplayName(teams[match.awayTeamId], match.awayTeamId);
+      const home = teamDisplayNameFromId(match.homeTeamId, teams);
+      const away = teamDisplayNameFromId(match.awayTeamId, teams);
       const score = `${match.homeScore ?? 0}–${match.awayScore ?? 0}`;
       const clock = formatLiveClock(match);
 
@@ -140,7 +140,7 @@ export function BestThirdRacePanel() {
                   <td>{index + 1}</td>
                   <td className="group-table-team">
                     <TeamFlag team={team} teamId={row.teamId} />
-                    <span className="team-name-text qual-team-name">{teamDisplayName(team, row.teamId)}</span>
+                    <span className="team-name-text qual-team-name">{teamDisplayNameFromId(row.teamId, teams)}</span>
                   </td>
                   <td>
                     <strong>{row.points}</strong>

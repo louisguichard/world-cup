@@ -6,7 +6,7 @@ import { DataOrchestrator } from "../services/orchestrator/DataOrchestrator";
 import { fetchMatchBundle } from "../services/matchDetail/fetchMatchBundle";
 import { mapEventsToCommentary } from "../services/matchDetail/mapEventsToCommentary";
 import { publishMatchEvents } from "../services/matchDetail/fetchMatchEvents";
-import { teamDisplayName } from "../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../lib/matchTeamDisplay";
 import { useStore } from "../store";
 
 type BundleState = {
@@ -67,8 +67,8 @@ export function useMatchDetailBundle(
   useEffect(() => {
     if (!match) return;
 
-    const homeName = teamDisplayName(teams[match.homeTeamId], match.homeTeamId);
-    const awayName = teamDisplayName(teams[match.awayTeamId], match.awayTeamId);
+    const homeName = teamDisplayNameFromId(match.homeTeamId, teams);
+    const awayName = teamDisplayNameFromId(match.awayTeamId, teams);
 
     let cancelled = false;
     setDirectLoading(true);

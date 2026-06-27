@@ -18,7 +18,13 @@ import { MatchGoalScorers } from "./MatchGoalScorers";
 import { VenueLabel } from "../venue/VenueLabel";
 import { KickoffCountdown } from "./KickoffCountdown";
 import { FixtureBettingSection } from "./FixtureBettingSection";
-import { teamDisplayName, teamLiveCardName } from "../../lib/teamIdentity";
+import {
+  flagTeamIdForMatch,
+  resolveMatchTeam,
+  teamDisplayNameForMatch,
+  teamLiveCardNameForMatch,
+  scheduleNameHintForMatch,
+} from "../../lib/matchTeamDisplay";
 import { useStore } from "../../store";
 import { useGoalDetector } from "../../hooks/useGoalDetector";
 import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
@@ -72,23 +78,30 @@ export function MatchScheduleCard({
     [match, bubbleTeamIds, isLive]
   );
 
+  const resolvedHome = home ?? resolveMatchTeam(match, "home", teams);
+  const resolvedAway = away ?? resolveMatchTeam(match, "away", teams);
+
   const { isGoalActive, latestGoal, secondsRemaining } = useGoalDetector(match.id);
   const scorerEvents = useMemo(
     () => (latestGoal?.scorerEvent ? [latestGoal.scorerEvent] : []),
     [latestGoal?.scorerEvent]
   );
-  const scorerPhotos = useEventPlayerPhotos({ events: scorerEvents, homeTeam: home, awayTeam: away });
+  const scorerPhotos = useEventPlayerPhotos({ events: scorerEvents, homeTeam: resolvedHome, awayTeam: resolvedAway });
   const scorerPhotoUrl = latestGoal?.scorerEvent
     ? scorerPhotos[latestGoal.scorerEvent.providerId]
     : undefined;
-  const homeDisplayName = teamDisplayName(home, match.homeTeamId);
-  const awayDisplayName = teamDisplayName(away, match.awayTeamId);
+  const homeDisplayName = teamDisplayNameForMatch(match, "home", teams);
+  const awayDisplayName = teamDisplayNameForMatch(match, "away", teams);
   const homeName = isLive
-    ? teamLiveCardName(home, match.homeTeamId)
+    ? teamLiveCardNameForMatch(match, "home", teams)
     : homeDisplayName;
   const awayName = isLive
-    ? teamLiveCardName(away, match.awayTeamId)
+    ? teamLiveCardNameForMatch(match, "away", teams)
     : awayDisplayName;
+  const homeFlagId = flagTeamIdForMatch(match, "home", teams);
+  const awayFlagId = flagTeamIdForMatch(match, "away", teams);
+  const homeNameHint = scheduleNameHintForMatch(match, "home");
+  const awayNameHint = scheduleNameHintForMatch(match, "away");
 
   const metaTimeDisplay = isDone
     ? APP_COPY.match.final
@@ -160,16 +173,17 @@ export function MatchScheduleCard({
       </div>
 
       <div className="score-line schedule-score-line">
-        {home ? (
+        {resolvedHome ? (
           <TeamLabel
-            team={home}
+            team={resolvedHome}
             displayName={isLive ? homeName : undefined}
             flagCompact={isLive}
             nested={Boolean(onSelect)}
           />
         ) : (
           <TeamLabelById
-            teamId={match.homeTeamId}
+            teamId={homeFlagId}
+            nameHint={homeNameHint}
             displayName={isLive ? homeName : undefined}
             flagCompact={isLive}
             nested={Boolean(onSelect)}
@@ -182,9 +196,9 @@ export function MatchScheduleCard({
         <strong className="schedule-score">
           {isDone || isLive ? (match.awayScore ?? 0) : "–"}
         </strong>
-        {away ? (
+        {resolvedAway ? (
           <TeamLabel
-            team={away}
+            team={resolvedAway}
             align="right"
             displayName={isLive ? awayName : undefined}
             flagCompact={isLive}
@@ -192,7 +206,8 @@ export function MatchScheduleCard({
           />
         ) : (
           <TeamLabelById
-            teamId={match.awayTeamId}
+            teamId={awayFlagId}
+            nameHint={awayNameHint}
             align="right"
             displayName={isLive ? awayName : undefined}
             flagCompact={isLive}

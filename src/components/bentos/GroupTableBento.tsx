@@ -3,7 +3,7 @@ import type { GroupStanding } from "../../types";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
@@ -72,7 +72,7 @@ export function GroupTableBento({ standing }: GroupTableBentoProps) {
                   <td className="group-table-team">
                     <TeamClickTarget teamId={row.teamId} className="group-table-team-btn">
                       <TeamFlag team={team} teamId={row.teamId} />
-                      <span className="team-name-text">{teamDisplayName(team, row.teamId)}</span>
+                      <span className="team-name-text">{teamDisplayNameFromId(row.teamId, teams)}</span>
                     </TeamClickTarget>
                   </td>
                   <td>{row.played}</td>

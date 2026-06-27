@@ -1,9 +1,15 @@
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { APP_COPY } from "../../lib/appCopy";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import {
+  flagTeamIdForMatch,
+  resolveMatchTeam,
+  scheduleNameHintForMatch,
+  teamDisplayNameForMatch,
+} from "../../lib/matchTeamDisplay";
 import type { MergedMatch, Team } from "../../types";
 import { TeamFlag } from "../team/TeamFlag";
+import { useStore } from "../../store";
 import styles from "./VenueMatchRow.module.css";
 
 type Props = {
@@ -27,8 +33,11 @@ function statusBadge(match: MergedMatch): { label: string; className: string } {
 }
 
 export function VenueMatchRow({ match, home, away, onSelect }: Props) {
-  const homeName = teamDisplayName(home, match.homeTeamId);
-  const awayName = teamDisplayName(away, match.awayTeamId);
+  const teams = useStore((s) => s.teams);
+  const resolvedHome = home ?? resolveMatchTeam(match, "home", teams);
+  const resolvedAway = away ?? resolveMatchTeam(match, "away", teams);
+  const homeName = teamDisplayNameForMatch(match, "home", teams);
+  const awayName = teamDisplayNameForMatch(match, "away", teams);
   const badge = statusBadge(match);
   const isScored = match.status === "live" || match.status === "completed" || match.locked;
   const stageLabel = match.stage ?? (match.group ? `Group ${match.group}` : match.matchId ?? match.id);
@@ -38,12 +47,24 @@ export function VenueMatchRow({ match, home, away, onSelect }: Props) {
       <div className={styles.venueMatchRowHead}>
         <span className={styles.venueMatchTitle}>
           <span className={styles.venueMatchTeam}>
-            <TeamFlag team={home} teamId={match.homeTeamId} size="sm" compact />
+            <TeamFlag
+              team={resolvedHome}
+              teamId={flagTeamIdForMatch(match, "home", teams)}
+              nameHint={scheduleNameHintForMatch(match, "home")}
+              size="sm"
+              compact
+            />
             <span className="team-name-text">{homeName}</span>
           </span>
           <span className={styles.venueMatchVs}>vs</span>
           <span className={styles.venueMatchTeam}>
-            <TeamFlag team={away} teamId={match.awayTeamId} size="sm" compact />
+            <TeamFlag
+              team={resolvedAway}
+              teamId={flagTeamIdForMatch(match, "away", teams)}
+              nameHint={scheduleNameHintForMatch(match, "away")}
+              size="sm"
+              compact
+            />
             <span className="team-name-text">{awayName}</span>
           </span>
         </span>

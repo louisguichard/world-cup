@@ -27,14 +27,16 @@ describe("teamDisplayName", () => {
     expect(teamDisplayName(makeTeam({ name: "South Africa", shortName: "RSA" }))).toBe("South Africa");
   });
 
-  it("falls back to short name then fallback", () => {
+  it("falls back to short name then human-readable fallback", () => {
     expect(teamDisplayName(makeTeam({ name: "", shortName: "RSA" }), "x")).toBe("RSA");
     expect(teamDisplayName(undefined, "fallback")).toBe("fallback");
-  });
-
-  it("resolves catalog name from team id hint", () => {
     expect(teamDisplayName(undefined, "bra")).toBe("Brazil");
     expect(teamDisplayName(undefined, "BRA")).toBe("Brazil");
+    expect(teamDisplayName(undefined, "760415")).toBe("TBD");
+  });
+
+  it("prefers schedule name hint over backend id", () => {
+    expect(teamDisplayName(undefined, "", "2nd Group A")).toBe("2nd Group A");
   });
 });
 

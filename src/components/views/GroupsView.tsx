@@ -22,7 +22,7 @@ import {
   useUpcomingGroupMatches,
   type ResultsSortOrder
 } from "../../store/selectors/historySelectors";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { TournamentInsightsPanel } from "../tournament/TournamentInsightsPanel";
@@ -177,7 +177,7 @@ export function GroupsView() {
                               <QualificationStatusBadge qual={qual} size="xs" />
                               <TeamFlag team={team} teamId={row.teamId} size="sm" />
                               <TeamClickTarget teamId={row.teamId} className="group-standing-team-btn">
-                                <strong className="team-name-text">{teamDisplayName(team, row.teamId)}</strong>
+                                <strong className="team-name-text">{teamDisplayNameFromId(row.teamId, teams)}</strong>
                               </TeamClickTarget>
                             </td>
                             <td>{row.played}</td>

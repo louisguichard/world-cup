@@ -1,7 +1,12 @@
 import type { MergedMatch } from "../../../../types";
 import { formatKickoffTime } from "../../../../lib/formatKickoff";
 import { formatLiveClock } from "../../../../lib/formatMatchClock";
-import { teamDisplayName } from "../../../../lib/teamIdentity";
+import {
+  flagTeamIdForMatch,
+  resolveMatchTeam,
+  scheduleNameHintForMatch,
+  teamDisplayNameForMatch,
+} from "../../../../lib/matchTeamDisplay";
 import { useStore } from "../../../../store";
 import { TeamFlag } from "../../../../components/team/TeamFlag";
 import { VenueLabel } from "../../../../components/venue/VenueLabel";
@@ -17,10 +22,12 @@ export function TournamentMatchCard({ match }: Props) {
   const tournamentSubTab = useStore((s) => s.tournamentSubTab);
   const selectedDateKey = useStore((s) => s.selectedDateKey);
 
-  const home = teams[match.homeTeamId];
-  const away = teams[match.awayTeamId];
-  const homeTeamName = teamDisplayName(home, match.homeTeamId);
-  const awayTeamName = teamDisplayName(away, match.awayTeamId);
+  const home = resolveMatchTeam(match, "home", teams);
+  const away = resolveMatchTeam(match, "away", teams);
+  const homeTeamName = teamDisplayNameForMatch(match, "home", teams);
+  const awayTeamName = teamDisplayNameForMatch(match, "away", teams);
+  const homeFlagId = flagTeamIdForMatch(match, "home", teams);
+  const awayFlagId = flagTeamIdForMatch(match, "away", teams);
 
   const isLive = match.status === "live";
   const isDone = match.status === "completed";
@@ -71,7 +78,13 @@ export function TournamentMatchCard({ match }: Props) {
         ) : null}
         <div className={styles.matchCardScoreLine}>
           <span className={`${styles.matchCardTeam} team-name-text`}>
-            <TeamFlag team={home} teamId={match.homeTeamId} size="sm" compact />
+            <TeamFlag
+              team={home}
+              teamId={homeFlagId}
+              nameHint={scheduleNameHintForMatch(match, "home")}
+              size="sm"
+              compact
+            />
             {homeTeamName}
           </span>
           {isLive || isDone ? (
@@ -84,7 +97,13 @@ export function TournamentMatchCard({ match }: Props) {
             <span className={styles.matchCardVs}>–</span>
           )}
           <span className={`${styles.matchCardTeam} ${styles["matchCardTeam--away"]} team-name-text`}>
-            <TeamFlag team={away} teamId={match.awayTeamId} size="sm" compact />
+            <TeamFlag
+              team={away}
+              teamId={awayFlagId}
+              nameHint={scheduleNameHintForMatch(match, "away")}
+              size="sm"
+              compact
+            />
             {awayTeamName}
           </span>
         </div>

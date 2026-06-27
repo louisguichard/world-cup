@@ -1,7 +1,7 @@
 /** SVG ranking chart for the best-third timeline slider. */
 import { useMemo, useRef, useState, useEffect } from "react";
 import type { RankingSnapshot } from "../../lib/buildRankingTimeline";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import type { Team } from "../../types";
 import {
   CHART_HEIGHT,
@@ -162,7 +162,7 @@ export function BestThirdTimelineChart({
                     fontSize={11}
                     opacity={dimmed ? 0.35 : 0.95}
                   >
-                    {teamDisplayName(teams[teamId], teamId)}
+                    {teamDisplayNameFromId(teamId, teams)}
                   </text>
                   <text
                     x={width - padRight + 6}

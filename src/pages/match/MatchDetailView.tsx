@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useScrollHeader } from "../../hooks/useScrollHeader";
 import { usePullToRefresh } from "../../hooks/usePullToRefresh";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import {
+  flagTeamIdForMatch,
+  resolveMatchTeam,
+  scheduleNameHintForMatch,
+  teamDisplayNameForMatch,
+} from "../../lib/matchTeamDisplay";
 import { useStore } from "../../store";
 import { useMatchDetailBundle } from "../../hooks/useMatchDetailBundle";
 import { usePageVisibilityPolling } from "../../hooks/usePageVisibilityPolling";
@@ -112,8 +117,8 @@ export function MatchDetailView() {
     }
   }, [activeMatchTab]);
 
-  const homeTeam = match ? teams[match.homeTeamId] : undefined;
-  const awayTeam = match ? teams[match.awayTeamId] : undefined;
+  const homeTeam = match ? resolveMatchTeam(match, "home", teams) : undefined;
+  const awayTeam = match ? resolveMatchTeam(match, "away", teams) : undefined;
 
   const { profiles: scorerProfiles, loading: scorersLoading } = useGoalScorerProfiles({
     events,
@@ -184,8 +189,8 @@ export function MatchDetailView() {
 
   if (!activeMatchId) return null;
 
-  const homeTeamName = teamDisplayName(homeTeam, match?.homeTeamId ?? "Home");
-  const awayTeamName = teamDisplayName(awayTeam, match?.awayTeamId ?? "Away");
+  const homeTeamName = match ? teamDisplayNameForMatch(match, "home", teams) : "Home";
+  const awayTeamName = match ? teamDisplayNameForMatch(match, "away", teams) : "Away";
 
   const isLive = match?.status === "live";
   const isDone = match?.status === "completed";
@@ -214,12 +219,13 @@ export function MatchDetailView() {
             <div className={styles.headerTeam}>
               <TeamFlag
                 team={homeTeam}
-                teamId={match?.homeTeamId ?? "tbd"}
+                teamId={match ? flagTeamIdForMatch(match, "home", teams) : "tbd"}
+                nameHint={match ? scheduleNameHintForMatch(match, "home") : undefined}
                 size="lg"
               />
-              {match?.homeTeamId ? (
+              {homeTeam?.id ? (
                 <TeamClickTarget
-                  teamId={match.homeTeamId}
+                  teamId={homeTeam.id}
                   className={styles.headerTeamNameBtn}
                 >
                   <span className={`${styles.headerTeamName} team-name-text`}>{homeTeamName}</span>
@@ -264,12 +270,13 @@ export function MatchDetailView() {
             <div className={styles.headerTeam}>
               <TeamFlag
                 team={awayTeam}
-                teamId={match?.awayTeamId ?? "tbd"}
+                teamId={match ? flagTeamIdForMatch(match, "away", teams) : "tbd"}
+                nameHint={match ? scheduleNameHintForMatch(match, "away") : undefined}
                 size="lg"
               />
-              {match?.awayTeamId ? (
+              {awayTeam?.id ? (
                 <TeamClickTarget
-                  teamId={match.awayTeamId}
+                  teamId={awayTeam.id}
                   className={styles.headerTeamNameBtn}
                 >
                   <span className={`${styles.headerTeamName} team-name-text`}>{awayTeamName}</span>

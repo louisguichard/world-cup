@@ -1,7 +1,12 @@
 import { useState } from "react";
 import type { MergedMatch } from "../../types";
 import { useMatchEnrichment } from "../../hooks/useMatchEnrichment";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import {
+  flagTeamIdForMatch,
+  resolveMatchTeam,
+  scheduleNameHintForMatch,
+  teamDisplayNameForMatch,
+} from "../../lib/matchTeamDisplay";
 import { useStore } from "../../store";
 import { TeamFlag } from "../team/TeamFlag";
 
@@ -18,8 +23,10 @@ export function MatchDetailPanel({ match, wcMatchId, onClose }: Props) {
   const { commentary, lineups, statistics, loading } = useMatchEnrichment(match.id);
   const teams = useStore((s) => s.teams);
 
-  const homeTeam = teamDisplayName(teams[match.homeTeamId], match.homeTeamId);
-  const awayTeam = teamDisplayName(teams[match.awayTeamId], match.awayTeamId);
+  const home = resolveMatchTeam(match, "home", teams);
+  const away = resolveMatchTeam(match, "away", teams);
+  const homeTeam = teamDisplayNameForMatch(match, "home", teams);
+  const awayTeam = teamDisplayNameForMatch(match, "away", teams);
 
   return (
     <div className="match-detail-backdrop" role="presentation" onClick={onClose}>
@@ -32,12 +39,24 @@ export function MatchDetailPanel({ match, wcMatchId, onClose }: Props) {
         <header className="match-detail-header">
           <h2 className="match-detail-title">
             <span className="match-detail-team" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <TeamFlag team={teams[match.homeTeamId]} teamId={match.homeTeamId} size="sm" compact />
+              <TeamFlag
+                team={home}
+                teamId={flagTeamIdForMatch(match, "home", teams)}
+                nameHint={scheduleNameHintForMatch(match, "home")}
+                size="sm"
+                compact
+              />
               {homeTeam}
             </span>{" "}
             {match.homeScore ?? "–"} : {match.awayScore ?? "–"}{" "}
             <span className="match-detail-team" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <TeamFlag team={teams[match.awayTeamId]} teamId={match.awayTeamId} size="sm" compact />
+              <TeamFlag
+                team={away}
+                teamId={flagTeamIdForMatch(match, "away", teams)}
+                nameHint={scheduleNameHintForMatch(match, "away")}
+                size="sm"
+                compact
+              />
               {awayTeam}
             </span>
           </h2>

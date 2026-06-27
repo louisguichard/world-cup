@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { MergedMatch, Team } from "../types";
 import type { LiveStreamMatchBundle } from "../types/liveStream";
-import { teamDisplayName } from "../lib/teamIdentity";
+import { teamDisplayNameForMatch } from "../lib/matchTeamDisplay";
+import { useStore } from "../store";
 import {
   checkLiveStreamAvailability,
   fetchLiveStreamSchedule,
@@ -21,6 +22,7 @@ export function useLiveStreamForMatch(
   homeTeam?: Team,
   awayTeam?: Team
 ): LiveStreamMatchBundle & { loading: boolean } {
+  const teams = useStore((s) => s.teams);
   const [bundle, setBundle] = useState<LiveStreamMatchBundle>(EMPTY);
   const [loading, setLoading] = useState(false);
 
@@ -33,8 +35,8 @@ export function useLiveStreamForMatch(
     let cancelled = false;
     setLoading(true);
 
-    const homeName = teamDisplayName(homeTeam, match.homeTeamId);
-    const awayName = teamDisplayName(awayTeam, match.awayTeamId);
+    const homeName = teamDisplayNameForMatch(match, "home", teams);
+    const awayName = teamDisplayNameForMatch(match, "away", teams);
     const scheduleDate = match.date.slice(0, 10);
 
     void (async () => {

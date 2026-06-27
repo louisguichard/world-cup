@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useBestThirdLiveGraphState } from "../../hooks/useBestThirdLiveGraphState";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { buildThirdPlaceCutoffScenario, CUTOFF_RANK } from "../../lib/thirdPlaceCutoffScenario";
 import { buildQualificationContext } from "../../lib/qualification";
@@ -67,7 +67,7 @@ function LadderRow({
       <span className={styles.ladderRank}>{rank}</span>
       <TeamFlag team={teams[row.teamId]} teamId={row.teamId} size="sm" compact />
       <span className={`${styles.ladderName} team-name-text`}>
-        {teamDisplayName(teams[row.teamId], row.teamId)}
+        {teamDisplayNameFromId(row.teamId, teams)}
       </span>
       <span className={styles.ladderPts}>
         {row.points} {tbl.points.toLowerCase()}
@@ -135,7 +135,7 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
     if (cutoffCrossings.length === 0) return null;
     return cutoffCrossings
       .map((c) => {
-        const name = teamDisplayName(teams[c.teamId], c.teamId);
+        const name = teamDisplayNameFromId(c.teamId, teams);
         return c.direction === "in" ? bt.cutoffBannerIn(name) : bt.cutoffBannerOut(name);
       })
       .join(" · ");
@@ -175,7 +175,7 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
                 <TeamFlag team={team} teamId={row.teamId} size="sm" compact />
                 <div className={styles.focusMeta}>
                   <strong className="team-name-text">
-                    {teamDisplayName(team, row.teamId)}
+                    {teamDisplayNameFromId(row.teamId, teams)}
                   </strong>
                   <span className={styles.focusStats}>
                     {row.record.points} {tbl.points.toLowerCase()} · {tbl.goalDiff}{" "}
