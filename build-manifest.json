@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-27T06:51:25.940Z",
+  "updatedAt": "2026-06-27T06:51:26.427Z",
   "builds": [
     {
       "version": "3.0.0",
@@ -51,6 +51,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "28b8f16aeb877865813bfd619a9373fc3d9de3bf",
+      "shortHash": "28b8f16",
+      "message": "build(12): fix R32 divergence, qual status, team drawer gaps, player photos, SLS wiring, plan sync",
+      "version": "3.0.0",
+      "build": 17,
+      "timestamp": "2026-06-27T06:51:26.426Z"
+    },
     {
       "hash": "098eab2aef3c17d4220b80c8f9ac97f9e34b2bb1",
       "shortHash": "098eab2",
