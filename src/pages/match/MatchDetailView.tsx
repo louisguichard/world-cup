@@ -32,6 +32,7 @@ import { PlayerPhoto } from "../../components/player/PlayerPhoto";
 import { useGoalScorerProfiles } from "../../hooks/useGoalScorerProfiles";
 import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
 import { useHighlightlyMatchData } from "../../hooks/useHighlightlyMatchData";
+import { getHighlightlyQuotaStatus } from "../../lib/highlightlyQuota";
 import { useLiveStreamForMatch } from "../../hooks/useLiveStreamForMatch";
 import { mapHighlightlyStatistics } from "../../services/matchDetail/fetchHighlightlyMatchBundle";
 import styles from "./MatchDetailView.module.css";
@@ -127,6 +128,8 @@ export function MatchDetailView() {
   );
   const eventPhotos = useEventPlayerPhotos({ events: goalEvents, homeTeam, awayTeam });
   const highlightly = useHighlightlyMatchData(match, homeTeam, awayTeam);
+  const highlightQuota = useMemo(() => getHighlightlyQuotaStatus(), [highlightly.fetchedAt]);
+  const highlightQuotaLabel = `${highlightQuota.remaining}/${highlightQuota.limit} API requests left this month`;
   const liveStream = useLiveStreamForMatch(match, homeTeam, awayTeam);
   const mergedStatistics = useMemo(() => {
     if (statistics) return statistics;
@@ -439,6 +442,9 @@ export function MatchDetailView() {
             loading={highlightly.loading}
             homeTeamName={homeTeamName}
             awayTeamName={awayTeamName}
+            introHighlight={highlightly.intro?.introHighlight}
+            attribution={highlightly.attribution}
+            quotaLabel={highlightQuotaLabel}
           />
         ) : null}
 

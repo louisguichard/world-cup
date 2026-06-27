@@ -33,7 +33,7 @@ export function useHighlightlyMatchData(
     let cancelled = false;
     setLoading(true);
 
-    void fetchHighlightlyMatchBundle({ match, homeTeam, awayTeam }).then((result) => {
+    void fetchHighlightlyMatchBundle({ match, homeTeam, awayTeam, detailView: true }).then((result) => {
       if (!cancelled) {
         setBundle(result);
         setLoading(false);
@@ -43,7 +43,7 @@ export function useHighlightlyMatchData(
     return () => {
       cancelled = true;
     };
-  }, [match?.id, match?.date, match?.status, homeTeam?.id, awayTeam?.id]);
+  }, [match?.id, match?.date, match?.status, homeTeam?.id, awayTeam?.id, match?.homeScore, match?.awayScore]);
 
   return { ...bundle, loading };
 }

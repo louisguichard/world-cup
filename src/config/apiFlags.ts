@@ -160,7 +160,7 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
   sportHighlights: {
     enabled: true,
     splashPath: false,
-    label: "Sport Highlights API (Highlightly)",
+    label: "Football Highlights API (Highlightly)",
     lastAudit: "untested",
     lastLatencyMs: 0,
   },

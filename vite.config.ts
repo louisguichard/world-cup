@@ -100,7 +100,7 @@ const rapidApiProxies = {
     "/api/world-cup-history"
   ),
   "/api/sport-highlights": rapidApiProxy(
-    "https://sport-highlights-api.p.rapidapi.com",
+    "https://football-highlights-api.p.rapidapi.com",
     "/api/sport-highlights"
   ),
   "/api/all-sport-live-stream": rapidApiProxy(

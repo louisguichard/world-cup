@@ -2,6 +2,8 @@ import type { MatchStatisticsBundle, MergedMatch } from "../../types";
 import type { HighlightlyMatchBundle } from "../../types/sportHighlights";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import type { Team } from "../../types";
+import { readHighlightIntro } from "../../lib/highlightlyStaticCache";
+import { canSpendHighlightlyRequests } from "../../lib/highlightlyQuota";
 import {
   fetchHighlightlyHead2Head,
   fetchHighlightlyHighlights,
@@ -14,10 +16,10 @@ import {
   resolveHighlightlyMatchId,
   resolveHighlightlyTeamId,
 } from "../SportHighlightsClient";
+import { fetchHighlightIntroForMatch } from "../highlights/fetchHighlightIntro";
 import { TtlCache } from "../cache/TtlCache";
 
-const TTL_LIVE_MS = 60_000;
-const TTL_FINISHED_MS = 10 * 60_000;
+const TTL_FINISHED_MS = 24 * 60 * 60_000;
 
 const bundleCache = new TtlCache<string, HighlightlyMatchBundle>();
 
@@ -25,24 +27,52 @@ function cacheKey(match: MergedMatch, homeName: string, awayName: string): strin
   return `${match.id}:${homeName}:${awayName}:${match.date}`;
 }
 
-function ttlFor(match: MergedMatch): number {
-  return match.status === "live" ? TTL_LIVE_MS : TTL_FINISHED_MS;
+function bundleFromIntro(
+  _match: MergedMatch,
+  intro: import("../../types/sportHighlights").HighlightlyMatchIntro
+): HighlightlyMatchBundle {
+  return {
+    highlightlyMatchId: intro.highlightlyMatchId,
+    matchDetail: null,
+    statistics: [],
+    highlights: intro.highlights,
+    liveEvents: [],
+    lineups: null,
+    lastFiveHome: [],
+    lastFiveAway: [],
+    head2Head: [],
+    fetchedAt: Date.parse(intro.fetchedAt) || Date.now(),
+    intro,
+    attribution: intro.attribution,
+  };
 }
 
-/** Loads Highlightly match bundle: highlights, facts, stats, form, H2H. */
+/** Loads Highlightly data — post-match API calls only; static cache for intros. */
 export async function fetchHighlightlyMatchBundle(input: {
   match: MergedMatch;
   homeTeam?: Team;
   awayTeam?: Team;
+  /** When true, user opened match detail — may spend extra quota on stats/H2H. */
+  detailView?: boolean;
 }): Promise<HighlightlyMatchBundle> {
-  const { match, homeTeam, awayTeam } = input;
+  const { match, homeTeam, awayTeam, detailView = false } = input;
   const homeName = teamDisplayName(homeTeam, match.homeTeamId);
   const awayName = teamDisplayName(awayTeam, match.awayTeamId);
   const key = cacheKey(match, homeName, awayName);
+
+  const staticIntro = readHighlightIntro(match.id);
+  if (staticIntro) {
+    const fromCache = bundleFromIntro(match, staticIntro);
+    bundleCache.set(key, fromCache, TTL_FINISHED_MS);
+    if (!detailView || match.status !== "completed") {
+      return fromCache;
+    }
+  }
+
   const cached = bundleCache.get(key);
   if (cached) return cached;
 
-  const empty: HighlightlyMatchBundle = {
+  const baseEmpty: HighlightlyMatchBundle = {
     highlightlyMatchId: null,
     matchDetail: null,
     statistics: [],
@@ -53,21 +83,45 @@ export async function fetchHighlightlyMatchBundle(input: {
     lastFiveAway: [],
     head2Head: [],
     fetchedAt: Date.now(),
+    intro: staticIntro,
+    attribution: staticIntro?.attribution,
   };
 
   if (isSportHighlightsDisabled()) {
-    return empty;
+    return baseEmpty;
   }
 
-  const highlightlyMatchId = await resolveHighlightlyMatchId({
-    homeTeamName: homeName,
-    awayTeamName: awayName,
-    date: match.date,
-  });
+  if (match.status !== "completed") {
+    return {
+      ...baseEmpty,
+      attribution: "Highlights are fetched after the match ends to save API quota.",
+    };
+  }
+
+  const intro = staticIntro ?? (await fetchHighlightIntroForMatch({ match, homeTeam, awayTeam }));
+  if (intro.highlights.length > 0 && !detailView) {
+    const light = bundleFromIntro(match, intro);
+    bundleCache.set(key, light, TTL_FINISHED_MS);
+    return light;
+  }
+
+  if (!detailView || !canSpendHighlightlyRequests(6)) {
+    const light = bundleFromIntro(match, intro);
+    bundleCache.set(key, light, TTL_FINISHED_MS);
+    return light;
+  }
+
+  const highlightlyMatchId =
+    intro.highlightlyMatchId ??
+    (await resolveHighlightlyMatchId({
+      homeTeamName: homeName,
+      awayTeamName: awayName,
+      date: match.date,
+    }));
 
   if (!highlightlyMatchId) {
-    bundleCache.set(key, empty, ttlFor(match));
-    return empty;
+    bundleCache.set(key, bundleFromIntro(match, intro), TTL_FINISHED_MS);
+    return bundleFromIntro(match, intro);
   }
 
   const [homeTeamId, awayTeamId] = await Promise.all([
@@ -87,7 +141,9 @@ export async function fetchHighlightlyMatchBundle(input: {
   ] = await Promise.all([
     fetchHighlightlyMatch(highlightlyMatchId),
     fetchHighlightlyStatistics(highlightlyMatchId),
-    fetchHighlightlyHighlights({ matchId: highlightlyMatchId, limit: 20 }),
+    intro.highlights.length > 0
+      ? Promise.resolve(intro.highlights)
+      : fetchHighlightlyHighlights({ matchId: highlightlyMatchId, limit: 20 }),
     fetchHighlightlyLiveEvents(highlightlyMatchId),
     fetchHighlightlyLineups(highlightlyMatchId),
     homeTeamId ? fetchHighlightlyLastFiveGames(homeTeamId) : Promise.resolve([]),
@@ -108,9 +164,11 @@ export async function fetchHighlightlyMatchBundle(input: {
     lastFiveAway,
     head2Head,
     fetchedAt: Date.now(),
+    intro,
+    attribution: intro.attribution,
   };
 
-  bundleCache.set(key, bundle, ttlFor(match));
+  bundleCache.set(key, bundle, TTL_FINISHED_MS);
   return bundle;
 }
 

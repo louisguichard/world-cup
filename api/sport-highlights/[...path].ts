@@ -1,11 +1,27 @@
 export const config = { runtime: "edge" };
 
-const HOST = "sport-highlights-api.p.rapidapi.com";
+const HOST = "football-highlights-api.p.rapidapi.com";
 
-const ALLOWED_PREFIXES = ["/football/"] as const;
+const ALLOWED_PREFIXES = [
+  "/countries",
+  "/leagues",
+  "/teams",
+  "/matches",
+  "/highlights",
+  "/bookmakers",
+  "/odds",
+  "/standings",
+  "/last-five-games",
+  "/head-2-head",
+  "/lineups",
+  "/statistics",
+  "/events",
+  "/players",
+  "/box-score",
+] as const;
 
 function isAllowed(path: string): boolean {
-  return ALLOWED_PREFIXES.some((p) => path.startsWith(p));
+  return ALLOWED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
 }
 
 export default async function handler(request: Request): Promise<Response> {

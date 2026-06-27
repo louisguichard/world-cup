@@ -1,6 +1,14 @@
 import { isApiEnabled } from "../config/apiFlags";
 import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
 import {
+  canSpendHighlightlyRequests,
+  recordHighlightlyRequests,
+} from "../lib/highlightlyQuota";
+import {
+  readCachedTeamId,
+  writeCachedTeamId,
+} from "../lib/highlightlyStaticCache";
+import {
   HIGHLIGHTLY_WC_LEAGUE_ID,
   HIGHLIGHTLY_WC_SEASON,
   SPORT_HIGHLIGHTS_HOST,
@@ -25,7 +33,7 @@ const RAPIDAPI_HOST =
   providerByHost(SPORT_HIGHLIGHTS_HOST)?.host ?? SPORT_HIGHLIGHTS_HOST;
 
 let sessionDisabled = false;
-const teamIdCache = new Map<string, number>();
+const teamIdMemoryCache = new Map<string, number>();
 
 export function isSportHighlightsDisabled(): boolean {
   return sessionDisabled || !isApiEnabled("sportHighlights");
@@ -40,10 +48,17 @@ function headers(): HeadersInit {
   return rapidApiHeaders(RAPIDAPI_HOST);
 }
 
-async function fetchJson<T>(path: string): Promise<T | null> {
+async function fetchJson<T>(path: string, opts?: { skipQuota?: boolean }): Promise<T | null> {
   if (isSportHighlightsDisabled()) return null;
+  if (!opts?.skipQuota && !canSpendHighlightlyRequests(1)) {
+    logger.warn("SportHighlights", `Monthly quota reached — skipped ${path}`);
+    return null;
+  }
+
   try {
     const res = await fetch(`${baseUrl()}${path}`, { headers: headers() });
+    if (!opts?.skipQuota) recordHighlightlyRequests(1);
+
     if (res.status === 401 || res.status === 403 || res.status === 429) {
       sessionDisabled = true;
       logger.warn("SportHighlights", `Blocked ${res.status} on ${path}`);
@@ -75,8 +90,14 @@ function normalizeTeamSearchName(name: string): string {
 /** Lookup Highlightly team id by display name (cached). */
 export async function resolveHighlightlyTeamId(teamName: string): Promise<number | null> {
   const key = normalizeTeamSearchName(teamName);
-  const cached = teamIdCache.get(key);
-  if (cached != null) return cached;
+  const mem = teamIdMemoryCache.get(key);
+  if (mem != null) return mem;
+
+  const persisted = readCachedTeamId(teamName);
+  if (persisted != null) {
+    teamIdMemoryCache.set(key, persisted);
+    return persisted;
+  }
 
   const payload = await fetchJson<HighlightlyPaginated<HighlightlyTeamRef>>(
     sportHighlightsEndpoints.teams({ name: teamName, limit: 5 })
@@ -85,7 +106,8 @@ export async function resolveHighlightlyTeamId(teamName: string): Promise<number
   const exact = list.find((t) => normalizeTeamSearchName(t.name) === key);
   const pick = exact ?? list[0];
   if (pick?.id) {
-    teamIdCache.set(key, pick.id);
+    teamIdMemoryCache.set(key, pick.id);
+    writeCachedTeamId(teamName, pick.id);
     return pick.id;
   }
   return null;
