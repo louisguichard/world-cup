@@ -36,7 +36,9 @@
     "seed-vault": "cd tools/api-portal && npm run seed",
     "dedupe-vault": "cd tools/api-portal && npm run dedupe",
     "mcp:zafronix": "node scripts/mcp-zafronix-config.mjs",
-    "mcp:endpoints": "node scripts/mcp-endpoint-config.mjs"
+    "mcp:endpoints": "node scripts/mcp-endpoint-config.mjs",
+    "env:sync-vercel": "node scripts/sync-vercel-env.mjs",
+    "deploy:vercel": "npx vercel deploy --prod --yes"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

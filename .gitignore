@@ -15,3 +15,4 @@ tools/api-portal/.portal-keys.enc
 tools/api-portal/.portal-keys.enc.bak*
 scripts/*-test-results.json
 scripts/api-audit-results.json
+.env*
