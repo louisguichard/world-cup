@@ -31,10 +31,12 @@ export function TournamentLeaderboard({ title, stats, teams, unit = "G" }: Props
           return (
             <li key={`${stat.player.id}-${stat.teamId}`} className={styles.leaderboardRow}>
               <span className={styles.leaderboardRank}>{i + 1}</span>
-              <PlayerPhoto name={stat.player.displayName} size="sm" />
               <TeamFlag team={team} teamId={stat.teamId} size="sm" />
               <div className={styles.leaderboardMeta}>
-                <span className={styles.leaderboardName}>{stat.player.displayName}</span>
+                <span className={styles.leaderboardNameRow}>
+                  <PlayerPhoto name={stat.player.displayName} size="sm" />
+                  <span className={styles.leaderboardName}>{stat.player.displayName}</span>
+                </span>
                 <TeamClickTarget teamId={stat.teamId} className={styles.leaderboardTeamBtn}>
                   <span className={styles.leaderboardTeam}>{teamLabel(stat.teamId, teams)}</span>
                 </TeamClickTarget>

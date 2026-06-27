@@ -1,34 +1,35 @@
+<!-- Last synced: build 11 / commit abd8e68 -->
 ---
 name: Live Qualification UX
 overview: Tighten WC 2026 live qualification UX (rank-8 popover, knockout story) plus a universal tabbed team drawer (Overview, Matches, Players, Form, Context, Historical)—one TeamDetailSheet everywhere, fed by shared profile/API sources.
 todos:
   - id: universal-team-drawer
     content: "Centralize team click in TeamLabel/TeamLabelById; audit all surfaces → openTeamSheet → TeamDetailSheet"
-    status: pending
+    status: completed
   - id: drawer-tab-refactor
     content: "Refactor TeamDetailSheet to tabbed hub (Overview, Matches, Players, Form, Context, Historical); migrate existing panels; conditional Historical tab"
-    status: pending
+    status: completed
   - id: lib-team-historical
     content: "Add teamHistoricalFacts.ts — derive notable history from API/static data only; hide Historical tab when empty"
-    status: pending
+    status: completed
   - id: lib-cutoff-scenario
     content: Add thirdPlaceCutoffScenario.ts + tests + APP_COPY.cutoffPopover with verbatim rank-8 template
-    status: pending
+    status: completed
   - id: lib-elimination-story
     content: Add eliminationStory.ts (timeline walk, full/partial/unknown confidence) + tests + APP_COPY.knockoutStory
-    status: pending
+    status: completed
   - id: ui-cutoff-popover
     content: Build ThirdPlaceCutoffPopover; wire into BestThirdLiveGraph rank-8 row + BestThirdRankingTable
-    status: pending
+    status: completed
   - id: ui-knockout-card
     content: Build KnockoutStoryCard + useEliminationStory; embed in TeamDetailSheet Context tab
-    status: pending
+    status: completed
   - id: copy-buttons-empty
     content: Add knockoutStory + teamDrawer tab labels + empty-state copy to APP_COPY (user may override)
-    status: pending
+    status: completed
   - id: live-qual-polish
     content: "Polish InContention/Eliminated bentos: clickable chips, bubble rank hints, deep-link to Context tab"
-    status: pending
+    status: completed
 isProject: false
 ---
 

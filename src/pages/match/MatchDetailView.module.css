@@ -115,6 +115,12 @@
   line-height: 1.25;
 }
 
+.headerTeamNameBtn {
+  display: inline-flex;
+  justify-content: center;
+  max-width: 100%;
+}
+
 .headerScorebox {
   display: flex;
   align-items: center;

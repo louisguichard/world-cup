@@ -2086,6 +2086,29 @@
   text-decoration: underline;
 }
 
+.group-standing-team-btn.team-click-target {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1 1 0;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.group-standing-team-btn.team-click-target .team-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.group-table-team-btn.team-click-target {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .group-table-row--qualified {
   border-left: 3px solid #10b981;
 }

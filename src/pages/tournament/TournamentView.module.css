@@ -492,6 +492,13 @@
   gap: 2px;
 }
 
+.leaderboardNameRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .leaderboardName {
   font-size: 13px;
   font-weight: 600;
@@ -599,6 +606,10 @@
 }
 
 .awardBadge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 4px 10px;

@@ -1,0 +1,22 @@
+---
+description: Always bump build number and sync release artifacts on every code change
+alwaysApply: true
+---
+
+# Version bump required on every change
+
+Before finishing any implementation task that modifies source, config, or scripts:
+
+1. Run `npm run version:build -- --message "concise summary of what changed"` OR rely on the pre-commit hook (`.githooks/pre-commit`) to auto-bump when you commit.
+2. Never commit code changes without a corresponding build increment in `version.json`.
+3. Updated artifacts (always commit together):
+   - `version.json` (build++)
+   - `VERSION_LOG.md` (build log entry)
+   - `CHANGELOG.md` (`## [Unreleased]` → `### Builds` entry)
+   - `build-manifest.json` (structured history)
+4. After commit: post-commit hook runs `version:record-commit` and syncs [release-dashboard.canvas.tsx](/Users/RonalSorto/.cursor/projects/Users-RonalSorto-Developer-world-cup/canvases/release-dashboard.canvas.tsx).
+5. After deploy: `npm run deploy:vercel` records deploy + syncs canvas.
+
+Semver releases only via `npm run version:patch|minor|major -- --message "..."`.
+
+See [docs/VERSIONING.md](../docs/VERSIONING.md).
