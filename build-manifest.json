@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-27T14:27:17.398Z",
+  "updatedAt": "2026-06-27T14:27:17.487Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -139,6 +139,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "cb362421d091099af32856d8792e701df7cda704",
+      "shortHash": "cb36242",
+      "message": "Fix uiDebugBridge missing module and reach 0-issue uidebug gate",
+      "version": "4.0.0",
+      "build": 7,
+      "timestamp": "2026-06-27T14:27:17.487Z"
+    },
     {
       "hash": "aa7e77d590ee1c7c7dad95d2632ed28352ffd164",
       "shortHash": "aa7e77d",
@@ -370,14 +378,6 @@
       "version": "3.0.0",
       "build": 15,
       "timestamp": "2026-06-27T06:44:26.836Z"
-    },
-    {
-      "hash": "4af133f2908447719e3c0277a7a9c129e092af00",
-      "shortHash": "4af133f",
-      "message": "Fix third-place bubble teams showing as projected out in live qualification layout.",
-      "version": "3.0.0",
-      "build": 14,
-      "timestamp": "2026-06-27T06:39:25.660Z"
     }
   ],
   "deploys": [
