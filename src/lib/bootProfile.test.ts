@@ -16,7 +16,6 @@ describe("bootProfile", () => {
   });
 
   it("defers heavy boot for all platforms", () => {
-    expect(shouldDeferHeavyBoot(false, false, false)).toBe(true);
-    expect(shouldDeferHeavyBoot(true, false, true)).toBe(true);
+    expect(shouldDeferHeavyBoot()).toBe(true);
   });
 });

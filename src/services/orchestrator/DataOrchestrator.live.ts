@@ -20,6 +20,8 @@ import { scheduleSimulation } from "../SimulationScheduler";
 import { logger } from "../Logger";
 import { computeScoreConsensus, type ScoreVote } from "./LiveScoreConsensus";
 import { selectPrimaryMatch } from "../PollingEngine";
+import { MODULE_IDS } from "../../lib/moduleIds";
+import { pollIntervalMs } from "../../lib/pollPolicy";
 
 const MAX_DISAGREEMENTS = 3;
 const disagreementCounts = new Map<string, number>();
@@ -170,8 +172,8 @@ function refreshStandingsAndSimulation(merged: Record<string, MergedMatch>): voi
   scheduleSimulation();
 }
 
-/** Live poll tick: consensus scores + enrichment cascade. */
-export async function runLiveTick(): Promise<number> {
+/** Live poll tick: consensus scores + enrichment cascade (light = ESPN only when idle). */
+export async function runLiveTick(options?: { light?: boolean }): Promise<number> {
   const store = useStore.getState();
   let merged: Record<string, MergedMatch> = { ...store.liveMatches };
   const teams = store.teams;
@@ -190,29 +192,37 @@ export async function runLiveTick(): Promise<number> {
   }
 
   const liveMatches = Object.values(merged).filter((m) => m.status === "live" && !m.locked);
-  await Promise.allSettled(
-    liveMatches.slice(0, 6).map(async (m) => {
-      const events = await fetchMatchEvents(m, m.matchId ?? m.id);
-      publishMatchEvents(m, events);
-    })
-  );
 
-  const votesByMatch = await collectAllVotes(merged, teams, espn.matches);
-  for (const [storeKey, votes] of votesByMatch) {
-    if (votes.length > 0) {
-      applyConsensusToMatch(merged, storeKey, votes);
+  if (!options?.light) {
+    await Promise.allSettled(
+      liveMatches.slice(0, 6).map(async (m) => {
+        const events = await fetchMatchEvents(m, m.matchId ?? m.id);
+        publishMatchEvents(m, events);
+      })
+    );
+
+    const votesByMatch = await collectAllVotes(merged, teams, espn.matches);
+    for (const [storeKey, votes] of votesByMatch) {
+      if (votes.length > 0) {
+        applyConsensusToMatch(merged, storeKey, votes);
+      }
     }
+
+    const { events: enrichmentEvents, source: enrichmentSource } = await fetchEnrichmentEvents();
+    const enrichedCount = applyEnrichmentEvents(merged, enrichmentEvents, teams);
+
+    logger.debug(enrichmentSourceLabel(enrichmentSource, enrichedCount), "DataOrchestrator.live", {
+      espnCount: espn.matches.length,
+      enrichmentEvents: enrichmentEvents.length,
+      enrichmentSource,
+      enrichedCount,
+      light: false,
+    });
+  } else {
+    logger.debug("Light poll — ESPN scoreboard only", "DataOrchestrator.live", {
+      espnCount: espn.matches.length,
+    });
   }
-
-  const { events: enrichmentEvents, source: enrichmentSource } = await fetchEnrichmentEvents();
-  const enrichedCount = applyEnrichmentEvents(merged, enrichmentEvents, teams);
-
-  logger.debug(enrichmentSourceLabel(enrichmentSource, enrichedCount), "DataOrchestrator.live", {
-    espnCount: espn.matches.length,
-    enrichmentEvents: enrichmentEvents.length,
-    enrichmentSource,
-    enrichedCount,
-  });
 
   for (const m of Object.values(merged)) {
     if (m.locked) store.addLockedMatchId(m.id);
@@ -227,19 +237,26 @@ export async function runLiveTick(): Promise<number> {
     consecutiveErrors: 0,
   });
 
+  store.touchModuleFreshness(MODULE_IDS.liveMatches);
+
   writeLiveMatchCache(merged);
 
   if (primary && primary !== store.primaryLiveMatchId) {
     store.setPrimaryMatch(primary);
   }
 
-  refreshStandingsAndSimulation(merged);
+  if (!options?.light) {
+    refreshStandingsAndSimulation(merged);
+    store.touchModuleFreshness(MODULE_IDS.groupStandings);
+  }
+
+  const intervalMs = pollIntervalMs(liveCount > 0);
 
   if (typeof window !== "undefined") {
     window.__pollingStatus = {
       running: true,
       liveMatchCount: liveCount,
-      intervalMs: liveCount > 0 ? 15_000 : 300_000,
+      intervalMs,
       lastPollAt: Date.now(),
       consecutiveErrors: 0,
     };

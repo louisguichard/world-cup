@@ -8,9 +8,11 @@ type Props = {
   team: Team;
   align?: "left" | "right";
   className?: string;
+  /** Override visible label (e.g. compact live-card name). */
+  displayName?: string;
 };
 
-export function TeamLabel({ team, align = "left", className = "" }: Props) {
+export function TeamLabel({ team, align = "left", className = "", displayName }: Props) {
   const theme = useTeamTheme(team.id);
 
   return (
@@ -20,7 +22,7 @@ export function TeamLabel({ team, align = "left", className = "" }: Props) {
       data-team-id={team.id}
     >
       <TeamFlag team={team} teamId={team.id} />
-      <span className="team-name-text">{teamDisplayName(team)}</span>
+      <span className="team-name-text">{displayName ?? teamDisplayName(team)}</span>
     </span>
   );
 }

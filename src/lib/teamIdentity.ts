@@ -128,6 +128,30 @@ export function teamDisplayName(
   return fallback;
 }
 
+/** Compact label for live hero/schedule cards — ESPN short name or FIFA abbrev when shorter. */
+export function teamLiveCardName(
+  team?: Pick<Team, "name" | "shortName" | "abbreviation"> | null,
+  fallback = "TBD"
+): string {
+  const name = team?.name?.trim();
+  const short = team?.shortName?.trim();
+  const abbrev = team?.abbreviation?.trim()?.toUpperCase();
+
+  if (short && name && short.localeCompare(name, undefined, { sensitivity: "accent" }) !== 0) {
+    return short;
+  }
+
+  const maxFullNameLength = 12;
+  if (name && abbrev && name.length > maxFullNameLength) {
+    return abbrev;
+  }
+
+  if (name) return name;
+  if (short) return short;
+  if (abbrev) return abbrev;
+  return fallback;
+}
+
 export function matchThemeToStyle(
   home: TeamIdentity | null,
   away: TeamIdentity | null,

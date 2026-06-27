@@ -140,6 +140,14 @@ export const APP_COPY = {
     bracketTitle: "Road to the final",
     bracketLead:
       "Preview the full bracket here. Switch between best-guess projections and locked-in teams.",
+    groupStandings: {
+      title: (group: string) => `Group ${group} · live table`,
+      ariaLabel: (group: string) => `Live Group ${group} standings`,
+      liveBadge: "Live",
+      updatesLive: "Points and goal difference update as goals are scored.",
+      sameGroupMulti: (count: number) =>
+        `${count} games live in this group — the table shifts after every goal.`,
+    },
   },
 
   schedule: {
@@ -368,6 +376,11 @@ export const APP_COPY = {
     insightsDraw: "Tie",
     simulatorNote:
       "Want to play with scores yourself? Open the Simulator tab to change results and see who might advance.",
+    fixtureBettingTitle: "Betting & tips",
+    fixtureBettingLoading: "Loading prices…",
+    fixtureBettingExpand: "Tap to see odds, tips, and what the numbers mean",
+    fixtureSummaryFavorite: (team: string, pct: number) => `Favorite: ${team} (${pct}%)`,
+    fixtureSummaryTip: (pick: string) => `Tip: ${pick}`,
   },
 
   pwa: {

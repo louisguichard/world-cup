@@ -1,11 +1,9 @@
 import type { MergedMatch } from "../types";
+import { isLightPoll, pollIntervalMs, POLL_LIVE_MS } from "../lib/pollPolicy";
 import { getLockedSet } from "../store/slices/matchSlice";
 import { useStore } from "../store";
 import { DataOrchestrator } from "./orchestrator/DataOrchestrator";
 import { logger } from "./Logger";
-
-const LIVE_INTERVAL_MS = 15_000;
-const IDLE_INTERVAL_MS = 300_000;
 
 function hasAnyLive(matches: Record<string, MergedMatch>): boolean {
   return Object.values(matches).some((m) => m.status === "live");
@@ -60,9 +58,9 @@ class PollingEngine {
       window.__pollingStatus = {
         running: true,
         liveMatchCount: 0,
-        intervalMs: LIVE_INTERVAL_MS,
+        intervalMs: POLL_LIVE_MS,
         lastPollAt: null,
-        consecutiveErrors: 0
+        consecutiveErrors: 0,
       };
     }
 
@@ -83,7 +81,7 @@ class PollingEngine {
     if (this.timer) clearTimeout(this.timer);
 
     const isLive = hasAnyLive(useStore.getState().liveMatches);
-    const delay = isLive ? LIVE_INTERVAL_MS : IDLE_INTERVAL_MS;
+    const delay = pollIntervalMs(isLive);
 
     if (typeof window !== "undefined" && window.__pollingStatus) {
       window.__pollingStatus.intervalMs = delay;
@@ -93,7 +91,8 @@ class PollingEngine {
   }
 
   private async fetchAndMerge(): Promise<number> {
-    return DataOrchestrator.getInstance().tickLive();
+    const isLive = hasAnyLive(useStore.getState().liveMatches);
+    return DataOrchestrator.getInstance().tickLive({ light: isLightPoll(isLive) });
   }
 
   private async poll(): Promise<void> {
@@ -108,7 +107,7 @@ class PollingEngine {
       allMatchesLocked(store.liveMatches, store.lockedMatchIds)
     ) {
       logger.info("All matches locked — polling paused", "PollingEngine", {
-        lockedCount: getLockedSet(store).size
+        lockedCount: getLockedSet(store).size,
       });
       this.scheduleNext();
       return;
@@ -121,11 +120,11 @@ class PollingEngine {
       store.batchPollUpdate({
         matches: store.liveMatches,
         lastPollAt: Date.now(),
-        consecutiveErrors
+        consecutiveErrors,
       });
       logger.error("Poll cycle failed", "PollingEngine", {
         error: error instanceof Error ? error.message : String(error),
-        consecutiveErrors
+        consecutiveErrors,
       });
 
       if (typeof window !== "undefined" && window.__pollingStatus) {

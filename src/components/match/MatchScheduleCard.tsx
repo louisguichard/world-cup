@@ -13,14 +13,12 @@ import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
 import { BroadcastBar } from "./BroadcastBar";
-import { OddsRow } from "./OddsRow";
 import { WeatherBadge } from "./WeatherBadge";
 import { MatchGoalScorers } from "./MatchGoalScorers";
 import { VenueLabel } from "../venue/VenueLabel";
 import { KickoffCountdown } from "./KickoffCountdown";
-import { PredictionBadge } from "../predictions/PredictionBadge";
-import { useFootballPredictionForMatch } from "../../hooks/useFootballPredictionIndex";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { FixtureBettingSection } from "./FixtureBettingSection";
+import { teamDisplayName, teamLiveCardName } from "../../lib/teamIdentity";
 import { useStore } from "../../store";
 import { useGoalDetector } from "../../hooks/useGoalDetector";
 import { GoalCelebrationOverlay } from "./GoalCelebrationOverlay";
@@ -74,9 +72,14 @@ export function MatchScheduleCard({
   );
 
   const { isGoalActive, latestGoal, secondsRemaining } = useGoalDetector(match.id);
-  const externalPrediction = useFootballPredictionForMatch(match.id);
-  const homeName = teamDisplayName(home, match.homeTeamId);
-  const awayName = teamDisplayName(away, match.awayTeamId);
+  const homeDisplayName = teamDisplayName(home, match.homeTeamId);
+  const awayDisplayName = teamDisplayName(away, match.awayTeamId);
+  const homeName = isLive
+    ? teamLiveCardName(home, match.homeTeamId)
+    : homeDisplayName;
+  const awayName = isLive
+    ? teamLiveCardName(away, match.awayTeamId)
+    : awayDisplayName;
 
   const metaTimeDisplay = isDone
     ? APP_COPY.match.final
@@ -148,9 +151,9 @@ export function MatchScheduleCard({
 
       <div className="score-line schedule-score-line">
         {home ? (
-          <TeamLabel team={home} />
+          <TeamLabel team={home} displayName={isLive ? homeName : undefined} />
         ) : (
-          <TeamLabelById teamId={match.homeTeamId} />
+          <TeamLabelById teamId={match.homeTeamId} displayName={isLive ? homeName : undefined} />
         )}
         <strong className="schedule-score">
           {isDone || isLive ? (match.homeScore ?? 0) : "–"}
@@ -160,9 +163,9 @@ export function MatchScheduleCard({
           {isDone || isLive ? (match.awayScore ?? 0) : "–"}
         </strong>
         {away ? (
-          <TeamLabel team={away} align="right" />
+          <TeamLabel team={away} align="right" displayName={isLive ? awayName : undefined} />
         ) : (
-          <TeamLabelById teamId={match.awayTeamId} align="right" />
+          <TeamLabelById teamId={match.awayTeamId} align="right" displayName={isLive ? awayName : undefined} />
         )}
       </div>
 
@@ -172,27 +175,20 @@ export function MatchScheduleCard({
             events={events}
             homeTeamId={match.homeTeamId}
             awayTeamId={match.awayTeamId}
+            homeTeam={home}
+            awayTeam={away}
+            photoSize={compact ? "xs" : "sm"}
           />
         </div>
       ) : isLive ? (
         <div className="match-goal-scorers-slot" aria-hidden />
       ) : null}
 
-      {!isDone && externalPrediction ? (
-        <PredictionBadge
-          prediction={externalPrediction}
-          homeTeam={teamDisplayName(home, match.homeTeamId)}
-          awayTeam={teamDisplayName(away, match.awayTeamId)}
-          compact={compact}
-        />
-      ) : null}
-
-      {!isDone && match ? (
-        <OddsRow
+      {!isDone ? (
+        <FixtureBettingSection
           match={match}
-          homeTeam={teamDisplayName(home, match.homeTeamId)}
-          awayTeam={teamDisplayName(away, match.awayTeamId)}
-          compact={compact}
+          homeTeam={homeDisplayName}
+          awayTeam={awayDisplayName}
         />
       ) : null}
 

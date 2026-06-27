@@ -13,6 +13,10 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+## [3.0.0] build 9 — 2026-06-27 (build)
+- Player photos, module refresh, tiered polling, lineup portraits
+
 ## [3.0.0] build 8 — 2026-06-27 (build)
 - Live dashboard shadow bleed so glow halos and feather edges no longer clip on desktop
 

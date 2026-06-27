@@ -1,11 +1,14 @@
 import { lazy, Suspense, useMemo, useState } from "react";
 import { BentoErrorBoundary } from "../shared/ErrorBoundary";
 import { LiveMatchBento } from "../bentos/LiveMatchBento";
+import { LiveGroupStandingsPanel } from "../bentos/LiveGroupStandingsPanel";
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
 import { groupMatchesByDay } from "../../lib/groupMatchesByDay";
 import { getNextKickoffMs, isNextKickoffFixture } from "../../lib/kickoffCountdown";
 import { APP_COPY } from "../../lib/appCopy";
+import { MODULE_IDS } from "../../lib/moduleIds";
 import { useStore } from "../../store";
+import { ModuleSectionActions } from "../shared/ModuleSectionActions";
 
 const BestThirdLiveGraph = lazy(() =>
   import("../bentos/BestThirdLiveGraph").then((m) => ({ default: m.BestThirdLiveGraph }))
@@ -83,6 +86,7 @@ export function LiveView() {
               <div className="section-kicker">{copy.liveNowKicker}</div>
               <h2 className="section-title-text">{copy.liveNowTitle}</h2>
             </div>
+            <ModuleSectionActions moduleId={MODULE_IDS.liveMatches} refreshLabel="Refresh live scores" />
           </div>
 
           <div className="live-command-row">
@@ -91,13 +95,20 @@ export function LiveView() {
                 {primary ? <LiveMatchBento match={primary} variant="primary" /> : null}
               </BentoErrorBoundary>
             </div>
-            <Suspense fallback={<DeferredSectionSkeleton />}>
-              <BentoErrorBoundary bento="BestThirdLiveGraph">
-                <BestThirdLiveGraph
-                  focusTeamIds={primary ? [primary.homeTeamId, primary.awayTeamId] : []}
-                />
-              </BentoErrorBoundary>
-            </Suspense>
+            <div className="live-command-aside">
+              {primary?.group ? (
+                <BentoErrorBoundary bento="LiveGroupStandingsPanel">
+                  <LiveGroupStandingsPanel group={primary.group} />
+                </BentoErrorBoundary>
+              ) : null}
+              <Suspense fallback={<DeferredSectionSkeleton />}>
+                <BentoErrorBoundary bento="BestThirdLiveGraph">
+                  <BestThirdLiveGraph
+                    focusTeamIds={primary ? [primary.homeTeamId, primary.awayTeamId] : []}
+                  />
+                </BentoErrorBoundary>
+              </Suspense>
+            </div>
           </div>
 
           {secondary.length > 0 ? (
@@ -112,6 +123,13 @@ export function LiveView() {
                   >
                     <LiveMatchBento match={m} variant="secondary" />
                   </button>
+                  {m.group && m.group !== primary?.group ? (
+                    <LiveGroupStandingsPanel
+                      group={m.group}
+                      variant="mini"
+                      highlightTeamIds={[m.homeTeamId, m.awayTeamId]}
+                    />
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -190,6 +208,7 @@ export function LiveView() {
             <h2 className="section-title-text">{copy.qualTitle}</h2>
             <p className="section-note">{APP_COPY.qual.sectionLead}</p>
           </div>
+          <ModuleSectionActions moduleId={MODULE_IDS.qualification} refreshLabel="Refresh qualification" />
         </div>
         <Suspense fallback={<DeferredSectionSkeleton />}>
           <div className="live-qual-row">

@@ -10,7 +10,7 @@ import { formatLiveClock, formatPeriodLabel } from "../../lib/formatMatchClock";
 import { APP_COPY } from "../../lib/appCopy";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { useGoalDetector } from "../../hooks/useGoalDetector";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamLiveCardName } from "../../lib/teamIdentity";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
 
@@ -38,8 +38,8 @@ export function LiveMatchBento({ match, variant }: Props) {
     [];
 
   const { isGoalActive, latestGoal, secondsRemaining } = useGoalDetector(match.id);
-  const homeName = teamDisplayName(home, match.homeTeamId);
-  const awayName = teamDisplayName(away, match.awayTeamId);
+  const homeName = teamLiveCardName(home, match.homeTeamId);
+  const awayName = teamLiveCardName(away, match.awayTeamId);
 
   return (
     <div
@@ -77,17 +77,17 @@ export function LiveMatchBento({ match, variant }: Props) {
 
       <div className="score-line live-hero-scoreline">
         {home ? (
-          <TeamLabel team={home} />
+          <TeamLabel team={home} displayName={homeName} />
         ) : (
-          <TeamLabelById teamId={match.homeTeamId} />
+          <TeamLabelById teamId={match.homeTeamId} displayName={homeName} />
         )}
         <strong className="live-hero-score">{match.homeScore ?? 0}</strong>
         <span className="schedule-score-sep">:</span>
         <strong className="live-hero-score">{match.awayScore ?? 0}</strong>
         {away ? (
-          <TeamLabel team={away} align="right" />
+          <TeamLabel team={away} align="right" displayName={awayName} />
         ) : (
-          <TeamLabelById teamId={match.awayTeamId} align="right" />
+          <TeamLabelById teamId={match.awayTeamId} align="right" displayName={awayName} />
         )}
       </div>
 
@@ -96,6 +96,9 @@ export function LiveMatchBento({ match, variant }: Props) {
           events={events}
           homeTeamId={match.homeTeamId}
           awayTeamId={match.awayTeamId}
+          homeTeam={home}
+          awayTeam={away}
+          photoSize={variant === "secondary" ? "xs" : "sm"}
         />
       </div>
 

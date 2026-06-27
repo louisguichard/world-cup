@@ -4,6 +4,7 @@ import {
   resolveTeamIdentity,
   resolveTeamIdentityFromAbbrev,
   teamDisplayName,
+  teamLiveCardName,
   teamIdentityToCssVars
 } from "./teamIdentity";
 import { pickOnPrimary } from "../utils/colorContrast";
@@ -29,6 +30,41 @@ describe("teamDisplayName", () => {
   it("falls back to short name then fallback", () => {
     expect(teamDisplayName(makeTeam({ name: "", shortName: "RSA" }), "x")).toBe("RSA");
     expect(teamDisplayName(undefined, "fallback")).toBe("fallback");
+  });
+});
+
+describe("teamLiveCardName", () => {
+  it("uses ESPN short display when it differs from full name", () => {
+    expect(
+      teamLiveCardName(
+        makeTeam({
+          name: "Bosnia and Herzegovina",
+          shortName: "Bosnia-Herz",
+          abbreviation: "BIH",
+        })
+      )
+    ).toBe("Bosnia-Herz");
+    expect(
+      teamLiveCardName(makeTeam({ name: "United States", shortName: "USA", abbreviation: "USA" }))
+    ).toBe("USA");
+  });
+
+  it("keeps full name when already short enough", () => {
+    expect(teamLiveCardName(makeTeam({ name: "Brazil", shortName: "Brazil", abbreviation: "BRA" }))).toBe(
+      "Brazil"
+    );
+  });
+
+  it("falls back to abbreviation for long names without a distinct short name", () => {
+    expect(
+      teamLiveCardName(
+        makeTeam({
+          name: "Bosnia and Herzegovina",
+          shortName: "Bosnia and Herzegovina",
+          abbreviation: "BIH",
+        })
+      )
+    ).toBe("BIH");
   });
 });
 

@@ -1,0 +1,178 @@
+.liveGroupPanel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--module-border, var(--line));
+  border-radius: var(--module-radius, var(--radius-lg));
+  background: var(--module-bg, var(--surface));
+  box-shadow: var(--shadow-feather-sm, var(--shadow-card));
+  overflow: visible;
+}
+
+.liveGroupPanelMini {
+  margin-top: 8px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: var(--module-padding-compact, 12px) var(--module-padding, 16px) 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: 0.92rem;
+  font-weight: var(--heading-weight);
+  font-synthesis: weight;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--status-danger) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--status-danger) 35%, transparent);
+  color: var(--status-danger);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.liveDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: live-group-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes live-group-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.tableWrap {
+  overflow-x: auto;
+  padding: 6px 8px 10px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+.table th,
+.table td {
+  padding: 6px 4px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  text-align: left;
+  width: 100%;
+}
+
+.table th {
+  color: var(--faint);
+  font-family: var(--font-brand);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rankCell {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.teamCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.teamBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.teamBtn:hover {
+  color: var(--text);
+}
+
+.statCell {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.pointsCell {
+  font-weight: 700;
+}
+
+.rowLive {
+  background: color-mix(in srgb, var(--team-primary) 10%, transparent);
+}
+
+.rowLive td:first-child {
+  box-shadow: inset 3px 0 0 var(--team-primary);
+}
+
+.rowChanged .statCell {
+  animation: live-group-stat-flash 0.9s ease-out;
+}
+
+@keyframes live-group-stat-flash {
+  0% {
+    background: color-mix(in srgb, var(--fwc-lime) 35%, transparent);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liveDot {
+    animation: none;
+  }
+
+  .rowChanged .statCell {
+    animation: none;
+  }
+}

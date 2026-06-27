@@ -1,5 +1,5 @@
 /* App shell service worker — enables install + offline fallback for static assets. */
-const CACHE = "wc-shell-v2";
+const CACHE = "wc-shell-v3";
 const PRECACHE = [
   "/",
   "/index.html",

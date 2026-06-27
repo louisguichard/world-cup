@@ -264,7 +264,7 @@ export async function runBoot(): Promise<void> {
   const cached = hydrateBootFromCache();
   const hadCache = cached.hadCache;
   const hasLiveInCache = hasLiveMatchesInCache(cached.matches);
-  const deferHeavy = shouldDeferHeavyBoot(mobileFast, hadCache, hasLiveInCache);
+  const deferHeavy = shouldDeferHeavyBoot();
 
   if (hadCache) {
     store.setTeams(cached.teams);

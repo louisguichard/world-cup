@@ -4,6 +4,7 @@ import {
   writeStoredColorScheme,
   type ColorSchemePreference,
 } from "../../lib/colorScheme";
+import type { ModuleId } from "../../lib/moduleIds";
 
 export type UiSliceState = {
   activeTab: TabId;
@@ -17,6 +18,7 @@ export type UiSliceState = {
   activeTeamId: string | null;
   teamSheetOpen: boolean;
   colorScheme: ColorSchemePreference;
+  moduleFreshness: Partial<Record<ModuleId, number>>;
   setActiveTab: (tab: TabId) => void;
   setSimulatorMode: (mode: SimulatorMode) => void;
   setSplashPhase: (phase: SplashPhase) => void;
@@ -27,6 +29,7 @@ export type UiSliceState = {
   setColorScheme: (scheme: ColorSchemePreference) => void;
   openTeamSheet: (teamId: string) => void;
   closeTeamSheet: () => void;
+  touchModuleFreshness: (moduleId: ModuleId) => void;
 };
 
 export const createUiSlice = (
@@ -43,6 +46,7 @@ export const createUiSlice = (
   activeTeamId: null,
   teamSheetOpen: false,
   colorScheme: readStoredColorScheme(),
+  moduleFreshness: {},
 
   setActiveTab: (tab) => set(() => ({ activeTab: tab })),
   setSimulatorMode: (mode) => set(() => ({ simulatorMode: mode })),
@@ -60,5 +64,9 @@ export const createUiSlice = (
     set(() => ({ colorScheme: scheme }));
   },
   openTeamSheet: (teamId) => set(() => ({ activeTeamId: teamId, teamSheetOpen: true })),
-  closeTeamSheet: () => set(() => ({ teamSheetOpen: false }))
+  closeTeamSheet: () => set(() => ({ teamSheetOpen: false })),
+  touchModuleFreshness: (moduleId) =>
+    set((state) => ({
+      moduleFreshness: { ...state.moduleFreshness, [moduleId]: Date.now() },
+    })),
 });

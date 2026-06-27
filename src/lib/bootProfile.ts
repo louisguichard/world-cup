@@ -17,13 +17,9 @@ export function splashMinimumHoldMs(mobileFast: boolean, hadCache = false): numb
   return mobileFast ? 280 : 700;
 }
 
-/** Whether team cascade + sim should run after splash instead of blocking it. */
-export function shouldDeferHeavyBoot(
-  mobileFast: boolean,
-  hadCache: boolean,
-  hasLiveInCache: boolean
-): boolean {
-  return mobileFast || (hadCache && !hasLiveInCache) || true;
+/** All platforms defer team cascade, standings API, and simulation until after splash. */
+export function shouldDeferHeavyBoot(): boolean {
+  return true;
 }
 
 export function isBootDebugEnabled(): boolean {

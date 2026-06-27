@@ -6,20 +6,32 @@ import {
   explainAmericanOdds,
   formatAmericanOdds,
 } from "../../lib/oddsDisplay";
-import type { MergedMatch } from "../../types";
+import type { MergedMatch, OddsSnapshot } from "../../types";
 
 type Props = {
   match: MergedMatch;
   homeTeam: string;
   awayTeam: string;
   compact?: boolean;
+  /** When set, skips internal odds fetch (used by FixtureBettingSection). */
+  externalOdds?: OddsSnapshot | null;
+  externalLoading?: boolean;
 };
 
 const POLYMARKET_EVENT_BASE = "https://polymarket.com/event";
 const copy = APP_COPY.odds;
 
-export function OddsRow({ match, homeTeam, awayTeam, compact }: Props) {
-  const { odds, loading } = useMatchOdds(match, homeTeam, awayTeam);
+export function OddsRow({
+  match,
+  homeTeam,
+  awayTeam,
+  compact,
+  externalOdds,
+  externalLoading,
+}: Props) {
+  const hooked = useMatchOdds(externalOdds !== undefined ? null : match, homeTeam, awayTeam);
+  const odds = externalOdds !== undefined ? externalOdds : hooked.odds;
+  const loading = externalLoading !== undefined ? externalLoading : hooked.loading;
 
   const summary = useMemo(() => {
     if (!odds) return null;

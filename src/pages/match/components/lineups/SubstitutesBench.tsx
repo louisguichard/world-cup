@@ -1,4 +1,6 @@
 import type { Lineup } from "../../../../types";
+import { resolveLineupPlayerPhoto } from "../../../../lib/resolveLineupPlayerPhoto";
+import { PlayerPhoto } from "../../../../components/player/PlayerPhoto";
 
 type Props = {
   homeLineup: Lineup | undefined;
@@ -7,92 +9,41 @@ type Props = {
   awayTeamName: string;
 };
 
+function SubRow({ jerseyNumber, displayName, photoUrl }: { jerseyNumber?: number; displayName: string; photoUrl?: string }) {
+  return (
+    <div className="lineup-sub-row">
+      <PlayerPhoto name={displayName} photoUrl={photoUrl} size="sm" />
+      <span className="lineup-sub-jersey">{jerseyNumber ?? ""}</span>
+      <span className="lineup-sub-name">{displayName}</span>
+    </div>
+  );
+}
+
 export function SubstitutesBench({ homeLineup, awayLineup, homeTeamName, awayTeamName }: Props) {
   return (
-    <div style={{ marginTop: 24 }}>
-      <h4 style={{ fontSize: 12, color: "var(--ss-muted)", marginBottom: 12, fontWeight: 600 }}>
-        SUBSTITUTES
-      </h4>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        {/* Home subs */}
+    <div className="lineup-subs-bench">
+      <h4 className="lineup-subs-title">SUBSTITUTES</h4>
+      <div className="lineup-subs-grid">
         <div>
-          <div style={{ fontSize: 11, color: "var(--ss-muted)", marginBottom: 8 }}>
-            {homeTeamName}
-          </div>
+          <div className="lineup-subs-team">{homeTeamName}</div>
           {(homeLineup?.substitutes ?? []).map((sub) => (
-            <div
+            <SubRow
               key={sub.player.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 0",
-                borderBottom: "1px solid var(--ss-border)",
-                fontSize: 12
-              }}
-            >
-              <span
-                style={{
-                  background: "var(--ss-elevated)",
-                  color: "var(--ss-muted)",
-                  width: 22,
-                  height: 22,
-                  borderRadius: 4,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 10,
-                  fontWeight: 600,
-                  flexShrink: 0
-                }}
-              >
-                {sub.player.jerseyNumber ?? ""}
-              </span>
-              <span style={{ color: "var(--ss-text)", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {sub.player.displayName}
-              </span>
-            </div>
+              jerseyNumber={sub.player.jerseyNumber}
+              displayName={sub.player.displayName}
+              photoUrl={resolveLineupPlayerPhoto(sub.player)}
+            />
           ))}
         </div>
-
-        {/* Away subs */}
         <div>
-          <div style={{ fontSize: 11, color: "var(--ss-muted)", marginBottom: 8 }}>
-            {awayTeamName}
-          </div>
+          <div className="lineup-subs-team">{awayTeamName}</div>
           {(awayLineup?.substitutes ?? []).map((sub) => (
-            <div
+            <SubRow
               key={sub.player.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 0",
-                borderBottom: "1px solid var(--ss-border)",
-                fontSize: 12
-              }}
-            >
-              <span
-                style={{
-                  background: "var(--ss-elevated)",
-                  color: "var(--ss-muted)",
-                  width: 22,
-                  height: 22,
-                  borderRadius: 4,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 10,
-                  fontWeight: 600,
-                  flexShrink: 0
-                }}
-              >
-                {sub.player.jerseyNumber ?? ""}
-              </span>
-              <span style={{ color: "var(--ss-text)", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {sub.player.displayName}
-              </span>
-            </div>
+              jerseyNumber={sub.player.jerseyNumber}
+              displayName={sub.player.displayName}
+              photoUrl={resolveLineupPlayerPhoto(sub.player)}
+            />
           ))}
         </div>
       </div>

@@ -29,6 +29,7 @@ import {
 } from "./EnrichmentQueue";
 import { runBoot } from "./DataOrchestrator.boot";
 import { runLiveTick } from "./DataOrchestrator.live";
+import { MODULE_IDS } from "../../lib/moduleIds";
 
 /** Master data coordinator — boot, live polling, enrichment, standings refresh. */
 export class DataOrchestrator {
@@ -46,9 +47,9 @@ export class DataOrchestrator {
     return runBoot();
   }
 
-  /** Live tick: Tier-1 consensus + enrichment cascade. */
-  async tickLive(): Promise<number> {
-    return runLiveTick();
+  /** Live tick: Tier-1 consensus + enrichment cascade (light mode when idle). */
+  async tickLive(options?: { light?: boolean }): Promise<number> {
+    return runLiveTick(options);
   }
 
   /** On-demand match enrichment via EnrichmentQueue. */
@@ -96,6 +97,7 @@ export class DataOrchestrator {
     } else if (derived) {
       store.setGroupStandings(derived);
     }
+    store.touchModuleFreshness(MODULE_IDS.groupStandings);
   }
 
   /** Refreshes bracket-related standings from Zafronix bracket endpoint. */

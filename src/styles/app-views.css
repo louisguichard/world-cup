@@ -51,6 +51,13 @@
   min-width: 0;
 }
 
+.live-command-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
 @media (min-width: 1024px) {
   .live-command-row {
     grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
@@ -315,6 +322,7 @@
   min-width: 0;
   scroll-snap-align: start;
   display: flex;
+  flex-direction: column;
 }
 
 .live-secondary-tap {
@@ -778,6 +786,72 @@
   font-size: 0.68rem;
   color: var(--faint);
   line-height: 1.4;
+}
+
+.fixture-betting-details {
+  margin-top: 8px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.fixture-betting-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.fixture-betting-summary::-webkit-details-marker {
+  display: none;
+}
+
+.fixture-betting-summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--brand);
+  font-size: 0.7rem;
+  transition: transform 0.15s ease;
+}
+
+.fixture-betting-details[open] .fixture-betting-summary::before {
+  transform: rotate(90deg);
+}
+
+.fixture-betting-summary-label {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.fixture-betting-summary-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--muted);
+  text-align: right;
+}
+
+.fixture-betting-body {
+  padding: 0 10px 10px;
+  border-top: 1px solid var(--line);
+}
+
+.fixture-betting-body .odds-panel {
+  margin-top: 8px;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.fixture-betting-body .fp-match-badge {
+  margin-top: 8px;
 }
 
 .odds-source-link {
@@ -2259,10 +2333,26 @@ tr.qual-row--in-contention {
 }
 
 .match-goal-scorers-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.match-goal-scorers-item-text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  min-width: 0;
+}
+
+.match-goal-scorers-item--away {
+  flex-direction: row-reverse;
+}
+
+.match-goal-scorers-col--away .match-goal-scorers-item-text {
+  text-align: right;
 }
 
 .match-goal-scorers-item--card {

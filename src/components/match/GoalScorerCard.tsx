@@ -1,5 +1,5 @@
-import { useState } from "react";
 import type { GoalScorerProfile } from "../../types";
+import { PlayerPhoto } from "../player/PlayerPhoto";
 import styles from "./GoalScorersPanel.module.css";
 
 type Props = {
@@ -19,29 +19,23 @@ function StatCell({ label, value }: { label: string; value: string | number | un
   );
 }
 
-function PlayerAvatar({ profile, loading }: { profile: GoalScorerProfile; loading?: boolean }) {
-  const [imageFailed, setImageFailed] = useState(false);
-
-  if (loading) {
-    return <div className={`${styles.avatar} ${styles.avatarSkeleton}`} aria-hidden />;
-  }
-
-  if (profile.photoUrl && !imageFailed) {
-    return (
-      <img
-        src={profile.photoUrl}
-        alt=""
-        className={styles.avatar}
-        loading="lazy"
-        onError={() => setImageFailed(true)}
-      />
-    );
-  }
-
+function PlayerAvatar({
+  profile,
+  loading,
+  size = "md",
+}: {
+  profile: GoalScorerProfile;
+  loading?: boolean;
+  size?: "sm" | "md";
+}) {
   return (
-    <div className={`${styles.avatar} ${styles.avatarFallback}`} aria-hidden>
-      <span>{profile.displayName.charAt(0).toUpperCase()}</span>
-    </div>
+    <PlayerPhoto
+      name={profile.displayName}
+      photoUrl={profile.photoUrl}
+      size={size}
+      loading={loading}
+      className={styles.avatar}
+    />
   );
 }
 
@@ -53,7 +47,7 @@ export function GoalScorerCard({ profile, teamName, loading, compact }: Props) {
   if (compact) {
     return (
       <div className={styles.compactCard} title={profile.displayName}>
-        <PlayerAvatar profile={profile} loading={loading} />
+        <PlayerAvatar profile={profile} loading={loading} size="sm" />
         <span className={styles.compactName}>{profile.displayName}</span>
         <span className={styles.compactMinute}>{minuteLabel}</span>
       </div>

@@ -13,8 +13,10 @@ import { usePlatform } from "../../hooks/usePlatform";
 import { usePullToRefresh } from "../../hooks/usePullToRefresh";
 import { DataOrchestrator } from "../../services/orchestrator/DataOrchestrator";
 import { useStore } from "../../store";
-import { LiveView } from "../views/LiveView";
 
+const LiveView = lazy(() =>
+  import("../views/LiveView").then((m) => ({ default: m.LiveView }))
+);
 const ResultsView = lazy(() =>
   import("../views/ResultsView").then((m) => ({ default: m.ResultsView }))
 );
@@ -106,7 +108,11 @@ export function AppShell() {
         className={`wc-main${refreshing ? " is-refreshing" : ""}`}
       >
         {splashPhase === "done" && !activeMatchId && !activeVenueSlug ? <InstallAppBanner /> : null}
-        {activeTab === "live" ? <LiveView /> : null}
+        {activeTab === "live" ? (
+          <Suspense fallback={null}>
+            <LiveView />
+          </Suspense>
+        ) : null}
         <Suspense fallback={null}>
           {activeTab === "results" ? <ResultsView /> : null}
           {activeTab === "bracket" ? <BracketView /> : null}

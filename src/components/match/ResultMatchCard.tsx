@@ -66,6 +66,8 @@ export function ResultMatchCard({ match, openTeamOnClick }: ResultMatchCardProps
         events={events}
         homeTeamId={match.homeTeamId}
         awayTeamId={match.awayTeamId}
+        homeTeam={home}
+        awayTeam={away}
       />
     </button>
   );
