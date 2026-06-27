@@ -31,6 +31,15 @@ export function UiDebugHost({ children, scanKey }: Props) {
     return <>{children}</>;
   }
 
+  if (typeof window !== "undefined") {
+    (window as Window & { __wcUiDebugScan?: () => ReturnType<typeof scanUiLayoutIssues> }).__wcUiDebugScan =
+      () => {
+        const root = document.querySelector(".wc-chrome");
+        if (!(root instanceof HTMLElement)) return [];
+        return scanUiLayoutIssues(root);
+      };
+  }
+
   return (
     <>
       <UiDebugViewportShell settings={settings}>{children}</UiDebugViewportShell>

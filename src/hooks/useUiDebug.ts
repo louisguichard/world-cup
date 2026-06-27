@@ -16,7 +16,13 @@ type PlatformSnapshot = {
 };
 
 export function useUiDebug(platform: PlatformSnapshot) {
-  const [settings, setSettingsState] = useState<UiDebugSettings>(() => readUiDebugSettings());
+  const [settings, setSettingsState] = useState<UiDebugSettings>(() => {
+    const base = readUiDebugSettings();
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("uidebug")) {
+      return { ...base, enabled: true, scanOverflow: true };
+    }
+    return base;
+  });
 
   const setSettings = useCallback((partial: Partial<UiDebugSettings>) => {
     setSettingsState((prev) => {
