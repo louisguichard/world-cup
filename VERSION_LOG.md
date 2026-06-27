@@ -54,6 +54,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 30 — 2026-06-27 (build)
+- 6 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, version.json — 6 files changed, 15 insertions(+), 2 deletions(-)
+
+## [4.0.0] build 29 — 2026-06-27 (build)
+- Fix Vercel rapid proxy catch-all route naming
+
 ## [4.0.0] build 28 — 2026-06-27 (build)
 - 31 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, src, vercel.json — 31 files changed, 509 insertions(+), 1001 deletions(-)
 
