@@ -8,6 +8,8 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 7** (2026-06-27): 9 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 9 files changed, 141 insertions(+), 2 deletions(-)
+- **4.0.0 build 6** (2026-06-27): Add uiDebugBridge for sweep; skip SVG collision false positives; 0-issue uidebug gate
 - **4.0.0 build 5** (2026-06-27): Fix UI debug sweep scan bridge timing; archive sweep runs under .cursor/ui-debug-runs
 - **4.0.0 build 4** (2026-06-27): 16 file(s) in scripts, src — 16 files changed, 374 insertions(+), 205 deletions(-)
 - **4.0.0 build 3** (2026-06-27): Pause UI debug live scan when viewport sim width mismatches browser; pin sim meta viewport

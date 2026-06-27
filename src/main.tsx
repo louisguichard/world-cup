@@ -19,6 +19,7 @@ import "./styles/edges.css";
 
 if (import.meta.env.DEV) {
   void import("./styles/ui-debug.css");
+  void import("./lib/uiDebugBridge");
 }
 
 async function init() {

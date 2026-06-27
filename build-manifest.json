@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-27T07:54:32.584Z",
+  "updatedAt": "2026-06-27T14:27:17.398Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 7,
+      "kind": "build",
+      "message": "9 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 9 files changed, 141 insertions(+), 2 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:27:17.398Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 6,
+      "kind": "build",
+      "message": "Add uiDebugBridge for sweep; skip SVG collision false positives; 0-issue uidebug gate",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:27:05.516Z"
+    },
     {
       "version": "4.0.0",
       "build": 5,

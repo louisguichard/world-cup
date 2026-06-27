@@ -1,0 +1,86 @@
+{
+  "scannedAt": "2026-06-27T14:26:56.438Z",
+  "base": "http://127.0.0.1:5173",
+  "report": [
+    {
+      "viewport": "mobile",
+      "route": "Live",
+      "issues": []
+    },
+    {
+      "viewport": "mobile",
+      "route": "Results",
+      "issues": []
+    },
+    {
+      "viewport": "mobile",
+      "route": "Schedule",
+      "issues": []
+    },
+    {
+      "viewport": "mobile",
+      "route": "Groups",
+      "issues": []
+    },
+    {
+      "viewport": "mobile",
+      "route": "Bracket",
+      "issues": []
+    },
+    {
+      "viewport": "mobile",
+      "route": "Teams",
+      "issues": []
+    },
+    {
+      "viewport": "mobile",
+      "route": "Tournament",
+      "issues": []
+    },
+    {
+      "viewport": "mobile",
+      "route": "Simulator",
+      "issues": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "Live",
+      "issues": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "Results",
+      "issues": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "Schedule",
+      "issues": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "Groups",
+      "issues": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "Bracket",
+      "issues": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "Teams",
+      "issues": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "Tournament",
+      "issues": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "Simulator",
+      "issues": []
+    }
+  ]
+}
