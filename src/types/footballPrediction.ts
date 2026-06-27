@@ -10,11 +10,14 @@ export type FootballPredictionBundle = {
   markets: string[];
   leagues: FootballPredictionLeague[];
   performance: FootballPredictionPerformance | null;
+  /** Merged best picks from Today + Boggio + VIP tiers. */
   dailyPredictions: FootballPredictionMatch[];
-  /** v1-only — always empty on Boggio v2 API. */
   vipFeatured: FootballPredictionMatch[];
-  /** v1-only — always empty on Boggio v2 API. */
   vipScores: FootballPredictionMatch[];
+  /** Raw Today API daily pool before merge. */
+  todayDaily: FootballPredictionMatch[];
+  /** Raw Boggio v2 daily pool before merge. */
+  boggioDaily: FootballPredictionMatch[];
   unavailable: string[];
 };
 

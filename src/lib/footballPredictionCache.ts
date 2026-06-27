@@ -1,7 +1,7 @@
 import type { FootballPredictionCacheStore, FootballPredictionBundle } from "../types/footballPrediction";
 import { PROFILE_TTL_MS } from "./teamProfileCache";
 
-export const FOOTBALL_PREDICTION_CACHE_KEY = "wc-football-prediction-v2";
+export const FOOTBALL_PREDICTION_CACHE_KEY = "wc-football-prediction-v3";
 
 const EMPTY: FootballPredictionCacheStore = {
   version: 1,

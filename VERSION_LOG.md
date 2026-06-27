@@ -39,6 +39,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 15 — 2026-06-27 (build)
+- 21 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, package.json — 21 files changed, 768 insertions(+), 30 deletions(-)
+
+## [4.0.0] build 14 — 2026-06-27 (build)
+- Wire Today Football Prediction API and merge with Boggio for accurate tips
+
 ## [4.0.0] build 13 — 2026-06-27 (build)
 - 15 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 15 files changed, 570 insertions(+), 143 deletions(-)
 

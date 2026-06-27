@@ -95,6 +95,10 @@ const rapidApiProxies = {
     "https://football-prediction-api.p.rapidapi.com",
     "/api/football-prediction"
   ),
+  "/api/today-football-prediction": rapidApiProxy(
+    "https://today-football-prediction.p.rapidapi.com",
+    "/api/today-football-prediction"
+  ),
   "/api/world-cup-history": rapidApiProxy(
     "https://world-cup1.p.rapidapi.com",
     "/api/world-cup-history"

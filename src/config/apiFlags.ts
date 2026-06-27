@@ -19,6 +19,7 @@ export type ApiSourceId =
   | "zafronix"
   | "oddsIntelligence"
   | "footballPrediction"
+  | "todayFootballPrediction"
   | "worldCupHistory"
   | "sportHighlights"
   | "allSportLiveStream"
@@ -148,6 +149,14 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     label: "Football Prediction API (Boggio v2)",
     lastAudit: "pass",
     lastLatencyMs: 200,
+  },
+  todayFootballPrediction: {
+    enabled: true,
+    splashPath: false,
+    label: "Today Football Prediction",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — leagues, VIP featured, daily tips",
   },
   worldCupHistory: {
     enabled: true,

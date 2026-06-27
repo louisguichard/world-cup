@@ -103,6 +103,11 @@ export type FootballPredictionMatch = {
   competitionName?: string;
   status?: string;
   result?: string;
+  /** Origin provider — merged when both APIs agree. */
+  source?: "today" | "boggio" | "merged";
+  sources?: Array<"today" | "boggio">;
+  /** Today API VIP tier when applicable. */
+  vipTier?: "featured" | "scores";
 };
 
 export type FootballPredictionPerformanceMarket = {
@@ -262,6 +267,7 @@ export function normalizePredictionMatch(raw: unknown): FootballPredictionMatch 
     competitionName: str(raw.competition_name),
     status,
     result,
+    source: "boggio",
   };
 }
 
@@ -392,16 +398,6 @@ export async function fetchFixtureIds(opts?: {
   return list
     .map((id) => (typeof id === "number" ? id : Number(id)))
     .filter((id) => Number.isFinite(id));
-}
-
-/** @deprecated v1-only — returns empty on v2 BASIC plans. */
-export async function fetchVipFeatured(_page = 1): Promise<FootballPredictionMatch[]> {
-  return [];
-}
-
-/** @deprecated v1-only — returns empty on v2 BASIC plans. */
-export async function fetchVipScores(_page = 1): Promise<FootballPredictionMatch[]> {
-  return [];
 }
 
 export function delay(ms: number): Promise<void> {

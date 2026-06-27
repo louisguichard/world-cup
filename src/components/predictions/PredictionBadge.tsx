@@ -29,6 +29,14 @@ export function PredictionBadge({ prediction, homeTeam, awayTeam, compact }: Pro
   const prob =
     prediction.predictionProbability != null ? `${prediction.predictionProbability}% sure` : null;
   const explain = pickExplain(resolved.side, homeTeam, awayTeam);
+  const consensus =
+    prediction.source === "merged" || (prediction.sources?.length ?? 0) > 1
+      ? "Both tipsters agree"
+      : prediction.vipTier === "featured"
+        ? "Featured pick"
+        : prediction.vipTier === "scores"
+          ? "Score pick"
+          : null;
 
   return (
     <div
@@ -37,6 +45,7 @@ export function PredictionBadge({ prediction, homeTeam, awayTeam, compact }: Pro
     >
       <span className="fp-match-badge-label">Tip</span>
       <strong className="fp-match-badge-pick">{resolved.shortLabel}</strong>
+      {consensus ? <span className="fp-match-badge-confidence">{consensus}</span> : null}
       {prob ? <span className="fp-match-badge-confidence">They feel {prob}</span> : null}
       {!compact && explain ? <p className="fp-match-badge-explain">{explain}</p> : null}
     </div>

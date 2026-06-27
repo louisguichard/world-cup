@@ -18,6 +18,8 @@ const PROVIDER_TO_FLAG = {
   wc2026Live: "wc2026Live",
   zafronix: "zafronix",
   oddsIntelligence: "oddsIntelligence",
+  footballPrediction: "footballPrediction",
+  todayFootballPrediction: "todayFootballPrediction",
   openWeather: "openWeather",
 };
 

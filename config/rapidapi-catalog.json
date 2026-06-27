@@ -530,6 +530,47 @@
     ]
   },
   {
+    "id": "todayFootballPrediction",
+    "label": "Today Football Prediction",
+    "host": "today-football-prediction.p.rapidapi.com",
+    "marketplaceSlug": "casedoweb-sXAtnI-JXY/api/today-football-prediction",
+    "client": "TodayFootballPredictionClient.ts",
+    "devProxyPrefix": "/api/today-football-prediction",
+    "testPath": "/leagues/",
+    "endpoints": [
+      {
+        "id": "leagues",
+        "fn": "fetchTodayLeagues",
+        "path": "/leagues/",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "performanceStats",
+        "fn": "fetchTodayPerformanceStats",
+        "path": "/stats/performance",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "dailyPredictions",
+        "fn": "fetchTodayDailyPredictionsPage",
+        "path": "/predictions/list?page=1&market=1X2",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "vipFeatured",
+        "fn": "fetchTodayVipFeatured",
+        "path": "/predictions/featured?page=1",
+        "acceptStatuses": [200, 401, 403, 429]
+      },
+      {
+        "id": "vipScores",
+        "fn": "fetchTodayVipScores",
+        "path": "/predictions/scores?page=1",
+        "acceptStatuses": [200, 401, 403, 429]
+      }
+    ]
+  },
+  {
     "id": "worldCupHistory",
     "label": "World Cup History (world-cup1)",
     "host": "world-cup1.p.rapidapi.com",
