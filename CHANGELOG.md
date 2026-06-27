@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Builds
+- **3.0.0 build 18** (2026-06-27): 8 file(s) in build-manifest.json, src — 8 files changed, 240 insertions(+), 10 deletions(-)
 - **3.0.0 build 17** (2026-06-27): 8 file(s) in src — 8 files changed, 157 insertions(+), 33 deletions(-)
 - **3.0.0 build 16** (2026-06-27): 13 file(s) in .cursor, src — 13 files changed, 415 insertions(+), 11 deletions(-)
 - **3.0.0 build 15** (2026-06-27): 3 file(s) in build-manifest.json, src — 3 files changed, 24 insertions(+), 4 deletions(-)

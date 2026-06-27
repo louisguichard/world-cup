@@ -1,14 +1,18 @@
-import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
+import {
+  resolveQualificationDisplay,
+  type QualificationDisplay,
+} from "../../lib/qualificationDisplay";
 import type { QualificationStatus } from "../../types";
 import styles from "./QualificationStatusBadge.module.css";
 
 type Props = {
   qual: QualificationStatus;
+  display?: QualificationDisplay;
   size?: "sm" | "xs";
 };
 
-export function QualificationStatusBadge({ qual, size = "xs" }: Props) {
-  const display = resolveQualificationDisplay(qual);
+export function QualificationStatusBadge({ qual, display: displayOverride, size = "xs" }: Props) {
+  const display = displayOverride ?? resolveQualificationDisplay(qual);
   const sizeClass = size === "xs" ? styles.xs : styles.sm;
   const variantClass =
     display.variant === "confirmed-qualified"

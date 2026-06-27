@@ -44,7 +44,7 @@ function QualTeamChip({
       options={sheetOptions}
       title={title}
     >
-      <QualificationStatusBadge qual={view.status} size="xs" />
+      <QualificationStatusBadge qual={view.status} display={view.display} size="xs" />
       <TeamFlag team={team} teamId={teamId} size="sm" dim={dim} />
       <span className="qual-team-name team-name-text">{label}</span>
       {rankHint ? <span className="qual-team-rank-hint">{rankHint}</span> : null}

@@ -22,8 +22,13 @@ import { TeamFlag } from "../team/TeamFlag";
 import { CertaintyBadge } from "../shared/CertaintyBadge";
 import type { TeamThemeStatus } from "../team/TeamThemeRoot";
 
-const bracketStages: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
+const allBracketStages: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
 const stageColumns: Record<Stage, number> = { R32: 1, R16: 2, QF: 3, SF: 4, Final: 5 };
+
+/** Locked-in mode: R32 only until group stage + third-place cutoffs are FIFA-confirmed. */
+function visibleBracketStages(mode: "confirmed" | "projected"): Stage[] {
+  return mode === "confirmed" ? ["R32"] : allBracketStages;
+}
 
 function GhostTeamList({
   ghosts,
@@ -355,6 +360,7 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
   }, [projection?.bracket]);
 
   const bb = APP_COPY.bracketBento;
+  const bracketStages = visibleBracketStages(mode);
 
   return (
     <section

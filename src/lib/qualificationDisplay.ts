@@ -48,7 +48,40 @@ function isProjectedEliminated(qual: QualificationStatus): boolean {
  * Confirmed = mathematically final (FIFA group stage locked in or no path remains).
  * Projected = live table / remaining matches can still change the outcome.
  */
-export function resolveQualificationDisplay(qual: QualificationStatus): QualificationDisplay {
+export type QualificationDisplayContext = {
+  tier?: "qualified" | "alive" | "projected_out" | "eliminated";
+  liveColumn?: "moving_on" | "in_contention" | "out";
+};
+
+export function resolveQualificationDisplay(
+  qual: QualificationStatus,
+  context: QualificationDisplayContext = {}
+): QualificationDisplay {
+  if (
+    context.liveColumn === "in_contention" &&
+    context.tier === "alive" &&
+    qual.status === "projected_out"
+  ) {
+    const copy = qualCopyFromVariant("in-contention");
+    return {
+      variant: "in-contention",
+      label: copy.label,
+      shortLabel: copy.shortLabel,
+      rowClass: "qual-row--in-contention",
+      hint: qual.reason ?? copy.hint
+    };
+  }
+
+  if (!qual.canQualify || qual.projectionScore <= 0) {
+    const copy = qualCopyFromVariant("confirmed-eliminated");
+    return {
+      variant: "confirmed-eliminated",
+      label: copy.label,
+      shortLabel: copy.shortLabel,
+      rowClass: "qual-row--confirmed-eliminated",
+      hint: qual.eliminationReason ?? qual.reason ?? copy.hint
+    };
+  }
   if (isConfirmedQualified(qual)) {
     const copy = qualCopyFromVariant("confirmed-qualified");
     return {

@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-27T06:51:45.799Z",
+  "updatedAt": "2026-06-27T06:56:47.980Z",
   "builds": [
+    {
+      "version": "3.0.0",
+      "build": 18,
+      "kind": "build",
+      "message": "8 file(s) in build-manifest.json, src — 8 files changed, 240 insertions(+), 10 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T06:56:47.980Z"
+    },
     {
       "version": "3.0.0",
       "build": 17,
@@ -52,6 +60,14 @@
   ],
   "commits": [
     {
+      "hash": "f4ee7428e633a6eacf6870e5d79576aba2d8b9cf",
+      "shortHash": "f4ee742",
+      "message": "Record production deploy metadata for v3.0.0 build 17.",
+      "version": "3.0.0",
+      "build": 17,
+      "timestamp": "2026-06-27T06:54:00.652Z"
+    },
+    {
       "hash": "fbef695016d2e0abbe74dd0f21cb69cef8356641",
       "shortHash": "fbef695",
       "message": "Record production deploy for v3.0.0 build 16.",
@@ -101,6 +117,14 @@
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "3.0.0",
+      "build": 17,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-27T06:55:31.937Z"
+    },
     {
       "url": "",
       "environment": "production",

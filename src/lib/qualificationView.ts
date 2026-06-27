@@ -77,12 +77,15 @@ export function buildTeamQualificationView(
   ) {
     tier = "alive";
   }
+  const liveColumn = deriveLiveColumn(tier);
+  const display = resolveQualificationDisplay(status, { tier, liveColumn });
+
   return {
     teamId,
     status,
     tier,
-    liveColumn: deriveLiveColumn(tier),
-    display: resolveQualificationDisplay(status),
+    liveColumn,
+    display,
     bestThirdRank
   };
 }
@@ -114,6 +117,10 @@ export function buildQualificationViewsForTeams(
   return buildQualificationViews(uniqueCanonicalTeamIds(teams), standings, context);
 }
 
+function hasAdvancementChance(view: TeamQualificationView): boolean {
+  return view.status.canQualify && view.status.projectionScore > 0;
+}
+
 export function buildLiveQualificationLayout(
   views: Map<string, TeamQualificationView>,
   buckets: QualificationBuckets
@@ -123,6 +130,7 @@ export function buildLiveQualificationLayout(
 
   for (const view of views.values()) {
     if (view.liveColumn !== "in_contention") continue;
+    if (!hasAdvancementChance(view)) continue;
     if (view.tier === "projected_out") {
       if (view.bestThirdRank !== undefined && view.bestThirdRank <= 8) {
         alive.push(view.teamId);
@@ -134,10 +142,17 @@ export function buildLiveQualificationLayout(
     }
   }
 
+  const movingOnProjected = buckets.projectedThrough
+    .filter((id) => !buckets.confirmedThrough.includes(id))
+    .filter((id) => {
+      const view = views.get(id);
+      return view !== undefined && hasAdvancementChance(view);
+    });
+
   return {
     movingOn: {
       confirmed: [...buckets.confirmedThrough],
-      projected: buckets.projectedThrough.filter((id) => !buckets.confirmedThrough.includes(id))
+      projected: movingOnProjected
     },
     inContention: { alive, projectedOut },
     out: { confirmed: [...buckets.confirmedOut, ...buckets.projectedOut] }
@@ -158,6 +173,21 @@ export function buildQualificationSnapshot(
   const views = buildQualificationViews(teamIds, standings, context);
   const layout = buildLiveQualificationLayout(views, buckets);
   return { teamIds, context, buckets, views, layout };
+}
+
+/** Projected UI sections must not include teams with 0% advancement chance. */
+export function assertZeroPctExcludedFromProjected(
+  views: Map<string, TeamQualificationView>,
+  layout: LiveQualificationLayout
+): void {
+  const projectedIds = [...layout.movingOn.projected, ...layout.inContention.projectedOut];
+  for (const teamId of projectedIds) {
+    const view = views.get(teamId);
+    if (!view) continue;
+    if (!view.status.canQualify || view.status.projectionScore <= 0) {
+      throw new Error(`Zero-pct exclusion violated: ${teamId} in projected section`);
+    }
+  }
 }
 
 /** Ensures no team appears in more than one live column. */

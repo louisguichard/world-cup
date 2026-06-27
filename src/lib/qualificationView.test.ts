@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   assertLiveColumnMutualExclusion,
   assertViewDisplayConsistency,
+  assertZeroPctExcludedFromProjected,
   buildQualificationSnapshot,
   deriveLiveColumn,
   deriveQualificationTierView
@@ -122,6 +123,7 @@ describe("frozen ESPN snapshot — live column reconciliation", () => {
   it("has mutually exclusive live columns", () => {
     assertLiveColumnMutualExclusion(snapshot.layout);
     assertViewDisplayConsistency(snapshot.views);
+    assertZeroPctExcludedFromProjected(snapshot.views, snapshot.layout);
   });
 
   it("does not place alive projected_out teams in the out column", () => {
