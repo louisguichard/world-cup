@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-27T07:52:39.493Z",
+  "updatedAt": "2026-06-27T07:52:39.899Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -115,6 +115,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "5341ad088cd8ea501124f9edad70eff30495b07b",
+      "shortHash": "5341ad0",
+      "message": "Keep group standings visible when standings APIs fail or rate-limit.",
+      "version": "4.0.0",
+      "build": 4,
+      "timestamp": "2026-06-27T07:52:39.898Z"
+    },
     {
       "hash": "617303571e8ca49d2ff4e8392d83dd16475785fe",
       "shortHash": "6173035",
