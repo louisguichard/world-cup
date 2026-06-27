@@ -3,7 +3,10 @@ import type { MergedMatch, MatchStatus, OddsSnapshot } from "../types";
 import { snapshotFromProbabilities } from "../lib/oddsFormat";
 import { resolvePolymarketOdds } from "../lib/polymarketMatchOdds";
 import { getOdds } from "../services/OddsCache";
+import { fetchSportsLiveScoresOdds } from "../services/SportsLiveScoresClient";
+import { normalizeSLSOdds } from "../lib/normalizeSLSOdds";
 import { isApiEnabled } from "../config/apiFlags";
+import { FEATURE_FLAGS } from "../config/featureFlags";
 import { useStore } from "../store";
 
 function shouldFetchSportsbookOdds(status: MatchStatus | undefined): boolean {
@@ -54,21 +57,40 @@ export function useMatchOdds(
     let cancelled = false;
     setLoading(true);
 
-    void getOdds(lookupKey, { home: homeTeamName, away: awayTeamName }).then((eventOdds) => {
+    void getOdds(lookupKey, { home: homeTeamName, away: awayTeamName }).then(async (eventOdds) => {
       if (cancelled) return;
-      setLoading(false);
-      if (!eventOdds?.bestHome || !eventOdds.bestDraw || !eventOdds.bestAway) {
-        setSportsbook(null);
+      if (eventOdds?.bestHome && eventOdds.bestDraw && eventOdds.bestAway) {
+        setLoading(false);
+        setSportsbook({
+          matchId: match.id,
+          homeWin: eventOdds.bestHome,
+          draw: eventOdds.bestDraw,
+          awayWin: eventOdds.bestAway,
+          fetchedAt: Date.now(),
+          source: "sportsbook",
+        });
         return;
       }
-      setSportsbook({
-        matchId: match.id,
-        homeWin: eventOdds.bestHome,
-        draw: eventOdds.bestDraw,
-        awayWin: eventOdds.bestAway,
-        fetchedAt: Date.now(),
-        source: "sportsbook",
-      });
+
+      if (FEATURE_FLAGS.sls_odds_enabled && isApiEnabled("sportsLiveScores")) {
+        try {
+          const slsId = match.sofaEventId ?? match.espnEventId ?? match.id;
+          const slsRaw = await fetchSportsLiveScoresOdds(slsId);
+          const normalized = slsRaw ? normalizeSLSOdds(match.id, slsRaw) : null;
+          if (!cancelled) {
+            setLoading(false);
+            setSportsbook(normalized);
+          }
+          return;
+        } catch {
+          // SLS odds unavailable — continue with null
+        }
+      }
+
+      if (!cancelled) {
+        setLoading(false);
+        setSportsbook(null);
+      }
     });
 
     return () => {

@@ -27,6 +27,9 @@ import { mapWcLineups } from "./mapWcLineups";
 import { mapWcStats } from "./mapWcStats";
 import { fetchMatchEvents } from "./fetchMatchEvents";
 import { resolveWcLiveApiMatchId } from "./resolveWcLiveMatchId";
+import { fetchSportsLiveScoresFootballMatchLineups } from "../SportsLiveScoresClient";
+import { normalizeSLSLineup } from "../../lib/normalizeSLSLineup";
+import { FEATURE_FLAGS } from "../../config/featureFlags";
 
 const TTL_LIVE_MS = 30_000;
 const TTL_FINISHED_MS = 5 * 60_000;
@@ -162,12 +165,29 @@ export async function fetchMatchBundle(
     sofaRapid.statistics ??
     null;
 
-  const lineups =
+  let lineups =
     wc.lineups.length > 0
       ? wc.lineups
       : sofa6.lineups.length > 0
         ? sofa6.lineups
         : sofaRapid.lineups;
+
+  if (
+    lineups.length === 0 &&
+    FEATURE_FLAGS.sls_lineups_enabled &&
+    isApiEnabled("sportsLiveScores")
+  ) {
+    try {
+      const slsId = match.sofaEventId ?? match.espnEventId ?? apiMatchId ?? match.id;
+      const slsLineup = await fetchSportsLiveScoresFootballMatchLineups(slsId);
+      if (slsLineup) {
+        const normalized = normalizeSLSLineup(match.homeTeamId, match.awayTeamId, slsLineup);
+        if (normalized) lineups = normalized;
+      }
+    } catch {
+      // SLS lineup unavailable
+    }
+  }
 
   let commentary =
     wc.commentary.length > 0

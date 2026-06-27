@@ -20,6 +20,10 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+## [3.0.0] build 17 — 2026-06-27 (build)
+- 8 file(s) in src — 8 files changed, 157 insertions(+), 33 deletions(-)
+
 ## [3.0.0] build 16 — 2026-06-27 (build)
 - 13 file(s) in .cursor, src — 13 files changed, 415 insertions(+), 11 deletions(-)
 

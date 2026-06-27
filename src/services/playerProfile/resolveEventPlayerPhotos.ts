@@ -15,12 +15,17 @@ export function photoUrlFromPlayer(player?: Wc2026Player): string | undefined {
   return typeof image === "string" && image.trim() ? image.trim() : undefined;
 }
 
-function photoForEvent(event: MatchEvent): string | undefined {
-  const fromIndex = lookupWc2026Player({
-    playerId: event.playerId,
-    playerName: event.playerName,
-  });
+function photoForPlayer(playerId: string | undefined, playerName: string): string | undefined {
+  const fromIndex = lookupWc2026Player({ playerId, playerName });
   return photoUrlFromPlayer(fromIndex);
+}
+
+function photoForEvent(event: MatchEvent): string | undefined {
+  return photoForPlayer(event.playerId, event.playerName);
+}
+
+export function assistPhotoKey(providerId: string): string {
+  return `${providerId}::assist`;
 }
 
 /** Instant lookup from local WC2026 player index (no network). */
@@ -28,6 +33,12 @@ export function resolveEventPhotosSync(events: MatchEvent[]): Record<string, str
   const out: Record<string, string | undefined> = {};
   for (const event of events) {
     out[event.providerId] = photoForEvent(event);
+    if (
+      event.assistName?.trim() &&
+      (event.type === "goal" || event.type === "own_goal")
+    ) {
+      out[assistPhotoKey(event.providerId)] = photoForPlayer(undefined, event.assistName);
+    }
   }
   return out;
 }
@@ -44,13 +55,25 @@ function applyRoster(
   photos: Record<string, string | undefined>
 ): void {
   for (const event of events) {
-    if (photos[event.providerId]) continue;
-    const player = matchPlayerInRoster(roster, {
-      playerId: event.playerId,
-      playerName: event.playerName,
-    });
-    const url = photoUrlFromPlayer(player);
-    if (url) photos[event.providerId] = url;
+    if (!photos[event.providerId]) {
+      const player = matchPlayerInRoster(roster, {
+        playerId: event.playerId,
+        playerName: event.playerName,
+      });
+      const url = photoUrlFromPlayer(player);
+      if (url) photos[event.providerId] = url;
+    }
+
+    const assistKey = assistPhotoKey(event.providerId);
+    if (
+      event.assistName?.trim() &&
+      (event.type === "goal" || event.type === "own_goal") &&
+      !photos[assistKey]
+    ) {
+      const assister = matchPlayerInRoster(roster, { playerName: event.assistName });
+      const assistUrl = photoUrlFromPlayer(assister);
+      if (assistUrl) photos[assistKey] = assistUrl;
+    }
   }
 }
 
@@ -64,7 +87,17 @@ export async function enrichEventPlayerPhotos(input: {
   const playerEvents = input.events.filter((e) => e.playerName.trim().length > 0);
   if (playerEvents.length === 0) return photos;
 
-  const needsFetch = playerEvents.some((e) => !photos[e.providerId]);
+  const needsFetch = playerEvents.some((e) => {
+    if (e.playerName.trim() && !photos[e.providerId]) return true;
+    if (
+      e.assistName?.trim() &&
+      (e.type === "goal" || e.type === "own_goal") &&
+      !photos[assistPhotoKey(e.providerId)]
+    ) {
+      return true;
+    }
+    return false;
+  });
   if (!needsFetch) return photos;
 
   const canFetchRoster = isApiEnabled("wc2026Teams") && !isWorldCup2026Disabled();

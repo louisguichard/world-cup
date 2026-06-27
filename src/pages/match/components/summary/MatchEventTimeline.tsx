@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
 import type { MatchEvent, Team } from "../../../../types";
 import { PlayerPhoto } from "../../../../components/player/PlayerPhoto";
 import { useEventPlayerPhotos } from "../../../../hooks/useEventPlayerPhotos";
+import { assistPhotoKey } from "../../../../services/playerProfile/resolveEventPlayerPhotos";
 import styles from "./MatchEventTimeline.module.css";
 
 type Props = {
@@ -37,10 +39,22 @@ const PLAYER_EVENT_TYPES = new Set<MatchEvent["type"]>([
   "penalty_saved",
 ]);
 
-function eventLabel(event: MatchEvent): string {
+function eventLabel(event: MatchEvent, assistPhotoUrl?: string): ReactNode {
   switch (event.type) {
     case "goal":
-      return `${event.playerName}${event.assistName ? ` (${event.assistName})` : ""}`;
+      return (
+        <>
+          {event.playerName}
+          {event.assistName ? (
+            <>
+              {" ("}
+              <PlayerPhoto name={event.assistName} photoUrl={assistPhotoUrl} size="xs" />
+              {event.assistName}
+              {")"}
+            </>
+          ) : null}
+        </>
+      );
     case "own_goal":
       return `${event.playerName} (OG)`;
     case "yellow_card":
@@ -70,11 +84,13 @@ function EventRow({
   event,
   isHome,
   photoUrl,
+  assistPhotoUrl,
   index,
 }: {
   event: MatchEvent;
   isHome: boolean;
   photoUrl?: string;
+  assistPhotoUrl?: string;
   index: number;
 }) {
   const minuteLabel = event.minuteExtra
@@ -87,7 +103,7 @@ function EventRow({
       {showPhoto ? (
         <PlayerPhoto name={event.playerName} photoUrl={photoUrl} size="sm" />
       ) : null}
-      {eventLabel(event)}
+      {eventLabel(event, assistPhotoUrl)}
     </span>
   );
 
@@ -132,6 +148,7 @@ export function MatchEventTimeline({
           event={event}
           isHome={event.teamId === homeTeamId}
           photoUrl={photos[event.providerId]}
+          assistPhotoUrl={photos[assistPhotoKey(event.providerId)]}
           index={i}
         />
       ))}

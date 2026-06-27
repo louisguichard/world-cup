@@ -201,6 +201,15 @@ async function loadTitleProbabilities(): Promise<Record<string, number>> {
 }
 
 /** Pre-tournament static snapshot — see `src/data/fifaRankings2026PreTournament.json`. */
+/**
+ * Loads FIFA rankings using the following cascade:
+ * 1. Static June 11 2026 pre-tournament snapshot (`fifaRankings2026PreTournament.json`)
+ * 2. Per-team Sofascore rank still available in team sheets independently
+ *
+ * Kill switch: `API_SOURCES.fifaRankings.enabled` disables the legacy FIFA API path.
+ * Legacy FIFA API + Sports Live Scores `/football/rankings/fifa` were replaced by the
+ * static snapshot after upstream quota / bot-protection failures in build 11.
+ */
 async function loadFifaRankings(): Promise<Record<string, FifaRanking>> {
   return loadStaticFifaRankings();
 }

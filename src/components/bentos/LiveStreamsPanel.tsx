@@ -19,16 +19,27 @@ export function LiveStreamsPanel() {
     return (
       <section className={styles.section}>
         <h2 className={styles.title}>Live streams</h2>
+        <p className={styles.emptyTitle}>📡 Stream schedule unavailable</p>
         <p className={styles.muted}>
-          Stream schedule unavailable ({error}). Match-level Watch tab may still work when a stream
-          id is known.
+          Live stream listings will appear here when available. Watch links still work — tap a
+          match to find stream options.
+          {error ? ` (${error})` : null}
         </p>
       </section>
     );
   }
 
   if (matches.length === 0) {
-    return null;
+    return (
+      <section className={styles.section}>
+        <h2 className={styles.title}>Live streams</h2>
+        <p className={styles.emptyTitle}>📡 Stream schedule unavailable</p>
+        <p className={styles.muted}>
+          Live stream listings will appear here when available. Watch links still work — tap a
+          match to find stream options.
+        </p>
+      </section>
+    );
   }
 
   return (

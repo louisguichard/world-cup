@@ -13,7 +13,12 @@ type Input = {
 
 export function useEventPlayerPhotos(input: Input): Record<string, string | undefined> {
   const playerEvents = useMemo(
-    () => input.events.filter((e) => e.playerName.trim().length > 0),
+    () =>
+      input.events.filter(
+        (e) =>
+          e.playerName.trim().length > 0 ||
+          (e.assistName?.trim() && (e.type === "goal" || e.type === "own_goal"))
+      ),
     [input.events]
   );
 

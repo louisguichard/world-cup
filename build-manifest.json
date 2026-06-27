@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-27T06:48:33.340Z",
+  "updatedAt": "2026-06-27T06:51:25.940Z",
   "builds": [
+    {
+      "version": "3.0.0",
+      "build": 17,
+      "kind": "build",
+      "message": "8 file(s) in src — 8 files changed, 157 insertions(+), 33 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T06:51:25.940Z"
+    },
     {
       "version": "3.0.0",
       "build": 16,
@@ -44,6 +52,14 @@
   ],
   "commits": [
     {
+      "hash": "098eab2aef3c17d4220b80c8f9ac97f9e34b2bb1",
+      "shortHash": "098eab2",
+      "message": "Polish team click targets in groups and tournament stats; add SLS normalize helpers.",
+      "version": "3.0.0",
+      "build": 16,
+      "timestamp": "2026-06-27T06:48:34.812Z"
+    },
+    {
       "hash": "d470c93009219c16dc187d5f93855fbf253c809f",
       "shortHash": "d470c93",
       "message": "Record production deploy for v3.0.0 build 15.",
@@ -69,6 +85,14 @@
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "3.0.0",
+      "build": 16,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-27T06:51:06.339Z"
+    },
     {
       "url": "",
       "environment": "production",
