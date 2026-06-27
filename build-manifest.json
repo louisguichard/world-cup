@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-27T07:54:25.525Z",
+  "updatedAt": "2026-06-27T07:54:32.584Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -123,6 +123,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "aa7e77d590ee1c7c7dad95d2632ed28352ffd164",
+      "shortHash": "aa7e77d",
+      "message": "Record v4.0.0 build 5 production deploy on Vercel.",
+      "version": "4.0.0",
+      "build": 5,
+      "timestamp": "2026-06-27T07:54:32.582Z"
+    },
     {
       "hash": "80caf9d2be3934b15b99c3d37ab883a1378d0df8",
       "shortHash": "80caf9d",
@@ -354,14 +362,6 @@
       "version": "3.0.0",
       "build": 14,
       "timestamp": "2026-06-27T06:39:25.660Z"
-    },
-    {
-      "hash": "daad4c241952aee206d080a1d1c4c75d75b35976",
-      "shortHash": "daad4c2",
-      "message": "Fix live layout regressions and ship qualification UX build 12.",
-      "version": "3.0.0",
-      "build": 13,
-      "timestamp": "2026-06-27T06:38:28.037Z"
     }
   ],
   "deploys": [
