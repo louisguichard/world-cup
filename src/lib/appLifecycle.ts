@@ -14,6 +14,8 @@ export function startAppServices(): void {
   store.startTeamProfileSync();
   store.hydrateFootballPredictions();
   store.startFootballPredictionSync();
+  store.hydrateFootApi7();
+  store.startFootApi7Sync();
   store.hydrateWorldCupHistory();
   store.startWorldCupHistorySync();
   void syncTournamentProfileIfNeeded();

@@ -86,6 +86,7 @@ const rapidApiProxies = {
   "/api/footballdata": rapidApiProxy("https://free-api-live-football-data.p.rapidapi.com", "/api/footballdata"),
   "/api/sportapi": rapidApiProxy("https://sportapi7.p.rapidapi.com", "/api/sportapi"),
   "/api/sofascore6": rapidApiProxy("https://sofascore6.p.rapidapi.com", "/api/sofascore6"),
+  "/api/footapi7": rapidApiProxy("https://footapi7.p.rapidapi.com", "/api/footapi7"),
   "/api/sofascore-rapid": rapidApiProxy("https://sofascore.p.rapidapi.com", "/api/sofascore-rapid"),
   "/api/wc2026": rapidApiProxy("https://world-cup-2026.p.rapidapi.com", "/api/wc2026"),
   "/api/wc-live": rapidApiProxy("https://world-cup-2026-live-api.p.rapidapi.com", "/api/wc-live"),

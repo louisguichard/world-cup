@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { createMatchSlice, type MatchSliceState } from "./slices/matchSlice";
 import { createFootballPredictionSlice, type FootballPredictionSliceState } from "./slices/footballPredictionSlice";
+import { createFootApi7Slice, type FootApi7SliceState } from "./slices/footApi7Slice";
 import { createWorldCupHistorySlice, type WorldCupHistorySliceState } from "./slices/worldCupHistorySlice";
 import { createNavigationSlice, type NavigationSliceState } from "./slices/navigationSlice";
 import { createSimulationSlice, type SimulationSliceState } from "./slices/simulationSlice";
@@ -16,6 +17,7 @@ export type AppStore = MatchSliceState &
   NavigationSliceState &
   TeamProfileSliceState &
   FootballPredictionSliceState &
+  FootApi7SliceState &
   WorldCupHistorySliceState;
 
 export const useStore = create<AppStore>()(
@@ -33,10 +35,8 @@ export const useStore = create<AppStore>()(
       ...createUiSlice((fn) => set((state) => fn(state as UiSliceState))),
       ...createNavigationSlice((fn) => set((state) => fn(state as NavigationSliceState))),
       ...createTeamProfileSlice((fn) => set((state) => fn(state as TeamProfileSliceState))),
-      ...createFootballPredictionSlice(
-        (fn) => set((state) => fn(state as FootballPredictionSliceState)),
-        () => get() as FootballPredictionSliceState & { teams: Record<string, import("../types").Team> }
-      ),
+      ...createFootballPredictionSlice((fn) => set((state) => fn(state as FootballPredictionSliceState))),
+      ...createFootApi7Slice((fn) => set((state) => fn(state as FootApi7SliceState))),
       ...createWorldCupHistorySlice(
         (fn) => set((state) => fn(state as WorldCupHistorySliceState)),
         () => get() as WorldCupHistorySliceState

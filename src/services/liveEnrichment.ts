@@ -2,11 +2,12 @@ import type { MergedMatch, Team } from "../types";
 import { isApiEnabled } from "../config/apiFlags";
 import { enrichFromSofaScore } from "./DataMerger";
 import { fetchScheduledToday as fetchFootballDataToday, isFootballDataDisabled } from "./FootballDataClient";
+import { fetchFootApi7ScheduledToday, isFootApi7Disabled } from "./FootApi7Client";
 import { findEspnMatchForSofaEvent } from "./matchLinking";
 import { fetchScheduledToday as fetchSportApiToday, isSportAPI7Disabled } from "./SportAPI7Client";
 import { fetchScheduledToday as fetchSofaToday, isSofaScoreDisabled, type SofaEvent } from "./SofaScoreClient";
 
-export type EnrichmentSource = "footballData" | "sportApi7" | "sofascore" | "none";
+export type EnrichmentSource = "footballData" | "footapi7" | "sportApi7" | "sofascore" | "none";
 
 export async function fetchEnrichmentEvents(): Promise<{
   events: SofaEvent[];
@@ -14,6 +15,7 @@ export async function fetchEnrichmentEvents(): Promise<{
 }> {
   const tryFootball = isApiEnabled("footballDataApi") && !isFootballDataDisabled();
   const trySofa = isApiEnabled("sofascore") && !isSofaScoreDisabled();
+  const tryFootApi7 = isApiEnabled("footApi7") && !isFootApi7Disabled();
   const trySportApi = isApiEnabled("sportApi7") && !isSportAPI7Disabled();
 
   if (tryFootball) {
@@ -24,6 +26,11 @@ export async function fetchEnrichmentEvents(): Promise<{
   if (trySofa) {
     const events = await fetchSofaToday();
     if (events.length > 0) return { events, source: "sofascore" };
+  }
+
+  if (tryFootApi7) {
+    const events = await fetchFootApi7ScheduledToday();
+    if (events.length > 0) return { events, source: "footapi7" };
   }
 
   if (trySportApi) {
