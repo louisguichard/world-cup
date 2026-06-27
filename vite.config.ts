@@ -120,6 +120,7 @@ const rapidApiProxies = {
     "/api/cloud-api-hub-iptv"
   ),
   "/api/tvview": rapidApiProxy("https://tvview.p.rapidapi.com", "/api/tvview"),
+  "/api/flashlive": rapidApiProxy("https://flashlive-sports.p.rapidapi.com", "/api/flashlive"),
   "/api/espn-web": {
     target: "https://site.web.api.espn.com",
     changeOrigin: true,

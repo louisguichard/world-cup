@@ -701,5 +701,35 @@
         "acceptStatuses": [200, 403, 429]
       }
     ]
+  },
+  {
+    "id": "flashlive",
+    "label": "FlashLive Sports",
+    "host": "flashlive-sports.p.rapidapi.com",
+    "marketplaceSlug": "tipsters/api/flashlive-sports",
+    "client": "FlashLiveClient.ts",
+    "devProxyPrefix": "/api/flashlive",
+    "testPath": "/v1/sports/list",
+    "endpoints": [
+      { "id": "sportsList", "fn": "fetchSportsList", "path": "/v1/sports/list", "acceptStatuses": [200, 429] },
+      { "id": "eventsList", "fn": "fetchEventsList", "path": "/v1/events/list?indent_days=0&locale=en_INT&sport_id=1&timezone=-4", "acceptStatuses": [200, 429] },
+      { "id": "eventsChanges", "fn": "fetchEventsChanges", "path": "/v1/events/changes?sport_id=1&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "multiSearch", "fn": "fetchMultiSearch", "path": "/v1/search/multi-search?query=Brazil&locale=en_INT&sport_id=1", "acceptStatuses": [200, 404, 429] },
+      { "id": "rankingsFifa", "fn": "fetchRankingsFifa", "path": "/v1/rankings/fifa?locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "eventDetails", "fn": "fetchEventDetails", "path": "/v1/events/details?event_id=6ZCocWsb&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "eventStatistics", "fn": "fetchEventStatistics", "path": "/v1/events/statistics?event_id=6ivhWNOG&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "eventLineups", "fn": "fetchEventLineups", "path": "/v1/events/lineups?event_id=6ivhWNOG&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "eventSummaryIncidents", "fn": "fetchEventSummaryIncidents", "path": "/v1/events/summary-incidents?event_id=6ivhWNOG&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "eventLastChange", "fn": "fetchEventLastChange", "path": "/v1/events/last-change?event_id=6ivhWNOG&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "tournamentResults", "fn": "fetchTournamentResults", "path": "/v1/tournaments/results?tournament_stage_id=OEEq9Yvp&page=1&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "tournamentFixtures", "fn": "fetchTournamentFixtures", "path": "/v1/tournaments/fixtures?tournament_stage_id=OEEq9Yvp&page=1&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "tournamentStandings", "fn": "fetchTournamentStandings", "path": "/v1/tournaments/standings?tournament_stage_id=OEEq9Yvp&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamData", "fn": "fetchTeamData", "path": "/v1/teams/data?team_id=Wtn9Stg0&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamSquad", "fn": "fetchTeamSquad", "path": "/v1/teams/squad?team_id=Wtn9Stg0&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamTransfers", "fn": "fetchTeamTransfers", "path": "/v1/teams/transfers?team_id=Wtn9Stg0&page=1&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamLastEvents", "fn": "fetchTeamLastEvents", "path": "/v1/teams/events/last?team_id=Wtn9Stg0&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamNextEvents", "fn": "fetchTeamNextEvents", "path": "/v1/teams/events/next?team_id=Wtn9Stg0&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "newsList", "fn": "fetchNewsList", "path": "/v1/news/list?locale=en_INT&page=1", "acceptStatuses": [200, 404, 429] }
+    ]
   }
 ]

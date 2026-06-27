@@ -8,6 +8,8 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 30** (2026-06-27): 17 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, package.json — 17 files changed, 807 insertions(+), 12 deletions(-)
+- **4.0.0 build 29** (2026-06-27): Wire FlashLive Sports RapidAPI with full v1 client and proxy
 - **4.0.0 build 28** (2026-06-27): 31 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, src, vercel.json — 31 files changed, 509 insertions(+), 1001 deletions(-)
 - **4.0.0 build 27** (2026-06-27): Consolidate RapidAPI proxies, boot ESPN bypass, cache migration, live results
 - **4.0.0 build 26** (2026-06-27): 18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, config, scripts, src — 18 files changed, 399 insertions(+), 49 deletions(-)

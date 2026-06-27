@@ -65,6 +65,10 @@
       "destination": "/api/rapid/tvview/:path*"
     },
     {
+      "source": "/api/flashlive/:path*",
+      "destination": "/api/rapid/flashlive/:path*"
+    },
+    {
       "source": "/api/zafronix/:path*",
       "destination": "/api/rapid/zafronix/:path*"
     },

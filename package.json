@@ -12,6 +12,7 @@
     "test:sofascore6": "node scripts/test-sofascore6.mjs",
     "test:sofascore-rapid": "node scripts/test-sofascore-rapid.mjs",
     "test:football-prediction": "node scripts/test-football-prediction.mjs",
+    "test:flashlive": "node scripts/test-flashlive.mjs",
     "test:world-cup-history": "node scripts/test-world-cup-history.mjs",
     "test:wc2026-teams": "node scripts/test-wc2026-teams.mjs",
     "test:wc-live": "node scripts/test-wc-live.mjs",

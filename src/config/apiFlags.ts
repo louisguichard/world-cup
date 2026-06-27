@@ -26,7 +26,8 @@ export type ApiSourceId =
   | "iptvCloudSubscriber"
   | "iptvTvView"
   | "sportsLiveScores"
-  | "openWeather";
+  | "openWeather"
+  | "flashLive";
 
 export type ApiAuditStatus = "pass" | "fail" | "untested";
 
@@ -213,6 +214,14 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     label: "Open Weather 13",
     lastAudit: "pass",
     lastLatencyMs: 331,
+  },
+  flashLive: {
+    enabled: true,
+    splashPath: false,
+    label: "FlashLive Sports",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription; live scores, teams, transfers",
   },
 };
 

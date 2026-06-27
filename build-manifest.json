@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-27T18:45:32.392Z",
+  "updatedAt": "2026-06-27T18:52:17.668Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 30,
+      "kind": "build",
+      "message": "17 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, package.json — 17 files changed, 807 insertions(+), 12 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T18:52:17.668Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 29,
+      "kind": "build",
+      "message": "Wire FlashLive Sports RapidAPI with full v1 client and proxy",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T18:52:11.479Z"
+    },
     {
       "version": "4.0.0",
       "build": 28,
@@ -308,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "ef99c0317b9216248636718c8b48e88a774cd574",
+      "shortHash": "ef99c03",
+      "message": "Production fixes: consolidated API proxies and boot/live improvements",
+      "version": "4.0.0",
+      "build": 28,
+      "timestamp": "2026-06-27T18:45:32.474Z"
+    },
+    {
       "hash": "499e1a1601142938c63d836edb54fa8ced93585b",
       "shortHash": "499e1a1",
       "message": "Merge football prediction integration with team display fixes",
@@ -538,14 +562,6 @@
       "version": "3.0.0",
       "build": 20,
       "timestamp": "2026-06-27T07:06:12.955Z"
-    },
-    {
-      "hash": "58517e0a23cd9833319c4e9aa256f2d719126949",
-      "shortHash": "58517e0",
-      "message": "Sync build-manifest commit record for c3b333f.",
-      "version": "3.0.0",
-      "build": 20,
-      "timestamp": "2026-06-27T07:06:02.421Z"
     }
   ],
   "deploys": [

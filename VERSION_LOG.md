@@ -54,6 +54,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 30 — 2026-06-27 (build)
+- 17 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, package.json — 17 files changed, 807 insertions(+), 12 deletions(-)
+
+## [4.0.0] build 29 — 2026-06-27 (build)
+- Wire FlashLive Sports RapidAPI with full v1 client and proxy
+
 ## [4.0.0] build 28 — 2026-06-27 (build)
 - 31 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, src, vercel.json — 31 files changed, 509 insertions(+), 1001 deletions(-)
 

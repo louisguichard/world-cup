@@ -100,6 +100,10 @@ export const RAPID_PROXY_ROUTES: Record<string, RapidProxyRoute> = {
     host: "tvview.p.rapidapi.com",
     allowedPaths: ["/getAll"],
   },
+  flashlive: {
+    host: "flashlive-sports.p.rapidapi.com",
+    requiredPathPrefix: "/v1/",
+  },
   zafronix: {
     host: "zafronix-fifa-world-cup-api.p.rapidapi.com",
     allowedPrefixes: [

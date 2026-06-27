@@ -371,7 +371,7 @@ for (const t of tests) {
     (
       t.label.includes("(vite proxy)") ||
       /offset=(100|200|300|400|500|600|700)/.test(t.label) ||
-      /(world-cup1|sport-highlights|all-sport-live-stream|sports-live-scores|free-daily-xtream-iptv|cloud-api-hub-iptv|tvview)/.test(t.url)
+      /(world-cup1|sport-highlights|all-sport-live-stream|sports-live-scores|free-daily-xtream-iptv|cloud-api-hub-iptv|tvview|flashlive)/.test(t.url)
     )
   ) {
     results.push({

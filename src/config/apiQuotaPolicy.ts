@@ -171,4 +171,10 @@ export const API_QUOTA_POLICY: Record<ApiSourceId, ApiQuotaPolicy> = {
     minIntervalMs: { live: 600_000, background: 3_600_000, test: 600_000, boot: 0 },
     note: "Weather updates are slow-changing; no frequent polling required.",
   },
+  flashLive: {
+    dailyLimit: 100,
+    reserveForLive: 15,
+    minIntervalMs: { live: 30_000, background: 600_000, test: 120_000, boot: 0 },
+    note: "FlashLive live scores/events; use events/changes for polling.",
+  },
 };
