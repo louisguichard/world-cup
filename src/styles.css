@@ -51,6 +51,9 @@
 
   --bracket-gap: 34px;
 
+  /* Height of the Speakea top-bar when visible (set from JS), else 0. */
+  --speakea-banner-h: 0px;
+
   color: var(--text);
   background: var(--bg);
   font-family: var(--font-ui);
@@ -66,7 +69,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 96px;
+  scroll-padding-top: calc(var(--speakea-banner-h, 0px) + 96px);
 }
 
 body {
@@ -287,7 +290,7 @@ select:focus-visible,
 
 .topbar {
   position: sticky;
-  top: 14px;
+  top: calc(var(--speakea-banner-h, 0px) + 14px);
   z-index: 30;
   display: flex;
   align-items: center;
@@ -2080,5 +2083,106 @@ h2 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================================================
+   Speakea — discreet green top-bar (pinned, centered, like the header)
+   ========================================================================= */
+
+.speakea-banner {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 46px;
+  color: var(--accent-ink);
+  background: linear-gradient(100deg, var(--accent) 0%, var(--accent-bright) 100%);
+  border-bottom: 1px solid rgba(4, 32, 22, 0.22);
+  box-shadow: 0 14px 40px -28px var(--accent-glow);
+  animation: speakea-in 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes speakea-in {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.speakea-banner.leaving {
+  overflow: hidden;
+  pointer-events: none;
+  animation: speakea-out 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes speakea-out {
+  from {
+    max-height: var(--speakea-banner-h, 80px);
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+  }
+}
+
+.speakea-banner-text {
+  margin: 0;
+  text-align: center;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--accent-ink);
+}
+
+.speakea-link {
+  color: var(--accent-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1.5px;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+
+.speakea-link:hover {
+  opacity: 0.65;
+}
+
+.speakea-close {
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(4, 32, 22, 0.55);
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease;
+}
+
+.speakea-close:hover {
+  color: var(--accent-ink);
+  background: rgba(4, 32, 22, 0.12);
+}
+
+@media (max-width: 560px) {
+  .speakea-banner {
+    padding: 8px 42px;
+  }
+  .speakea-banner-text {
+    font-size: 12.5px;
   }
 }

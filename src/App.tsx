@@ -30,6 +30,7 @@ import type {
   TournamentSimulationResult
 } from "./types";
 import { groupLetters } from "./types";
+import SpeakeaBanner from "./SpeakeaBanner";
 import { knockoutSchedule, type KnockoutInfo } from "./data/knockoutSchedule";
 import { loadWorldCupData } from "./lib/dataSources";
 import { formatPercent } from "./lib/normalize";
@@ -432,7 +433,9 @@ function App() {
   }
 
   return (
-    <main className="app-shell">
+    <>
+      <SpeakeaBanner />
+      <main className="app-shell">
       <header className="topbar">
         <button className="brand" onClick={() => setView("app")} aria-label="Home">
           <span className="brand-mark" aria-hidden="true">
@@ -564,7 +567,8 @@ function App() {
         </>
       )}
       <AppFooter />
-    </main>
+      </main>
+    </>
   );
 }
 
