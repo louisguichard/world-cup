@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-27T21:23:18.806Z",
+  "updatedAt": "2026-06-27T21:23:18.900Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "9b44af8e99e462332d74d6897f257dd1338b1b2c",
+      "shortHash": "9b44af8",
+      "message": "Fix ESPN standings merge and refresh tournament audit data",
+      "version": "4.0.0",
+      "build": 44,
+      "timestamp": "2026-06-27T21:23:18.900Z"
+    },
+    {
       "hash": "67c1e5f3fb294c657ade98cfc186a020869e23b2",
       "shortHash": "67c1e5f",
       "message": "Fix vercel.json rewrite syntax (named upstream param passthrough)",
@@ -554,14 +562,6 @@
       "version": "3.0.0",
       "build": 21,
       "timestamp": "2026-06-27T07:11:18.149Z"
-    },
-    {
-      "hash": "48e40633606b1ad1561d1659ead27e223726d3bb",
-      "shortHash": "48e4063",
-      "message": "Record deploy metadata for v3.0.0 build 20 production release.",
-      "version": "3.0.0",
-      "build": 20,
-      "timestamp": "2026-06-27T07:09:15.680Z"
     }
   ],
   "deploys": [
