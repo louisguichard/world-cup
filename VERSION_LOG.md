@@ -49,6 +49,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 25 — 2026-06-27 (build)
+- 19 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, config, scripts, src — 19 files changed, 409 insertions(+), 46 deletions(-)
+
+## [4.0.0] build 24 — 2026-06-27 (build)
+- Wire Boggio Football Prediction v2 into WC sync and match index
+
 ## [4.0.0] build 23 — 2026-06-27 (build)
 - 10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, vercel.json — 10 files changed, 59 insertions(+), 13 deletions(-)
 

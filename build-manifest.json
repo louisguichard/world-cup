@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-27T17:27:59.634Z",
+  "updatedAt": "2026-06-27T18:38:01.703Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 25,
+      "kind": "build",
+      "message": "19 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, config, scripts, src — 19 files changed, 409 insertions(+), 46 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T18:38:01.703Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 24,
+      "kind": "build",
+      "message": "Wire Boggio Football Prediction v2 into WC sync and match index",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T18:37:55.450Z"
+    },
     {
       "version": "4.0.0",
       "build": 23,

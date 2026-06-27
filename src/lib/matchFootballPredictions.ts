@@ -1,3 +1,9 @@
+import {
+  mergeTeamWithCatalog,
+  resolveCanonicalTeamId,
+  resolveTeamForDisplay,
+} from "../data/wc2026TeamCatalog";
+import { materializeFullSchedule } from "./materializeFullSchedule";
 import type { MergedMatch, Team } from "../types";
 import type { FootballPredictionMatch } from "../services/FootballPredictionClient";
 
@@ -26,6 +32,29 @@ function normalizeName(name: string): string {
     .replace(/\s+/g, " ");
 }
 
+export function resolveTeamFromStore(
+  teamId: string | undefined,
+  teams: Record<string, Team>
+): Team | undefined {
+  if (!teamId?.trim()) return undefined;
+
+  const direct = teams[teamId];
+  if (direct) return mergeTeamWithCatalog(direct);
+
+  const canonical = resolveCanonicalTeamId(teamId);
+  const byCanonical = teams[canonical];
+  if (byCanonical) return mergeTeamWithCatalog(byCanonical);
+
+  for (const candidate of Object.values(teams)) {
+    if (candidate.id === teamId) return mergeTeamWithCatalog(candidate);
+    if (resolveCanonicalTeamId(candidate.id, candidate) === canonical) {
+      return mergeTeamWithCatalog(candidate);
+    }
+  }
+
+  return resolveTeamForDisplay(teamId);
+}
+
 function teamNamesFor(team: Team): string[] {
   const names = new Set<string>();
   for (const n of [team.name, team.shortName, team.abbreviation, team.id]) {
@@ -50,8 +79,8 @@ export function linkPredictionToMatch(
   match: MergedMatch,
   teams: Record<string, Team>
 ): boolean {
-  const home = teams[match.homeTeamId];
-  const away = teams[match.awayTeamId];
+  const home = resolveTeamFromStore(match.homeTeamId, teams);
+  const away = resolveTeamFromStore(match.awayTeamId, teams);
   if (!home || !away) return false;
 
   const homeOk = predictionTeamMatchesTeam(prediction.homeTeam, home);
@@ -67,16 +96,33 @@ export function linkPredictionToMatch(
   return true;
 }
 
+function matchIndexKeys(match: MergedMatch): string[] {
+  return [match.matchId, match.id, match.espnEventId].filter(
+    (key): key is string => Boolean(key?.trim())
+  );
+}
+
 export function buildPredictionIndex(
   predictions: FootballPredictionMatch[],
   matches: MergedMatch[],
-  teams: Record<string, Team>
+  teams: Record<string, Team>,
+  opts?: { includeScheduleShells?: boolean }
 ): Record<string, FootballPredictionMatch> {
+  const scheduleMatches =
+    matches.length > 0
+      ? matches
+      : opts?.includeScheduleShells
+        ? materializeFullSchedule(teams, {})
+        : [];
+
   const index: Record<string, FootballPredictionMatch> = {};
 
-  for (const match of matches) {
+  for (const match of scheduleMatches) {
     const found = predictions.find((p) => linkPredictionToMatch(p, match, teams));
-    if (found) index[match.id] = found;
+    if (!found) continue;
+    for (const key of matchIndexKeys(match)) {
+      index[key] = found;
+    }
   }
 
   return index;
@@ -131,4 +177,15 @@ export function resolvePredictionPick(
     default:
       return { shortLabel: formatPredictionPick(prediction), pickedTeam: null, side: "other" };
   }
+}
+
+export function lookupFootballPrediction(
+  index: Record<string, FootballPredictionMatch>,
+  match: Pick<MergedMatch, "id" | "matchId" | "espnEventId">
+): FootballPredictionMatch | null {
+  for (const key of matchIndexKeys(match as MergedMatch)) {
+    const hit = index[key];
+    if (hit) return hit;
+  }
+  return null;
 }

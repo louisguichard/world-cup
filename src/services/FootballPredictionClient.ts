@@ -1,7 +1,10 @@
 import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
 import { isApiEnabled } from "../config/apiFlags";
+import type { ApiRequestIntent } from "../config/apiQuotaPolicy";
+import { acquireApiQuota, logApiQuotaBlock } from "./ApiQuotaGovernor";
 import {
   FOOTBALL_PREDICTION_HOST,
+  FOOTBALL_PREDICTION_WC_LEAGUE_HINTS,
   footballPredictionEndpoints,
   type FootballPredictionFederation,
   type FootballPredictionMarket,
@@ -49,8 +52,18 @@ function unwrapData<T>(raw: unknown): T | null {
   return raw as T;
 }
 
-async function fetchJson<T = unknown>(path: string, context: string): Promise<T | null> {
+async function fetchJson<T = unknown>(
+  path: string,
+  context: string,
+  intent: ApiRequestIntent = "background"
+): Promise<T | null> {
   if (sessionDisabled || !isApiEnabled("footballPrediction")) return null;
+
+  const quota = acquireApiQuota("footballPrediction", intent);
+  if (!quota.allowed) {
+    logApiQuotaBlock("footballPrediction", intent, quota);
+    return null;
+  }
 
   try {
     const res = await fetch(`${baseUrl()}${path}`, { headers: headers() });
@@ -289,6 +302,76 @@ export function normalizeStringList(raw: unknown): string[] {
   return data.map((item) => (typeof item === "string" ? item : String(item))).filter(Boolean);
 }
 
+export async function fetchConnectionTest(): Promise<boolean> {
+  const data = await fetchJson<unknown>(
+    footballPredictionEndpoints.connectionTest(),
+    "connection-test",
+    "test"
+  );
+  return data != null;
+}
+
+export async function fetchCountries(): Promise<string[]> {
+  const data = await fetchJson<unknown>(footballPredictionEndpoints.listCountries(), "list-countries");
+  return normalizeStringList(data);
+}
+
+export async function fetchSeasons(league: string): Promise<string[]> {
+  const data = await fetchJson<unknown>(
+    footballPredictionEndpoints.listSeasons({ league }),
+    "list-seasons"
+  );
+  return normalizeStringList(data);
+}
+
+export async function fetchTeams(opts: {
+  league: string;
+  season?: string;
+}): Promise<string[]> {
+  const data = await fetchJson<unknown>(
+    footballPredictionEndpoints.listTeams(opts),
+    "list-teams"
+  );
+  return normalizeStringList(data);
+}
+
+export function findWorldCupLeague(
+  leagues: FootballPredictionLeague[]
+): FootballPredictionLeague | null {
+  for (const league of leagues) {
+    const haystack = `${league.name} ${league.country} ${league.id}`.toLowerCase();
+    if (FOOTBALL_PREDICTION_WC_LEAGUE_HINTS.some((hint) => haystack.includes(hint))) {
+      return league;
+    }
+  }
+  return null;
+}
+
+export function isWorldCupPrediction(match: FootballPredictionMatch): boolean {
+  const comp = `${match.competitionName ?? ""} ${match.leagueId ?? ""}`.toLowerCase();
+  return FOOTBALL_PREDICTION_WC_LEAGUE_HINTS.some((hint) => comp.includes(hint));
+}
+
+export async function fetchHeadToHead(id: string | number): Promise<unknown> {
+  return fetchJson<unknown>(footballPredictionEndpoints.headToHead(id), "head-to-head");
+}
+
+export async function fetchHomeLeagueStats(id: string | number): Promise<unknown> {
+  return fetchJson<unknown>(footballPredictionEndpoints.homeLeagueStats(id), "home-league-stats");
+}
+
+export async function fetchAwayLeagueStats(id: string | number): Promise<unknown> {
+  return fetchJson<unknown>(footballPredictionEndpoints.awayLeagueStats(id), "away-league-stats");
+}
+
+export async function fetchHomeLast10(id: string | number): Promise<unknown> {
+  return fetchJson<unknown>(footballPredictionEndpoints.homeLast10(id), "home-last-10");
+}
+
+export async function fetchAwayLast10(id: string | number): Promise<unknown> {
+  return fetchJson<unknown>(footballPredictionEndpoints.awayLast10(id), "away-last-10");
+}
+
 export async function fetchFederations(): Promise<string[]> {
   const data = await fetchJson<unknown>(footballPredictionEndpoints.listFederations(), "list-federations");
   return normalizeStringList(data);
@@ -330,18 +413,21 @@ export async function fetchDailyPredictionsPage(
   page = 1,
   opts?: {
     date?: string;
+    iso_date?: string;
     market?: FootballPredictionMarket;
     federation?: FootballPredictionFederation;
     league?: string;
+    season?: string;
   }
 ): Promise<{ matches: FootballPredictionMatch[]; totalPages: number; total: number }> {
   const data = await fetchJson<unknown>(
     footballPredictionEndpoints.predictions({
       page,
-      iso_date: opts?.date,
+      iso_date: opts?.iso_date ?? opts?.date,
       market: opts?.market,
       federation: opts?.federation,
       league: opts?.league,
+      season: opts?.season,
     }),
     "predictions"
   );

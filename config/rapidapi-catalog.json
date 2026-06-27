@@ -463,9 +463,15 @@
       },
       {
         "id": "listCountries",
-        "fn": "fetchLeagues",
+        "fn": "fetchCountries",
         "path": "/api/v2/list-countries",
         "acceptStatuses": [200, 403, 404]
+      },
+      {
+        "id": "connectionTest",
+        "fn": "fetchConnectionTest",
+        "path": "/api/v2/test",
+        "acceptStatuses": [200, 403]
       },
       {
         "id": "listLeagues",

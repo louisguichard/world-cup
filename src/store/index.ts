@@ -33,7 +33,10 @@ export const useStore = create<AppStore>()(
       ...createUiSlice((fn) => set((state) => fn(state as UiSliceState))),
       ...createNavigationSlice((fn) => set((state) => fn(state as NavigationSliceState))),
       ...createTeamProfileSlice((fn) => set((state) => fn(state as TeamProfileSliceState))),
-      ...createFootballPredictionSlice((fn) => set((state) => fn(state as FootballPredictionSliceState))),
+      ...createFootballPredictionSlice(
+        (fn) => set((state) => fn(state as FootballPredictionSliceState)),
+        () => get() as FootballPredictionSliceState & { teams: Record<string, import("../types").Team> }
+      ),
       ...createWorldCupHistorySlice(
         (fn) => set((state) => fn(state as WorldCupHistorySliceState)),
         () => get() as WorldCupHistorySliceState

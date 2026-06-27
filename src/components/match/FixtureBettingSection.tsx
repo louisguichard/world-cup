@@ -21,7 +21,7 @@ function stopCardClick(event: MouseEvent | SyntheticEvent) {
 }
 
 export function FixtureBettingSection({ match, homeTeam, awayTeam }: Props) {
-  const prediction = useFootballPredictionForMatch(match.id);
+  const prediction = useFootballPredictionForMatch(match);
   const { odds, loading } = useMatchOdds(match, homeTeam, awayTeam);
 
   const summary = useMemo(() => {
