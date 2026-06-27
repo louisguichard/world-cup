@@ -1,5 +1,5 @@
 import { GROUP_STAGE_MATCH_COUNT } from "../../types";
-import { deriveStandingsIfScored } from "../../lib/qualification";
+import { deriveStandingsIfScored, standingsEqual } from "../../lib/qualification";
 import { applyTeamLogoOverrides } from "../../lib/resolveTeamLogo";
 import type { DataLoadResult, GroupStanding, MergedMatch, PolymarketMatchMarket, ScoreOverride, Team } from "../../types";
 
@@ -59,7 +59,10 @@ export const createTournamentSlice = (
 
   setScoreOverrides: (overrides) => set(() => ({ scoreOverrides: overrides })),
   setBracketPicks: (picks) => set(() => ({ bracketPicks: picks })),
-  setGroupStandings: (standings) => set(() => ({ groupStandings: standings })),
+  setGroupStandings: (standings) =>
+    set((state) =>
+      standingsEqual(standings, state.groupStandings) ? {} : { groupStandings: standings }
+    ),
 
   groupStageComplete: () => {
     const live = get().liveMatches ?? {};

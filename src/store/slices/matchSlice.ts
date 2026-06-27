@@ -1,4 +1,5 @@
 import type { MatchEvent, MergedMatch } from "../../types";
+import { mergeLiveMatchRecords } from "../../lib/dataFreshness";
 
 export type LockedMatchIds = Record<string, true>;
 
@@ -50,14 +51,19 @@ export const createMatchSlice = (
     ),
 
   batchPollUpdate: (payload) =>
-    set((state) => ({
-      liveMatches: payload.matches,
-      matchEvents: payload.events ?? state.matchEvents,
-      lastPollAt: payload.lastPollAt,
-      consecutiveErrors: payload.consecutiveErrors,
-      lastGoalTimestamp: payload.lastGoalTimestamp ?? state.lastGoalTimestamp,
-      lastGoalAnnouncement: payload.lastGoalAnnouncement ?? state.lastGoalAnnouncement
-    })),
+    set((state) => {
+      const { merged, changed } = mergeLiveMatchRecords(state.liveMatches, payload.matches);
+      if (!changed) return {};
+
+      return {
+        liveMatches: merged,
+        matchEvents: payload.events ?? state.matchEvents,
+        lastPollAt: payload.lastPollAt,
+        consecutiveErrors: payload.consecutiveErrors,
+        lastGoalTimestamp: payload.lastGoalTimestamp ?? state.lastGoalTimestamp,
+        lastGoalAnnouncement: payload.lastGoalAnnouncement ?? state.lastGoalAnnouncement,
+      };
+    }),
 
   mergeMatchEvents: (matchId, incoming) =>
     set((state) => {

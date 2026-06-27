@@ -4,8 +4,11 @@ import { loadWorldCupData } from "../../lib/dataSources";
 import {
   espnBootTimeoutMs,
   isMobileBootProfile,
+  shouldDeferHeavyBoot,
   splashMinimumHoldMs,
 } from "../../lib/bootProfile";
+import { hydrateBootFromCache, persistBootCache } from "../../lib/bootCache";
+import { hasLiveMatchesInCache } from "../../lib/liveMatchCache";
 import {
   finishBootTracking,
   formatBootReport,
@@ -218,7 +221,7 @@ async function runBootstrapSim(): Promise<void> {
   }
 }
 
-async function runDeferredMobileEnrichment(
+async function runDeferredEnrichment(
   espnTeamsMap: Record<string, Team>,
   liveMatches: MergedMatch[]
 ): Promise<void> {
@@ -240,9 +243,11 @@ async function runDeferredMobileEnrichment(
 
     await runBootstrapSim();
     endBootPhase("deferred-enrichment", "complete");
+
+    persistBootCache(store.teams, store.liveMatches, store.groupStandings);
   } catch (error) {
     endBootPhase("deferred-enrichment", "partial failure");
-    logger.warn("Deferred mobile enrichment failed", "DataOrchestrator.boot", {
+    logger.warn("Deferred enrichment failed", "DataOrchestrator.boot", {
       reason: error instanceof Error ? error.message : String(error),
     });
   }
@@ -256,10 +261,27 @@ export async function runBoot(): Promise<void> {
   store.setSplashPhase("loading");
   store.setSplashProgress(0, mobileFast ? "Loading live scores..." : "Connecting to live data...");
 
+  const cached = hydrateBootFromCache();
+  const hadCache = cached.hadCache;
+  const hasLiveInCache = hasLiveMatchesInCache(cached.matches);
+  const deferHeavy = shouldDeferHeavyBoot(mobileFast, hadCache, hasLiveInCache);
+
+  if (hadCache) {
+    store.setTeams(cached.teams);
+    store.setLiveMatches(cached.matches);
+    if (cached.standings.length > 0) {
+      store.setGroupStandings(cached.standings);
+    }
+    for (const m of Object.values(cached.matches)) {
+      if (m.locked) store.addLockedMatchId(m.id);
+    }
+    store.setSplashProgress(40, "Loading live scores...");
+  }
+
   const slowTimer = setTimeout(() => {
     if (useStore.getState().splashPhase === "loading") {
       store.setSplashPhase("slow");
-      store.setSplashProgress(15, "Taking longer than usual...");
+      store.setSplashProgress(hadCache ? 45 : 15, "Taking longer than usual...");
     }
   }, mobileFast ? 3_500 : 2_000);
 
@@ -301,13 +323,13 @@ export async function runBoot(): Promise<void> {
     const baseTeams = { ...catalog, ...mergedIncoming };
 
     startBootPhase("teams-merge");
-    const teams = mobileFast
+    const teams = deferHeavy
       ? applyTeamLogoOverrides(baseTeams)
       : applyTeamLogoOverrides(await mergeTeamsFromCascade(baseTeams));
-    endBootPhase("teams-merge", mobileFast ? "catalog + local (APIs deferred)" : "catalog + API merge");
+    endBootPhase("teams-merge", deferHeavy ? "catalog + local (APIs deferred)" : "catalog + API merge");
     store.setTeams(teams);
 
-    store.setSplashProgress(35, "Loading live scores...");
+    store.setSplashProgress(hadCache ? 55 : 35, "Loading live scores...");
 
     startBootPhase("matches-build");
     const liveMatches: Record<string, MergedMatch> = {};
@@ -335,40 +357,37 @@ export async function runBoot(): Promise<void> {
 
     startBootPhase("standings-load");
     const teamsList = Object.values(useStore.getState().teams);
-    let standings: GroupStanding[] | null;
-    if (mobileFast) {
-      standings = deriveStandingsIfScored(Object.values(liveMatches), teamsList);
-      endBootPhase("standings-load", standings ? "derived locally (APIs deferred)" : "empty");
-    } else {
-      standings = await loadStandingsWithFallback(Object.values(liveMatches), teamsList);
-      endBootPhase("standings-load", standings ? `${standings.length} groups` : "empty");
-    }
+    const standings = deriveStandingsIfScored(Object.values(liveMatches), teamsList);
+    endBootPhase("standings-load", standings ? "derived locally (APIs deferred)" : "empty");
     if (standings) {
       store.setGroupStandings(standings);
     }
 
-    store.setSplashProgress(mobileFast ? 80 : 65, mobileFast ? "Almost ready..." : "Running simulations...");
+    store.setSplashProgress(deferHeavy ? 80 : 65, deferHeavy ? "Almost ready..." : "Running simulations...");
 
-    if (mobileFast) {
-      void runDeferredMobileEnrichment(espnTeamsMap, Object.values(liveMatches));
-    } else {
-      void runBootstrapSim();
-    }
+    void runDeferredEnrichment(espnTeamsMap, Object.values(liveMatches));
 
     startBootPhase("splash-hold");
-    await sleep(splashMinimumHoldMs(mobileFast));
+    await sleep(splashMinimumHoldMs(mobileFast, hadCache));
     endBootPhase("splash-hold");
 
     store.setSplashPhase("done");
+    persistBootCache(
+      useStore.getState().teams,
+      useStore.getState().liveMatches,
+      useStore.getState().groupStandings
+    );
     startBootPhase("services-start");
     startAppServices();
     endBootPhase("services-start");
 
-    finishBootTracking(mobileFast ? "mobile fast path" : "full path");
+    finishBootTracking(deferHeavy ? "cache-first deferred path" : "full path");
     logger.info("Bootstrap complete", "DataOrchestrator.boot", {
       matchCount: Object.keys(liveMatches).length,
       teamsCount: Object.keys(useStore.getState().teams).length,
       mobileFast,
+      hadCache,
+      deferHeavy,
       bootMs: formatBootReport(),
     });
   } catch (err) {

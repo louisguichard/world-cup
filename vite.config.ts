@@ -178,6 +178,16 @@ export default defineConfig({
     __APP_CHANNEL__: JSON.stringify(versionMeta.channel),
     "import.meta.env.VITE_BUILD_VERSION": JSON.stringify(
       `${versionMeta.version}+${versionMeta.build}`
-    )
+    ),
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          zustand: ["zustand"],
+        },
+      },
+    },
   },
 });

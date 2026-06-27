@@ -4,7 +4,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import App from "./App";
 import { bootstrap } from "./lib/bootstrap";
-import { isMobileBootProfile } from "./lib/bootProfile";
 import { registerServiceWorker } from "./lib/registerServiceWorker";
 import "./styles.css";
 import "./styles/themes.css";
@@ -17,7 +16,10 @@ import "./styles/responsive.css";
 import "./styles/platform.css";
 import "./styles/modules.css";
 import "./styles/edges.css";
-import "./styles/ui-debug.css";
+
+if (import.meta.env.DEV) {
+  void import("./styles/ui-debug.css");
+}
 
 async function init() {
   if (typeof performance !== "undefined" && performance.mark) {
@@ -27,10 +29,10 @@ async function init() {
   const registerSw = () => {
     void registerServiceWorker();
   };
-  if (isMobileBootProfile() && "requestIdleCallback" in window) {
+  if ("requestIdleCallback" in window) {
     window.requestIdleCallback(registerSw, { timeout: 8_000 });
   } else {
-    registerSw();
+    setTimeout(registerSw, 8_000);
   }
 }
 

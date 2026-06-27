@@ -12,8 +12,18 @@ export function espnBootTimeoutMs(mobileFast: boolean): number {
   return mobileFast ? 5_000 : 8_000;
 }
 
-export function splashMinimumHoldMs(mobileFast: boolean): number {
+export function splashMinimumHoldMs(mobileFast: boolean, hadCache = false): number {
+  if (hadCache) return mobileFast ? 280 : 400;
   return mobileFast ? 280 : 700;
+}
+
+/** Whether team cascade + sim should run after splash instead of blocking it. */
+export function shouldDeferHeavyBoot(
+  mobileFast: boolean,
+  hadCache: boolean,
+  hasLiveInCache: boolean
+): boolean {
+  return mobileFast || (hadCache && !hasLiveInCache) || true;
 }
 
 export function isBootDebugEnabled(): boolean {

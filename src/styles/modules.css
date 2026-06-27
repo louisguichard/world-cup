@@ -109,6 +109,17 @@
   margin-top: 0;
 }
 
+.dashboard-section--defer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+
+.dashboard-section-skeleton {
+  min-height: 320px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+}
+
 .section-heading.compact {
   margin-bottom: var(--module-gap);
 }
