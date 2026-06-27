@@ -141,6 +141,18 @@ export const API_QUOTA_POLICY: Record<ApiSourceId, ApiQuotaPolicy> = {
     minIntervalMs: { live: 900_000, background: 21_600_000, test: 21_600_000 },
     note: "Potentially low plan cap; fetch only on explicit watch views.",
   },
+  iptvXtreamDaily: {
+    dailyLimit: 5,
+    reserveForLive: 0,
+    minIntervalMs: { live: 3_600_000, background: 21_600_000, test: 21_600_000 },
+    note: "Daily rotating Xtream credentials; 6h client cache, fetch on watch tab only.",
+  },
+  iptvCloudSubscriber: {
+    dailyLimit: 5,
+    reserveForLive: 0,
+    minIntervalMs: { live: 3_600_000, background: 21_600_000, test: 21_600_000 },
+    note: "Per-country IPTV subscription; 6h client cache.",
+  },
   sportsLiveScores: {
     dailyLimit: 5,
     reserveForLive: 1,

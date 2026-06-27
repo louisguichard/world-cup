@@ -111,6 +111,14 @@ const rapidApiProxies = {
     "https://sports-live-scores.p.rapidapi.com",
     "/api/sports-live-scores"
   ),
+  "/api/free-daily-xtream-iptv": rapidApiProxy(
+    "https://free-daily-xtream-iptv-servers.p.rapidapi.com",
+    "/api/free-daily-xtream-iptv"
+  ),
+  "/api/cloud-api-hub-iptv": rapidApiProxy(
+    "https://cloud-api-hub-iptv-auto-subscriber.p.rapidapi.com",
+    "/api/cloud-api-hub-iptv"
+  ),
   "/api/espn-web": {
     target: "https://site.web.api.espn.com",
     changeOrigin: true,

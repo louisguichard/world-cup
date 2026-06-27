@@ -22,6 +22,8 @@ export type ApiSourceId =
   | "worldCupHistory"
   | "sportHighlights"
   | "allSportLiveStream"
+  | "iptvXtreamDaily"
+  | "iptvCloudSubscriber"
   | "sportsLiveScores"
   | "openWeather";
 
@@ -171,6 +173,22 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     lastAudit: "untested",
     lastLatencyMs: 0,
     failureReason: "Schedule endpoint may return GraphQL PersistedQueryNotFound upstream",
+  },
+  iptvXtreamDaily: {
+    enabled: true,
+    splashPath: false,
+    label: "Free Daily Xtream IPTV Servers",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription; cached 6h after fetch",
+  },
+  iptvCloudSubscriber: {
+    enabled: true,
+    splashPath: false,
+    label: "Cloud API Hub IPTV Auto Subscriber",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription; cached 6h per country",
   },
   sportsLiveScores: {
     enabled: true,

@@ -7,6 +7,7 @@ import {
   fetchLiveStreamSchedule,
   findLiveStreamScheduleMatch,
 } from "../services/AllSportLiveStreamClient";
+import { resolveIptvStreamsForMatch } from "../services/IptvStreamClient";
 
 const EMPTY: LiveStreamMatchBundle = {
   streamMatchId: null,
@@ -41,11 +42,25 @@ export function useLiveStreamForMatch(
       if (cancelled) return;
 
       if (schedule.upstreamError && schedule.matches.length === 0) {
+        const iptv = await resolveIptvStreamsForMatch(homeName, awayName);
+        if (cancelled) return;
+
         setBundle({
           streamMatchId: null,
           scheduleMatch: null,
-          play: null,
+          play: iptv.available
+            ? {
+                available: true,
+                servers: iptv.servers,
+              }
+            : null,
           scheduleError: schedule.upstreamError,
+          iptv: {
+            available: iptv.available,
+            sources: iptv.sources,
+            servers: iptv.servers,
+            error: iptv.error,
+          },
           fetchedAt: Date.now(),
         });
         setLoading(false);
@@ -58,10 +73,24 @@ export function useLiveStreamForMatch(
         null;
 
       if (!row) {
+        const iptv = await resolveIptvStreamsForMatch(homeName, awayName);
+        if (cancelled) return;
+
         setBundle({
           streamMatchId: null,
           scheduleMatch: null,
-          play: null,
+          play: iptv.available
+            ? {
+                available: true,
+                servers: iptv.servers,
+              }
+            : null,
+          iptv: {
+            available: iptv.available,
+            sources: iptv.sources,
+            servers: iptv.servers,
+            error: iptv.error,
+          },
           fetchedAt: Date.now(),
         });
         setLoading(false);
@@ -71,10 +100,30 @@ export function useLiveStreamForMatch(
       const play = await checkLiveStreamAvailability(row.id);
       if (cancelled) return;
 
+      let iptvBundle: LiveStreamMatchBundle["iptv"];
+      if (!play?.available) {
+        const iptv = await resolveIptvStreamsForMatch(homeName, awayName);
+        if (cancelled) return;
+        iptvBundle = {
+          available: iptv.available,
+          sources: iptv.sources,
+          servers: iptv.servers,
+          error: iptv.error,
+        };
+      }
+
+      const mergedPlay =
+        play?.available
+          ? play
+          : iptvBundle?.available
+            ? { available: true, servers: iptvBundle.servers }
+            : play;
+
       setBundle({
         streamMatchId: row.id,
         scheduleMatch: row,
-        play,
+        play: mergedPlay,
+        iptv: iptvBundle,
         fetchedAt: Date.now(),
       });
       setLoading(false);

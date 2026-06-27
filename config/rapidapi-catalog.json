@@ -649,5 +649,34 @@
       { "id": "footballMatchLineups", "fn": "fetchSportsLiveScoresFootballMatchLineups", "path": "/football/match_lineups/11352563", "acceptStatuses": [200, 429] },
       { "id": "tennisLive", "fn": "fetchSportsLiveScoresSportLive", "path": "/tennis/live", "acceptStatuses": [200, 429, 500] }
     ]
+  },
+  {
+    "id": "free-daily-xtream-iptv",
+    "label": "Free Daily Xtream IPTV Servers",
+    "host": "free-daily-xtream-iptv-servers.p.rapidapi.com",
+    "marketplaceSlug": "free-daily-xtream-iptv-servers",
+    "client": "IptvStreamClient.ts",
+    "devProxyPrefix": "/api/free-daily-xtream-iptv",
+    "testPath": "/get",
+    "endpoints": [
+      { "id": "dailyXtreamGet", "fn": "fetchDailyXtreamServers", "path": "/get", "acceptStatuses": [200, 403, 429] }
+    ]
+  },
+  {
+    "id": "cloud-api-hub-iptv",
+    "label": "Cloud API Hub IPTV Auto Subscriber",
+    "host": "cloud-api-hub-iptv-auto-subscriber.p.rapidapi.com",
+    "marketplaceSlug": "cloud-api-hub-iptv-auto-subscriber",
+    "client": "IptvStreamClient.ts",
+    "devProxyPrefix": "/api/cloud-api-hub-iptv",
+    "testPath": "/subscribe/1year_no_adults?countryCode=US",
+    "endpoints": [
+      {
+        "id": "subscribeNoAdults",
+        "fn": "fetchIptvSubscription",
+        "path": "/subscribe/1year_no_adults?countryCode=US",
+        "acceptStatuses": [200, 403, 429]
+      }
+    ]
   }
 ]

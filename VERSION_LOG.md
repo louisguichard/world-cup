@@ -43,6 +43,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 19 — 2026-06-27 (build)
+- 19 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 19 files changed, 828 insertions(+), 7 deletions(-)
+
+## [4.0.0] build 18 — 2026-06-27 (build)
+- Wire IPTV RapidAPI providers as stream fallback on match watch tab
+
 ## [4.0.0] build 17 — 2026-06-27 (build)
 - 18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, scripts, src — 18 files changed, 666 insertions(+), 45 deletions(-)
 
