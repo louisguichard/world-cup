@@ -16,6 +16,7 @@ import { MatchLineupsTab } from "./components/tabs/MatchLineupsTab";
 import { MatchCommentaryTab } from "./components/tabs/MatchCommentaryTab";
 import { MatchH2HTab } from "./components/tabs/MatchH2HTab";
 import { MatchHighlightsTab } from "./components/tabs/MatchHighlightsTab";
+import { MatchWatchTab } from "./components/tabs/MatchWatchTab";
 import type { MatchDetailTab, MatchEvent } from "../../types";
 import { clearReturnContext } from "../../store/slices/navigationSlice";
 import { APP_BRAND } from "../../config/appMeta";
@@ -30,11 +31,13 @@ import { PlayerPhoto } from "../../components/player/PlayerPhoto";
 import { useGoalScorerProfiles } from "../../hooks/useGoalScorerProfiles";
 import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
 import { useHighlightlyMatchData } from "../../hooks/useHighlightlyMatchData";
+import { useLiveStreamForMatch } from "../../hooks/useLiveStreamForMatch";
 import { mapHighlightlyStatistics } from "../../services/matchDetail/fetchHighlightlyMatchBundle";
 import styles from "./MatchDetailView.module.css";
 
 const TABS: { id: MatchDetailTab; label: string }[] = [
   { id: "summary", label: "Summary" },
+  { id: "watch", label: "Watch" },
   { id: "highlights", label: "Highlights" },
   { id: "statistics", label: "Statistics" },
   { id: "lineups", label: "Lineups" },
@@ -123,6 +126,7 @@ export function MatchDetailView() {
   );
   const eventPhotos = useEventPlayerPhotos({ events: goalEvents, homeTeam, awayTeam });
   const highlightly = useHighlightlyMatchData(match, homeTeam, awayTeam);
+  const liveStream = useLiveStreamForMatch(match, homeTeam, awayTeam);
   const mergedStatistics = useMemo(() => {
     if (statistics) return statistics;
     if (!match || highlightly.statistics.length === 0) return null;
@@ -399,6 +403,14 @@ export function MatchDetailView() {
             homeTeam={homeTeam}
             awayTeam={awayTeam}
             highlightly={highlightly}
+          />
+        ) : null}
+
+        {activeMatchTab === "watch" ? (
+          <MatchWatchTab
+            bundle={liveStream}
+            homeTeamName={homeTeamName}
+            awayTeamName={awayTeamName}
           />
         ) : null}
 

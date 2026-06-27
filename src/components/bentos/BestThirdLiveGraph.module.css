@@ -176,14 +176,42 @@
 }
 
 .ladderRow {
-  display: grid;
-  grid-template-columns: 1.5rem 1.25rem minmax(0, 1fr) auto auto auto;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 6px;
+  gap: 0;
+  padding: 0;
   border-radius: var(--radius-sm);
   font-size: 0.72rem;
   transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.ladderClick {
+  display: grid;
+  grid-template-columns: 1.5rem 1.25rem minmax(0, 1fr) auto auto auto auto;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 6px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ladderClick:focus-visible {
+  outline: 2px solid var(--fwc-royal-blue);
+  outline-offset: -2px;
+}
+
+.focusCard.team-click-target {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
 }
 
 .ladderFocus {

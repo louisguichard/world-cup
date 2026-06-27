@@ -151,9 +151,9 @@ export function MatchScheduleCard({
 
       <div className="score-line schedule-score-line">
         {home ? (
-          <TeamLabel team={home} displayName={isLive ? homeName : undefined} />
+          <TeamLabel team={home} displayName={isLive ? homeName : undefined} nested={Boolean(onSelect)} />
         ) : (
-          <TeamLabelById teamId={match.homeTeamId} displayName={isLive ? homeName : undefined} />
+          <TeamLabelById teamId={match.homeTeamId} displayName={isLive ? homeName : undefined} nested={Boolean(onSelect)} />
         )}
         <strong className="schedule-score">
           {isDone || isLive ? (match.homeScore ?? 0) : "–"}
@@ -163,9 +163,9 @@ export function MatchScheduleCard({
           {isDone || isLive ? (match.awayScore ?? 0) : "–"}
         </strong>
         {away ? (
-          <TeamLabel team={away} align="right" displayName={isLive ? awayName : undefined} />
+          <TeamLabel team={away} align="right" displayName={isLive ? awayName : undefined} nested={Boolean(onSelect)} />
         ) : (
-          <TeamLabelById teamId={match.awayTeamId} align="right" displayName={isLive ? awayName : undefined} />
+          <TeamLabelById teamId={match.awayTeamId} align="right" displayName={isLive ? awayName : undefined} nested={Boolean(onSelect)} />
         )}
       </div>
 

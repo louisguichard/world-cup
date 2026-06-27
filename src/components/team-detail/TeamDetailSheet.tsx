@@ -3,11 +3,14 @@ import { createPortal } from "react-dom";
 import { formatKickoffDate, formatKickoffTime } from "../../lib/formatKickoff";
 import {
   buildQualificationContext,
-  computeQualificationStatus
+  computeQualificationStatus,
 } from "../../lib/qualification";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
+import { buildThirdPlaceCutoffScenario } from "../../lib/thirdPlaceCutoffScenario";
+import { buildTeamHistoricalFacts } from "../../lib/teamHistoricalFacts";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import type { TeamDrawerTab } from "../../lib/teamDrawer";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { getTeamElo } from "../../services/ClubEloClient";
@@ -24,56 +27,52 @@ import { useZafronixTeamRoster } from "../../hooks/useZafronixTeamRoster";
 import { TeamBettingPanel } from "./TeamBettingPanel";
 import { TeamHighlightlyPanel } from "./TeamHighlightlyPanel";
 import { useHighlightlyTeamData } from "../../hooks/useHighlightlyTeamData";
+import { useEliminationStory } from "../../hooks/useEliminationStory";
+import { KnockoutStoryCard } from "./KnockoutStoryCard";
 import { predictionsForTeam } from "../../lib/matchFootballPredictions";
 import type { MergedMatch } from "../../types";
 
-type Tab = "overview" | "squad" | "fixtures" | "stats" | "media" | "betting";
+const td = APP_COPY.teamDrawer;
 
-const TAB_LABELS: Record<Tab, string> = {
-  overview: "Overview",
-  squad: "Squad",
-  fixtures: "Fixtures",
-  stats: "Stats",
-  media: "Highlights",
-  betting: APP_COPY.odds.tabLabel,
+const TAB_LABELS: Record<TeamDrawerTab, string> = {
+  overview: td.tabOverview,
+  matches: td.tabMatches,
+  players: td.tabPlayers,
+  form: td.tabForm,
+  context: td.tabContext,
+  historical: td.tabHistorical,
 };
-type MatchOutcome = "W" | "D" | "L";
-
-function outcomeForTeam(match: MergedMatch, teamId: string): MatchOutcome {
-  const isHome = match.homeTeamId === teamId;
-  const teamScore = isHome ? (match.homeScore ?? 0) : (match.awayScore ?? 0);
-  const oppScore = isHome ? (match.awayScore ?? 0) : (match.homeScore ?? 0);
-  if (teamScore > oppScore) return "W";
-  if (teamScore < oppScore) return "L";
-  return "D";
-}
 
 export function TeamDetailSheet() {
   const open = useStore((s) => s.teamSheetOpen);
   const teamId = useStore((s) => s.activeTeamId);
+  const initialTab = useStore((s) => s.teamSheetTab);
   const close = useStore((s) => s.closeTeamSheet);
+  const openMatchDetail = useStore((s) => s.openMatchDetail);
   const teams = useStore((s) => s.teams);
   const liveMatches = useStore((s) => s.liveMatches);
   const standings = useStore((s) => s.groupStandings);
   const simulationRunning = useStore((s) => s.simulationRunning);
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<TeamDrawerTab>("overview");
   const [elo, setElo] = useState<number | null>(null);
   const [recentForm, setRecentForm] = useState<ZafronixMatch[]>([]);
 
   const team = teamId ? teams[teamId] : null;
   const teamDisplay = team ? teamDisplayName(team, team.id) : "";
-  const highlightlyTeam = useHighlightlyTeamData(teamDisplay, tab === "media" && Boolean(team));
+  const highlightlyTeam = useHighlightlyTeamData(teamDisplay, Boolean(team));
   const { profile: sofaProfile, loading: sofaLoading } = useTeamProfile(team?.abbreviation);
   const { players: wcSquad, loading: wcSquadLoading } = useWc2026TeamSquad(team);
+  const loadPlayersTab = tab === "players";
   const { players: zafronixSquad, loading: zafronixRosterLoading } = useZafronixTeamRoster(
     team,
-    tab === "squad" && wcSquad.length === 0 && !wcSquadLoading
+    loadPlayersTab && wcSquad.length === 0 && !wcSquadLoading
   );
   const footballPredictionBundle = useStore((s) => s.footballPredictionBundle);
   const teamPredictions = useMemo(() => {
     if (!team || !footballPredictionBundle) return [];
     return predictionsForTeam(team, footballPredictionBundle.dailyPredictions);
   }, [team, footballPredictionBundle]);
+
   const qualContext = useMemo(
     () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
     [liveMatches, teams]
@@ -83,6 +82,8 @@ export function TeamDetailSheet() {
     () => (teamId ? computeQualificationStatus(teamId, standings, qualContext) : null),
     [teamId, standings, qualContext]
   );
+
+  const { story: eliminationStory } = useEliminationStory(teamId);
 
   const groupStanding = useMemo(() => {
     if (!team) return null;
@@ -108,7 +109,7 @@ export function TeamDetailSheet() {
       gd: row.goalDifference,
       cleanSheets: 0,
       wdl: { w: row.wins, d: row.draws, l: row.losses },
-      avgGoals: (row.goalsFor / played).toFixed(2)
+      avgGoals: (row.goalsFor / played).toFixed(2),
     };
   }, [groupStanding]);
 
@@ -117,13 +118,38 @@ export function TeamDetailSheet() {
     return rankAliveBestThirds(standings, qualContext).findIndex((r) => r.teamId === teamId);
   }, [standings, teamId, qualContext]);
 
+  const rankedThirds = useMemo(
+    () => rankAliveBestThirds(standings, qualContext),
+    [standings, qualContext]
+  );
+
+  const cutoffScenario = useMemo(() => {
+    if (!teamId || thirdRank < 0) return null;
+    return buildThirdPlaceCutoffScenario(teamId, rankedThirds, standings, qualContext);
+  }, [teamId, thirdRank, rankedThirds, standings, qualContext]);
+
+  const historical = useMemo(() => {
+    if (!team) return { facts: [], hasNotable: false };
+    return buildTeamHistoricalFacts(team, { managerName: sofaProfile?.details?.managerName });
+  }, [team, sofaProfile]);
+
+  const visibleTabs = useMemo((): TeamDrawerTab[] => {
+    const base: TeamDrawerTab[] = ["overview", "matches", "players", "form", "context"];
+    if (historical.hasNotable) base.push("historical");
+    return base;
+  }, [historical.hasNotable]);
+
+  useEffect(() => {
+    if (open) setTab(initialTab);
+  }, [open, initialTab, teamId]);
+
   useEffect(() => {
     if (!team) return;
     void getTeamElo(team.name).then(setElo);
   }, [team]);
 
   useEffect(() => {
-    if (!team || tab !== "overview") return;
+    if (!team || tab !== "form") return;
     void getHistoricalMatchesForTeam(team.name, 7).then(setRecentForm);
   }, [team, tab]);
 
@@ -139,6 +165,11 @@ export function TeamDetailSheet() {
   if (!open || !team || !teamId) return null;
 
   const qualDisplay = qual ? resolveQualificationDisplay(qual) : null;
+  const isEliminated = qual && (!qual.canQualify || qual.lifeState === "eliminated");
+
+  const openFixture = (match: MergedMatch) => {
+    openMatchDetail(match.id, { from: "live" });
+  };
 
   const sheet = (
     <div className="team-sheet-backdrop team-sheet-backdrop--portal" role="presentation" onClick={close}>
@@ -157,6 +188,7 @@ export function TeamDetailSheet() {
                 <h2>{team.name}</h2>
                 <p className="team-sheet-sub">
                   Group {team.group} · FIFA rank {team.fifaRank ?? sofaProfile?.details?.fifaRanking ?? "—"}
+                  {elo != null ? ` · Elo ${Math.round(elo)}` : null}
                   {sofaProfile?.details?.managerName
                     ? ` · Coach ${sofaProfile.details.managerName}`
                     : null}
@@ -171,7 +203,7 @@ export function TeamDetailSheet() {
         </TeamThemeRoot>
 
         <div className="team-sheet-tabs">
-          {(["overview", "squad", "fixtures", "stats", "media", "betting"] as Tab[]).map((t) => (
+          {visibleTabs.map((t) => (
             <button key={t} type="button" className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
               {TAB_LABELS[t]}
             </button>
@@ -181,18 +213,9 @@ export function TeamDetailSheet() {
         <div className="team-sheet-body">
           {tab === "overview" ? (
             <>
-              {recentForm.length > 0 ? (
-                <p className="team-sheet-form">
-                  Form:{" "}
-                  {recentForm
-                    .slice(0, 5)
-                    .map((m) => {
-                      const isHome = m.homeTeam.toLowerCase() === team.name.toLowerCase();
-                      const ts = isHome ? m.homeScore : m.awayScore;
-                      const os = isHome ? m.awayScore : m.homeScore;
-                      return ts > os ? "W" : ts < os ? "L" : "D";
-                    })
-                    .join("")}
+              {qualDisplay ? (
+                <p className="team-sheet-qual-oneliner">
+                  <strong>{qualDisplay.label}</strong> — {qualDisplay.hint}
                 </p>
               ) : null}
 
@@ -227,6 +250,63 @@ export function TeamDetailSheet() {
                 </table>
               ) : null}
 
+              {stats ? (
+                <TeamStatsPanel groupStats={stats} sofaStats={sofaProfile?.statistics ?? null} />
+              ) : null}
+
+              {highlightlyTeam.highlights.length > 0 ? (
+                <button type="button" className="team-sheet-highlights-teaser" onClick={() => setTab("overview")}>
+                  {td.highlightsTeaser} ({highlightlyTeam.highlights.length})
+                </button>
+              ) : null}
+            </>
+          ) : null}
+
+          {tab === "matches" ? (
+            <>
+              {allFixtures.length === 0 ? (
+                <p className="team-sheet-empty">
+                  {isEliminated ? td.fixturesEmptyEliminated : td.fixturesEmptyNoData}
+                </p>
+              ) : (
+                <ul className="team-match-history-list">
+                  {allFixtures.map((match) => {
+                    const isHome = match.homeTeamId === teamId;
+                    const opponentId = isHome ? match.awayTeamId : match.homeTeamId;
+                    const opponent = teams[opponentId];
+                    const teamScore = isHome ? (match.homeScore ?? 0) : (match.awayScore ?? 0);
+                    const oppScore = isHome ? (match.awayScore ?? 0) : (match.homeScore ?? 0);
+                    return (
+                      <li key={match.id}>
+                        <button
+                          type="button"
+                          className="team-match-history-row team-match-history-row--clickable"
+                          onClick={() => openFixture(match)}
+                        >
+                          <span>
+                            {match.status === "live"
+                              ? APP_COPY.match.live
+                              : match.status === "completed"
+                                ? APP_COPY.match.final
+                                : formatKickoffTime(match.date)}
+                          </span>
+                          <span>
+                            <TeamFlag team={opponent} teamId={opponentId} />{" "}
+                            <span className="team-name-text">
+                              {teamDisplayName(opponent, opponentId)}
+                            </span>
+                          </span>
+                          <span>
+                            {match.homeScore !== undefined ? `${teamScore}–${oppScore}` : "vs"}
+                          </span>
+                          <time dateTime={match.date}>{formatKickoffDate(match.date)}</time>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
               {sofaProfile ? (
                 <>
                   <TeamMatchLists
@@ -241,10 +321,91 @@ export function TeamDetailSheet() {
                   />
                 </>
               ) : null}
+            </>
+          ) : null}
+
+          {tab === "players" ? (
+            wcSquadLoading ? (
+              <p className="team-sheet-empty">Loading squad photos…</p>
+            ) : wcSquad.length > 0 ? (
+              <Wc2026SquadList players={wcSquad} />
+            ) : zafronixRosterLoading ? (
+              <p className="team-sheet-empty">Loading squad…</p>
+            ) : zafronixSquad.length > 0 ? (
+              <ul className="team-squad-list">
+                {zafronixSquad.map((p) => (
+                  <li key={p.name} className="team-squad-row">
+                    <span className="team-squad-num">{p.number ?? "—"}</span>
+                    <PlayerPhoto name={p.name ?? "Player"} size="lg" className="team-squad-photo" />
+                    <span className="team-squad-name">
+                      <strong>{p.name}</strong>
+                      {p.club ? <span className="team-squad-club">{p.club}</span> : null}
+                    </span>
+                    <span className="team-squad-pos">{p.position ?? "—"}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : sofaLoading ? (
+              <p className="team-sheet-empty">Loading squad…</p>
+            ) : (
+              <TeamSquadList players={sofaProfile?.players ?? []} />
+            )
+          ) : null}
+
+          {tab === "form" ? (
+            <>
+              {recentForm.length > 0 ? (
+                <>
+                  <p className="team-sheet-form">
+                    Form:{" "}
+                    {recentForm
+                      .slice(0, 5)
+                      .map((m) => {
+                        const isHome = m.homeTeam.toLowerCase() === team.name.toLowerCase();
+                        const ts = isHome ? m.homeScore : m.awayScore;
+                        const os = isHome ? m.awayScore : m.homeScore;
+                        return ts > os ? "W" : ts < os ? "L" : "D";
+                      })
+                      .join("")}
+                  </p>
+                  <ul className="team-form-list">
+                    {recentForm.map((m) => {
+                      const isHome = m.homeTeam.toLowerCase() === team.name.toLowerCase();
+                      const ts = isHome ? m.homeScore : m.awayScore;
+                      const os = isHome ? m.awayScore : m.homeScore;
+                      const result = ts > os ? "W" : ts < os ? "L" : "D";
+                      const opp = isHome ? m.awayTeam : m.homeTeam;
+                      return (
+                        <li key={`${m.date}-${opp}`} className={`team-form-row team-form-row--${result}`}>
+                          <span>{result}</span>
+                          <span>
+                            {ts}–{os} vs {opp}
+                          </span>
+                          <time dateTime={m.date}>{m.date}</time>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
+              ) : (
+                <p className="team-sheet-empty">No recent form data yet.</p>
+              )}
+            </>
+          ) : null}
+
+          {tab === "context" ? (
+            <>
+              {eliminationStory ? (
+                <KnockoutStoryCard
+                  story={eliminationStory}
+                  teamId={teamId}
+                  onViewFixtures={() => setTab("matches")}
+                />
+              ) : null}
 
               {qual && qualDisplay ? (
                 <div className={`team-sheet-qual ${qualDisplay.rowClass}`}>
-                  <h3>Knockout qualification</h3>
+                  <h3>{APP_COPY.knockoutStory.qualPathTitle}</h3>
                   <p className="team-sheet-qual-label">
                     <strong>{qualDisplay.label}</strong>
                   </p>
@@ -263,97 +424,45 @@ export function TeamDetailSheet() {
                       Best-third rank (alive teams): {thirdRank + 1} — cut line is top 8.
                     </p>
                   ) : null}
+                  {cutoffScenario && thirdRank === 7 ? (
+                    <div className="team-sheet-cutoff-summary">
+                      {cutoffScenario.proseLines.map((line) => (
+                        <p key={line}>{line}</p>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
+
+              <TeamBettingPanel
+                team={team}
+                teamPredictions={teamPredictions}
+                simulationRunning={simulationRunning}
+              />
             </>
           ) : null}
 
-          {tab === "squad" ? (
-            wcSquadLoading ? (
-              <p className="team-sheet-empty">Loading squad photos…</p>
-            ) : wcSquad.length > 0 ? (
-              <Wc2026SquadList players={wcSquad} />
-            ) : zafronixRosterLoading ? (
-              <p className="team-sheet-empty">Loading squad…</p>
-            ) : zafronixSquad.length > 0 ? (
-              <ul className="team-squad-list">
-                {zafronixSquad.map((p) => (
-                  <li key={p.name} className="team-squad-row">
-                    <span className="team-squad-num">{p.number ?? "—"}</span>
-                    <PlayerPhoto
-                      name={p.name ?? "Player"}
-                      size="lg"
-                      className="team-squad-photo"
-                    />
-                    <span className="team-squad-name">
-                      <strong>{p.name}</strong>
-                      {p.club ? <span className="team-squad-club">{p.club}</span> : null}
-                    </span>
-                    <span className="team-squad-pos">{p.position ?? "—"}</span>
+          {tab === "historical" && historical.hasNotable ? (
+            <>
+              <p className="team-sheet-lead">{td.historicalLead}</p>
+              <ul className="team-historical-list">
+                {historical.facts.map((fact) => (
+                  <li key={fact.id} className="team-historical-row">
+                    <strong>{fact.label}</strong>
+                    <span>{fact.detail}</span>
                   </li>
                 ))}
               </ul>
-            ) : sofaLoading ? (
-              <p className="team-sheet-empty">Loading squad…</p>
-            ) : (
-              <TeamSquadList players={sofaProfile?.players ?? []} />
-            )
+            </>
           ) : null}
 
-          {tab === "fixtures" ? (
-            <ul className="team-match-history-list">
-              {allFixtures.map((match) => {
-                const isHome = match.homeTeamId === teamId;
-                const opponentId = isHome ? match.awayTeamId : match.homeTeamId;
-                const opponent = teams[opponentId];
-                const teamScore = isHome ? (match.homeScore ?? 0) : (match.awayScore ?? 0);
-                const oppScore = isHome ? (match.awayScore ?? 0) : (match.homeScore ?? 0);
-                return (
-                  <li key={match.id} className="team-match-history-row">
-                    <span>
-                      {match.status === "live"
-                        ? APP_COPY.match.live
-                        : match.status === "completed"
-                          ? APP_COPY.match.final
-                          : formatKickoffTime(match.date)}
-                    </span>
-                    <span>
-                      <TeamFlag team={opponent} teamId={opponentId} />{" "}
-                      <span className="team-name-text">{teamDisplayName(opponent, opponentId)}</span>
-                    </span>
-                    <span>
-                      {match.homeScore !== undefined ? `${teamScore}–${oppScore}` : "vs"}
-                    </span>
-                    <time dateTime={match.date}>{formatKickoffDate(match.date)}</time>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : null}
-
-          {tab === "stats" ? (
-            <TeamStatsPanel groupStats={stats} sofaStats={sofaProfile?.statistics ?? null} />
-          ) : null}
-
-          {tab === "media" ? (
-            highlightlyTeam.loading && highlightlyTeam.highlights.length === 0 ? (
-              <p className="team-sheet-empty">Loading highlights…</p>
-            ) : (
-              <TeamHighlightlyPanel
-                teamName={teamDisplay}
-                highlights={highlightlyTeam.highlights}
-                lastFive={highlightlyTeam.lastFive}
-                seasonStats={highlightlyTeam.seasonStats}
-                loading={highlightlyTeam.loading}
-              />
-            )
-          ) : null}
-
-          {tab === "betting" ? (
-            <TeamBettingPanel
-              team={team}
-              teamPredictions={teamPredictions}
-              simulationRunning={simulationRunning}
+          {tab === "overview" && highlightlyTeam.highlights.length > 0 ? (
+            <TeamHighlightlyPanel
+              teamName={teamDisplay}
+              highlights={highlightlyTeam.highlights}
+              lastFive={highlightlyTeam.lastFive}
+              seasonStats={highlightlyTeam.seasonStats}
+              loading={highlightlyTeam.loading}
             />
           ) : null}
         </div>

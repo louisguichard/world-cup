@@ -9,13 +9,11 @@ import { MatchGoalScorers } from "./MatchGoalScorers";
 
 export interface ResultMatchCardProps {
   match: MergedMatch;
-  openTeamOnClick?: boolean;
 }
 
-export function ResultMatchCard({ match, openTeamOnClick }: ResultMatchCardProps) {
+export function ResultMatchCard({ match }: ResultMatchCardProps) {
   const teams = useStore((s) => s.teams);
   const openMatchDetail = useStore((s) => s.openMatchDetail);
-  const openTeamSheet = useStore((s) => s.openTeamSheet);
   const matchEvents = useStore((s) => s.matchEvents);
 
   const events =
@@ -33,16 +31,18 @@ export function ResultMatchCard({ match, openTeamOnClick }: ResultMatchCardProps
   const kickoffDate = formatKickoffDate(match.date);
 
   return (
-    <button
-      type="button"
-      className="result-match-card"
-      role="article"
+    <article
+      className="result-match-card result-match-card--interactive"
+      role="button"
+      tabIndex={0}
       aria-label={`${homeName} ${homeScore}–${awayScore} ${awayName}, Final`}
-      onClick={() =>
-        openTeamOnClick
-          ? openTeamSheet(match.homeTeamId)
-          : openMatchDetail(match.matchId ?? match.id, { from: "results" })
-      }
+      onClick={() => openMatchDetail(match.matchId ?? match.id, { from: "results" })}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openMatchDetail(match.matchId ?? match.id, { from: "results" });
+        }
+      }}
     >
       <div className="result-match-card-meta">
         <span className="final-pill">FINAL</span>
@@ -51,14 +51,18 @@ export function ResultMatchCard({ match, openTeamOnClick }: ResultMatchCardProps
       </div>
 
       <div className="result-match-card-scoreline">
-        {home ? <TeamLabel team={home} /> : <TeamLabelById teamId={match.homeTeamId} />}
+        {home ? (
+          <TeamLabel team={home} nested />
+        ) : (
+          <TeamLabelById teamId={match.homeTeamId} nested />
+        )}
         <strong className="result-match-card-score">{homeScore}</strong>
         <span className="result-match-card-sep">–</span>
         <strong className="result-match-card-score">{awayScore}</strong>
         {away ? (
-          <TeamLabel team={away} align="right" />
+          <TeamLabel team={away} align="right" nested />
         ) : (
-          <TeamLabelById teamId={match.awayTeamId} align="right" />
+          <TeamLabelById teamId={match.awayTeamId} align="right" nested />
         )}
       </div>
 
@@ -69,6 +73,6 @@ export function ResultMatchCard({ match, openTeamOnClick }: ResultMatchCardProps
         homeTeam={home}
         awayTeam={away}
       />
-    </button>
+    </article>
   );
 }

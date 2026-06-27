@@ -1,30 +1,100 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
+import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { useOpenTeam } from "../../hooks/useOpenTeam";
 import { TeamFlag } from "./TeamFlag";
 
 type Props = {
   teamId: string;
   align?: "left" | "right";
   className?: string;
-  /** Override visible label (e.g. compact live-card name). */
   displayName?: string;
+  clickable?: boolean;
+  nested?: boolean;
+  onTeamClick?: (teamId: string) => void;
 };
 
 /** Themed team label when only an id is available (no Team object in store). */
-export function TeamLabelById({ teamId, align = "left", className = "", displayName }: Props) {
+export function TeamLabelById({
+  teamId,
+  align = "left",
+  className = "",
+  displayName,
+  clickable = true,
+  nested = false,
+  onTeamClick,
+}: Props) {
   const theme = useTeamTheme(teamId);
   const team = useStore((s) => s.teams[teamId]);
+  const { openTeam } = useOpenTeam();
+
+  const label = displayName ?? teamDisplayName(team, teamId.toUpperCase());
+  const baseClass = `team-label team-label-themed ${align === "right" ? "right" : ""} ${clickable ? "team-label--clickable" : ""} ${className}`.trim();
+
+  const handleActivate = (e: MouseEvent | KeyboardEvent) => {
+    if (!clickable) return;
+    e.stopPropagation();
+    if (onTeamClick) {
+      onTeamClick(teamId);
+    } else {
+      openTeam(teamId);
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (!clickable) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleActivate(e);
+    }
+  };
+
+  const content = (
+    <>
+      <TeamFlag team={team} teamId={teamId} />
+      <span className="team-name-text">{label}</span>
+    </>
+  );
+
+  if (!clickable) {
+    return (
+      <span className={baseClass} style={theme as CSSProperties} data-team-id={teamId}>
+        {content}
+      </span>
+    );
+  }
+
+  if (nested) {
+    return (
+      <span
+        className={baseClass}
+        style={theme as CSSProperties}
+        data-team-id={teamId}
+        role="button"
+        tabIndex={0}
+        aria-label={`${APP_COPY.teamDrawer.openTeamProfile}: ${label}`}
+        title={APP_COPY.teamDrawer.teamClickHint}
+        onClick={handleActivate}
+        onKeyDown={handleKeyDown}
+      >
+        {content}
+      </span>
+    );
+  }
 
   return (
-    <span
-      className={`team-label team-label-themed ${align === "right" ? "right" : ""} ${className}`.trim()}
+    <button
+      type="button"
+      className={baseClass}
       style={theme as CSSProperties}
       data-team-id={teamId}
+      aria-label={`${APP_COPY.teamDrawer.openTeamProfile}: ${label}`}
+      title={APP_COPY.teamDrawer.teamClickHint}
+      onClick={handleActivate}
     >
-      <TeamFlag team={team} teamId={teamId} />
-      <span className="team-name-text">{displayName ?? teamDisplayName(team, teamId.toUpperCase())}</span>
-    </span>
+      {content}
+    </button>
   );
 }

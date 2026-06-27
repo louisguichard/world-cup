@@ -1,0 +1,62 @@
+.infoBtn {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary, #9ca3af);
+  font-size: 0.75rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.infoBtn:hover,
+.infoBtn:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--text, #f3f4f6);
+}
+
+.rowWrap {
+  display: contents;
+}
+
+.panel {
+  position: fixed;
+  z-index: 10050;
+  max-width: min(320px, calc(100vw - 16px));
+}
+
+.prose p {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.prose p:first-child {
+  color: var(--text, #f3f4f6);
+  font-weight: 600;
+}
+
+.summary {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+}
+
+.summary dt {
+  font-weight: 600;
+  margin-top: 0.5rem;
+  color: var(--text, #f3f4f6);
+}
+
+.summary dd {
+  margin: 0.15rem 0 0;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.summary ul {
+  margin: 0.25rem 0 0;
+  padding-left: 1.1rem;
+}

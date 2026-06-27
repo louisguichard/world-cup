@@ -103,6 +103,14 @@ const rapidApiProxies = {
     "https://sport-highlights-api.p.rapidapi.com",
     "/api/sport-highlights"
   ),
+  "/api/all-sport-live-stream": rapidApiProxy(
+    "https://all-sport-live-stream.p.rapidapi.com",
+    "/api/all-sport-live-stream"
+  ),
+  "/api/sports-live-scores": rapidApiProxy(
+    "https://sports-live-scores.p.rapidapi.com",
+    "/api/sports-live-scores"
+  ),
   "/api/espn-web": {
     target: "https://site.web.api.espn.com",
     changeOrigin: true,

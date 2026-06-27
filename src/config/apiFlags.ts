@@ -21,6 +21,8 @@ export type ApiSourceId =
   | "footballPrediction"
   | "worldCupHistory"
   | "sportHighlights"
+  | "allSportLiveStream"
+  | "sportsLiveScores"
   | "openWeather";
 
 export type ApiAuditStatus = "pass" | "fail" | "untested";
@@ -74,7 +76,7 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     lastAudit: "fail",
     lastLatencyMs: 94,
     failureReason: "Returns HTML instead of JSON (bot protection)",
-    disableReason: "FIFA API blocked — ratings use strength-index fallback",
+    disableReason: "FIFA API blocked — bootstrap uses Sports Live Scores fallback when available",
   },
   footballDataApi: {
     enabled: true,
@@ -161,6 +163,22 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     label: "Sport Highlights API (Highlightly)",
     lastAudit: "untested",
     lastLatencyMs: 0,
+  },
+  allSportLiveStream: {
+    enabled: true,
+    splashPath: false,
+    label: "All Sport Live Stream",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Schedule endpoint may return GraphQL PersistedQueryNotFound upstream",
+  },
+  sportsLiveScores: {
+    enabled: true,
+    splashPath: false,
+    label: "Sports Live Scores",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "FIFA league rankings may return empty on BASIC plan; odds/live vary by match",
   },
   openWeather: {
     enabled: true,

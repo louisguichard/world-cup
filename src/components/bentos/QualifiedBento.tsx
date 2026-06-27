@@ -6,8 +6,29 @@ import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
 import { TeamFlag } from "../team/TeamFlag";
+import { TeamClickTarget } from "../team/TeamClickTarget";
+import type { OpenTeamSheetOptions } from "../../lib/teamDrawer";
 
-function QualTeamChip({ teamId, dim }: { teamId: string; dim?: boolean }) {
+function thirdRankHint(teamId: string, ranked: ReturnType<typeof rankAliveBestThirds>): string | undefined {
+  const idx = ranked.findIndex((r) => r.teamId === teamId);
+  if (idx < 0) return undefined;
+  const rank = idx + 1;
+  const td = APP_COPY.teamDrawer;
+  if (rank === 8) return td.thirdRankCutoff;
+  if (rank >= 7 && rank <= 10) return td.thirdRankBubble(rank);
+  if (rank > 8) return td.thirdRankOutside(rank);
+  return undefined;
+}
+
+function QualTeamChip({
+  teamId,
+  dim,
+  sheetOptions,
+}: {
+  teamId: string;
+  dim?: boolean;
+  sheetOptions?: OpenTeamSheetOptions;
+}) {
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
   const liveMatches = useStore((s) => s.liveMatches);
@@ -18,13 +39,22 @@ function QualTeamChip({ teamId, dim }: { teamId: string; dim?: boolean }) {
   const team = teams[teamId];
   const label = teamDisplayName(team, teamId);
   const qual = computeQualificationStatus(teamId, standings, qualContext);
+  const ranked = useMemo(() => rankAliveBestThirds(standings, qualContext), [standings, qualContext]);
+  const rankHint = thirdRankHint(teamId, ranked);
+  const title = [qual.reason ?? team?.name ?? label, rankHint].filter(Boolean).join(" · ");
 
   return (
-    <div className={`qual-team-chip ${dim ? "qual-team-chip--dim" : ""}`} title={qual.reason ?? team?.name ?? label}>
+    <TeamClickTarget
+      teamId={teamId}
+      className={`qual-team-chip ${dim ? "qual-team-chip--dim" : ""}`}
+      options={sheetOptions}
+      title={title}
+    >
       <QualificationStatusBadge qual={qual} size="xs" />
       <TeamFlag team={team} teamId={teamId} size="lg" dim={dim} />
       <span className="qual-team-name team-name-text">{label}</span>
-    </div>
+      {rankHint ? <span className="qual-team-rank-hint">{rankHint}</span> : null}
+    </TeamClickTarget>
   );
 }
 
@@ -32,12 +62,14 @@ function QualSection({
   title,
   hint,
   teamIds,
-  dim
+  dim,
+  sheetOptions,
 }: {
   title: string;
   hint: string;
   teamIds: string[];
   dim?: boolean;
+  sheetOptions?: OpenTeamSheetOptions;
 }) {
   if (teamIds.length === 0) return null;
 
@@ -49,7 +81,7 @@ function QualSection({
       </div>
       <div className="qual-bento-crests">
         {teamIds.map((id) => (
-          <QualTeamChip key={id} teamId={id} dim={dim} />
+          <QualTeamChip key={id} teamId={id} dim={dim} sheetOptions={sheetOptions} />
         ))}
       </div>
     </div>
@@ -115,6 +147,7 @@ export function EliminatedBento() {
   const hasAny = buckets.confirmedOut.length > 0 || buckets.projectedOut.length > 0;
 
   const q = APP_COPY.qual;
+  const contextTab = { tab: "context" as const };
 
   return (
     <section className="qual-bento qual-bento--eliminated" aria-label="Eliminated teams">
@@ -127,12 +160,14 @@ export function EliminatedBento() {
             hint={q.confirmedEliminatedHint}
             teamIds={buckets.confirmedOut}
             dim
+            sheetOptions={contextTab}
           />
           <QualSection
             title={q.projectedEliminatedSection}
             hint={q.projectedEliminatedHint}
             teamIds={buckets.projectedOut}
             dim
+            sheetOptions={contextTab}
           />
         </>
       ) : (
@@ -165,7 +200,7 @@ export function InContentionBento() {
       {inContention.length > 0 ? (
         <div className="qual-bento-crests">
           {inContention.slice(0, 12).map((id) => (
-            <QualTeamChip key={id} teamId={id} />
+            <QualTeamChip key={id} teamId={id} sheetOptions={{ tab: "context" }} />
           ))}
         </div>
       ) : (
@@ -192,7 +227,7 @@ export function BestThirdsBento() {
       <p className="qual-bento-lead">{bt.subtitle}</p>
       <div className="qual-bento-crests">
         {best.map((r) => (
-          <QualTeamChip key={r.teamId} teamId={r.teamId} />
+          <QualTeamChip key={r.teamId} teamId={r.teamId} sheetOptions={{ tab: "context" }} />
         ))}
       </div>
     </section>

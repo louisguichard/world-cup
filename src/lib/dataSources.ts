@@ -2,6 +2,7 @@ import type { DataLoadResult, GroupLetter, Match, OutcomeProbabilities, Polymark
 import { isApiEnabled } from "../config/apiFlags";
 import { buildPrediction, makeFallbackPrediction, normalizeProbabilities } from "./predictions";
 import { normalizeName, pairKey } from "./normalize";
+import { fetchSportsLiveScoresFifaRankings } from "../services/SportsLiveScoresClient";
 import { addModelRatings, calibrateRatingsToTitleMarket, type FifaRanking, type MatchMarket, type RatingMarket } from "./ratings";
 import { applyTeamLogoOverridesList } from "./resolveTeamLogo";
 import { simulateTournamentOutcomes } from "./tournament";
@@ -200,21 +201,50 @@ async function loadTitleProbabilities(): Promise<Record<string, number>> {
   return probabilities;
 }
 
-async function loadFifaRankings(): Promise<Record<string, FifaRanking>> {
-  if (!isApiEnabled("fifaRankings")) return {};
-  const response = await fetchJson<any>(FIFA_RANKINGS_PATH, "fifa-api");
+function parseOfficialFifaRankings(response: unknown): Record<string, FifaRanking> {
   const rankings: Record<string, FifaRanking> = {};
+  const results = (response as { Results?: unknown[] } | null)?.Results ?? [];
 
-  for (const item of response?.Results ?? []) {
-    const name = item?.TeamName?.[0]?.Description;
-    const rank = Number(item?.Rank);
-    const points = Number(item?.DecimalTotalPoints ?? item?.TotalPoints);
+  for (const item of results) {
+    const row = item as {
+      TeamName?: Array<{ Description?: string }>;
+      Rank?: number | string;
+      DecimalTotalPoints?: number | string;
+      TotalPoints?: number | string;
+    };
+    const name = row?.TeamName?.[0]?.Description;
+    const rank = Number(row?.Rank);
+    const points = Number(row?.DecimalTotalPoints ?? row?.TotalPoints);
     if (name && Number.isFinite(rank) && Number.isFinite(points)) {
       rankings[normalizeName(name)] = { rank, points };
     }
   }
 
   return rankings;
+}
+
+async function loadOfficialFifaRankings(): Promise<Record<string, FifaRanking>> {
+  if (!isApiEnabled("fifaRankings")) return {};
+  const response = await fetchJson<unknown>(FIFA_RANKINGS_PATH, "fifa-api");
+  return parseOfficialFifaRankings(response);
+}
+
+async function loadFifaRankings(): Promise<Record<string, FifaRanking>> {
+  if (isApiEnabled("fifaRankings")) {
+    try {
+      const official = await loadOfficialFifaRankings();
+      if (Object.keys(official).length > 0) return official;
+    } catch {
+      // Fall through to Sports Live Scores.
+    }
+  }
+
+  if (isApiEnabled("sportsLiveScores")) {
+    const fallback = await fetchSportsLiveScoresFifaRankings();
+    if (Object.keys(fallback).length > 0) return fallback;
+  }
+
+  return {};
 }
 
 async function loadPolymarketGames(): Promise<any[]> {
@@ -538,7 +568,9 @@ export async function loadWorldCupData(options: LoadWorldCupDataOptions = {}): P
     rankingResult.status === "fulfilled"
       ? rankingResult.value
       : (() => {
-          warnings.push("Could not load the official FIFA ranking; falling back to the strength index.");
+          warnings.push(
+            "Could not load FIFA rankings (official API or Sports Live Scores fallback); using strength index."
+          );
           return {};
         })();
 

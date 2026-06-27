@@ -383,6 +383,60 @@ export const APP_COPY = {
     fixtureSummaryTip: (pick: string) => `Tip: ${pick}`,
   },
 
+  teamDrawer: {
+    openTeamProfile: "Open team profile",
+    teamClickHint: "View team details, matches, and qualification status",
+    tabOverview: "Overview",
+    tabMatches: "Matches",
+    tabPlayers: "Players",
+    tabForm: "Form",
+    tabContext: "Context",
+    tabHistorical: "History",
+    historicalLead: "Notable World Cup history for this team.",
+    highlightsTeaser: "Watch highlights",
+    fixturesEmptyEliminated: "Their World Cup run is over. Past results are below.",
+    fixturesEmptyNoData: "No match data yet for this team.",
+    eliminatedChipHint: "Tap to read why they're out",
+    thirdRankBubble: (rank: number) => `#${rank} among third-place teams — on the bubble`,
+    thirdRankCutoff: "#8 among third-place teams — on the edge",
+    thirdRankOutside: (rank: number) => `#${rank} among third-place teams — outside top 8`,
+  },
+
+  cutoffPopover: {
+    title: "On the edge of qualification.",
+    rankLine: (rank: number) => `You are currently #${rank} among third-place teams.`,
+    safeNotLocked: "Safe for now, but not locked.",
+    holdLine:
+      "Keep your place by holding your current points and goal difference.",
+    dropLine:
+      "You can drop out if a team below you wins, improves goal difference, or scores enough to pass you on the tiebreakers.",
+    watchLine:
+      "Watch the teams just behind the cutoff — they are the ones most likely to push you out.",
+    statsHeading: "Current stats",
+    keepHeading: "What keeps you in",
+    knockHeading: "What can knock you out",
+    watchHeading: "Teams to watch",
+    infoLabel: "Qualification scenario details",
+    openTeam: "Open team profile",
+  },
+
+  knockoutStory: {
+    cardTitle: "Elimination story",
+    viewDecidingMatch: "See the match that knocked them out",
+    viewAllFixtures: "See all their World Cup games",
+    timelineHeading: "What changed near the end",
+    partialTitle: "Elimination story",
+    partialLead: "We can't pinpoint the exact match or goal from current data.",
+    partialKnownFacts: "What we know",
+    partialFooter: "No remaining result can move them back into qualification.",
+    loading: "Loading elimination story…",
+    fullIntro: "This team was knocked out when",
+    fullReason: "That result sealed their fate because",
+    fullAliveSpan: "They stayed mathematically alive for",
+    fullFooter: "No remaining result can now move them back into qualification.",
+    qualPathTitle: "Qualification path",
+  },
+
   pwa: {
     installTitle: "Install the app",
     installBodyMobile: "Add to your home screen for a full-screen app with live scores.",

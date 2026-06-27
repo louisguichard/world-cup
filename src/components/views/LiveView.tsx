@@ -2,6 +2,7 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import { BentoErrorBoundary } from "../shared/ErrorBoundary";
 import { LiveMatchBento } from "../bentos/LiveMatchBento";
 import { LiveGroupStandingsPanel } from "../bentos/LiveGroupStandingsPanel";
+import { LiveStreamsPanel } from "../bentos/LiveStreamsPanel";
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
 import { groupMatchesByDay } from "../../lib/groupMatchesByDay";
 import { getNextKickoffMs, isNextKickoffFixture } from "../../lib/kickoffCountdown";
@@ -148,6 +149,8 @@ export function LiveView() {
           </Suspense>
         </section>
       )}
+
+      <LiveStreamsPanel />
 
       <Suspense fallback={<DeferredSectionSkeleton />}>
         <div className="dashboard-section--defer">

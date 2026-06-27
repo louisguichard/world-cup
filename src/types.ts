@@ -194,7 +194,14 @@ export type TabId = "live" | "results" | "bracket" | "groups" | "simulator" | "t
 
 // --- Match detail + tournament navigation ---
 
-export type MatchDetailTab = "summary" | "statistics" | "lineups" | "commentary" | "h2h" | "highlights";
+export type MatchDetailTab =
+  | "summary"
+  | "watch"
+  | "statistics"
+  | "lineups"
+  | "commentary"
+  | "h2h"
+  | "highlights";
 export type TournamentSubTab = "matches" | "standings" | "bracket" | "stats" | "history";
 
 export type NavigationContext = {

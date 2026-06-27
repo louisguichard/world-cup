@@ -30,6 +30,19 @@
   gap: 6px;
 }
 
+.teamCellBtn {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
 .pointBar {
   height: 6px;
   margin-top: 4px;

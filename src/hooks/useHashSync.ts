@@ -15,7 +15,15 @@ const VALID_TABS: TabId[] = [
   "tournament"
 ];
 const VALID_SIMULATOR_MODES: SimulatorMode[] = ["tournament", "probabilities", "methodology"];
-const VALID_MATCH_TABS: MatchDetailTab[] = ["summary", "highlights", "statistics", "lineups", "commentary", "h2h"];
+const VALID_MATCH_TABS: MatchDetailTab[] = [
+  "summary",
+  "watch",
+  "highlights",
+  "statistics",
+  "lineups",
+  "commentary",
+  "h2h",
+];
 const VALID_TOURNAMENT_SUB_TABS: TournamentSubTab[] = ["matches", "standings", "bracket", "stats", "history"];
 
 export type ParsedAppHash = {

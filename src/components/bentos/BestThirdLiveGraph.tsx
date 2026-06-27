@@ -1,11 +1,16 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useBestThirdLiveGraphState } from "../../hooks/useBestThirdLiveGraphState";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
+import { buildThirdPlaceCutoffScenario, CUTOFF_RANK } from "../../lib/thirdPlaceCutoffScenario";
+import { buildQualificationContext } from "../../lib/qualification";
 import { useStore } from "../../store";
+import type { Team } from "../../types";
 import { TeamFlag } from "../team/TeamFlag";
+import { TeamClickTarget } from "../team/TeamClickTarget";
 import { BestThirdRankingTable } from "./BestThirdRankingTable";
 import { BestThirdTimelineChart } from "./BestThirdTimelineChart";
+import { CutoffRowHoverWrap, ThirdPlaceCutoffPopover } from "./ThirdPlaceCutoffPopover";
 import styles from "./BestThirdLiveGraph.module.css";
 
 type Props = {
@@ -24,10 +29,93 @@ function deltaClass(delta: number): string {
   return styles.deltaFlat;
 }
 
+type LadderRowProps = {
+  rank: number;
+  row: { teamId: string; points: number; goalDifference: number };
+  teams: Record<string, Team>;
+  posDelta: number;
+  isFocus: boolean;
+  crossing?: { direction: "in" | "out" };
+  cutoffScenario: ReturnType<typeof buildThirdPlaceCutoffScenario>;
+};
+
+function LadderRow({
+  rank,
+  row,
+  teams,
+  posDelta,
+  isFocus,
+  crossing,
+  cutoffScenario,
+}: LadderRowProps) {
+  const anchorRef = useRef<HTMLLIElement>(null);
+  const tbl = APP_COPY.table;
+
+  const rowClasses = [
+    styles.ladderRow,
+    rank === CUTOFF_RANK ? styles.ladderCut : "",
+    rank > CUTOFF_RANK ? styles.ladderBelow : "",
+    isFocus ? styles.ladderFocus : "",
+    crossing?.direction === "in" ? styles.ladderCutoffIn : "",
+    crossing?.direction === "out" ? styles.ladderCutoffOut : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const rowInner = (
+    <>
+      <span className={styles.ladderRank}>{rank}</span>
+      <TeamFlag team={teams[row.teamId]} teamId={row.teamId} size="sm" />
+      <span className={`${styles.ladderName} team-name-text`}>
+        {teamDisplayName(teams[row.teamId], row.teamId)}
+      </span>
+      <span className={styles.ladderPts}>
+        {row.points} {tbl.points.toLowerCase()}
+      </span>
+      <span className={styles.ladderGd}>
+        {tbl.goalDiff}{" "}
+        {row.goalDifference >= 0 ? "+" : ""}
+        {row.goalDifference}
+      </span>
+      <span className={`${styles.ladderDelta} ${deltaClass(posDelta)}`}>{deltaArrow(posDelta)}</span>
+      {rank === CUTOFF_RANK && cutoffScenario ? (
+        <ThirdPlaceCutoffPopover scenario={cutoffScenario} teams={teams} anchorRef={anchorRef} />
+      ) : null}
+    </>
+  );
+
+  const clickableRow = (
+    <TeamClickTarget teamId={row.teamId} className={styles.ladderClick} options={{ tab: "context" }}>
+      {rowInner}
+    </TeamClickTarget>
+  );
+
+  const content =
+    rank === CUTOFF_RANK && cutoffScenario ? (
+      <CutoffRowHoverWrap scenario={cutoffScenario} teams={teams}>
+        {clickableRow}
+      </CutoffRowHoverWrap>
+    ) : (
+      clickableRow
+    );
+
+  return (
+    <li ref={anchorRef} className={rowClasses}>
+      {content}
+    </li>
+  );
+}
+
 export function BestThirdLiveGraph({ focusTeamIds }: Props) {
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
+  const liveMatches = useStore((s) => s.liveMatches);
   const [expanded, setExpanded] = useState(false);
+
+  const qualContext = useMemo(
+    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
+    [liveMatches, teams]
+  );
 
   const {
     snapshot,
@@ -77,7 +165,12 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
           {focusRows.map((row) => {
             const team = teams[row.teamId];
             return (
-              <div key={row.teamId} className={styles.focusCard}>
+              <TeamClickTarget
+                key={row.teamId}
+                teamId={row.teamId}
+                className={styles.focusCard}
+                options={{ tab: "context" }}
+              >
                 <div className={styles.focusRank}>#{row.rank}</div>
                 <TeamFlag team={team} teamId={row.teamId} size="sm" />
                 <div className={styles.focusMeta}>
@@ -97,7 +190,7 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
                 <span className={`${styles.focusDelta} ${deltaClass(row.positionDelta)}`}>
                   {deltaArrow(row.positionDelta)}
                 </span>
-              </div>
+              </TeamClickTarget>
             );
           })}
         </div>
@@ -121,42 +214,25 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
         <ol className={styles.ladder} aria-label="Best third rankings">
           {compactRows.map((row, index) => {
             const rank = index + 1;
-            const isFocus = focusTeamIds.includes(row.teamId);
             const delta = snapshot.deltas.find((d) => d.teamId === row.teamId);
             const posDelta = delta ? delta.positionBefore - delta.positionAfter : 0;
             const crossing = cutoffCrossings.find((c) => c.teamId === row.teamId);
+            const cutoffScenario =
+              rank === CUTOFF_RANK
+                ? buildThirdPlaceCutoffScenario(row.teamId, ranked, standings, qualContext)
+                : null;
 
             return (
-              <li
+              <LadderRow
                 key={row.teamId}
-                className={[
-                  styles.ladderRow,
-                  rank === 8 ? styles.ladderCut : "",
-                  rank > 8 ? styles.ladderBelow : "",
-                  isFocus ? styles.ladderFocus : "",
-                  crossing?.direction === "in" ? styles.ladderCutoffIn : "",
-                  crossing?.direction === "out" ? styles.ladderCutoffOut : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                <span className={styles.ladderRank}>{rank}</span>
-                <TeamFlag team={teams[row.teamId]} teamId={row.teamId} size="sm" />
-                <span className={`${styles.ladderName} team-name-text`}>
-                  {teamDisplayName(teams[row.teamId], row.teamId)}
-                </span>
-                <span className={styles.ladderPts}>
-                  {row.points} {tbl.points.toLowerCase()}
-                </span>
-                <span className={styles.ladderGd}>
-                  {tbl.goalDiff}{" "}
-                  {row.goalDifference >= 0 ? "+" : ""}
-                  {row.goalDifference}
-                </span>
-                <span className={`${styles.ladderDelta} ${deltaClass(posDelta)}`}>
-                  {deltaArrow(posDelta)}
-                </span>
-              </li>
+                rank={rank}
+                row={row}
+                teams={teams}
+                posDelta={posDelta}
+                isFocus={focusTeamIds.includes(row.teamId)}
+                crossing={crossing}
+                cutoffScenario={cutoffScenario}
+              />
             );
           })}
           <li className={styles.ladderCutLabel} aria-hidden>
@@ -171,6 +247,8 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
           focusTeamIds={focusTeamIds}
           cutoffCrossings={cutoffCrossings}
           showBubbleColumn
+          ranked={ranked}
+          qualContext={qualContext}
         />
       )}
 

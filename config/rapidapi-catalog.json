@@ -569,5 +569,37 @@
       { "id": "players", "fn": "fetchHighlightlyPlayers", "path": "/football/players?limit=2", "acceptStatuses": [200, 429] },
       { "id": "boxScore", "fn": "fetchHighlightlyBoxScore", "path": "/football/box-score/1329761470", "acceptStatuses": [200, 404, 429] }
     ]
+  },
+  {
+    "id": "all-sport-live-stream",
+    "label": "All Sport Live Stream",
+    "host": "all-sport-live-stream.p.rapidapi.com",
+    "marketplaceSlug": "all-sport-live-stream",
+    "client": "AllSportLiveStreamClient.ts",
+    "devProxyPrefix": "/api/all-sport-live-stream",
+    "testPath": "/api/v6/sport-id",
+    "endpoints": [
+      { "id": "sportIdsV6", "fn": "fetchLiveStreamSports", "path": "/api/v6/sport-id", "acceptStatuses": [200, 429] },
+      { "id": "scheduleV6", "fn": "fetchLiveStreamSchedule", "path": "/api/v6/matches?slug=football&current_date={todayIso}", "acceptStatuses": [200, 400, 429] },
+      { "id": "playStreamV6", "fn": "fetchLiveStreamPlay", "path": "/api/v6/play-stream?id=1", "acceptStatuses": [200, 400, 429] },
+      { "id": "checkAvailabilityV4", "fn": "checkLiveStreamAvailability", "path": "/api/v6/play-stream?id=1", "acceptStatuses": [200, 400, 429] },
+      { "id": "allLiveStreamV1", "fn": "fetchLegacyAllLiveStream", "path": "/api/v1/all-live-stream?slug=football", "acceptStatuses": [200, 408, 429, 504] }
+    ]
+  },
+  {
+    "id": "sports-live-scores",
+    "label": "Sports Live Scores",
+    "host": "sports-live-scores.p.rapidapi.com",
+    "marketplaceSlug": "sports-live-scores",
+    "client": "SportsLiveScoresClient.ts",
+    "devProxyPrefix": "/api/sports-live-scores",
+    "testPath": "/get_odds/11352563",
+    "endpoints": [
+      { "id": "oddsByMatchId", "fn": "fetchSportsLiveScoresOdds", "path": "/get_odds/11352563", "acceptStatuses": [200, 429] },
+      { "id": "footballLive", "fn": "fetchSportsLiveScoresFootballLive", "path": "/football/live", "acceptStatuses": [200, 429, 500] },
+      { "id": "footballRankingsFifa", "fn": "fetchSportsLiveScoresFootballRankings", "path": "/football/rankings/fifa", "acceptStatuses": [200, 429] },
+      { "id": "footballMatchLineups", "fn": "fetchSportsLiveScoresFootballMatchLineups", "path": "/football/match_lineups/11352563", "acceptStatuses": [200, 429] },
+      { "id": "tennisLive", "fn": "fetchSportsLiveScoresSportLive", "path": "/tennis/live", "acceptStatuses": [200, 429, 500] }
+    ]
   }
 ]

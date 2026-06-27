@@ -1,0 +1,113 @@
+.panel {
+  padding: 16px;
+}
+
+.muted {
+  font-size: 13px;
+  color: var(--ss-muted);
+  line-height: 1.5;
+}
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--ss-text);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ss-danger) 18%, transparent);
+  color: var(--ss-danger);
+}
+
+.league,
+.id {
+  font-size: 11px;
+  color: var(--ss-muted);
+}
+
+.unavailable {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface-2, var(--surface));
+}
+
+.playerWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  margin-bottom: 12px;
+}
+
+.player {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.serverList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.serverLink {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface-2, var(--surface));
+  color: var(--ss-brand);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.serverLink:hover {
+  text-decoration: underline;
+}
+
+.openBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--ss-brand);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.embedHtml {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.embedHtml iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}

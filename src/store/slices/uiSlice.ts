@@ -1,4 +1,5 @@
 import type { BracketViewMode, GroupsViewMode, SimulatorMode, SplashPhase, TabId } from "../../types";
+import type { OpenTeamSheetOptions, TeamDrawerTab } from "../../lib/teamDrawer";
 import {
   readStoredColorScheme,
   writeStoredColorScheme,
@@ -17,6 +18,7 @@ export type UiSliceState = {
   groupsViewMode: GroupsViewMode;
   activeTeamId: string | null;
   teamSheetOpen: boolean;
+  teamSheetTab: TeamDrawerTab;
   colorScheme: ColorSchemePreference;
   moduleFreshness: Partial<Record<ModuleId, number>>;
   setActiveTab: (tab: TabId) => void;
@@ -27,7 +29,7 @@ export type UiSliceState = {
   setBracketViewMode: (mode: BracketViewMode) => void;
   setGroupsViewMode: (mode: GroupsViewMode) => void;
   setColorScheme: (scheme: ColorSchemePreference) => void;
-  openTeamSheet: (teamId: string) => void;
+  openTeamSheet: (teamId: string, options?: OpenTeamSheetOptions) => void;
   closeTeamSheet: () => void;
   touchModuleFreshness: (moduleId: ModuleId) => void;
 };
@@ -45,6 +47,7 @@ export const createUiSlice = (
   groupsViewMode: "flags",
   activeTeamId: null,
   teamSheetOpen: false,
+  teamSheetTab: "overview",
   colorScheme: readStoredColorScheme(),
   moduleFreshness: {},
 
@@ -63,8 +66,13 @@ export const createUiSlice = (
     writeStoredColorScheme(scheme);
     set(() => ({ colorScheme: scheme }));
   },
-  openTeamSheet: (teamId) => set(() => ({ activeTeamId: teamId, teamSheetOpen: true })),
-  closeTeamSheet: () => set(() => ({ teamSheetOpen: false })),
+  openTeamSheet: (teamId, options) =>
+    set(() => ({
+      activeTeamId: teamId,
+      teamSheetOpen: true,
+      teamSheetTab: options?.tab ?? "overview",
+    })),
+  closeTeamSheet: () => set(() => ({ teamSheetOpen: false, teamSheetTab: "overview" })),
   touchModuleFreshness: (moduleId) =>
     set((state) => ({
       moduleFreshness: { ...state.moduleFreshness, [moduleId]: Date.now() },

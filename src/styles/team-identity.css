@@ -204,6 +204,162 @@
   min-width: 0;
 }
 
+button.team-label,
+.team-label--clickable {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  max-width: 100%;
+}
+
+button.team-label:focus-visible,
+.team-label--clickable[role="button"]:focus-visible {
+  outline: 2px solid var(--fwc-royal-blue);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.team-click-target {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+.team-click-target:focus-visible {
+  outline: 2px solid var(--fwc-royal-blue);
+  outline-offset: 2px;
+}
+
+.qual-team-chip.team-click-target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.qual-team-rank-hint {
+  font-size: 0.62rem;
+  color: var(--muted);
+  text-align: center;
+  max-width: 5.5rem;
+  line-height: 1.2;
+}
+
+.knockout-story-card {
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--status-danger) 35%, var(--line));
+  background: color-mix(in srgb, var(--status-danger) 8%, var(--surface));
+}
+
+.knockout-story-card h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.knockout-story-card p {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.knockout-story-known ul,
+.knockout-story-timeline ul {
+  margin: 4px 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+}
+
+.knockout-story-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.knockout-story-btn,
+.knockout-story-link {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.team-match-history-row--clickable {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.team-match-history-row--clickable:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.team-sheet-qual-oneliner {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+}
+
+.team-form-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.team-form-row {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.82rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.team-historical-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.team-historical-row {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.result-match-card--interactive {
+  cursor: pointer;
+}
+
 .bracket-team-themed {
   border-left: 3px solid var(--team-primary);
   background: color-mix(in srgb, var(--team-primary) 8%, var(--surface));
