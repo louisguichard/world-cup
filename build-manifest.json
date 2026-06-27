@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-27T07:20:01.115Z",
+  "updatedAt": "2026-06-27T07:20:02.212Z",
   "builds": [
     {
       "version": "3.0.0",
@@ -91,6 +91,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "0a554fdbf0de86f0d7b8adec69c05c9d136a0c1c",
+      "shortHash": "0a554fd",
+      "message": "Fix Mexico crest, seed group standings, and sync hash navigation.",
+      "version": "3.0.0",
+      "build": 22,
+      "timestamp": "2026-06-27T07:20:02.207Z"
+    },
     {
       "hash": "6d9295d92db7159cf31910c825e0baac5091fd27",
       "shortHash": "6d9295d",
