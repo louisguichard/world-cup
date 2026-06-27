@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 1100;
-  background: var(--bg, #0b0f19);
+  background: var(--surface-base);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -88,7 +88,7 @@
 
 .expandBtn:hover,
 .expandBtnActive {
-  border-color: var(--accent, #6366f1);
+  border-color: var(--fwc-royal-blue);
   color: var(--text, #f3f4f6);
 }
 

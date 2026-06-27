@@ -1,0 +1,289 @@
+.timeline {
+  overflow: hidden;
+  margin-top: var(--module-gap-lg, 20px);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: clamp(12px, 3vw, 16px) clamp(14px, 3vw, 20px) 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.contextLabel {
+  margin: 0;
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  color: var(--text);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.chartArea {
+  width: 100%;
+  overflow-x: auto;
+  padding: 8px 0;
+  background: var(--surface-2);
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  min-width: min(100%, 500px);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.controls button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.controls button:hover {
+  background: var(--surface-3);
+}
+
+.speedControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.speedActive {
+  background: var(--accent) !important;
+  color: var(--accent-ink) !important;
+  border-color: var(--accent) !important;
+}
+
+.slider {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.sliderWrap {
+  padding: 12px 16px 4px;
+  position: relative;
+}
+
+.tickRow {
+  position: relative;
+  height: 16px;
+  margin: 0 16px 8px;
+}
+
+.tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  top: 4px;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.tick--goal {
+  border-radius: 50%;
+}
+
+.tick--match-start {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 7px solid var(--muted);
+  border-radius: 0;
+  background: none;
+  top: 2px;
+}
+
+.tick--final-whistle {
+  width: 2px;
+  height: 10px;
+  border-radius: 1px;
+  background: var(--line-2);
+  top: 3px;
+}
+
+.callout {
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.calloutGoal {
+  background: color-mix(in srgb, var(--status-success) 8%, var(--surface-2));
+  border-top-color: color-mix(in srgb, var(--status-success) 24%, var(--line));
+}
+
+.deltaUp {
+  color: var(--status-success);
+  font-weight: 700;
+}
+
+.deltaDown {
+  color: var(--status-danger);
+  font-weight: 700;
+}
+
+.deltaFlat {
+  color: var(--muted);
+}
+
+.tableWrap {
+  padding: 0 8px 8px;
+}
+
+.miniTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.miniTable td,
+.miniTable th {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  color: var(--text);
+}
+
+.miniTable th {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.miniTable td:nth-child(2) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cutLine td {
+  border-bottom: 2px dashed var(--warn);
+}
+
+.belowCut {
+  opacity: var(--dimmed-opacity);
+}
+
+.cutLabelRow td {
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--warn);
+  border-bottom: none;
+  padding-top: 4px;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--live-surface);
+  border: 1px solid var(--live-border);
+  color: var(--on-live);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.svgCutLine {
+  stroke: var(--warn);
+  stroke-dasharray: 4 3;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.svgCurrentLine {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: none;
+  fill: none;
+}
+
+.svgTeamLine {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-width 0.15s ease, opacity 0.15s ease;
+  cursor: pointer;
+}
+
+.svgGoalDot {
+  cursor: pointer;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--line);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.legendSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}

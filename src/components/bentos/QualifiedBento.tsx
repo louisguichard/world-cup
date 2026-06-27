@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { bucketQualificationTeams, buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
 import { TeamFlag } from "../team/TeamFlag";
@@ -71,28 +72,27 @@ export function QualifiedBento() {
 
   const hasAny = buckets.confirmedThrough.length > 0 || buckets.projectedThrough.length > 0;
 
+  const q = APP_COPY.qual;
+
   return (
     <section className="qual-bento qual-bento--qualified" aria-label="Qualified teams">
-      <h3 className="qual-bento-title">Qualified</h3>
-      <p className="qual-bento-lead">
-        Top-two places — <strong>Confirmed</strong> when the group stage is final; <strong>Projected</strong> while
-        matches remain.
-      </p>
+      <h3 className="qual-bento-title">{q.qualifiedTitle}</h3>
+      <p className="qual-bento-lead">{q.qualifiedLead}</p>
       {hasAny ? (
         <>
           <QualSection
-            title="Confirmed · Qualified"
-            hint="100% through — group stage complete and final rank is top two. No remaining result can change this."
+            title={q.confirmedQualifiedSection}
+            hint={q.confirmedQualifiedHint}
             teamIds={buckets.confirmedThrough}
           />
           <QualSection
-            title="Projected · To Qualify"
-            hint="Currently in the top two based on live results, but remaining group matches could still change the outcome."
+            title={q.projectedQualifiedSection}
+            hint={q.projectedQualifiedHint}
             teamIds={buckets.projectedThrough}
           />
         </>
       ) : (
-        <p className="qual-bento-empty">No teams in the top two yet.</p>
+        <p className="qual-bento-empty">{q.noQualified}</p>
       )}
     </section>
   );
@@ -114,30 +114,29 @@ export function EliminatedBento() {
 
   const hasAny = buckets.confirmedOut.length > 0 || buckets.projectedOut.length > 0;
 
+  const q = APP_COPY.qual;
+
   return (
     <section className="qual-bento qual-bento--eliminated" aria-label="Eliminated teams">
-      <h3 className="qual-bento-title">Eliminated</h3>
-      <p className="qual-bento-lead">
-        <strong>Confirmed</strong> when mathematically out; <strong>Projected</strong> when likely out but not yet
-        100% ruled out.
-      </p>
+      <h3 className="qual-bento-title">{q.eliminatedTitle}</h3>
+      <p className="qual-bento-lead">{q.eliminatedLead}</p>
       {hasAny ? (
         <>
           <QualSection
-            title="Confirmed · Eliminated"
-            hint="Mathematically eliminated — even maximum points from here cannot reach knockout qualification."
+            title={q.confirmedEliminatedSection}
+            hint={q.confirmedEliminatedHint}
             teamIds={buckets.confirmedOut}
             dim
           />
           <QualSection
-            title="Projected · To Be Eliminated"
-            hint="Likely out based on live standings and remaining fixtures, but not yet mathematically confirmed."
+            title={q.projectedEliminatedSection}
+            hint={q.projectedEliminatedHint}
             teamIds={buckets.projectedOut}
             dim
           />
         </>
       ) : (
-        <p className="qual-bento-empty">No teams mathematically eliminated yet.</p>
+        <p className="qual-bento-empty">{q.noEliminated}</p>
       )}
     </section>
   );
@@ -157,10 +156,12 @@ export function InContentionBento() {
     [teams, standings, qualContext]
   );
 
+  const q = APP_COPY.qual;
+
   return (
     <section className="qual-bento qual-bento--contention" aria-label="Teams still in contention">
-      <h3 className="qual-bento-title">In contention</h3>
-      <p className="qual-bento-lead">Third-place and best-eight-third races still open.</p>
+      <h3 className="qual-bento-title">{q.contentionTitle}</h3>
+      <p className="qual-bento-lead">{q.contentionLead}</p>
       {inContention.length > 0 ? (
         <div className="qual-bento-crests">
           {inContention.slice(0, 12).map((id) => (
@@ -168,7 +169,7 @@ export function InContentionBento() {
           ))}
         </div>
       ) : (
-        <p className="qual-bento-empty">No teams on the bubble right now.</p>
+        <p className="qual-bento-empty">{q.noContention}</p>
       )}
     </section>
   );
@@ -182,12 +183,13 @@ export function BestThirdsBento() {
     () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
     [liveMatches, teams]
   );
+  const bt = APP_COPY.bestThird;
   const best = rankAliveBestThirds(standings, qualContext).slice(0, 8);
 
   return (
-    <section className="qual-bento qual-bento--thirds" aria-label="Best third place teams">
-      <h3 className="qual-bento-title">Best 3rd</h3>
-      <p className="qual-bento-lead">Projected top eight third-placed teams (not final until all groups finish).</p>
+    <section className="qual-bento qual-bento--thirds" aria-label={bt.title}>
+      <h3 className="qual-bento-title">{bt.title}</h3>
+      <p className="qual-bento-lead">{bt.subtitle}</p>
       <div className="qual-bento-crests">
         {best.map((r) => (
           <QualTeamChip key={r.teamId} teamId={r.teamId} />

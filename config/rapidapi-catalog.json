@@ -12,68 +12,160 @@
         "id": "health",
         "fn": "healthCheck",
         "path": "/health",
-        "acceptStatuses": [200]
+        "acceptStatuses": [200, 429]
+      },
+      {
+        "id": "meta",
+        "fn": "fetchMeta",
+        "path": "/",
+        "acceptStatuses": [200, 429]
       },
       {
         "id": "listTournaments",
-        "fn": "getTournament",
+        "fn": "listTournaments",
         "path": "/tournaments",
-        "acceptStatuses": [200]
+        "acceptStatuses": [200, 401, 429]
       },
       {
         "id": "getTournament",
         "fn": "getTournament",
         "path": "/tournaments/2026",
-        "acceptStatuses": [200, 401],
+        "acceptStatuses": [200, 401, 404, 429],
         "requiresZafronixKey": true
       },
       {
-        "id": "fetchBracket",
-        "fn": "fetchBracket",
-        "path": "/bracket?year=2026",
-        "acceptStatuses": [200, 401, 404],
+        "id": "fetchTeamsList",
+        "fn": "fetchTeamsList",
+        "path": "/teams",
+        "acceptStatuses": [200, 401, 404, 429],
         "requiresZafronixKey": true
       },
       {
         "id": "fetchTeamProfile",
         "fn": "fetchTeamProfile",
         "path": "/teams/Brazil",
-        "acceptStatuses": [200, 401, 404],
-        "requiresZafronixKey": true
-      },
-      {
-        "id": "fetchTeamForm",
-        "fn": "getHistoricalMatchesForTeam",
-        "path": "/teams/Brazil",
-        "acceptStatuses": [200, 401, 404],
+        "acceptStatuses": [200, 401, 404, 429],
         "requiresZafronixKey": true
       },
       {
         "id": "fetchTeamRoster",
         "fn": "fetchTeamRoster",
         "path": "/teams/Brazil/roster?year=2026",
-        "acceptStatuses": [200, 401, 404],
+        "acceptStatuses": [200, 401, 404, 429],
         "requiresZafronixKey": true
       },
       {
-        "id": "getTrivia",
-        "fn": "getTrivia",
-        "path": "/trivia",
-        "acceptStatuses": [200, 401, 404],
+        "id": "fetchMatches",
+        "fn": "fetchMatches",
+        "path": "/matches?limit=5",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchMatch",
+        "fn": "fetchMatch",
+        "path": "/matches/{sampleMatchId}",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true,
+        "skipIfUnresolved": true
+      },
+      {
+        "id": "fetchMatchHistory",
+        "fn": "fetchMatchHistory",
+        "path": "/matches/{sampleMatchId}/history",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true,
+        "skipIfUnresolved": true
+      },
+      {
+        "id": "fetchLiveMatches",
+        "fn": "fetchLiveMatches",
+        "path": "/matches/live",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchBracket",
+        "fn": "fetchBracket",
+        "path": "/bracket?year=2026",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchStandings",
+        "fn": "fetchStandings",
+        "path": "/standings?year=2026",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchPlayers",
+        "fn": "fetchPlayers",
+        "path": "/players",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchPlayer",
+        "fn": "fetchPlayer",
+        "path": "/players/Lionel%20Messi",
+        "acceptStatuses": [200, 401, 404, 429],
         "requiresZafronixKey": true
       },
       {
         "id": "fetchStadiums",
         "fn": "fetchStadiums",
         "path": "/stadiums",
-        "acceptStatuses": [200, 401, 404],
+        "acceptStatuses": [200, 401, 404, 429],
         "requiresZafronixKey": true
       },
       {
-        "id": "fetchLiveMatches",
-        "fn": "fetchLiveMatches",
-        "path": "/matches/live",
-        "acceptStatuses": [200, 401, 404],
+        "id": "fetchCompare",
+        "fn": "fetchCompare",
+        "path": "/compare?team1=Brazil&team2=Argentina",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "getTrivia",
+        "fn": "getTrivia",
+        "path": "/trivia",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchAggregatePlayers",
+        "fn": "fetchAggregatePlayers",
+        "path": "/aggregates/players",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchAggregateChampions",
+        "fn": "fetchAggregateChampions",
+        "path": "/aggregates/champions",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "searchZafronix",
+        "fn": "searchZafronix",
+        "path": "/search?q=brazil",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchUsage",
+        "fn": "fetchUsage",
+        "path": "/me/usage",
+        "acceptStatuses": [200, 401, 404, 429],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchSandbox",
+        "fn": "fetchSandbox",
+        "path": "/sandbox",
+        "acceptStatuses": [200, 401, 404, 429],
         "requiresZafronixKey": true
       }
     ]
@@ -110,30 +202,83 @@
     ]
   },
   {
-    "id": "sportApi7",
-    "label": "SportAPI7",
-    "host": "sportapi7.p.rapidapi.com",
-    "marketplaceSlug": "sportapi7",
-    "client": "SportAPI7Client.ts",
-    "devProxyPrefix": "/api/sportapi",
-    "testPath": "/api/v1/category/1468/scheduled-events/{todayIso}",
+    "id": "sofascore6",
+    "label": "SofaScore6 RapidAPI",
+    "host": "sofascore6.p.rapidapi.com",
+    "marketplaceSlug": "sofascore6",
+    "client": "SofaScore6Client.ts",
+    "devProxyPrefix": "/api/sofascore6",
+    "testPath": "/api/sofascore/v1/match/live?sport_slug=football",
     "endpoints": [
       {
-        "id": "fetchScheduledEvents",
-        "fn": "fetchScheduledEvents",
-        "path": "/api/v1/category/1468/scheduled-events/{todayIso}",
+        "id": "fetchLiveEvents",
+        "fn": "fetchLiveEventsRaw",
+        "path": "/api/sofascore/v1/match/live?sport_slug=football",
         "acceptStatuses": [200]
       },
       {
-        "id": "fetchLiveEvents",
-        "fn": "fetchLiveEvents",
-        "path": "/api/v1/category/1468/events/live",
+        "id": "fetchScheduledToday",
+        "fn": "fetchScheduledToday",
+        "path": "/api/sofascore/v1/match/matches-by-date?sport_slug=football&date={todayIso}",
         "acceptStatuses": [200, 404]
       },
       {
         "id": "fetchIncidents",
         "fn": "fetchIncidents",
-        "path": "/api/v1/event/{sportApiEventId}/incidents",
+        "path": "/api/sofascore/v1/match/incidents?match_id={sofaEventId}",
+        "resolveKeys": ["sofaEventId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
+      },
+      {
+        "id": "fetchEventDetail",
+        "fn": "fetchEventDetail",
+        "path": "/api/sofascore/v1/match/details?match_id={sofaEventId}",
+        "resolveKeys": ["sofaEventId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
+      },
+      {
+        "id": "fetchMatchLineups",
+        "fn": "fetchMatchLineups",
+        "path": "/api/sofascore/v1/match/lineups?match_id={sofaEventId}",
+        "resolveKeys": ["sofaEventId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
+      },
+      {
+        "id": "searchAll",
+        "fn": "searchAll",
+        "path": "/api/sofascore/v1/search/all?q=world+cup",
+        "acceptStatuses": [200]
+      }
+    ]
+  },
+  {
+    "id": "sportApi7",
+    "label": "SofaScore6 (SportAPI7 alias)",
+    "host": "sofascore6.p.rapidapi.com",
+    "marketplaceSlug": "sofascore6",
+    "client": "SportAPI7Client.ts",
+    "devProxyPrefix": "/api/sofascore6",
+    "testPath": "/api/sofascore/v1/match/live?sport_slug=football",
+    "endpoints": [
+      {
+        "id": "fetchScheduledEvents",
+        "fn": "fetchScheduledEvents",
+        "path": "/api/sofascore/v1/match/matches-by-date?sport_slug=football&date={todayIso}",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "fetchLiveEvents",
+        "fn": "fetchLiveEvents",
+        "path": "/api/sofascore/v1/match/live?sport_slug=football",
+        "acceptStatuses": [200]
+      },
+      {
+        "id": "fetchIncidents",
+        "fn": "fetchIncidents",
+        "path": "/api/sofascore/v1/match/incidents?match_id={sportApiEventId}",
         "resolveKeys": ["sportApiEventId"],
         "acceptStatuses": [200, 404],
         "skipIfUnresolved": true
@@ -163,11 +308,17 @@
       },
       {
         "id": "fetchTeam",
-        "fn": "fetchTeam",
+        "fn": "fetchTeamDetail",
         "path": "/world-cup-2026/teams/{wc2026TeamId}",
         "resolveKeys": ["wc2026TeamId"],
         "acceptStatuses": [200, 404],
         "skipIfUnresolved": true
+      },
+      {
+        "id": "fetchPlayers",
+        "fn": "fetchAllPlayers",
+        "path": "/world-cup-2026/players",
+        "acceptStatuses": [200]
       }
     ]
   },
@@ -201,26 +352,34 @@
       {
         "id": "fetchMatchDetail",
         "fn": "fetchMatchDetail",
-        "path": "/wc/match/{sampleMatchId}",
-        "acceptStatuses": [200, 404]
+        "path": "/wc/match/{sampleMatchId}/detail",
+        "resolveKeys": ["sampleMatchId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
       },
       {
         "id": "fetchCommentary",
         "fn": "fetchCommentary",
-        "path": "/wc/commentary/{sampleMatchId}",
-        "acceptStatuses": [200, 404]
+        "path": "/wc/match/{sampleMatchId}/commentary",
+        "resolveKeys": ["sampleMatchId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
       },
       {
         "id": "fetchLineups",
         "fn": "fetchLineups",
-        "path": "/wc/lineups/{sampleMatchId}",
-        "acceptStatuses": [200, 404]
+        "path": "/wc/match/{sampleMatchId}/lineups",
+        "resolveKeys": ["sampleMatchId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
       },
       {
         "id": "fetchStats",
         "fn": "fetchStats",
-        "path": "/wc/stats/{sampleMatchId}",
-        "acceptStatuses": [200, 404]
+        "path": "/wc/match/{sampleMatchId}/stats",
+        "resolveKeys": ["sampleMatchId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
       }
     ]
   },
@@ -263,6 +422,121 @@
         "resolveKeys": ["oddsEventId"],
         "acceptStatuses": [200, 404],
         "skipIfUnresolved": true
+      }
+    ]
+  },
+  {
+    "id": "sofascoreRapid",
+    "label": "SofaScore RapidAPI",
+    "host": "sofascore.p.rapidapi.com",
+    "marketplaceSlug": "sofascore",
+    "client": "SofaScoreRapidClient.ts",
+    "devProxyPrefix": "/api/sofascore-rapid",
+    "testPath": "/teams/detail?teamId=4748",
+    "endpoints": [
+      { "id": "teamDetail", "fn": "fetchTeamDetailRaw", "path": "/teams/detail?teamId=4748", "acceptStatuses": [200] },
+      { "id": "teamSquad", "fn": "fetchTeamSquadRaw", "path": "/teams/get-squad?teamId=4748", "acceptStatuses": [200] },
+      { "id": "tournamentStandings", "fn": "fetchTournamentStandingsRaw", "path": "/tournaments/get-standings?tournamentId=16&seasonId=58210", "acceptStatuses": [200] },
+      { "id": "matchH2h", "fn": "fetchMatchH2hRaw", "path": "/matches/get-h2h?matchId=12813012", "acceptStatuses": [200] }
+    ]
+  },
+  {
+    "id": "footballPrediction",
+    "label": "Today Football Prediction",
+    "host": "today-football-prediction.p.rapidapi.com",
+    "marketplaceSlug": "today-football-prediction",
+    "client": "FootballPredictionClient.ts",
+    "devProxyPrefix": "/api/football-prediction",
+    "testPath": "/leagues/",
+    "endpoints": [
+      {
+        "id": "leagues",
+        "fn": "fetchLeagues",
+        "path": "/leagues/",
+        "acceptStatuses": [200]
+      },
+      {
+        "id": "dailyPredictions",
+        "fn": "fetchDailyPredictionsPage",
+        "path": "/predictions/list?page=1",
+        "acceptStatuses": [200]
+      },
+      {
+        "id": "performanceStats",
+        "fn": "fetchPerformanceStats",
+        "path": "/stats/performance",
+        "acceptStatuses": [200]
+      },
+      {
+        "id": "vipFeatured",
+        "fn": "fetchVipFeatured",
+        "path": "/predictions/featured?page=1",
+        "acceptStatuses": [200, 401]
+      },
+      {
+        "id": "vipScores",
+        "fn": "fetchVipScores",
+        "path": "/predictions/scores?page=1",
+        "acceptStatuses": [200, 401]
+      }
+    ]
+  },
+  {
+    "id": "worldCupHistory",
+    "label": "World Cup History (world-cup1)",
+    "host": "world-cup1.p.rapidapi.com",
+    "marketplaceSlug": "koukoulina001/api/world-cup1",
+    "client": "WorldCupHistoryClient.ts",
+    "devProxyPrefix": "/api/world-cup-history",
+    "testPath": "/winners/",
+    "endpoints": [
+      {
+        "id": "winners",
+        "fn": "fetchWinners",
+        "path": "/winners/",
+        "acceptStatuses": [200, 429]
+      },
+      {
+        "id": "winnersByYear",
+        "fn": "fetchWinnersByYear",
+        "path": "/winners_by_year/?year=2018",
+        "acceptStatuses": [200, 404, 429]
+      },
+      {
+        "id": "worldCupsDetails",
+        "fn": "fetchWorldCupsDetails",
+        "path": "/world_cups_details/",
+        "acceptStatuses": [200, 404, 429]
+      },
+      {
+        "id": "worldCupDetailByYear",
+        "fn": "fetchWorldCupDetailByYear",
+        "path": "/world_cup_detail_by_year/?year=2018",
+        "acceptStatuses": [200, 404, 429]
+      },
+      {
+        "id": "goldenBall",
+        "fn": "fetchGoldenBall",
+        "path": "/golden_ball/",
+        "acceptStatuses": [200, 404, 429]
+      },
+      {
+        "id": "goldenBoot",
+        "fn": "fetchGoldenBoot",
+        "path": "/golden_boot/",
+        "acceptStatuses": [200, 404, 429]
+      },
+      {
+        "id": "bestYoungPlayer",
+        "fn": "fetchBestYoungPlayer",
+        "path": "/best_young_player/",
+        "acceptStatuses": [200, 429]
+      },
+      {
+        "id": "goldenGlove",
+        "fn": "fetchGoldenGlove",
+        "path": "/golden_glove/",
+        "acceptStatuses": [200, 404, 429]
       }
     ]
   }

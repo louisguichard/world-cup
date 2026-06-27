@@ -56,22 +56,31 @@ describe("fetchEnrichmentEvents", () => {
     expect(fetchSofaToday).not.toHaveBeenCalled();
   });
 
-  it("falls back to SportAPI7 when FootballData is empty", async () => {
+  it("falls back to SofaScore6 when FootballData is empty", async () => {
     vi.mocked(fetchFootballDataToday).mockResolvedValue([]);
     vi.mocked(fetchSportApiToday).mockResolvedValue([mockEvent]);
     vi.mocked(fetchSofaToday).mockResolvedValue([{ ...mockEvent, id: 3 }]);
 
     const result = await fetchEnrichmentEvents();
-    expect(result.source).toBe("sportApi7");
-    expect(fetchSofaToday).not.toHaveBeenCalled();
+    expect(result.source).toBe("sofascore");
+    expect(fetchSportApiToday).not.toHaveBeenCalled();
   });
 
-  it("falls back to SofaScore when earlier sources are empty", async () => {
+  it("falls back to SportAPI7 alias when FootballData and SofaScore are empty", async () => {
     vi.mocked(fetchFootballDataToday).mockResolvedValue([]);
-    vi.mocked(fetchSportApiToday).mockResolvedValue([]);
-    vi.mocked(fetchSofaToday).mockResolvedValue([mockEvent]);
+    vi.mocked(fetchSportApiToday).mockResolvedValue([mockEvent]);
+    vi.mocked(fetchSofaToday).mockResolvedValue([]);
 
     const result = await fetchEnrichmentEvents();
-    expect(result.source).toBe("sofascore");
+    expect(result.source).toBe("sportApi7");
+  });
+
+  it("returns none when all sources are empty", async () => {
+    vi.mocked(fetchFootballDataToday).mockResolvedValue([]);
+    vi.mocked(fetchSportApiToday).mockResolvedValue([]);
+    vi.mocked(fetchSofaToday).mockResolvedValue([]);
+
+    const result = await fetchEnrichmentEvents();
+    expect(result.source).toBe("none");
   });
 });

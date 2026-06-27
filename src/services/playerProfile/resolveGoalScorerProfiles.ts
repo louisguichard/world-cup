@@ -4,6 +4,7 @@ import {
   fetchTeamPlayers,
   getWc2026TeamIdFromCache,
   isWorldCup2026Disabled,
+  lookupWc2026Player,
   resolveWc2026TeamId,
   type Wc2026Player,
 } from "../WorldCup2026Client";
@@ -117,6 +118,15 @@ export async function resolveGoalScorerProfiles(input: {
     if (rosterPlayer) {
       return buildProfileFromRoster(event, rosterPlayer, tournamentGoals);
     }
+
+    const fromIndex = lookupWc2026Player({
+      playerId: event.playerId,
+      playerName: event.playerName,
+    });
+    if (fromIndex) {
+      return buildProfileFromRoster(event, fromIndex, tournamentGoals);
+    }
+
     return buildFallbackProfile(event, tournamentGoals);
   });
 }

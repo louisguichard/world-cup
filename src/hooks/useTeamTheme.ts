@@ -13,7 +13,12 @@ const FALLBACK_VARS: Record<string, string> = {
   "--team-secondary": "#9CA3AF",
   "--team-on-primary": "#FFFFFF",
   "--team-gradient-start": "#6B7280",
-  "--team-gradient-end": "#9CA3AF"
+  "--team-gradient-end": "#9CA3AF",
+  "--team-crest-pad-start": "#4B5563",
+  "--team-crest-pad-end": "#374151",
+  "--team-crest-frame-start": "#6B7280",
+  "--team-crest-frame-end": "#9CA3AF",
+  "--team-crest-inset": "13%",
 };
 
 export function useTeamIdentity(teamId: string | undefined | null) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { H2HBundle, MergedMatch } from "../../../../types";
-import { getHistoricalMatchesForTeam } from "../../../../services/ZafronixClient";
+import { getHistoricalMatchesForTeam, fetchMatchHistory } from "../../../../services/ZafronixClient";
+import { fetchSofaRapidH2H } from "../../../../services/matchDetail/fetchSofaRapidH2H";
 import { hasZafronixKey, zafronixSignupUrl } from "../../../../lib/apiSetup";
 import { MatchTabEmptyState } from "../../../../components/shared/MatchTabEmptyState";
 import styles from "../../MatchDetailView.module.css";
@@ -78,15 +79,60 @@ export function MatchH2HTab({ match, homeTeamName, awayTeamName }: Props) {
     let cancelled = false;
     setLoading(true);
 
-    void Promise.allSettled([
-      getHistoricalMatchesForTeam(homeTeamName, 10),
-      getHistoricalMatchesForTeam(awayTeamName, 10)
-    ]).then(([homeRes, awayRes]) => {
+    const load = async () => {
+      if (match.sofaEventId) {
+        const sofa = await fetchSofaRapidH2H(match.sofaEventId);
+        if (cancelled) return;
+        if (sofa && (sofa.homeWins + sofa.awayWins + sofa.draws > 0 || sofa.events.length > 0)) {
+          setH2h({
+            team1Id: match.homeTeamId,
+            team2Id: match.awayTeamId,
+            summary: {
+              total: sofa.homeWins + sofa.awayWins + sofa.draws,
+              team1Wins: sofa.homeWins,
+              team2Wins: sofa.awayWins,
+              draws: sofa.draws,
+            },
+            matches: sofa.events.map((e) => ({
+              id: String(e.id),
+              date: e.date,
+              tournament: e.tournament ?? "SofaScore",
+              homeTeam: e.homeTeam,
+              awayTeam: e.awayTeam,
+              homeScore: e.homeScore ?? 0,
+              awayScore: e.awayScore ?? 0,
+            })),
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      const matchHistory = await fetchMatchHistory(match.id);
       if (cancelled) return;
-      const homeMatches =
-        homeRes.status === "fulfilled" ? homeRes.value : [];
-      const awayMatches =
-        awayRes.status === "fulfilled" ? awayRes.value : [];
+      if (matchHistory.length > 0) {
+        const bundle = buildH2HFromZafronix(
+          matchHistory,
+          [],
+          match.homeTeamId,
+          match.awayTeamId,
+          homeTeamName,
+          awayTeamName
+        );
+        if (bundle.summary.total > 0) {
+          setH2h(bundle);
+          setLoading(false);
+          return;
+        }
+      }
+
+      const [homeRes, awayRes] = await Promise.allSettled([
+        getHistoricalMatchesForTeam(homeTeamName, 10),
+        getHistoricalMatchesForTeam(awayTeamName, 10),
+      ]);
+      if (cancelled) return;
+      const homeMatches = homeRes.status === "fulfilled" ? homeRes.value : [];
+      const awayMatches = awayRes.status === "fulfilled" ? awayRes.value : [];
       const bundle = buildH2HFromZafronix(
         homeMatches,
         awayMatches,
@@ -97,10 +143,14 @@ export function MatchH2HTab({ match, homeTeamName, awayTeamName }: Props) {
       );
       setH2h(bundle);
       setLoading(false);
-    });
+    };
 
-    return () => { cancelled = true; };
-  }, [match.homeTeamId, match.awayTeamId, homeTeamName, awayTeamName]);
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [match.id, match.homeTeamId, match.awayTeamId, match.sofaEventId, homeTeamName, awayTeamName]);
 
   if (loading) {
     return (

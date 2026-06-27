@@ -1,18 +1,18 @@
-import { useEffect, useState } from "react";
-import type { Lineup, MatchStatisticsBundle, MergedMatch, CommentaryEntry } from "../types";
+import { useEffect, useMemo, useState } from "react";
+import type { Lineup, MatchStatisticsBundle, MergedMatch } from "../types";
+import type { WcCommentaryEntry } from "../services/WorldCup2026LiveClient";
 import { useMatchEnrichment } from "./useMatchEnrichment";
 import { DataOrchestrator } from "../services/orchestrator/DataOrchestrator";
 import { fetchMatchBundle } from "../services/matchDetail/fetchMatchBundle";
-import { fetchMatchEvents, publishMatchEvents } from "../services/matchDetail/fetchMatchEvents";
+import { mapEventsToCommentary } from "../services/matchDetail/mapEventsToCommentary";
+import { publishMatchEvents } from "../services/matchDetail/fetchMatchEvents";
 import { teamDisplayName } from "../lib/teamIdentity";
 import { useStore } from "../store";
-import { isApiEnabled } from "../config/apiFlags";
-import { isWc2026LiveDisabled } from "../services/WorldCup2026LiveClient";
 
 type BundleState = {
   statistics: MatchStatisticsBundle | null;
   lineups: Lineup[];
-  commentary: CommentaryEntry[];
+  commentary: WcCommentaryEntry[];
   loading: boolean;
   error: string | null;
   fetchedAt: number | null;
@@ -27,13 +27,26 @@ const INITIAL_STATE: BundleState = {
   fetchedAt: null,
 };
 
-/** Match detail bundle — orchestrator enrichment + direct WC Live fetch. */
+function resolveStoredEvents(
+  match: MergedMatch,
+  matchEvents: Record<string, import("../types").MatchEvent[]>
+): import("../types").MatchEvent[] {
+  const keys = [match.id, match.matchId, match.espnEventId].filter(Boolean) as string[];
+  for (const key of keys) {
+    const events = matchEvents[key];
+    if (events?.length) return events;
+  }
+  return [];
+}
+
+/** Match detail bundle — orchestrator enrichment + multi-source fetch cascade. */
 export function useMatchDetailBundle(
   match: MergedMatch | null,
   wcMatchId: string | null
 ): BundleState & { refetch: () => void } {
   const matchId = match?.id ?? null;
   const enrichment = useMatchEnrichment(matchId);
+  const matchEvents = useStore((s) => s.matchEvents);
   const [direct, setDirect] = useState<Pick<BundleState, "statistics" | "lineups" | "commentary">>({
     statistics: null,
     lineups: [],
@@ -57,42 +70,26 @@ export function useMatchDetailBundle(
     const homeName = teamDisplayName(teams[match.homeTeamId], match.homeTeamId);
     const awayName = teamDisplayName(teams[match.awayTeamId], match.awayTeamId);
 
-    if (wcMatchId && isApiEnabled("wc2026Live") && !isWc2026LiveDisabled()) {
-      let cancelled = false;
-      setDirectLoading(true);
+    let cancelled = false;
+    setDirectLoading(true);
 
-      void fetchMatchBundle(match, wcMatchId, forceKey > 0, { homeName, awayName }).then((bundle) => {
+    void fetchMatchBundle(match, wcMatchId, forceKey > 0, { homeName, awayName, teams }).then(
+      (bundle) => {
         if (cancelled) return;
         setDirect({
           statistics: bundle.statistics,
           lineups: bundle.lineups,
-          commentary: bundle.commentary.map((e) => ({
-            minute: typeof e.minute === "number" ? e.minute : Number(e.minute) || 0,
-            text: e.text,
-            type: e.type as CommentaryEntry["type"],
-          })),
+          commentary: bundle.commentary,
         });
         setFetchedAt(bundle.fetchedAt);
         setDirectLoading(false);
         if (bundle.events.length > 0) publishMatchEvents(match, bundle.events);
-      });
+      }
+    );
 
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    if (match.status === "live" || match.status === "completed") {
-      let cancelled = false;
-      void fetchMatchEvents(match, wcMatchId, { homeName, awayName }).then((events) => {
-        if (!cancelled && events.length > 0) publishMatchEvents(match, events);
-      });
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    return undefined;
+    return () => {
+      cancelled = true;
+    };
   }, [match, wcMatchId, forceKey, teams]);
 
   const refetch = () => {
@@ -103,9 +100,29 @@ export function useMatchDetailBundle(
     setForceKey((k) => k + 1);
   };
 
+  const storedEvents = useMemo(
+    () => (match ? resolveStoredEvents(match, matchEvents) : []),
+    [match, matchEvents]
+  );
+
   const statistics = enrichment.statistics ?? direct.statistics;
   const lineups = enrichment.lineups.length > 0 ? enrichment.lineups : direct.lineups;
-  const commentary = enrichment.commentary.length > 0 ? enrichment.commentary : direct.commentary;
+
+  const enrichmentCommentary: WcCommentaryEntry[] =
+    enrichment.commentary.length > 0
+      ? enrichment.commentary.map((e) => ({
+          minute: e.minute,
+          text: e.text,
+          type: e.type,
+        }))
+      : [];
+
+  const commentary: WcCommentaryEntry[] =
+    enrichmentCommentary.length > 0
+      ? enrichmentCommentary
+      : direct.commentary.length > 0
+        ? direct.commentary
+        : mapEventsToCommentary(storedEvents);
 
   return {
     statistics,

@@ -8,8 +8,15 @@ export const APP_BRAND = {
   name: "Road to the World Cup Final 2026",
   /** Short nav / compact headers */
   shortName: "Road to the Final",
-  /** Two-letter mark in top bar */
+  /** Two-letter mark in top bar (fallback text) */
   mark: "WC",
+  /** Primary trophy logo — cartoon hyperrealistic WC 2026 mark */
+  logoMark: "/logo/wc-trophy-mark.png",
+  /** Full trophy logo for splash & marketing */
+  logoFull: "/logo/wc-trophy-logo.png",
+  /** Compact splash hero */
+  logoSplash: "/logo/wc-trophy-splash.png",
+  logoAlt: "FIFA World Cup trophy — Road to the Final 2026",
   /** Splash headline line 1 */
   splashLine1: "ROAD TO THE",
   /** Splash headline line 2 */
@@ -20,7 +27,7 @@ export const APP_BRAND = {
   tournament: "FIFA World Cup 2026™",
   /** One-line product description */
   tagline:
-    "Live scores, qualification tracking, venue hubs, and Monte Carlo tournament intelligence for the 48-team FIFA World Cup 2026™.",
+    "Follow live World Cup games, see who moves on, and explore every team and match — built for the 2026 tournament.",
   /** npm / internal package identifier (not shown in UI) */
   packageName: "road-to-wc-final",
   /** PWA short name */

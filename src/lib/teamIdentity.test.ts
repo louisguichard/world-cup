@@ -85,6 +85,8 @@ describe("teamIdentityToCssVars", () => {
     expect(vars["--team-on-primary"]).toBeTruthy();
     expect(vars["--team-gradient-start"]).toBe("#009C3B");
     expect(vars["--team-gradient-end"]).toBe("#FFDF00");
+    expect(vars["--team-crest-pad-start"]).toBeTruthy();
+    expect(vars["--team-crest-pad-end"]).toBeTruthy();
   });
 });
 

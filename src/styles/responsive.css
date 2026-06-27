@@ -1,0 +1,236 @@
+/* Fluid, device-agnostic layout — phone → tablet → desktop → ultra-wide */
+
+html {
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.wc-chrome {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+.wc-main,
+.wc-main-simulator {
+  width: min(var(--layout-max), calc(100% - var(--layout-gutter-inline) * 2));
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Hero & section spacing scale with viewport */
+.hero-panel,
+.hero-panel--compact {
+  padding: clamp(16px, 4vw, 28px) clamp(16px, 4vw, 32px);
+}
+
+.hero-panel--compact h1 {
+  max-width: min(22ch, 100%);
+}
+
+.dashboard-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--layout-section-gap);
+  min-width: 0;
+}
+
+/* Bracket — fluid columns; horizontal scroll only when truly needed */
+.bracket-view {
+  --bracket-gap: var(--bracket-col-gap);
+}
+
+.bracket-head,
+.bracket-rounds {
+  grid-template-columns: repeat(5, var(--bracket-col-width));
+  gap: var(--bracket-col-gap);
+  min-width: min(
+    100%,
+    calc(5 * var(--bracket-col-width) + 4 * var(--bracket-col-gap))
+  );
+}
+
+.bracket-scroll {
+  margin-inline: calc(-1 * var(--layout-gutter));
+  padding-inline: var(--layout-gutter);
+  scroll-padding-inline: var(--layout-gutter);
+}
+
+/* Group / standings tables — fit narrow screens; scroll when columns need room */
+.group-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-inline: 8px;
+}
+
+.group-table {
+  min-width: min(100%, 36rem);
+}
+
+/* Teams filters — wrap on desktop; scroll on phones */
+.teams-filters {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .teams-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    margin-inline: calc(-1 * var(--layout-gutter));
+    padding-inline: var(--layout-gutter);
+  }
+
+  .teams-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .teams-filter-pill {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+}
+
+/* Bottom nav — scroll on small screens (many tabs) */
+@media (max-width: 960px) {
+  .bottom-tab-bar {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding-left: max(8px, var(--safe-left));
+    padding-right: max(8px, var(--safe-right));
+  }
+
+  .bottom-tab-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bottom-tab {
+    flex: 0 0 auto;
+    min-width: max(4.5rem, 11vw);
+    scroll-snap-align: start;
+  }
+
+  .bottom-tab-theme {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    margin-right: 4px;
+    padding-right: 4px;
+    background: linear-gradient(
+      90deg,
+      var(--surface-base) 85%,
+      color-mix(in srgb, var(--surface-base) 40%, transparent)
+    );
+  }
+}
+
+/* Top bar — wrap meta on narrow phones */
+@media (max-width: 640px) {
+  .wc-topbar {
+    margin-bottom: 12px;
+  }
+
+  .wc-topbar-inner {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding: 8px max(12px, var(--safe-left));
+  }
+
+  .wc-topbar-meta {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px 8px;
+    max-width: 100%;
+  }
+
+  .wc-topbar-meta .updated-at {
+    display: none;
+  }
+
+  .brand-text small {
+    display: none;
+  }
+
+  .live-command-row {
+    grid-template-columns: 1fr;
+  }
+
+  .bracket-view .bracket-toggle {
+    grid-template-columns: 1fr;
+  }
+
+  .bracket-view .bracket-toggle button {
+    align-items: stretch;
+  }
+
+  .groups-view-toggle {
+    display: flex;
+    width: 100%;
+  }
+
+  .groups-view-toggle-btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  .results-controls-sticky {
+    position: static;
+  }
+
+  .recent-result-row {
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 6px 8px;
+  }
+
+  .recent-result-meta {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+/* Tablet — two-column groups where space allows (modules.css owns base grid) */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .groups-table-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  }
+}
+
+/* Desktop — side-by-side live hero + third-place graph */
+@media (min-width: 1024px) {
+  .live-command-row {
+    grid-template-columns: minmax(0, 1.15fr) minmax(min(100%, 320px), 0.85fr);
+  }
+}
+
+/* Ultra-wide — cap readable line length in hero copy */
+@media (min-width: 1600px) {
+  .hero-panel p,
+  .bracket-hint,
+  .qual-bento-lead,
+  .section-note {
+    max-width: var(--content-readable);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .live-now-strip,
+  .teams-filters,
+  .bottom-tab-bar,
+  .bracket-scroll {
+    scroll-behavior: auto;
+  }
+}

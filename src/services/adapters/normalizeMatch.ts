@@ -18,8 +18,8 @@ export function normalizeWCLiveMatch(raw: unknown): Partial<MergedMatch> {
   if (id != null) partial.id = String(id);
   if (raw.matchId != null) partial.matchId = String(raw.matchId);
 
-  const homeScore = parseScoreValue(raw.homeScore);
-  const awayScore = parseScoreValue(raw.awayScore);
+  const homeScore = parseScoreValue(raw.homeScore ?? raw.scoreHome);
+  const awayScore = parseScoreValue(raw.awayScore ?? raw.scoreAway);
   if (homeScore !== undefined) partial.homeScore = homeScore;
   if (awayScore !== undefined) partial.awayScore = awayScore;
 

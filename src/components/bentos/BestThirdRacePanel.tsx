@@ -5,6 +5,7 @@ import { formatLiveClock } from "../../lib/formatMatchClock";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import type { GroupStanding, MergedMatch, TeamRecord } from "../../types";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { TeamFlag } from "../team/TeamFlag";
 
@@ -14,18 +15,24 @@ function statusLabel(
   standings: GroupStanding[],
   qualContext: ReturnType<typeof buildQualificationContext>
 ): { text: string; className: string } {
+  const race = APP_COPY.bestThirdRace;
   const qual = computeQualificationStatus(teamId, standings, qualContext);
   const display = resolveQualificationDisplay(qual);
   if (display.variant === "confirmed-eliminated") {
-    return { text: "Eliminated ✕", className: "best-third-status--out" };
+    return { text: race.statusOut, className: "best-third-status--out" };
   }
   if (display.variant === "projected-eliminated") {
-    return { text: "Proj. Out", className: "best-third-status--warn" };
+    return { text: race.statusLikelyOut, className: "best-third-status--warn" };
   }
   if (display.variant === "projected-qualified" || display.variant === "confirmed-qualified") {
-    if (rank <= 8) return { text: rank === 8 ? "Cut line" : "Proj. Qualify", className: rank === 8 ? "best-third-status--cut" : "best-third-status--in" };
+    if (rank <= 8) {
+      return {
+        text: rank === 8 ? race.statusCutLine : race.statusMovingOn,
+        className: rank === 8 ? "best-third-status--cut" : "best-third-status--in",
+      };
+    }
   }
-  return { text: "In contention", className: "best-third-status--warn" };
+  return { text: race.statusStillIn, className: "best-third-status--warn" };
 }
 
 export function BestThirdRacePanel() {
@@ -77,17 +84,21 @@ export function BestThirdRacePanel() {
     return callouts;
   }, [liveMatches, ranked, thirdIds, teams]);
 
+  const bt = APP_COPY.bestThird;
+  const tbl = APP_COPY.table;
+  const race = APP_COPY.bestThirdRace;
+
   if (ranked.length === 0) return null;
 
   return (
-    <section className="best-third-race-panel dashboard-section" aria-label="Race for best third">
+    <section className="best-third-race-panel dashboard-section" aria-label={bt.raceTitle}>
       <header className="best-third-race-head">
         <div>
-          <h2 className="section-title-text">🏁 Race for Best Third</h2>
-          <p className="best-third-race-lead">Top 8 advance to the Round of 32</p>
+          <h2 className="section-title-text">{bt.raceTitle}</h2>
+          <p className="best-third-race-lead">{bt.raceLead}</p>
         </div>
         <span className="best-third-race-live-dot" aria-hidden>
-          Live ●
+          {bt.liveBadge} ●
         </span>
       </header>
 
@@ -95,13 +106,13 @@ export function BestThirdRacePanel() {
         <table className="group-table best-third-race-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Team</th>
-              <th>Pts</th>
-              <th>GD</th>
-              <th>GF</th>
-              <th>Group</th>
-              <th>Status</th>
+              <th>{tbl.rank}</th>
+              <th>{tbl.team}</th>
+              <th>{tbl.points}</th>
+              <th>{tbl.goalDiff}</th>
+              <th>{tbl.goalsFor}</th>
+              <th>{tbl.group}</th>
+              <th>{tbl.status}</th>
             </tr>
           </thead>
           <tbody>
@@ -143,7 +154,7 @@ export function BestThirdRacePanel() {
         <div className="best-third-race-callouts">
           {liveCallouts.map((c) => (
             <p key={c.match.id} className={`best-third-race-callout best-third-race-callout--${c.type}`}>
-              {c.type === "live" ? "🔴 LIVE: " : "👁 Watch: "}
+              {c.type === "live" ? `🔴 ${race.liveCallout}: ` : `👁 ${race.watchCallout}: `}
               {c.label}
             </p>
           ))}

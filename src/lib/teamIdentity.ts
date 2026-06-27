@@ -1,6 +1,9 @@
 import type { CSSProperties } from "react";
 import { TEAM_IDENTITY_OVERRIDES } from "../data/teamIdentityOverrides";
+import type { CrestProfile } from "../data/teamCrestDisplay";
 import type { Team } from "../types";
+import { crestDisplayToCssVars, resolveCrestDisplay } from "./resolveCrestDisplay";
+import { resolveTeamLogo } from "./resolveTeamLogo";
 import { normalizeHex, pickOnPrimary } from "../utils/colorContrast";
 
 export type TeamIdentity = {
@@ -12,6 +15,9 @@ export type TeamIdentity = {
   onPrimary: string;
   crestUrl: string;
   gradient: [string, string];
+  crestProfile: CrestProfile;
+  crestPad: [string, string];
+  crestFrame: [string, string];
 };
 
 const DEFAULT_PRIMARY = "#6B7280";
@@ -39,7 +45,8 @@ export function resolveTeamIdentity(team: Team | undefined, primaryOverride?: st
     DEFAULT_SECONDARY;
 
   const gradient: [string, string] = staticOverride?.gradient ?? [primary, secondary];
-  const crestUrl = team.logo ?? "";
+  const crestUrl = resolveTeamLogo(team) ?? "";
+  const crest = resolveCrestDisplay(abbrev, primary, secondary, gradient);
 
   return {
     teamId: team.id,
@@ -49,7 +56,10 @@ export function resolveTeamIdentity(team: Team | undefined, primaryOverride?: st
     secondary,
     onPrimary: pickOnPrimary(primary),
     crestUrl,
-    gradient
+    gradient,
+    crestProfile: crest.profile,
+    crestPad: crest.pad,
+    crestFrame: crest.frame ?? crest.pad,
   };
 }
 
@@ -62,12 +72,19 @@ export function resolveTeamIdentityById(
 }
 
 export function teamIdentityToCssVars(identity: TeamIdentity): Record<string, string> {
+  const crestVars = crestDisplayToCssVars({
+    profile: identity.crestProfile,
+    pad: identity.crestPad,
+    frame: identity.crestFrame,
+  });
+
   return {
     "--team-primary": identity.primary,
     "--team-secondary": identity.secondary,
     "--team-on-primary": identity.onPrimary,
     "--team-gradient-start": identity.gradient[0],
-    "--team-gradient-end": identity.gradient[1]
+    "--team-gradient-end": identity.gradient[1],
+    ...crestVars,
   };
 }
 
@@ -81,6 +98,7 @@ export function resolveTeamIdentityFromAbbrev(abbrev: string): TeamIdentity | nu
   const primary = staticOverride.primary;
   const secondary = staticOverride.secondary;
   const gradient: [string, string] = staticOverride.gradient ?? [primary, secondary];
+  const crest = resolveCrestDisplay(key, primary, secondary, gradient);
 
   return {
     teamId: key.toLowerCase(),
@@ -90,7 +108,10 @@ export function resolveTeamIdentityFromAbbrev(abbrev: string): TeamIdentity | nu
     secondary,
     onPrimary: pickOnPrimary(primary),
     crestUrl: "",
-    gradient
+    gradient,
+    crestProfile: crest.profile,
+    crestPad: crest.pad,
+    crestFrame: crest.frame ?? crest.pad,
   };
 }
 

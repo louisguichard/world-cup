@@ -169,6 +169,7 @@ export function MatchDetailView() {
     <div className={styles.root}>
       {/* ── Sticky Header ───────────────────────────── */}
       <header className={styles.header} data-shrunk={shrunk || undefined}>
+        <div className="fwc-unify-stripe" aria-hidden="true" />
         <div className={styles.headerInner}>
           <button
             type="button"

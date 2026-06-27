@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseEspnScoreboard } from "./ESPNClient";
 import { simulateTournamentOutcomes } from "../lib/tournament";
+import { fetchEspnWorldCupScoreboard, skipIfOffline } from "../test/helpers/espnIntegration";
 import type { Match, Team } from "../types";
 
 const sampleTeams: Team[] = [
@@ -44,14 +45,13 @@ describe("SimulationScheduler bootstrap path", () => {
   });
 
   it("parses ESPN knockout without assigning group A fallback", async () => {
-    const res = await fetch(
-      "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=300"
-    );
-    const sb = await res.json();
-    const { matches } = parseEspnScoreboard(sb);
-    const knockoutWithFakeGroup = matches.filter(
-      (m) => m.group === "A" && Date.parse(m.date) > Date.parse("2026-07-01T00:00:00Z")
-    );
-    expect(knockoutWithFakeGroup).toHaveLength(0);
+    const sb = await fetchEspnWorldCupScoreboard();
+    skipIfOffline(sb, (payload) => {
+      const { matches } = parseEspnScoreboard(payload);
+      const knockoutWithFakeGroup = matches.filter(
+        (m) => m.group === "A" && Date.parse(m.date) > Date.parse("2026-07-01T00:00:00Z")
+      );
+      expect(knockoutWithFakeGroup).toHaveLength(0);
+    });
   }, 15_000);
 });

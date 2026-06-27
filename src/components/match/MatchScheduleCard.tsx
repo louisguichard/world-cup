@@ -2,6 +2,7 @@ import type { MergedMatch, Team } from "../../types";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
+import { APP_COPY } from "../../lib/appCopy";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
@@ -10,8 +11,14 @@ import { OddsRow } from "./OddsRow";
 import { WeatherBadge } from "./WeatherBadge";
 import { MatchGoalScorers } from "./MatchGoalScorers";
 import { VenueLabel } from "../venue/VenueLabel";
+import { KickoffCountdown } from "./KickoffCountdown";
+import { PredictionBadge } from "../predictions/PredictionBadge";
+import { useFootballPredictionForMatch } from "../../hooks/useFootballPredictionIndex";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { useStore } from "../../store";
+import { useGoalDetector } from "../../hooks/useGoalDetector";
+import { GoalCelebrationOverlay } from "./GoalCelebrationOverlay";
+import goalStyles from "./GoalCelebrationOverlay.module.css";
 
 type Props = {
   match: MergedMatch;
@@ -19,9 +26,18 @@ type Props = {
   away?: Team;
   compact?: boolean;
   onSelect?: () => void;
+  /** Shows a live countdown clock until kickoff (next fixture highlight). */
+  showKickoffCountdown?: boolean;
 };
 
-export function MatchScheduleCard({ match, home, away, compact, onSelect }: Props) {
+export function MatchScheduleCard({
+  match,
+  home,
+  away,
+  compact,
+  onSelect,
+  showKickoffCountdown,
+}: Props) {
   const matchEvents = useStore((s) => s.matchEvents);
   const events =
     matchEvents[match.id] ??
@@ -35,17 +51,50 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
   const isDone = match.status === "completed" || match.locked;
   const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId, isLive ? "live" : "default");
 
+  const { isGoalActive, latestGoal, secondsRemaining } = useGoalDetector(match.id);
+  const externalPrediction = useFootballPredictionForMatch(match.id);
+  const homeName = teamDisplayName(home, match.homeTeamId);
+  const awayName = teamDisplayName(away, match.awayTeamId);
+
   const metaTimeDisplay = isDone
-    ? "FT"
+    ? APP_COPY.match.final
     : isLive
       ? formatLiveClock(match)
       : formatKickoffTime(kickoffUtc);
 
-  const cardClass = `schedule-card schedule-card-themed ${isLive ? "is-live" : ""} ${compact ? "schedule-card--compact" : ""} ${onSelect ? "schedule-card--btn" : ""}`.trim();
+  const cardClass = [
+    "schedule-card",
+    "schedule-card-themed",
+    isLive ? "is-live" : "",
+    showKickoffCountdown ? "schedule-card--next-ko" : "",
+    compact ? "schedule-card--compact" : "",
+    onSelect ? "schedule-card--btn" : "",
+    isGoalActive ? goalStyles.cardGoalActive : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const celebrationOverlay = isLive ? (
+    <GoalCelebrationOverlay
+      isActive={isGoalActive}
+      latestGoal={latestGoal}
+      secondsRemaining={secondsRemaining}
+      homeTeamName={homeName}
+      awayTeamName={awayName}
+    />
+  ) : null;
 
   const body = (
     <>
+      {celebrationOverlay}
+      <div className={isLive ? goalStyles.cardContentLayer : undefined}>
       {isLive ? <div className="team-accent-bar" aria-hidden /> : null}
+      {showKickoffCountdown && !isLive && !isDone ? (
+        <div className="schedule-card-countdown-row">
+          <span className="schedule-card-next-label">Next kickoff</span>
+          <KickoffCountdown kickoffUtc={kickoffUtc} />
+        </div>
+      ) : null}
       <div className="match-meta">
         <span>
           {isLive ? (
@@ -88,11 +137,19 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
       </div>
 
       {(isLive || isDone) && events.length > 0 ? (
-        <MatchGoalScorers
-          events={events}
-          homeTeamId={match.homeTeamId}
-          awayTeamId={match.awayTeamId}
-        />
+        <div className="match-goal-scorers-slot">
+          <MatchGoalScorers
+            events={events}
+            homeTeamId={match.homeTeamId}
+            awayTeamId={match.awayTeamId}
+          />
+        </div>
+      ) : isLive ? (
+        <div className="match-goal-scorers-slot" aria-hidden />
+      ) : null}
+
+      {!isDone && externalPrediction ? (
+        <PredictionBadge prediction={externalPrediction} compact={compact} />
       ) : null}
 
       {!isDone && match ? (
@@ -105,6 +162,7 @@ export function MatchScheduleCard({ match, home, away, compact, onSelect }: Prop
       ) : null}
 
       <BroadcastBar matchId={match.matchId} kickoffUtc={kickoffUtc} />
+      </div>
     </>
   );
 

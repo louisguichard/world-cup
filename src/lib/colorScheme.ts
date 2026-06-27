@@ -28,8 +28,8 @@ export function resolveColorScheme(preference: ColorSchemePreference): ResolvedC
 }
 
 const THEME_COLOR: Record<ResolvedColorScheme, string> = {
-  dark: "#0a0c0e",
-  light: "#e8ece9",
+  dark: "#08091A",
+  light: "#F4F5FA",
 };
 
 /** Applies resolved theme to the document root (call on preference or OS change). */

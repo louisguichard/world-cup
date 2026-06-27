@@ -331,16 +331,19 @@
 }
 
 .badge--at_risk {
-  background: var(--badge-at-risk-bg);
-  color: var(--badge-at-risk-text);
+  color: var(--qual-badge-contention-fg);
+  background: var(--qual-badge-contention-bg);
+  border: 1px solid var(--qual-badge-contention-border);
 }
 
 .badge--qualified {
-  background: #16a34a;
-  color: white;
+  color: var(--qual-badge-confirmed-fg);
+  background: var(--qual-badge-confirmed-bg);
+  border: 1px solid var(--qual-badge-confirmed-border);
 }
 
 .badge--eliminated {
-  background: #64748b;
-  color: white;
+  color: var(--qual-badge-eliminated-fg);
+  background: var(--qual-badge-eliminated-bg);
+  border: 1px solid var(--qual-badge-eliminated-border);
 }

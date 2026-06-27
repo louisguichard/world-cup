@@ -2,7 +2,9 @@ import { useDeferredValue, useMemo } from "react";
 import { knockoutSchedule } from "../../data/knockoutSchedule";
 import { buildQualificationContext, computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
 import { projectTournament } from "../../lib/tournament";
+import { resolveTeamLogo } from "../../lib/resolveTeamLogo";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { APP_COPY } from "../../lib/appCopy";
 import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
 import type {
   BracketGhostCandidate,
@@ -37,9 +39,14 @@ function GhostTeamList({
     <div className="bracket-ghost-list" aria-hidden="true">
       {ghosts.map(({ teamId, frequency }) => {
         const t = teamsById[teamId];
+        const logo = t ? resolveTeamLogo(t) : undefined;
         return (
           <div key={teamId} className="bracket-ghost-team">
-            {t?.logo ? <img src={t.logo} alt="" /> : <span className="bracket-dot" style={{ width: 12, height: 12 }} />}
+            {logo ? (
+              <img src={logo} alt="" className="bracket-ghost-crest" />
+            ) : (
+              <span className="bracket-dot" style={{ width: 12, height: 12 }} />
+            )}
             <span className="team-name-text">{teamDisplayName(t, teamId)}</span>
             {showFrequency ? <span className="bracket-ghost-freq">{Math.round(frequency * 100)} conf.</span> : null}
           </div>
@@ -347,21 +354,21 @@ export function BracketBento() {
     return map;
   }, [projection?.bracket]);
 
+  const bb = APP_COPY.bracketBento;
+
   return (
     <section className="bracket-section" aria-label="Knockout bracket">
       <div className="section-title">
         <div>
-          <div className="section-kicker">Knockout</div>
-          <h2>{mode === "confirmed" ? "Confirmed" : "Projected"}</h2>
+          <div className="section-kicker">{bb.kicker}</div>
+          <h2>{mode === "confirmed" ? bb.confirmedTitle : bb.projectedTitle}</h2>
         </div>
       </div>
       <p className="bracket-hint">
-        {mode === "confirmed"
-          ? "Only teams mathematically through after completing all 3 group matches. Unconfirmed slots show as TBD."
-          : "Based on current group standings. Teams shown may change as remaining matches are played. Projected teams shown in indigo."}
+        {mode === "confirmed" ? bb.confirmedHint : bb.projectedHint}
       </p>
       {!projection ? (
-        <p className="view-note">Bracket loads after tournament data is available.</p>
+        <p className="view-note">{bb.loading}</p>
       ) : (
         <div className="bracket-scroll">
           <div className="bracket-head">

@@ -13,22 +13,22 @@ export async function fetchEnrichmentEvents(): Promise<{
   source: EnrichmentSource;
 }> {
   const tryFootball = isApiEnabled("footballDataApi") && !isFootballDataDisabled();
-  const trySportApi = isApiEnabled("sportApi7") && !isSportAPI7Disabled();
   const trySofa = isApiEnabled("sofascore") && !isSofaScoreDisabled();
+  const trySportApi = isApiEnabled("sportApi7") && !isSportAPI7Disabled();
 
   if (tryFootball) {
     const events = await fetchFootballDataToday();
     if (events.length > 0) return { events, source: "footballData" };
   }
 
-  if (trySportApi) {
-    const events = await fetchSportApiToday();
-    if (events.length > 0) return { events, source: "sportApi7" };
-  }
-
   if (trySofa) {
     const events = await fetchSofaToday();
     if (events.length > 0) return { events, source: "sofascore" };
+  }
+
+  if (trySportApi) {
+    const events = await fetchSportApiToday();
+    if (events.length > 0) return { events, source: "sportApi7" };
   }
 
   return { events: [], source: "none" };

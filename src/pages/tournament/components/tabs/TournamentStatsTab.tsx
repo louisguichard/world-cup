@@ -1,47 +1,53 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useStore } from "../../../../store";
+import { aggregateTournamentStats } from "../../../../lib/aggregateTournamentStats";
+import { deriveMatchAwards } from "../../../../lib/deriveMatchAwards";
+import { buildWorldCupHistoryStats } from "../../../../lib/worldCupHistoryStats";
+import {
+  ALL_TIME_APPEARANCES,
+  ALL_TIME_TEAM_TITLES,
+  ALL_TIME_TOP_SCORERS,
+} from "../../../../data/worldCupAllTimeLeaders";
 import type { TournamentStatsBundle } from "../../../../services/matchDetail/fetchTournamentStats";
 import { fetchTournamentStats } from "../../../../services/matchDetail/fetchTournamentStats";
+import { TournamentLeaderboard } from "../stats/TournamentLeaderboard";
+import { AllTimeLeadersSection } from "../stats/AllTimeLeadersSection";
+import { MatchAwardsFeed } from "../stats/MatchAwardsFeed";
 import styles from "../../TournamentView.module.css";
 
-function StandingsPreview({ standings }: { standings: TournamentStatsBundle["standings"] }) {
-  if (standings.length === 0) return null;
-
-  return (
-    <div className={styles.statsSection}>
-      <h3 className={styles.statsSectionTitle}>Group standings</h3>
-      <p style={{ fontSize: 12, color: "var(--ss-muted)", marginBottom: 12 }}>
-        Player leaderboards are not available yet — showing live group tables instead.
-      </p>
-      {standings.map((group) => (
-        <div key={group.group} style={{ marginBottom: 16 }}>
-          <div className={styles.standingsSectionTitle}>Group {group.group}</div>
-          <table className={styles.standingsTable}>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Team</th>
-                <th>Pts</th>
-              </tr>
-            </thead>
-            <tbody>
-              {group.teams.slice(0, 4).map((team, i) => (
-                <tr key={team.name}>
-                  <td>{i + 1}</td>
-                  <td>{team.name}</td>
-                  <td className={styles.standingsPts}>{team.points}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export function TournamentStatsTab() {
+  const teams = useStore((s) => s.teams);
+  const liveMatches = useStore((s) => s.liveMatches);
+  const matchEvents = useStore((s) => s.matchEvents);
+  const openMatchDetail = useStore((s) => s.openMatchDetail);
+  const worldCupHistoryBundle = useStore((s) => s.worldCupHistoryBundle);
+
+  const historyStats = useMemo(
+    () => buildWorldCupHistoryStats(worldCupHistoryBundle),
+    [worldCupHistoryBundle]
+  );
+
+  const titleLeaders =
+    historyStats.titleLeaders.length > 0 ? historyStats.titleLeaders : ALL_TIME_TEAM_TITLES;
+  const bootLeaders =
+    historyStats.topScorersFromBoot.length > 0 ? historyStats.topScorersFromBoot : ALL_TIME_TOP_SCORERS;
+  const titlesFromApi = historyStats.titleLeaders.length > 0;
+  const scorersFromApi = historyStats.topScorersFromBoot.length > 0;
+
   const [bundle, setBundle] = useState<TournamentStatsBundle | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const allMatches = useMemo(() => Object.values(liveMatches), [liveMatches]);
+
+  const { topScorers, topAssists } = useMemo(
+    () => aggregateTournamentStats({ matches: allMatches, matchEvents }),
+    [allMatches, matchEvents]
+  );
+
+  const matchAwards = useMemo(
+    () => deriveMatchAwards({ matches: allMatches, matchEvents }),
+    [allMatches, matchEvents]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -52,10 +58,12 @@ export function TournamentStatsTab() {
         setLoading(false);
       }
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  if (loading) {
+  if (loading && !bundle) {
     return (
       <div className={styles.tabPanel}>
         <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
@@ -67,123 +75,57 @@ export function TournamentStatsTab() {
     );
   }
 
-  const topScorers = bundle?.topScorers ?? [];
-  const topAssists = bundle?.topAssists ?? [];
-  const cleanSheets = bundle?.cleanSheets ?? [];
-  const standings = bundle?.standings ?? [];
-
-  const isEmpty = topScorers.length === 0 && topAssists.length === 0 && cleanSheets.length === 0;
-
-  if (isEmpty) {
-    return (
-      <div className={styles.tabPanel}>
-        {standings.length > 0 ? (
-          <StandingsPreview standings={standings} />
-        ) : (
-          <div className={styles.statsSection}>
-            <div className={styles.statsPlaceholder}>
-              <p>Player statistics will be available once the tournament begins.</p>
-              <p style={{ marginTop: 8, fontSize: 12 }}>
-                Top scorers, assists, and clean sheets require a provider endpoint not yet wired.
-                Group standings will appear here when WC 2026 Live API publishes tables.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className={styles.tabPanel}>
-      {topScorers.length > 0 ? (
-        <div className={styles.statsSection}>
-          <h3 className={styles.statsSectionTitle}>⚽ Top Scorers</h3>
-          {topScorers.slice(0, 10).map((stat, i) => (
-            <div
-              key={stat.player.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "10px 0",
-                borderBottom: "1px solid var(--ss-border)"
-              }}
-            >
-              <span style={{ width: 20, color: "var(--ss-muted)", fontSize: 12 }}>{i + 1}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>{stat.player.displayName}</div>
-                <div style={{ fontSize: 11, color: "var(--ss-muted)" }}>{stat.teamId}</div>
-              </div>
-              <span
-                style={{
-                  fontSize: 20,
-                  fontWeight: 700,
-                  color: "var(--ss-text)",
-                  minWidth: 24,
-                  textAlign: "right"
-                }}
-              >
-                {stat.value}
-              </span>
-            </div>
-          ))}
-        </div>
-      ) : null}
+      <div className={styles.statsIntro}>
+        <h2 className={styles.statsIntroTitle}>2026 leaders &amp; awards</h2>
+        <p className={styles.statsIntroText}>
+          Tournament tables update from live match events. All-time records are historical FIFA
+          benchmarks for context.
+        </p>
+      </div>
 
-      {topAssists.length > 0 ? (
-        <div className={styles.statsSection}>
-          <h3 className={styles.statsSectionTitle}>🎯 Top Assists</h3>
-          {topAssists.slice(0, 10).map((stat, i) => (
-            <div
-              key={stat.player.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "10px 0",
-                borderBottom: "1px solid var(--ss-border)"
-              }}
-            >
-              <span style={{ width: 20, color: "var(--ss-muted)", fontSize: 12 }}>{i + 1}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>{stat.player.displayName}</div>
-                <div style={{ fontSize: 11, color: "var(--ss-muted)" }}>{stat.teamId}</div>
-              </div>
-              <span style={{ fontSize: 20, fontWeight: 700, minWidth: 24, textAlign: "right" }}>
-                {stat.value}
-              </span>
-            </div>
-          ))}
-        </div>
-      ) : null}
+      <TournamentLeaderboard
+        title="Top scorers · World Cup 2026"
+        stats={topScorers}
+        teams={teams}
+        unit="G"
+      />
 
-      {cleanSheets.length > 0 ? (
-        <div className={styles.statsSection}>
-          <h3 className={styles.statsSectionTitle}>🧤 Clean Sheets</h3>
-          {cleanSheets.slice(0, 10).map((stat, i) => (
-            <div
-              key={stat.player.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "10px 0",
-                borderBottom: "1px solid var(--ss-border)"
-              }}
-            >
-              <span style={{ width: 20, color: "var(--ss-muted)", fontSize: 12 }}>{i + 1}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>{stat.player.displayName}</div>
-                <div style={{ fontSize: 11, color: "var(--ss-muted)" }}>{stat.teamId}</div>
-              </div>
-              <span style={{ fontSize: 20, fontWeight: 700, minWidth: 24, textAlign: "right" }}>
-                {stat.value}
-              </span>
-            </div>
-          ))}
-        </div>
-      ) : null}
+      <TournamentLeaderboard
+        title="Top assists · World Cup 2026"
+        stats={topAssists}
+        teams={teams}
+        unit="A"
+      />
+
+      <MatchAwardsFeed
+        rows={matchAwards}
+        teams={teams}
+        onOpenMatch={(matchId) => openMatchDetail(matchId, { from: "tournament", tournamentSubTab: "stats" })}
+      />
+
+      <AllTimeLeadersSection
+        title="All-time top scorers"
+        leaders={bootLeaders}
+        valueSuffix="G"
+        note={
+          scorersFromApi
+            ? "Golden Boot highs from World Cup1 history database."
+            : "All-time FIFA World Cup records through 2022."
+        }
+      />
+      <AllTimeLeadersSection title="All-time appearances" leaders={ALL_TIME_APPEARANCES} />
+      <AllTimeLeadersSection
+        title="Most World Cup titles"
+        leaders={titleLeaders}
+        valueSuffix="★"
+        note={
+          titlesFromApi
+            ? "Title counts from World Cup1 winners database."
+            : "All-time FIFA World Cup records through 2022."
+        }
+      />
     </div>
   );
 }

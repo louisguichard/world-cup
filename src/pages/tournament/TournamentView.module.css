@@ -1,15 +1,8 @@
-/* SofaScore token layer — scoped to tournament page */
+/* FWC token layer — inherits from html[data-theme] via themes.css */
 .root {
-  --ss-bg: #0a0e1a;
-  --ss-surface: #141b2d;
-  --ss-elevated: #1e2746;
-  --ss-brand: #4c6ef5;
-  --ss-text: #ffffff;
-  --ss-muted: #8b92a8;
-  --ss-success: #40c057;
-  --ss-danger: #fa5252;
-  --ss-warning: #fcc419;
-  --ss-border: rgba(255, 255, 255, 0.08);
+  --ss-header-height: 72px;
+  --ss-header-height-shrunk: 56px;
+  --ss-tab-bar-height: 44px;
 
   min-height: 100%;
   background: var(--ss-bg);
@@ -27,8 +20,11 @@
 }
 
 .headerTitle {
-  font-size: 20px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--ss-text);
   margin: 0;
 }
@@ -143,7 +139,7 @@
 
 .datePill--active {
   background: var(--ss-brand);
-  color: #fff;
+  color: var(--fwc-white);
   border-color: var(--ss-brand);
 }
 
@@ -154,7 +150,7 @@
 
 .datePill--today.datePill--active {
   background: var(--ss-brand);
-  color: #fff;
+  color: var(--fwc-white);
 }
 
 /* ── Match list ───────────────────────────────── */
@@ -184,7 +180,7 @@
 
 .todayBadge {
   background: var(--ss-brand);
-  color: #fff;
+  color: var(--fwc-white);
   font-size: 10px;
   padding: 1px 6px;
   border-radius: 8px;
@@ -415,4 +411,271 @@
   text-align: center;
   color: var(--ss-muted);
   font-size: 13px;
+}
+
+.statsIntro {
+  padding: 16px 16px 0;
+}
+
+.statsIntroTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ss-text);
+}
+
+.statsIntroText {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--ss-muted);
+  line-height: 1.45;
+}
+
+.statsSectionNote,
+.statsEmptyNote {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--ss-muted);
+  line-height: 1.45;
+}
+
+.leaderboardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ss-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ss-surface);
+}
+
+.leaderboardRow {
+  display: grid;
+  grid-template-columns: 28px auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.leaderboardRow:last-child {
+  border-bottom: none;
+}
+
+.leaderboardRank {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ss-muted);
+  text-align: center;
+}
+
+.leaderboardMeta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.leaderboardName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ss-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaderboardTeam {
+  font-size: 11px;
+  color: var(--ss-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaderboardValue {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ss-text);
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.leaderboardUnit {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ss-muted);
+}
+
+.awardsFeed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.awardsFeedItem {
+  border: 1px solid var(--ss-border);
+  border-radius: 10px;
+  background: var(--ss-surface);
+  overflow: hidden;
+}
+
+.awardsFeedMatch {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-bottom: 1px solid var(--ss-border);
+  background: var(--ss-elevated);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.awardsFeedMatch:hover {
+  background: color-mix(in srgb, var(--ss-brand) 8%, var(--ss-elevated));
+}
+
+.awardsFeedMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--ss-muted);
+  margin-bottom: 8px;
+}
+
+.awardsFeedScoreline {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.awardsFeedTeam {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.awardsFeedScore {
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  font-size: 15px;
+  padding: 0 4px;
+  text-align: center;
+}
+
+.awardsFeedBadges {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 12px;
+}
+
+.awardBadge {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  align-items: baseline;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ss-brand) 10%, var(--ss-elevated));
+  border: 1px solid color-mix(in srgb, var(--ss-brand) 22%, transparent);
+}
+
+.awardBadgePending {
+  background: var(--ss-elevated);
+  border-style: dashed;
+  border-color: var(--ss-border);
+}
+
+.awardBadgeKind {
+  grid-column: 1;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ss-brand);
+}
+
+.awardBadgePlayer {
+  grid-column: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ss-text);
+}
+
+.awardBadgeDetail {
+  grid-column: 1;
+  font-size: 11px;
+  color: var(--ss-muted);
+}
+
+.awardBadgeSource {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--ss-elevated);
+  color: var(--ss-muted);
+}
+
+/* ── History tab ──────────────────────────────── */
+
+.historyYearPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.historyYearBtn {
+  border: 1px solid var(--ss-border);
+  background: var(--ss-elevated);
+  color: var(--ss-muted);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.historyYearBtn--active {
+  border-color: var(--ss-brand);
+  color: var(--ss-brand);
+  background: rgba(76, 110, 245, 0.12);
+}
+
+.historyDetailCard {
+  border: 1px solid var(--ss-border);
+  border-radius: 12px;
+  background: var(--ss-surface);
+  padding: 14px 16px;
+}
+
+.historyDetailTitle {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.historyDetailLine {
+  margin: 4px 0;
+  font-size: 13px;
+  color: var(--ss-muted);
 }

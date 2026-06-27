@@ -2,7 +2,10 @@ import type { GroupStanding } from "../../types";
 import { isApiEnabled } from "../../config/apiFlags";
 import { deriveStandingsIfScored } from "../../lib/qualification";
 import { useStore } from "../../store";
-import { fetchBracket as fetchZafronixBracket } from "../ZafronixClient";
+import {
+  fetchBracket as fetchZafronixBracket,
+  fetchStandings as fetchZafronixStandings,
+} from "../ZafronixClient";
 import {
   fetchStandings as fetchWcLiveStandings,
   isWc2026LiveDisabled,
@@ -13,6 +16,7 @@ import {
   normalizeWCLiveStandings,
   normalizeWC2026Groups,
   normalizeZafronixBracket,
+  normalizeZafronixStandings,
 } from "../adapters/normalizeStandings";
 import { fetchWithFallback, STANDINGS_SOURCE_PRIORITY } from "./FallbackChain";
 import {
@@ -72,7 +76,11 @@ export class DataOrchestrator {
           isApiEnabled("wc2026Live") && !isWc2026LiveDisabled()
             ? normalizeWCLiveStandings(await fetchWcLiveStandings())
             : [],
-        zafronix: async () => normalizeZafronixBracket(await fetchZafronixBracket(2026)),
+        zafronix: async () => {
+          const fromStandings = normalizeZafronixStandings(await fetchZafronixStandings(2026));
+          if (fromStandings.length > 0) return fromStandings;
+          return normalizeZafronixBracket(await fetchZafronixBracket(2026));
+        },
         wc2026teams: async () =>
           isApiEnabled("wc2026Teams") && !isWorldCup2026Disabled()
             ? normalizeWC2026Groups(await fetchGroups())

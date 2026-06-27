@@ -1,0 +1,265 @@
+/* ─── ACT 1: Border impact flash ─── */
+@keyframes fwcImpactFlash {
+  0% {
+    border-color: #6b1a1a;
+    border-width: 2px;
+    box-shadow: none;
+  }
+  10% {
+    border-color: #e00000;
+    border-width: 6px;
+    box-shadow:
+      0 0 24px 6px #e00000,
+      inset 0 0 20px 2px rgba(255, 255, 255, 0.15);
+  }
+  20% {
+    border-color: #5b0ea6;
+    border-width: 4px;
+    box-shadow: 0 0 20px 4px #5b0ea6;
+  }
+  30% {
+    border-color: #1e3eef;
+    border-width: 6px;
+    box-shadow: 0 0 28px 8px #1e3eef;
+  }
+  45% {
+    border-color: #ff4500;
+    border-width: 5px;
+    box-shadow: 0 0 32px 10px #ff4500;
+  }
+  60% {
+    border-color: #d4af37;
+    border-width: 4px;
+    box-shadow: 0 0 20px 6px #d4af37;
+  }
+  80% {
+    border-color: #00d26a;
+    border-width: 3px;
+    box-shadow: 0 0 16px 4px #00d26a;
+  }
+  100% {
+    border-color: #d4af37;
+    border-width: 2px;
+    box-shadow: 0 0 12px 3px rgba(212, 175, 55, 0.4);
+  }
+}
+
+/* ─── ACT 2: Amplify burst (conic gradient rotation) ─── */
+@keyframes fwcAmplifyRotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+    opacity: 0.55;
+  }
+  60% {
+    opacity: 0.35;
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* ─── ACT 3: Sustained glow border pulse ─── */
+@keyframes fwcSustainedGlow {
+  0% {
+    border-color: #d4af37;
+    box-shadow: 0 0 10px 2px rgba(212, 175, 55, 0.35);
+  }
+  50% {
+    border-color: #1e3eef;
+    box-shadow: 0 0 16px 4px rgba(30, 62, 239, 0.4);
+  }
+  100% {
+    border-color: #d4af37;
+    box-shadow: 0 0 10px 2px rgba(212, 175, 55, 0.35);
+  }
+}
+
+/* ─── Shimmer sweep (Unify pattern motion) ─── */
+@keyframes fwcShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ─── Goal banner slide-in ─── */
+@keyframes fwcBannerSlide {
+  0% {
+    transform: translateY(-110%);
+    opacity: 0;
+  }
+  12% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  85% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-110%);
+    opacity: 0;
+  }
+}
+
+/* ─── GOAL word pop ─── */
+@keyframes fwcGoalPop {
+  0% {
+    transform: scale(0.4);
+    letter-spacing: -0.05em;
+  }
+  25% {
+    transform: scale(1.2);
+    letter-spacing: 0.18em;
+  }
+  45% {
+    transform: scale(0.95);
+  }
+  60% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    letter-spacing: 0.12em;
+  }
+}
+
+/* ─── Countdown pip pulse ─── */
+@keyframes fwcCountdownPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.cardGoalActive {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: var(--r-lg, 12px);
+  animation:
+    fwcImpactFlash 2s ease-out forwards,
+    fwcSustainedGlow 4s ease-in-out 2s infinite;
+}
+
+.cardGoalActive::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(212, 175, 55, 0.08) 50%,
+    rgba(30, 62, 239, 0.06) 60%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: fwcShimmer 3s linear 2s infinite;
+}
+
+.cardContentLayer {
+  position: relative;
+  z-index: 3;
+}
+
+.amplifyBurst {
+  position: absolute;
+  width: 160%;
+  height: 160%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(0deg);
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 50%;
+  will-change: transform, opacity;
+  animation: fwcAmplifyRotate 6s ease-out 0.3s forwards;
+  mix-blend-mode: screen;
+}
+
+.goalBanner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 12px;
+  background: linear-gradient(
+    90deg,
+    rgba(11, 10, 18, 0.92) 0%,
+    rgba(30, 62, 239, 0.85) 40%,
+    rgba(11, 10, 18, 0.92) 100%
+  );
+  backdrop-filter: blur(4px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.4);
+  will-change: transform, opacity;
+  animation: fwcBannerSlide 60s ease-in-out forwards;
+}
+
+.goalWord {
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #d4af37;
+  text-shadow:
+    0 0 8px rgba(212, 175, 55, 0.8),
+    0 0 20px rgba(212, 175, 55, 0.4);
+  animation: fwcGoalPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.goalDetail {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  flex: 1;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.countdownPip {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-variant-numeric: tabular-nums;
+  min-width: 28px;
+  text-align: right;
+  animation: fwcCountdownPulse 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .amplifyBurst {
+    animation: none;
+    display: none;
+  }
+
+  .cardGoalActive {
+    animation: fwcImpactFlash 1s ease-out forwards;
+  }
+
+  .cardGoalActive::before {
+    animation: none;
+  }
+
+  .goalBanner {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .goalWord {
+    animation: none;
+  }
+}

@@ -14,7 +14,7 @@
 }
 
 .venueMatchRow:hover {
-  border-color: rgba(99, 102, 241, 0.45);
+  border-color: rgba(48, 79, 255, 0.45);
 }
 
 .venueMatchRowHead {
@@ -50,8 +50,8 @@
 }
 
 .statusBadge--live {
-  background: rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
+  background: var(--status-live-bg);
+  color: var(--status-live-text);
 }
 
 .statusBadge--ft {
@@ -60,8 +60,8 @@
 }
 
 .statusBadge--scheduled {
-  background: rgba(99, 102, 241, 0.2);
-  color: #a5b4fc;
+  background: rgba(48, 79, 255, 0.2);
+  color: var(--fwc-sky-blue);
 }
 
 .venueMatchScore {

@@ -1,0 +1,389 @@
+/**
+ * Plain-language labels and short help text for the whole app.
+ * Written for easy reading (about 6th-grade level).
+ */
+
+export const APP_COPY = {
+  /** Bottom navigation tab names */
+  tabs: {
+    live: "Live",
+    tournament: "Tournament",
+    schedule: "Schedule",
+    results: "Results",
+    groups: "Groups",
+    bracket: "Bracket",
+    teams: "Teams",
+    simulator: "Simulator",
+  },
+
+  /** Words we use a lot — same meaning everywhere */
+  glossary: {
+    lockedIn:
+      "Locked in means the math is done — no more games can change this.",
+    probably:
+      "Probably means it looks this way now, but more games could still change it.",
+    points: "Points — teams earn 3 for a win and 1 for a tie.",
+    goalDiff: "Goal difference — goals scored minus goals allowed.",
+    goalsFor: "Goals scored in all group games.",
+    group: "Group — teams play others in the same letter group first.",
+    cutoff: "Cutoff — only the top 8 third-place teams move on.",
+  },
+
+  /** Who moves on to the next round */
+  qual: {
+    sectionTitle: "Who moves on",
+    sectionLead:
+      "Locked in = definitely moving on. Probably = looks good now, but more games could change it.",
+    confirmedQualified: "Locked in · Moving on",
+    confirmedQualifiedShort: "In ✓",
+    confirmedQualifiedHint:
+      "This team is definitely moving on. All group games are done and the spot is final.",
+    projectedQualified: "Probably · Moving on",
+    projectedQualifiedShort: "Likely in",
+    projectedQualifiedHint:
+      "This team looks like it will move on, but more group games could still change that.",
+    confirmedEliminated: "Locked in · Out",
+    confirmedEliminatedShort: "Out ✕",
+    confirmedEliminatedHint:
+      "This team cannot move on anymore — even the best results left would not be enough.",
+    projectedEliminated: "Probably · Out",
+    projectedEliminatedShort: "Likely out",
+    projectedEliminatedHint:
+      "This team will probably not move on, but it is not 100% final yet.",
+    inContention: "Still fighting",
+    inContentionShort: "Still in it",
+    inContentionHint: "This team still has a real chance — it depends on upcoming games.",
+    qualifiedTitle: "Moving on",
+    qualifiedLead:
+      "Top two in each group move on. Locked in when all group games are finished; probably while games are still left.",
+    confirmedQualifiedSection: "Locked in · Moving on",
+    projectedQualifiedSection: "Probably · Moving on",
+    eliminatedTitle: "Out of the tournament",
+    eliminatedLead:
+      "Locked in when a team cannot catch up; probably when they are likely out but not final yet.",
+    confirmedEliminatedSection: "Locked in · Out",
+    projectedEliminatedSection: "Probably · Out",
+    contentionTitle: "Still in the race",
+    contentionLead: "Third-place teams still fighting for a spot in the round of 32.",
+    noQualified: "No teams in the top two yet.",
+    noEliminated: "No teams are fully out yet.",
+    noContention: "No teams on the bubble right now.",
+  },
+
+  /** Third-place race (best 8 of 12 third-place teams) */
+  bestThird: {
+    title: "Third-place race",
+    subtitle: "The best 8 third-place teams also move on to the round of 32.",
+    liveBadge: "Live",
+    safe: "Safe",
+    bubble: "On the bubble",
+    outside: "Unlikely",
+    safeHint: "Inside the top 8 third-place spots right now.",
+    bubbleHint: "Close to the cutoff — one goal could change things.",
+    outsideHint: "Far from the top 8 cutoff right now.",
+    cutoffBannerIn: (name: string) => `${name} moved into the top 8!`,
+    cutoffBannerOut: (name: string) => `${name} dropped out of the top 8.`,
+    expandTable: "Show full list",
+    collapseTable: "Show short list",
+    cutoffLabel: "— Top 8 move on —",
+    raceTitle: "Race for third place",
+    raceLead: "Top 8 third-place teams advance.",
+  },
+
+  /** Table column headers — spell things out */
+  table: {
+    rank: "#",
+    team: "Team",
+    points: "Points",
+    goalDiff: "Goal diff",
+    goalsFor: "Goals scored",
+    goalsAgainst: "Goals allowed",
+    group: "Group",
+    change: "Move",
+    status: "Status",
+    gamesPlayed: "Games",
+    wins: "Wins",
+    ties: "Ties",
+    losses: "Losses",
+    time: "Time",
+    home: "Home",
+    score: "Score",
+    away: "Away",
+    venue: "Stadium",
+    gameStatus: "Status",
+  },
+
+  live: {
+    eyebrow: "USA · Canada · Mexico",
+    titleAccent: "Final.",
+    heroLead:
+      "Watch live games, see who might move on, and check upcoming matches — all in your local time.",
+    liveNowKicker: "Live right now",
+    liveNowTitle: "Games happening now",
+    noLiveKicker: "No live games",
+    noLiveBody:
+      "Nothing is live right now. Check Results for finished games or Schedule for what's coming up.",
+    scheduleKicker: "Coming up",
+    scheduleTitle: "Upcoming games",
+    noUpcoming: "No upcoming games — check Results for finished matches.",
+    showAllDays: (n: number) => `Show all ${n} days`,
+    showLess: "Show fewer days",
+    qualKicker: "Moving on",
+    qualTitle: "Who is through?",
+    promoteMatch: "Show this game as the main live match",
+    recentResultsKicker: "Finished games",
+    recentResultsTitle: "Recent scores",
+    seeAllResults: "See all results",
+    finalWhistle: "Final",
+  },
+
+  schedule: {
+    heroLead:
+      "Every World Cup game from the group stage through the final — times shown in your time zone.",
+    viewOneDay: "One day",
+    viewAllDays: "All days",
+    today: "Today",
+    prevDay: "Previous day",
+    nextDay: "Next day",
+    filterStatus: "Show",
+    filterAll: "All games",
+    filterUpcoming: "Not started yet",
+    filterLive: "Live now",
+    filterCompleted: "Finished",
+    sortBy: "Sort by",
+    sortTime: "Start time",
+    sortGroup: "Group",
+    sortStage: "Round",
+    emptyAll: "No games on the schedule yet.",
+    emptyFilter: "No games match this filter.",
+    matchCount: (n: number) => `${n} ${n === 1 ? "game" : "games"}`,
+  },
+
+  groups: {
+    eyebrow: "Group stage",
+    titleAccent: "Forty-eight teams.",
+    heroLead:
+      "Each group has 4 teams. The top 2 in each group move on. Colors show who is in, who is out, and who is still fighting.",
+    legendConfirmedIn: "Locked in · Moving on",
+    legendProbablyIn: "Probably · Moving on",
+    legendConfirmedOut: "Locked in · Out",
+    legendProbablyOut: "Probably · Out",
+    viewFlags: "Team flags",
+    viewTable: "Score table",
+    standingsKicker: "Standings",
+    resultsKicker: "Finished games",
+    fixturesKicker: "Upcoming games",
+    noResults: "No finished group games match this filter.",
+    qualKicker: "Moving on",
+  },
+
+  results: {
+    eyebrow: "Finished games",
+    titleAccent: "final scores.",
+    heroLead:
+      "Every completed game, grouped by day. Tap a game to learn more about the teams.",
+    sortLabel: "Sort",
+    sortRecent: "Newest first",
+    sortOldest: "Oldest first",
+    sortHighScore: "Most goals",
+    sortBigWin: "Biggest win",
+    stageLabel: "Round",
+    stageAll: "All rounds",
+    stageGroup: "Group stage",
+    stageR32: "Round of 32",
+    stageR16: "Round of 16",
+    stageQF: "Quarterfinals",
+    stageSF: "Semifinals",
+    stageFinal: "Final",
+    groupLabel: "Group",
+    groupAll: "All groups",
+    searchLabel: "Find a team",
+    searchPlaceholder: "Type a country name…",
+    empty: "No finished games match this filter.",
+    today: "Today",
+    yesterday: "Yesterday",
+    day: "Day",
+  },
+
+  bracket: {
+    eyebrow: "Playoff rounds",
+    titleAccent: "the Final.",
+    heroLead:
+      "See the path from the round of 32 to the championship. Switch between guesses and locked-in teams.",
+    modeLabel: "Bracket view",
+    projectedLabel: "Best guess",
+    projectedSubtitle:
+      "Uses today's standings. Teams can still change as more group games are played.",
+    confirmedLabel: "Locked in",
+    confirmedSubtitle:
+      "Only shows teams that are definitely in after all 3 group games are done. Empty slots say TBD.",
+  },
+
+  teams: {
+    eyebrow: "All 48 teams",
+    titleAccent: "Every nation.",
+    heroLead: "Browse every country, filter by status, and tap a team for details.",
+    searchPlaceholder: "Search teams…",
+    filterAll: "All teams",
+    filterQualified: "Locked in · Moving on",
+    filterProjected: "Probably · Moving on",
+    filterAtRisk: "Still fighting",
+    filterEliminated: "Out",
+    filterContention: "Still in the race",
+    filterStillPlaying: "Still playing",
+    rankLabel: (rank: number | string, points: number, gd: number) =>
+      `Place ${rank} · ${points} points · ${gd >= 0 ? "+" : ""}${gd} goal diff`,
+  },
+
+  topBar: {
+    liveCount: (n: number) => `${n} live now`,
+    updated: (time: string) => `Updated ${time}`,
+  },
+
+  /** Game clock and status labels */
+  match: {
+    final: "Final",
+    live: "Live",
+    halftime: "Halftime",
+    kickoff: "Kickoff",
+    penalties: "Penalties",
+    postponed: "Postponed",
+    interrupted: "Stopped",
+    extraTimeBreak: "Extra time break",
+    firstHalf: "First half",
+    secondHalf: "Second half",
+    extraTimeFirst: "Extra time · 1st half",
+    extraTimeSecond: "Extra time · 2nd half",
+    fullTime: "Game over",
+  },
+
+  bestThirdTable: {
+    title: "Third-place ranking",
+    lead:
+      "All 12 third-place teams ranked. The top 8 move on. Locked in = final; probably = could still change.",
+    h2h: "Vs other 3rd-place teams",
+    discipline: "Fair play",
+    legend:
+      "Fair play score: yellow card −1, red card −4. Lower is better. Head-to-head vs other third-place teams is shown for info only.",
+  },
+
+  bestThirdTimeline: {
+    title: "Third-place race · replay",
+    subtitle: "See how the ranking changed goal by goal",
+    liveBadge: "Live",
+    speed: "Speed",
+    stepBack: "Go back",
+    play: "Play",
+    pause: "Pause",
+    stepForward: "Go forward",
+    jumpToNow: "Jump to now",
+    currentStandings: "Right now — drag the slider to replay how we got here",
+    scored: (name: string, score: string, minute: number) =>
+      `${name} scored! ${score} at ${minute} minutes`,
+    movedRank: (from: number, to: number) => `Moved from #${from} to #${to}`,
+    matchStart: (home: string, away: string, group: string) =>
+      `${home} vs ${away} — Group ${group} is starting`,
+    fullTime: (home: string, score: string, away: string, changed: number) =>
+      `Game over: ${home} ${score} ${away} — ${changed} teams moved in the ranking`,
+  },
+
+  bestThirdRace: {
+    liveCallout: "Live now",
+    watchCallout: "Worth watching",
+    statusCutLine: "On the cutoff line",
+    statusMovingOn: "Probably moving on",
+    statusOut: "Out",
+    statusLikelyOut: "Probably out",
+    statusStillIn: "Still fighting",
+  },
+
+  bracketBento: {
+    kicker: "Knockout rounds",
+    confirmedTitle: "Locked in",
+    projectedTitle: "Best guess",
+    confirmedHint:
+      "Only teams that are definitely in after all 3 group games. Empty spots say TBD (to be decided).",
+    projectedHint:
+      "Based on today's standings. Teams can still change as more group games are played.",
+    loading: "The bracket will show up once tournament data is loaded.",
+  },
+
+  pwa: {
+    installTitle: "Install the app",
+    installBodyMobile: "Add to your home screen for a full-screen app with live scores.",
+    installBodyDesktop: "Install on your computer for quick access from the dock or taskbar.",
+    installButton: "Install app",
+    installIosTitle: "Add to Home Screen",
+    installIosBody: "Tap the Share button, then choose \"Add to Home Screen\".",
+    dismiss: "Not now",
+    refreshing: "Updating scores…",
+  },
+
+  simulator: {
+    loading: "Loading scores and odds…",
+    loadError: "The simulator could not load.",
+    tryAgain: "Try again",
+    heroLead:
+      "Change scores, pick winners, and see who might move on — from the group stage all the way to the final.",
+    tabTournament: "Play it out",
+    tabProbabilities: "Win chances",
+    tabMethodology: "How it works",
+    resultsIn: (n: number) => `${n} finished games`,
+    marketPriced: (n: number) => `${n} with betting odds`,
+    projectedWinner: (name: string) => `Most likely winner · ${name}`,
+    preparingRuns: "Calculating win chances…",
+    preparingRunsDetail: (n: string) =>
+      `Trying ${n} different ways the rest of the tournament could play out.`,
+    projectedStandings: "Group standings (your guess)",
+    tapGroupHint: "Tap a group to see and change its games.",
+    monteCarloKicker: "Win chances",
+    titleOdds: "Who might win it all?",
+    showMarket: "Show betting odds",
+    hideMarket: "Hide betting odds",
+    model: "Our guess",
+    market: "Betting",
+  },
+} as const;
+
+/** Qualification display strings — used by qualificationDisplay.ts */
+export function qualCopyFromVariant(
+  variant: "confirmed-qualified" | "projected-qualified" | "confirmed-eliminated" | "projected-eliminated" | "in-contention"
+) {
+  const q = APP_COPY.qual;
+  switch (variant) {
+    case "confirmed-qualified":
+      return {
+        label: q.confirmedQualified,
+        shortLabel: q.confirmedQualifiedShort,
+        hint: q.confirmedQualifiedHint,
+      };
+    case "projected-qualified":
+      return {
+        label: q.projectedQualified,
+        shortLabel: q.projectedQualifiedShort,
+        hint: q.projectedQualifiedHint,
+      };
+    case "confirmed-eliminated":
+      return {
+        label: q.confirmedEliminated,
+        shortLabel: q.confirmedEliminatedShort,
+        hint: q.confirmedEliminatedHint,
+      };
+    case "projected-eliminated":
+      return {
+        label: q.projectedEliminated,
+        shortLabel: q.projectedEliminatedShort,
+        hint: q.projectedEliminatedHint,
+      };
+    case "in-contention":
+      return {
+        label: q.inContention,
+        shortLabel: q.inContentionShort,
+        hint: q.inContentionHint,
+      };
+    default: {
+      const _exhaustive: never = variant;
+      return _exhaustive;
+    }
+  }
+}

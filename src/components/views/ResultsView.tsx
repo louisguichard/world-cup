@@ -1,23 +1,25 @@
 import { useMemo, useState } from "react";
 import { groupResultsByDay, filterCompletedResults, type ResultsSort } from "../../lib/resultsView";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import type { GroupLetter, Stage } from "../../types";
 import { ResultMatchCard } from "../match/ResultMatchCard";
 
 const STAGES: Array<{ id: "all" | "group" | Stage; label: string }> = [
-  { id: "all", label: "All Stages" },
-  { id: "group", label: "Group Stage" },
-  { id: "R32", label: "Round of 32" },
-  { id: "R16", label: "Round of 16" },
-  { id: "QF", label: "Quarterfinals" },
-  { id: "SF", label: "Semifinals" },
-  { id: "Final", label: "Final" }
+  { id: "all", label: APP_COPY.results.stageAll },
+  { id: "group", label: APP_COPY.results.stageGroup },
+  { id: "R32", label: APP_COPY.results.stageR32 },
+  { id: "R16", label: APP_COPY.results.stageR16 },
+  { id: "QF", label: APP_COPY.results.stageQF },
+  { id: "SF", label: APP_COPY.results.stageSF },
+  { id: "Final", label: APP_COPY.results.stageFinal }
 ];
 
 const GROUPS: GroupLetter[] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
 
 export function ResultsView() {
+  const copy = APP_COPY.results;
   const liveMatchesMap = useStore((s) => s.liveMatches);
   const teams = useStore((s) => s.teams);
 
@@ -47,29 +49,29 @@ export function ResultsView() {
   return (
     <div className="results-view dashboard-view">
       <section className="hero-panel hero-panel--compact">
-        <div className="eyebrow">Tournament results</div>
+        <div className="eyebrow">{copy.eyebrow}</div>
         <h1>
-          Every <span className="accent">final score.</span>
+          Every <span className="accent">{copy.titleAccent}</span>
         </h1>
-        <p>Completed matches grouped by day — filter, sort, and tap any row for team details.</p>
+        <p>{copy.heroLead}</p>
       </section>
 
       <div className="results-controls-sticky">
         <label className="results-control">
-          <span className="results-control-label">Sort</span>
-          <select value={sort} onChange={(e) => setSort(e.target.value as ResultsSort)} aria-label="Sort results">
-            <option value="recent">Most Recent</option>
-            <option value="oldest">Oldest First</option>
-            <option value="highest_scoring">Highest Scoring</option>
-            <option value="biggest_win">Biggest Win</option>
+          <span className="results-control-label">{copy.sortLabel}</span>
+          <select value={sort} onChange={(e) => setSort(e.target.value as ResultsSort)} aria-label={copy.sortLabel}>
+            <option value="recent">{copy.sortRecent}</option>
+            <option value="oldest">{copy.sortOldest}</option>
+            <option value="highest_scoring">{copy.sortHighScore}</option>
+            <option value="biggest_win">{copy.sortBigWin}</option>
           </select>
         </label>
         <label className="results-control">
-          <span className="results-control-label">Stage</span>
+          <span className="results-control-label">{copy.stageLabel}</span>
           <select
             value={stage}
             onChange={(e) => setStage(e.target.value as typeof stage)}
-            aria-label="Filter by stage"
+            aria-label={copy.stageLabel}
           >
             {STAGES.map((s) => (
               <option key={s.id} value={s.id}>
@@ -79,13 +81,13 @@ export function ResultsView() {
           </select>
         </label>
         <label className="results-control">
-          <span className="results-control-label">Group</span>
+          <span className="results-control-label">{copy.groupLabel}</span>
           <select
             value={group}
             onChange={(e) => setGroup(e.target.value as typeof group)}
-            aria-label="Filter by group"
+            aria-label={copy.groupLabel}
           >
-            <option value="all">All Groups</option>
+            <option value="all">{copy.groupAll}</option>
             {GROUPS.map((g) => (
               <option key={g} value={g}>
                 Group {g}
@@ -93,32 +95,32 @@ export function ResultsView() {
             ))}
           </select>
         </label>
-        <input
-          type="search"
-          className="results-search"
-          placeholder="Search team..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label="Search results by team"
-        />
+        <label className="results-control results-control--search">
+          <span className="results-control-label">{copy.searchLabel}</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={copy.searchPlaceholder}
+            aria-label={copy.searchLabel}
+          />
+        </label>
       </div>
 
-      {filtered.length === 0 ? (
-        <section className="dashboard-section">
-          <p className="view-note">No results match this filter.</p>
-        </section>
+      {daySections.length === 0 ? (
+        <p className="view-note">{copy.empty}</p>
       ) : (
         daySections.map((section) => (
-          <section key={section.dateKey} className="dashboard-section" aria-label={section.label}>
+          <section key={section.dateKey} className="results-day-section">
             <div className="section-heading compact">
               <div>
-                <div className="section-kicker">{section.isToday ? "Today" : "Day"}</div>
+                <div className="section-kicker">{section.isToday ? copy.today : copy.day}</div>
                 <h2 className="section-title-text">{section.label}</h2>
               </div>
             </div>
-            <div className="results-list">
-              {section.matches.map((match) => (
-                <ResultMatchCard key={match.id} match={match} openTeamOnClick />
+            <div className="results-match-list">
+              {section.matches.map((m) => (
+                <ResultMatchCard key={m.id} match={m} />
               ))}
             </div>
           </section>

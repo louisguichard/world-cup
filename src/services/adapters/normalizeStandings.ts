@@ -48,6 +48,14 @@ export function normalizeWCLiveStandings(raw: unknown): GroupStanding[] {
   return result;
 }
 
+/** Converts Zafronix /standings or /bracket payload into GroupStanding array (best-effort). */
+export function normalizeZafronixStandings(raw: unknown): GroupStanding[] {
+  if (isRecord(raw) && Array.isArray(raw.standings) && !raw.groups) {
+    return normalizeZafronixBracket({ groups: raw.standings });
+  }
+  return normalizeZafronixBracket(raw);
+}
+
 /** Converts Zafronix bracket/groups payload into GroupStanding array (best-effort). */
 export function normalizeZafronixBracket(raw: unknown): GroupStanding[] {
   if (!isRecord(raw)) return [];

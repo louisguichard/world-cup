@@ -1,0 +1,89 @@
+/* Native app shell — installed PWA on mobile & desktop */
+
+[data-display="standalone"] .wc-chrome {
+  min-height: var(--app-height);
+}
+
+[data-display="standalone"] .wc-topbar {
+  padding-top: max(0px, var(--safe-top));
+}
+
+[data-display="standalone"] .wc-main {
+  /* Extra breathing room when browser chrome is hidden */
+  padding-bottom: calc(5rem + var(--safe-bottom));
+}
+
+[data-display="standalone"] .bottom-tab-bar {
+  padding-bottom: calc(8px + var(--safe-bottom));
+  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--surface-base) 92%, transparent);
+}
+
+/* iOS installed app — prevent rubber-band overscroll on shell */
+[data-platform="ios"][data-display="standalone"] .wc-main {
+  overscroll-behavior-y: contain;
+}
+
+/* Desktop installed app — centered column, native window feel */
+[data-platform="desktop"][data-display="standalone"] .wc-chrome {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(48, 79, 255, 0.08), transparent 60%),
+    var(--surface-base);
+}
+
+[data-platform="desktop"][data-display="standalone"] .wc-topbar,
+[data-platform="desktop"][data-display="standalone"] .wc-main,
+[data-platform="desktop"][data-display="standalone"] .bottom-tab-bar {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  width: 100%;
+}
+
+[data-platform="desktop"][data-display="standalone"] .bottom-tab-bar {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  max-width: min(var(--layout-max), 100%);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-left: 1px solid var(--surface-border);
+  border-right: 1px solid var(--surface-border);
+}
+
+/* Touch devices — pull-to-refresh hint area */
+[data-touch="true"] .wc-main.is-refreshing {
+  scroll-behavior: auto;
+}
+
+.pull-refresh-indicator {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: height 0.2s ease;
+}
+
+.pull-refresh-indicator.is-active {
+  height: 36px;
+}
+
+/* Larger tap targets on touch */
+[data-touch="true"] .bottom-tab,
+[data-touch="true"] .teams-filter-pill,
+[data-touch="true"] .groups-view-toggle-btn {
+  min-height: var(--touch-target-min);
+}
+
+/* Pointer / desktop — subtle hover affordances already in components.css */
+[data-touch="false"] .schedule-card--btn:hover,
+[data-touch="false"] .teams-row:hover {
+  cursor: pointer;
+}

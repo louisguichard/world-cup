@@ -1,12 +1,17 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { BottomTabBar } from "./BottomTabBar";
 import { TopNavBar } from "./TopNavBar";
 import { SplashScreen } from "./SplashScreen";
+import { InstallAppBanner } from "./InstallAppBanner";
 import { DebugPanel } from "../shared/DebugPanel";
 import { ApiSetupBanner } from "../shared/ApiSetupBanner";
 import { useColorScheme } from "../../hooks/useColorScheme";
 import { useHashSync } from "../../hooks/useHashSync";
 import { useQualificationChangeLogger } from "../../hooks/useQualificationChangeLogger";
+import { usePlatform } from "../../hooks/usePlatform";
+import { usePullToRefresh } from "../../hooks/usePullToRefresh";
+import { APP_COPY } from "../../lib/appCopy";
+import { DataOrchestrator } from "../../services/orchestrator/DataOrchestrator";
 import { useStore } from "../../store";
 import { LiveView } from "../views/LiveView";
 import { ResultsView } from "../views/ResultsView";
@@ -27,10 +32,30 @@ export function AppShell() {
   const activeMatchId = useStore((s) => s.activeMatchId);
   const activeVenueSlug = useStore((s) => s.activeVenueSlug);
   const mainRef = useRef<HTMLElement>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const { isTouch } = usePlatform();
 
   useHashSync();
   useColorScheme();
   useQualificationChangeLogger();
+
+  const refreshLiveData = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const orchestrator = DataOrchestrator.getInstance();
+      await Promise.all([orchestrator.tickLive(), orchestrator.refreshStandings()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
+  usePullToRefresh(
+    mainRef,
+    () => {
+      void refreshLiveData();
+    },
+    isTouch && splashPhase === "done" && !activeMatchId && !activeVenueSlug
+  );
 
   useEffect(() => {
     const main = mainRef.current;
@@ -51,7 +76,11 @@ export function AppShell() {
     <div className="wc-chrome">
       <ApiSetupBanner />
       <TopNavBar hidden={activeTab === "simulator" || !!activeMatchId || !!activeVenueSlug} />
-      <main ref={mainRef} className="wc-main">
+      <main
+        ref={mainRef}
+        className={`wc-main${refreshing ? " is-refreshing" : ""}`}
+      >
+        {splashPhase === "done" && !activeMatchId && !activeVenueSlug ? <InstallAppBanner /> : null}
         {activeTab === "live" ? <LiveView /> : null}
         {activeTab === "results" ? <ResultsView /> : null}
         {activeTab === "bracket" ? <BracketView /> : null}

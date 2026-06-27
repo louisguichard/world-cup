@@ -207,25 +207,38 @@ const tests = [
     },
   },
   {
-    label: "SportAPI7 WC scheduled-events (direct)",
-    url: `https://sportapi7.p.rapidapi.com/api/v1/category/1468/scheduled-events/${TODAY_ISO}`,
-    headers: rapidHeaders("sportapi7.p.rapidapi.com"),
+    label: "SofaScore6 match live (direct)",
+    url: "https://sofascore6.p.rapidapi.com/api/sofascore/v1/match/live?sport_slug=football",
+    headers: rapidHeaders("sofascore6.p.rapidapi.com"),
     skip: !RAPIDAPI_KEY,
     parse: ({ body, status }) => {
       if (status === 401 || status === 403) return `FAIL: HTTP ${status}`;
       const d = JSON.parse(body);
-      return `events=${d.events?.length ?? 0}`;
+      const events = Array.isArray(d) ? d : d.events ?? [];
+      return `events=${events.length}`;
     },
   },
   {
-    label: "SportAPI7 WC scheduled-events (vite proxy)",
-    url: `${PROXY_BASE}/rapidapi-sportapi/api/v1/category/1468/scheduled-events/${TODAY_ISO}`,
-    headers: rapidHeaders("sportapi7.p.rapidapi.com"),
+    label: "SofaScore6 match live (vite proxy)",
+    url: `${PROXY_BASE}/api/sofascore6/api/sofascore/v1/match/live?sport_slug=football`,
+    headers: rapidHeaders("sofascore6.p.rapidapi.com"),
     skip: !RAPIDAPI_KEY,
     parse: ({ body, status }) => {
       if (status === 401 || status === 403) return `FAIL: HTTP ${status}`;
       const d = JSON.parse(body);
-      return `events=${d.events?.length ?? 0}`;
+      const events = Array.isArray(d) ? d : d.events ?? [];
+      return `events=${events.length}`;
+    },
+  },
+  {
+    label: "SofaScore6 search/all (direct)",
+    url: "https://sofascore6.p.rapidapi.com/api/sofascore/v1/search/all?q=world+cup",
+    headers: rapidHeaders("sofascore6.p.rapidapi.com"),
+    skip: !RAPIDAPI_KEY,
+    parse: ({ body, status }) => {
+      if (status === 401 || status === 403) return `FAIL: HTTP ${status}`;
+      const d = JSON.parse(body);
+      return `results=${Array.isArray(d) ? d.length : 0}`;
     },
   },
   {

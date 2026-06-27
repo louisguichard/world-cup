@@ -1,19 +1,38 @@
 :root {
   --app-height: 100dvh;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 
-  /* Bridge split CSS to Pressroom tokens from styles.css */
-  --color-bg: var(--bg, #0a0c0e);
-  --color-surface: var(--surface, #101316);
-  --color-text: var(--text, #f3f6f4);
-  --color-muted: var(--muted, #98a29d);
-  --color-accent: var(--accent, #36e8a0);
-  --color-live: #ff4d4d;
+  /* Fluid layout — scales from phone to ultra-wide desktop */
+  --layout-max: 1420px;
+  --layout-gutter: clamp(12px, 2.5vw, 24px);
+  --layout-gutter-inline: clamp(12px, 3vw, 32px);
+  --layout-section-gap: clamp(16px, 2.5vw, 28px);
+  --touch-target-min: 44px;
+  --content-readable: min(100%, 72ch);
 
-  --badge-at-risk-bg: rgba(255, 210, 125, 0.18);
-  --badge-at-risk-text: var(--warn, #ffd27d);
-  --badge-qualified: var(--accent);
-  --badge-eliminated: var(--coral, #ff9168);
+  /* Bracket columns shrink on narrow viewports, expand on wide */
+  --bracket-col-width: clamp(140px, 14vw, 208px);
+  --bracket-col-gap: clamp(10px, 1.8vw, 20px);
+
+  /* Card heights — aliases; modules.css owns responsive tuning */
+  --card-min: var(--module-grid-min, clamp(260px, 42vw, 320px));
+  --strip-card-width: var(--live-secondary-card-width, clamp(240px, 72vw, 300px));
+
+  /* Bridge split CSS to FWC canonical tokens */
+  --color-bg: var(--surface-base);
+  --color-surface: var(--surface-raised);
+  --color-text: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-accent: var(--action-primary);
+  --color-live: var(--fwc-bright-red);
+
+  --badge-at-risk-bg: rgba(236, 255, 67, 0.12);
+  --badge-at-risk-text: var(--fwc-yellow);
+  --badge-qualified: var(--fwc-green);
+  --badge-eliminated: var(--fwc-bright-red);
 
   /* Venue / location overlay — above hub (1100), sheets, nav, debug */
   --z-venue-overlay: 10000;

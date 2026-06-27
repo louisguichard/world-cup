@@ -6,6 +6,7 @@ import {
   type QualificationMatchContext
 } from "../../lib/qualification";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { APP_COPY } from "../../lib/appCopy";
 import type { GroupLetter } from "../../types";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
@@ -23,12 +24,12 @@ type QualFilter = "all" | "qualified" | "projected" | "at_risk" | "eliminated" |
 const GROUPS: GroupLetter[] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
 
 const filterConfig: { id: QualFilter; label: string; activeClass: string }[] = [
-  { id: "all", label: "All", activeClass: "teams-filter-pill--all" },
-  { id: "qualified", label: "Confirmed Qualified ✓", activeClass: "teams-filter-pill--qualified" },
-  { id: "projected", label: "Projected to Qualify", activeClass: "teams-filter-pill--projected" },
-  { id: "at_risk", label: "In Contention", activeClass: "teams-filter-pill--at-risk" },
-  { id: "eliminated", label: "Eliminated ✕", activeClass: "teams-filter-pill--eliminated" },
-  { id: "contention", label: "All Active", activeClass: "teams-filter-pill--contention" }
+  { id: "all", label: APP_COPY.teams.filterAll, activeClass: "teams-filter-pill--all" },
+  { id: "qualified", label: APP_COPY.teams.filterQualified, activeClass: "teams-filter-pill--qualified" },
+  { id: "projected", label: APP_COPY.teams.filterProjected, activeClass: "teams-filter-pill--projected" },
+  { id: "at_risk", label: APP_COPY.teams.filterAtRisk, activeClass: "teams-filter-pill--at-risk" },
+  { id: "eliminated", label: APP_COPY.teams.filterEliminated, activeClass: "teams-filter-pill--eliminated" },
+  { id: "contention", label: APP_COPY.teams.filterStillPlaying, activeClass: "teams-filter-pill--contention" }
 ];
 
 function TeamRow({
@@ -45,12 +46,15 @@ function TeamRow({
   qualContext: QualificationMatchContext;
 }) {
   const teams = useStore((s) => s.teams);
+  const teamProfiles = useStore((s) => s.teamProfiles);
   const standings = useStore((s) => s.groupStandings);
   const openTeamSheet = useStore((s) => s.openTeamSheet);
   const team = teams[teamId];
   const theme = useTeamTheme(teamId);
   const qual = computeQualificationStatus(teamId, standings, qualContext);
   const display = resolveQualificationDisplay(qual);
+  const abbrev = team?.abbreviation?.toUpperCase() ?? "";
+  const squadSize = abbrev ? teamProfiles[abbrev]?.players.length : 0;
 
   return (
     <li>
@@ -64,8 +68,8 @@ function TeamRow({
         <span className="teams-row-name team-name-text">{teamDisplayName(team, teamId)}</span>
         <QualificationStatusBadge qual={qual} size="xs" />
         <span className="teams-stats">
-          Rank {rank} · {points}pts · {gd >= 0 ? "+" : ""}
-          {gd} GD
+          {APP_COPY.teams.rankLabel(rank, points, gd)}
+          {squadSize > 0 ? ` · ${squadSize} players` : ""}
         </span>
       </button>
     </li>
@@ -151,20 +155,22 @@ export function TeamsView() {
     }).filter((g) => g.teams.length > 0);
   }, [teams, standings, query, filterSet]);
 
+  const t = APP_COPY.teams;
+
   return (
     <div className="teams-view dashboard-view">
       <section className="hero-panel hero-panel--compact">
-        <div className="eyebrow">All 48 teams</div>
+        <div className="eyebrow">{t.eyebrow}</div>
         <h1>
-          Every nation, <span className="accent">one table.</span>
+          Every nation, <span className="accent">{t.titleAccent}</span>
         </h1>
-        <p>Search the roster, filter by qualification status, and tap any team for path and odds.</p>
+        <p>{t.heroLead}</p>
       </section>
 
       <input
         type="search"
         className="teams-search"
-        placeholder="Search teams..."
+        placeholder={t.searchPlaceholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         aria-label="Search teams"

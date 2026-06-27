@@ -131,22 +131,19 @@
 
 .team-sheet-header-themed {
   position: relative;
-  margin: -1rem -1.25rem 1rem;
-  padding: 1.25rem 1.25rem 1rem;
+  flex-shrink: 0;
+  margin: 0;
+  padding: var(--space-5) var(--space-5) var(--space-4);
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--team-primary) 35%, var(--surface-2)),
-    var(--surface-2)
+    color-mix(in srgb, var(--team-primary) 35%, var(--surface-overlay)),
+    var(--surface-overlay)
   );
-  border-bottom: 1px solid color-mix(in srgb, var(--team-primary) 25%, var(--line));
+  border-bottom: 1px solid color-mix(in srgb, var(--team-primary) 25%, var(--surface-border));
 }
 
 .team-sheet-header-themed .team-accent-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  margin: 0;
+  display: none;
 }
 
 .qual-crest-themed {
@@ -236,18 +233,18 @@
 }
 
 .certainty-badge--confirmed {
-  background: #10b981;
-  color: #fff;
+  background: var(--qual-certainty-confirmed-bg);
+  color: var(--qual-certainty-confirmed-fg);
 }
 
 .certainty-badge--projected {
-  background: #6366f1;
-  color: #fff;
+  background: var(--qual-certainty-projected-bg);
+  color: var(--qual-certainty-projected-fg);
 }
 
 .certainty-badge--simulated {
-  background: #64748b;
-  color: #fff;
+  background: var(--qual-certainty-simulated-bg);
+  color: var(--qual-certainty-simulated-fg);
 }
 
 .bracket-ghost-list {
@@ -271,12 +268,16 @@
   padding: 2px 4px;
 }
 
-.bracket-ghost-team img {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  object-fit: cover;
+.bracket-ghost-team img,
+.bracket-ghost-crest {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  object-fit: contain;
+  object-position: center;
   flex-shrink: 0;
+  padding: 1px;
+  box-sizing: border-box;
   filter: grayscale(100%) opacity(0.35);
 }
 
@@ -295,16 +296,16 @@
 }
 
 .qual-team-badge--leading {
-  background: #6366f1;
-  color: #fff;
+  background: var(--qual-certainty-projected-bg);
+  color: var(--qual-certainty-projected-fg);
 }
 
 .qual-team-badge--on-track {
-  background: #d97706;
-  color: #fff;
+  background: var(--qual-row-contention-border);
+  color: #ffffff;
 }
 
 .qual-team-badge--locked {
-  background: #10b981;
-  color: #fff;
+  background: var(--qual-certainty-confirmed-bg);
+  color: var(--qual-certainty-confirmed-fg);
 }

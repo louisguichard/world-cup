@@ -1,0 +1,115 @@
+import type { MergedMatch, Team } from "../types";
+import type { FootballPredictionMatch } from "../services/FootballPredictionClient";
+
+const TEAM_ALIASES: Record<string, string[]> = {
+  usa: ["united states", "u.s.a.", "u.s.", "usmnt"],
+  eng: ["england"],
+  kor: ["south korea", "korea republic", "republic of korea"],
+  ksa: ["saudi arabia"],
+  civ: ["ivory coast", "cote d'ivoire", "côte d'ivoire"],
+  cod: ["dr congo", "democratic republic of congo", "congo dr"],
+  cpv: ["cape verde", "cabo verde"],
+  cuw: ["curacao", "curaçao"],
+  bih: ["bosnia", "bosnia and herzegovina", "bosnia & herzegovina"],
+  rsa: ["south africa"],
+  nzl: ["new zealand"],
+  uae: ["united arab emirates"],
+};
+
+function normalizeName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function teamNamesFor(team: Team): string[] {
+  const names = new Set<string>();
+  for (const n of [team.name, team.shortName, team.abbreviation, team.id]) {
+    if (n) names.add(normalizeName(n));
+  }
+  const abbrev = team.abbreviation?.toLowerCase() ?? team.id?.toLowerCase();
+  for (const alias of TEAM_ALIASES[abbrev] ?? []) {
+    names.add(normalizeName(alias));
+  }
+  return [...names];
+}
+
+export function predictionTeamMatchesTeam(predictionName: string, team: Team): boolean {
+  const norm = normalizeName(predictionName);
+  return teamNamesFor(team).some(
+    (candidate) => norm === candidate || norm.includes(candidate) || candidate.includes(norm)
+  );
+}
+
+export function linkPredictionToMatch(
+  prediction: FootballPredictionMatch,
+  match: MergedMatch,
+  teams: Record<string, Team>
+): boolean {
+  const home = teams[match.homeTeamId];
+  const away = teams[match.awayTeamId];
+  if (!home || !away) return false;
+
+  const homeOk = predictionTeamMatchesTeam(prediction.homeTeam, home);
+  const awayOk = predictionTeamMatchesTeam(prediction.awayTeam, away);
+  if (!homeOk || !awayOk) return false;
+
+  const matchDate = match.date.slice(0, 10);
+  if (prediction.date && prediction.date !== matchDate) {
+    const predDay = prediction.date.slice(0, 10);
+    if (predDay !== matchDate) return false;
+  }
+
+  return true;
+}
+
+export function buildPredictionIndex(
+  predictions: FootballPredictionMatch[],
+  matches: MergedMatch[],
+  teams: Record<string, Team>
+): Record<string, FootballPredictionMatch> {
+  const index: Record<string, FootballPredictionMatch> = {};
+
+  for (const match of matches) {
+    const found = predictions.find((p) => linkPredictionToMatch(p, match, teams));
+    if (found) index[match.id] = found;
+  }
+
+  return index;
+}
+
+export function predictionsForTeam(
+  team: Team,
+  predictions: FootballPredictionMatch[]
+): FootballPredictionMatch[] {
+  return predictions.filter(
+    (p) => predictionTeamMatchesTeam(p.homeTeam, team) || predictionTeamMatchesTeam(p.awayTeam, team)
+  );
+}
+
+export function formatPredictionPick(prediction: string): string {
+  switch (prediction.toUpperCase()) {
+    case "1":
+      return "Home win";
+    case "2":
+      return "Away win";
+    case "X":
+      return "Draw";
+    case "O":
+    case "OVER":
+      return "Over";
+    case "U":
+    case "UNDER":
+      return "Under";
+    case "YES":
+      return "BTTS Yes";
+    case "NO":
+      return "BTTS No";
+    default:
+      return prediction;
+  }
+}

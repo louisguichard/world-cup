@@ -1,5 +1,12 @@
 import type { Team } from "../types";
+import { isApiEnabled } from "../config/apiFlags";
 import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
+import { wc2026Endpoints } from "../config/wc2026Endpoints";
+import {
+  buildPlayerIndex,
+  readWc2026PlayerStore,
+} from "../lib/wc2026PlayerCache";
+import { matchPlayerInRoster } from "./playerProfile/matchPlayerInRoster";
 import { logger } from "./Logger";
 
 const RAPIDAPI_HOST =
@@ -11,6 +18,16 @@ export function isWorldCup2026Disabled(): boolean {
   return worldCup2026SessionDisabled;
 }
 
+export type Wc2026Tournament = {
+  name: string;
+  year: number;
+  host: string;
+  startDate: string;
+  endDate: string;
+  teamsCount: number;
+  description?: string;
+};
+
 export type Wc2026Team = {
   id: string;
   name: string;
@@ -19,6 +36,8 @@ export type Wc2026Team = {
   logo?: string;
   color?: string;
   slug?: string;
+  image?: string;
+  teamPhoto?: string;
 };
 
 export type Wc2026Player = {
@@ -32,6 +51,8 @@ export type Wc2026Player = {
   age?: number;
   citizenship?: string;
   jerseyNumber?: string;
+  teamId?: string;
+  teamName?: string;
   marketValue?: { valueM?: number; display?: string };
   club?: string;
   birthplace?: string;
@@ -39,6 +60,7 @@ export type Wc2026Player = {
 };
 
 export type Wc2026TeamDetail = {
+  tournament?: Wc2026Tournament;
   team?: Wc2026Team;
   players?: Wc2026Player[];
   playersCount?: number;
@@ -47,6 +69,8 @@ export type Wc2026TeamDetail = {
 const ROSTER_CACHE_TTL_MS = 30 * 60 * 1000;
 const rosterCache = new Map<string, Wc2026Player[]>();
 const abbrevToWcId = new Map<string, string>();
+let tournamentCache: Wc2026Tournament | null = null;
+let playerIndex = buildPlayerIndex(readWc2026PlayerStore().players);
 
 function baseUrl(): string {
   if (typeof window === "undefined") {
@@ -57,6 +81,43 @@ function baseUrl(): string {
 
 function rapidHeaders(): HeadersInit {
   return rapidApiHeaders(RAPIDAPI_HOST);
+}
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null;
+}
+
+function cacheTournament(raw: unknown): void {
+  if (!isRecord(raw)) return;
+  const name = raw.name;
+  const year = raw.year;
+  const host = raw.host;
+  const startDate = raw.startDate;
+  const endDate = raw.endDate;
+  const teamsCount = raw.teamsCount;
+  if (
+    typeof name !== "string" ||
+    typeof year !== "number" ||
+    typeof host !== "string" ||
+    typeof startDate !== "string" ||
+    typeof endDate !== "string" ||
+    typeof teamsCount !== "number"
+  ) {
+    return;
+  }
+  tournamentCache = {
+    name,
+    year,
+    host,
+    startDate,
+    endDate,
+    teamsCount,
+    description: typeof raw.description === "string" ? raw.description : undefined,
+  };
+}
+
+function hydratePlayerIndex(players: Wc2026Player[]): void {
+  playerIndex = buildPlayerIndex(players);
 }
 
 async function handleBlocked(res: Response): Promise<boolean> {
@@ -70,56 +131,6 @@ async function handleBlocked(res: Response): Promise<boolean> {
     bodySnippet,
   });
   return true;
-}
-
-export async function fetchTeams(): Promise<Wc2026Team[]> {
-  if (worldCup2026SessionDisabled) return [];
-
-  try {
-    const res = await fetch(`${baseUrl()}/world-cup-2026/teams`, { headers: rapidHeaders() });
-    if (await handleBlocked(res)) return [];
-    if (!res.ok) throw new Error(`${res.status}`);
-
-    const data = (await res.json()) as { teams?: Wc2026Team[] };
-    const teams = data.teams ?? [];
-    for (const team of teams) {
-      if (team.abbreviation && team.id) {
-        abbrevToWcId.set(team.abbreviation.toUpperCase(), team.id);
-      }
-    }
-    return teams;
-  } catch (error) {
-    logger.warn("WorldCup2026 teams fetch failed", "WorldCup2026Client", {
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return [];
-  }
-}
-
-/** Alias for fetchTeams — returns all WC 2026 teams. */
-export async function fetchAllTeams(): Promise<Wc2026Team[]> {
-  return fetchTeams();
-}
-
-/** Fetches a single team by id. */
-export async function fetchTeam(teamId: string): Promise<Wc2026Team | null> {
-  if (worldCup2026SessionDisabled) return null;
-
-  try {
-    const res = await fetch(`${baseUrl()}/world-cup-2026/teams/${encodeURIComponent(teamId)}`, {
-      headers: rapidHeaders(),
-    });
-    if (await handleBlocked(res)) return null;
-    if (!res.ok) return null;
-    const data = (await res.json()) as Wc2026TeamDetail & Wc2026Team;
-    return data.team ?? data;
-  } catch (error) {
-    logger.warn("WorldCup2026 team fetch failed", "WorldCup2026Client", {
-      error: error instanceof Error ? error.message : String(error),
-      teamId,
-    });
-    return null;
-  }
 }
 
 function normalizeWcPlayer(raw: Record<string, unknown>): Wc2026Player | null {
@@ -137,6 +148,8 @@ function normalizeWcPlayer(raw: Record<string, unknown>): Wc2026Player | null {
     age: typeof raw.age === "number" ? raw.age : raw.age != null ? Number(raw.age) : undefined,
     citizenship: raw.citizenship != null ? String(raw.citizenship) : undefined,
     jerseyNumber: raw.jerseyNumber != null ? String(raw.jerseyNumber) : undefined,
+    teamId: raw.teamId != null ? String(raw.teamId) : undefined,
+    teamName: raw.teamName != null ? String(raw.teamName) : undefined,
     marketValue: raw.marketValue as Wc2026Player["marketValue"],
     club:
       raw.club != null
@@ -154,38 +167,143 @@ function normalizeWcPlayer(raw: Record<string, unknown>): Wc2026Player | null {
   };
 }
 
-/** Fetches squad roster with player photos and bio fields. */
-export async function fetchTeamPlayers(wcTeamId: string): Promise<Wc2026Player[]> {
-  const cached = rosterCache.get(wcTeamId);
-  if (cached) return cached;
+export function getCachedTournamentInfo(): Wc2026Tournament | null {
+  return tournamentCache;
+}
 
+/** Tournament metadata is included on teams/players list responses. */
+export async function fetchTournamentInfo(): Promise<Wc2026Tournament | null> {
+  if (tournamentCache) return tournamentCache;
+  await fetchTeams();
+  return tournamentCache;
+}
+
+export async function fetchTeams(): Promise<Wc2026Team[]> {
   if (worldCup2026SessionDisabled) return [];
 
   try {
-    const res = await fetch(`${baseUrl()}/world-cup-2026/teams/${encodeURIComponent(wcTeamId)}`, {
-      headers: rapidHeaders(),
-    });
+    const res = await fetch(`${baseUrl()}${wc2026Endpoints.teams()}`, { headers: rapidHeaders() });
     if (await handleBlocked(res)) return [];
-    if (!res.ok) return [];
+    if (!res.ok) throw new Error(`${res.status}`);
 
-    const data = (await res.json()) as Wc2026TeamDetail & { players?: unknown[] };
-    const players = (data.players ?? [])
-      .map((p) => normalizeWcPlayer(p as Record<string, unknown>))
-      .filter((p): p is Wc2026Player => p != null);
-
-    rosterCache.set(wcTeamId, players);
-    setTimeout(() => rosterCache.delete(wcTeamId), ROSTER_CACHE_TTL_MS);
-    return players;
+    const data = (await res.json()) as { tournament?: unknown; teams?: Wc2026Team[] };
+    if (data.tournament) cacheTournament(data.tournament);
+    const teams = data.teams ?? [];
+    for (const team of teams) {
+      if (team.abbreviation && team.id) {
+        abbrevToWcId.set(team.abbreviation.toUpperCase(), team.id);
+      }
+    }
+    return teams;
   } catch (error) {
-    logger.warn("WorldCup2026 roster fetch failed", "WorldCup2026Client", {
+    logger.warn("WorldCup2026 teams fetch failed", "WorldCup2026Client", {
       error: error instanceof Error ? error.message : String(error),
-      wcTeamId,
     });
     return [];
   }
 }
 
-/** Resolves WC 2026 team id from abbreviation (loads team list if needed). */
+export async function fetchAllTeams(): Promise<Wc2026Team[]> {
+  return fetchTeams();
+}
+
+export async function fetchAllPlayers(): Promise<Wc2026Player[]> {
+  if (worldCup2026SessionDisabled || !isApiEnabled("wc2026Teams")) return [];
+
+  try {
+    const res = await fetch(`${baseUrl()}${wc2026Endpoints.players()}`, { headers: rapidHeaders() });
+    if (await handleBlocked(res)) return [];
+    if (!res.ok) return [];
+
+    const data = (await res.json()) as { tournament?: unknown; players?: unknown[] };
+    if (data.tournament) cacheTournament(data.tournament);
+    const players = (data.players ?? [])
+      .map((p) => normalizeWcPlayer(p as Record<string, unknown>))
+      .filter((p): p is Wc2026Player => p != null);
+
+    hydratePlayerIndex(players);
+    return players;
+  } catch (error) {
+    logger.warn("WorldCup2026 players fetch failed", "WorldCup2026Client", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+}
+
+export async function fetchTeam(teamId: string): Promise<Wc2026Team | null> {
+  const detail = await fetchTeamDetail(teamId);
+  return detail?.team ?? null;
+}
+
+export async function fetchTeamDetail(teamId: string): Promise<Wc2026TeamDetail | null> {
+  if (worldCup2026SessionDisabled) return null;
+
+  try {
+    const res = await fetch(`${baseUrl()}${wc2026Endpoints.team(teamId)}`, { headers: rapidHeaders() });
+    if (await handleBlocked(res)) return null;
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as Wc2026TeamDetail & { players?: unknown[] };
+    if (data.tournament) cacheTournament(data.tournament);
+    const players = (data.players ?? [])
+      .map((p) => normalizeWcPlayer(p as Record<string, unknown>))
+      .filter((p): p is Wc2026Player => p != null);
+
+    if (players.length > 0) {
+      rosterCache.set(teamId, players);
+      setTimeout(() => rosterCache.delete(teamId), ROSTER_CACHE_TTL_MS);
+    }
+
+    return { ...data, players };
+  } catch (error) {
+    logger.warn("WorldCup2026 team fetch failed", "WorldCup2026Client", {
+      error: error instanceof Error ? error.message : String(error),
+      teamId,
+    });
+    return null;
+  }
+}
+
+export async function fetchTeamPlayers(wcTeamId: string): Promise<Wc2026Player[]> {
+  const cached = rosterCache.get(wcTeamId);
+  if (cached) return cached;
+
+  const detail = await fetchTeamDetail(wcTeamId);
+  return detail?.players ?? [];
+}
+
+/** Photo URLs ship on player records — there is no separate working photo route upstream. */
+export function getPlayerPhotoUrl(playerId: string): string | undefined {
+  if (playerIndex.size === 0) {
+    hydratePlayerIndex(readWc2026PlayerStore().players);
+  }
+  const image = playerIndex.get(playerId)?.image;
+  return typeof image === "string" && image.trim() ? image : undefined;
+}
+
+export async function fetchPlayerPhotoUrl(playerId: string): Promise<string | undefined> {
+  if (!playerIndex.has(playerId)) {
+    const store = readWc2026PlayerStore();
+    if (store.players.length > 0) {
+      hydratePlayerIndex(store.players);
+    } else {
+      await fetchAllPlayers();
+    }
+  }
+  return getPlayerPhotoUrl(playerId);
+}
+
+export function lookupWc2026Player(opts: {
+  playerId?: string;
+  playerName: string;
+}): Wc2026Player | undefined {
+  if (playerIndex.size === 0) {
+    hydratePlayerIndex(readWc2026PlayerStore().players);
+  }
+  return matchPlayerInRoster([...playerIndex.values()], opts);
+}
+
 export async function resolveWc2026TeamId(abbreviation: string): Promise<string | undefined> {
   const key = abbreviation.toUpperCase();
   const hit = abbrevToWcId.get(key);
@@ -198,12 +316,11 @@ export function getWc2026TeamIdFromCache(abbreviation: string): string | undefin
   return abbrevToWcId.get(abbreviation.toUpperCase());
 }
 
-/** Fetches group assignments (raw). */
 export async function fetchGroups(): Promise<unknown> {
   if (worldCup2026SessionDisabled) return null;
 
   try {
-    const res = await fetch(`${baseUrl()}/world-cup-2026/groups`, { headers: rapidHeaders() });
+    const res = await fetch(`${baseUrl()}${wc2026Endpoints.groups()}`, { headers: rapidHeaders() });
     if (await handleBlocked(res)) return null;
     if (!res.ok) return null;
     return await res.json();
@@ -241,9 +358,14 @@ export function mergeTeamMetadata(
   return { teams: result, patched };
 }
 
-/** Test-only reset */
 export function resetWorldCup2026SessionForTests(): void {
   worldCup2026SessionDisabled = false;
   rosterCache.clear();
   abbrevToWcId.clear();
+  tournamentCache = null;
+  playerIndex = new Map();
+}
+
+export function seedWc2026PlayerIndexForTests(players: Wc2026Player[]): void {
+  hydratePlayerIndex(players);
 }

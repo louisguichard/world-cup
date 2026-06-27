@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { APP_COPY } from "./appCopy";
 import { resolveQualificationDisplay } from "./qualificationDisplay";
 import type { QualificationStatus } from "../types";
 
@@ -14,24 +15,23 @@ function qual(partial: Partial<QualificationStatus> & Pick<QualificationStatus, 
 }
 
 describe("resolveQualificationDisplay", () => {
-  it("labels confirmed top-two as Confirmed · Qualified", () => {
+  it("labels confirmed top-two as locked in · moving on", () => {
     const d = resolveQualificationDisplay(
       qual({ status: "qualified", certainty: "confirmed", lifeState: "projected", projectionScore: 100 })
     );
     expect(d.variant).toBe("confirmed-qualified");
-    expect(d.label).toContain("Confirmed");
-    expect(d.label).toContain("Qualified");
+    expect(d.label).toBe(APP_COPY.qual.confirmedQualified);
   });
 
-  it("labels projected top-two as Projected · To Qualify", () => {
+  it("labels projected top-two as probably · moving on", () => {
     const d = resolveQualificationDisplay(
       qual({ status: "qualified", certainty: "projected_weak", lifeState: "alive" })
     );
     expect(d.variant).toBe("projected-qualified");
-    expect(d.shortLabel).toBe("Proj. Qualify");
+    expect(d.shortLabel).toBe(APP_COPY.qual.projectedQualifiedShort);
   });
 
-  it("labels mathematical elimination as Confirmed · Eliminated", () => {
+  it("labels mathematical elimination as locked in · out", () => {
     const d = resolveQualificationDisplay(
       qual({
         status: "eliminated",
@@ -42,17 +42,18 @@ describe("resolveQualificationDisplay", () => {
       })
     );
     expect(d.variant).toBe("confirmed-eliminated");
-    expect(d.label).toContain("Eliminated");
+    expect(d.label).toBe(APP_COPY.qual.confirmedEliminated);
   });
 
-  it("labels fourth-place alive as Projected · To Be Eliminated", () => {
+  it("labels fourth-place alive as probably · out", () => {
     const d = resolveQualificationDisplay(
       qual({ status: "pending", lifeState: "alive", canQualify: true, projectionScore: 22 })
     );
     expect(d.variant).toBe("projected-eliminated");
+    expect(d.label).toBe(APP_COPY.qual.projectedEliminated);
   });
 
-  it("labels third-place race as Projected · To Qualify", () => {
+  it("labels third-place race as probably · moving on", () => {
     const d = resolveQualificationDisplay(
       qual({ status: "at_risk", certainty: "projected_weak", lifeState: "alive" })
     );

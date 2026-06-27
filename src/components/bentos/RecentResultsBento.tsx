@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { localDateKey, formatTimeAgo, yesterdayDateKey } from "../../lib/localDate";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { APP_COPY } from "../../lib/appCopy";
 import type { MergedMatch, Team } from "../../types";
 import { useStore } from "../../store";
 import { TeamFlag } from "../team/TeamFlag";
@@ -31,7 +32,7 @@ function ResultRow({ match, home, away, onSelect }: ResultRowProps) {
         <span className="team-name-text">{awayName}</span>
       </span>
       <span className="recent-result-meta">
-        <span className="final-pill">FT</span>
+        <span className="final-pill">{APP_COPY.match.final}</span>
         {ago ? <span className="recent-result-ago">{ago}</span> : null}
       </span>
     </button>
@@ -59,14 +60,16 @@ export function RecentResultsBento() {
     const result: { label: string; matches: MergedMatch[] }[] = [];
     let remaining = 8;
 
+    const res = APP_COPY.results;
+
     if (todayMatches.length > 0) {
       const slice = todayMatches.slice(0, remaining);
-      result.push({ label: `Today (${todayMatches.length})`, matches: slice });
+      result.push({ label: `${res.today} (${todayMatches.length})`, matches: slice });
       remaining -= slice.length;
     }
     if (remaining > 0 && yesterdayMatches.length > 0) {
       result.push({
-        label: `Yesterday (${yesterdayMatches.length})`,
+        label: `${res.yesterday} (${yesterdayMatches.length})`,
         matches: yesterdayMatches.slice(0, remaining)
       });
     }
@@ -76,16 +79,19 @@ export function RecentResultsBento() {
 
   if (sections.length === 0) return null;
 
+  const live = APP_COPY.live;
+  const res = APP_COPY.results;
+
   return (
-    <section className="recent-results-bento" aria-label="Recent results">
+    <section className="recent-results-bento" aria-label={live.recentResultsTitle}>
       <div className="section-heading compact">
         <div>
-          <div className="section-kicker">Results</div>
-          <h2 className="section-title-text">Recent results</h2>
+          <div className="section-kicker">{live.recentResultsKicker}</div>
+          <h2 className="section-title-text">{live.recentResultsTitle}</h2>
         </div>
         {total > 8 ? (
           <button type="button" className="recent-results-link" onClick={() => setActiveTab("results")}>
-            See all results →
+            {live.seeAllResults} →
           </button>
         ) : null}
       </div>

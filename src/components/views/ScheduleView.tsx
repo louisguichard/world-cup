@@ -14,9 +14,11 @@ import {
   type ScheduleStatusFilter
 } from "../../lib/scheduleView";
 import styles from "./ScheduleView.module.css";
+import { FootballPredictionInsightsPanel } from "../predictions/FootballPredictionInsightsPanel";
 import { VenueLabel } from "../venue/VenueLabel";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_BRAND } from "../../config/appMeta";
+import { APP_COPY } from "../../lib/appCopy";
 import type { MergedMatch, Team } from "../../types";
 
 type ViewMode = "day" | "all";
@@ -105,6 +107,9 @@ export function ScheduleView() {
     }
   };
 
+  const sched = APP_COPY.schedule;
+  const tbl = APP_COPY.table;
+
   return (
     <div className={styles.view}>
       <section className="hero-panel hero-panel--compact">
@@ -112,8 +117,10 @@ export function ScheduleView() {
         <h1>
           Full <span className="accent">Schedule.</span>
         </h1>
-        <p>All 104 matches — group stage through the Final — in your local time.</p>
+        <p>{sched.heroLead}</p>
       </section>
+
+      <FootballPredictionInsightsPanel />
 
       <div className={styles.toolbar} role="toolbar" aria-label="Schedule filters">
         <div className={styles.toolbarRow}>
@@ -123,14 +130,14 @@ export function ScheduleView() {
               className={`${styles.toggleBtn} ${viewMode === "day" ? styles["toggleBtn--active"] : ""}`}
               onClick={() => setViewMode("day")}
             >
-              Single day
+              {sched.viewOneDay}
             </button>
             <button
               type="button"
               className={`${styles.toggleBtn} ${viewMode === "all" ? styles["toggleBtn--active"] : ""}`}
               onClick={() => setViewMode("all")}
             >
-              All days
+              {sched.viewAllDays}
             </button>
           </div>
 
@@ -140,19 +147,19 @@ export function ScheduleView() {
               className={styles.navBtn}
               onClick={goToPrevDay}
               disabled={selectedIndex <= 0}
-              aria-label="Previous day"
+              aria-label={sched.prevDay}
             >
               ←
             </button>
             <button type="button" className={styles.todayJumpBtn} onClick={jumpToToday}>
-              Today
+              {sched.today}
             </button>
             <button
               type="button"
               className={styles.navBtn}
               onClick={goToNextDay}
               disabled={selectedIndex < 0 || selectedIndex >= dateKeys.length - 1}
-              aria-label="Next day"
+              aria-label={sched.nextDay}
             >
               →
             </button>
@@ -161,29 +168,29 @@ export function ScheduleView() {
 
         <div className={styles.toolbarRow}>
           <label className={styles.selectLabel}>
-            Status
+            {sched.filterStatus}
             <select
               className={styles.select}
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ScheduleStatusFilter)}
             >
-              <option value="all">All matches</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="live">Live</option>
-              <option value="completed">Completed</option>
+              <option value="all">{sched.filterAll}</option>
+              <option value="upcoming">{sched.filterUpcoming}</option>
+              <option value="live">{sched.filterLive}</option>
+              <option value="completed">{sched.filterCompleted}</option>
             </select>
           </label>
 
           <label className={styles.selectLabel}>
-            Sort by
+            {sched.sortBy}
             <select
               className={styles.select}
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as ScheduleSort)}
             >
-              <option value="time">Kickoff time</option>
-              <option value="group">Group</option>
-              <option value="stage">Stage</option>
+              <option value="time">{sched.sortTime}</option>
+              <option value="group">{sched.sortGroup}</option>
+              <option value="stage">{sched.sortStage}</option>
             </select>
           </label>
         </div>
@@ -216,9 +223,7 @@ export function ScheduleView() {
 
       {displayGroups.length === 0 ? (
         <div className={styles.emptyState}>
-          {statusFilter === "all"
-            ? "No matches in the schedule yet."
-            : "No matches match this filter."}
+          {statusFilter === "all" ? sched.emptyAll : sched.emptyFilter}
         </div>
       ) : (
         displayGroups.map((group) => (
@@ -235,7 +240,7 @@ export function ScheduleView() {
                 {group.isToday ? <span className={styles.todayBadge}>Today</span> : null}
               </span>
               <span className={styles.matchCount}>
-                {group.matches.length} {group.matches.length === 1 ? "match" : "matches"}
+                {sched.matchCount(group.matches.length)}
               </span>
             </div>
 
@@ -258,17 +263,18 @@ type ScheduleMatchTableProps = {
 };
 
 function ScheduleMatchTable({ matches, teams, onOpenMatch }: ScheduleMatchTableProps) {
+  const tbl = APP_COPY.table;
   return (
     <div className={styles.tableWrapper}>
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>Time</th>
-            <th>Home</th>
-            <th>Score</th>
-            <th>Away</th>
-            <th>Venue</th>
-            <th>Status</th>
+            <th>{tbl.time}</th>
+            <th>{tbl.home}</th>
+            <th>{tbl.score}</th>
+            <th>{tbl.away}</th>
+            <th>{tbl.venue}</th>
+            <th>{tbl.gameStatus}</th>
           </tr>
         </thead>
         <tbody>
@@ -342,7 +348,7 @@ function StatusBadge({ match }: StatusBadgeProps) {
   }
 
   if (match.status === "completed") {
-    return <span className={`${styles.badge} ${styles["badge--ft"]}`}>FT</span>;
+    return <span className={`${styles.badge} ${styles["badge--ft"]}`}>{APP_COPY.live.finalWhistle}</span>;
   }
 
   return (

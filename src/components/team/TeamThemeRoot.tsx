@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { useTeamTheme } from "../../hooks/useTeamTheme";
+import { useTeamIdentity, useTeamTheme } from "../../hooks/useTeamTheme";
 
 export type TeamThemeStatus = "live" | "advancing" | "eliminated" | "default";
 
@@ -13,6 +13,7 @@ type Props = {
 
 export function TeamThemeRoot({ teamId, className = "", status = "default", style, children }: Props) {
   const theme = useTeamTheme(teamId);
+  const identity = useTeamIdentity(teamId);
   const mergedStyle = { ...theme, ...style };
 
   return (
@@ -20,6 +21,7 @@ export function TeamThemeRoot({ teamId, className = "", status = "default", styl
       className={`team-theme-root ${className}`.trim()}
       style={mergedStyle}
       data-team-id={teamId ?? undefined}
+      data-crest-profile={identity?.crestProfile}
       data-status={status === "default" ? undefined : status}
     >
       {children}

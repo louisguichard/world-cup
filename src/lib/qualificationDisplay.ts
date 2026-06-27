@@ -1,4 +1,5 @@
 import type { QualificationStatus } from "../types";
+import { qualCopyFromVariant } from "./appCopy";
 
 /** Visual + copy bucket for qualification UI (tables, badges, bentos). */
 export type QualificationDisplayVariant =
@@ -51,56 +52,55 @@ function isProjectedEliminated(qual: QualificationStatus): boolean {
  */
 export function resolveQualificationDisplay(qual: QualificationStatus): QualificationDisplay {
   if (isConfirmedQualified(qual)) {
+    const copy = qualCopyFromVariant("confirmed-qualified");
     return {
       variant: "confirmed-qualified",
-      label: "Confirmed · Qualified",
-      shortLabel: "Conf. Qual ✓",
+      label: copy.label,
+      shortLabel: copy.shortLabel,
       rowClass: "qual-row--confirmed-qualified",
-      hint: "Mathematically through — group stage complete and final position is top two.",
+      hint: qual.reason ?? copy.hint,
     };
   }
 
   if (isConfirmedEliminated(qual)) {
+    const copy = qualCopyFromVariant("confirmed-eliminated");
     return {
       variant: "confirmed-eliminated",
-      label: "Confirmed · Eliminated",
-      shortLabel: "Eliminated ✕",
+      label: copy.label,
+      shortLabel: copy.shortLabel,
       rowClass: "qual-row--confirmed-eliminated",
-      hint:
-        qual.eliminationReason ??
-        "Mathematically eliminated — no remaining results can change knockout qualification.",
+      hint: qual.eliminationReason ?? copy.hint,
     };
   }
 
   if (isProjectedQualified(qual)) {
+    const copy = qualCopyFromVariant("projected-qualified");
     return {
       variant: "projected-qualified",
-      label: "Projected · To Qualify",
-      shortLabel: "Proj. Qualify",
+      label: copy.label,
+      shortLabel: copy.shortLabel,
       rowClass: "qual-row--projected-qualified",
-      hint:
-        qual.reason ??
-        "Currently on course to advance, but remaining group matches could still change the outcome.",
+      hint: qual.reason ?? copy.hint,
     };
   }
 
   if (isProjectedEliminated(qual)) {
+    const copy = qualCopyFromVariant("projected-eliminated");
     return {
       variant: "projected-eliminated",
-      label: "Projected · To Be Eliminated",
-      shortLabel: "Proj. Out",
+      label: copy.label,
+      shortLabel: copy.shortLabel,
       rowClass: "qual-row--projected-eliminated",
-      hint:
-        qual.reason ??
-        "Likely out based on live standings, but not yet mathematically eliminated.",
+      hint: qual.reason ?? copy.hint,
     };
   }
 
+  const copy = qualCopyFromVariant("in-contention");
   return {
     variant: "in-contention",
-    label: "In Contention",
-    shortLabel: "Live",
+    label: copy.label,
+    shortLabel: copy.shortLabel,
     rowClass: "qual-row--in-contention",
-    hint: qual.reason ?? "Still fighting for position — outcome depends on remaining matches.",
+    hint: qual.reason ?? copy.hint,
   };
 }

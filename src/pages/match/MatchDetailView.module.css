@@ -21,6 +21,8 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  display: flex;
+  flex-direction: column;
   background: var(--ss-surface);
   border-bottom: 1px solid var(--ss-border);
   transition: padding 0.2s ease, backdrop-filter 0.2s ease;
@@ -105,11 +107,14 @@
 }
 
 .headerScoreNum {
-  font-size: 28px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 900;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
   min-width: 28px;
   text-align: center;
+  color: var(--ss-text);
 }
 
 .headerScoreSep {
@@ -126,20 +131,26 @@
 }
 
 .statusLive {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ss-danger);
+  gap: 5px;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--status-live-text);
+  background: var(--status-live-bg);
+  border: 1px solid var(--status-live-border);
 }
 
 .statusDot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: var(--ss-danger);
-  animation: pulseDot 1.4s ease-in-out infinite;
+  background: var(--fwc-bright-red);
+  animation: livePulse 1.4s ease-in-out infinite;
 }
 
 .statusText {

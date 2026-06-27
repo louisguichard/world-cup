@@ -1,15 +1,17 @@
 import type { Lineup, LineupPlayer, PlayerRef } from "../../types";
-import type { WcLineup } from "../WorldCup2026LiveClient";
+import type { WcLineup, WcLineupPlayer } from "../WorldCup2026LiveClient";
 
 type RawPlayer = {
   id?: string | number;
   name?: string;
   displayName?: string;
+  shortName?: string;
   number?: number | string;
   jerseyNumber?: number | string;
   position?: string;
   isCaptain?: boolean;
   rating?: number | string;
+  role?: string | null;
 };
 
 // Default grid positions for common formations (0–100 scale, (0,0) = top-left)
@@ -65,23 +67,24 @@ function getDefaultPositions(formation: string): Array<{ x: number; y: number }>
 
 function mapPlayer(raw: RawPlayer, index: number, formation: string): LineupPlayer {
   const defaultPositions = getDefaultPositions(formation);
+  const isCaptain = raw.isCaptain ?? raw.role === "(C)";
   const playerRef: PlayerRef = {
     id: String(raw.id ?? `player-${index}`),
-    displayName: raw.displayName ?? raw.name ?? `Player ${index + 1}`,
+    displayName: raw.displayName ?? raw.name ?? raw.shortName ?? `Player ${index + 1}`,
     jerseyNumber:
       raw.jerseyNumber !== undefined
         ? Number(raw.jerseyNumber)
         : raw.number !== undefined
           ? Number(raw.number)
           : undefined,
-    position: raw.position
+    position: raw.position ?? (raw.role ? String(raw.role).replace(/[()]/g, "") : undefined),
   };
 
   return {
     player: playerRef,
     gridPosition: defaultPositions[index],
     rating: raw.rating !== undefined ? Number(raw.rating) : undefined,
-    isCaptain: raw.isCaptain ?? false
+    isCaptain,
   };
 }
 
@@ -96,22 +99,63 @@ function mapTeamLineup(
     .slice(0, 11)
     .map((p, i) => mapPlayer(p as RawPlayer, i, formation));
 
-  const substitutes = (rawSubs ?? []).map((p, i) =>
-    mapPlayer(p as RawPlayer, i, "")
-  );
+  const substitutes = (rawSubs ?? []).map((p, i) => mapPlayer(p as RawPlayer, i, ""));
 
   return {
     team,
     formation,
     manager,
     startingXI,
-    substitutes
+    substitutes,
   };
+}
+
+function normalizeFormation(raw: string | undefined): string {
+  if (!raw) return "4-3-3";
+  return raw.replace(/^1-/, "").replace(/-/g, "-") || "4-3-3";
+}
+
+function mapNestedSide(
+  players: WcLineupPlayer[] | undefined,
+  formation: string | undefined,
+  team: "home" | "away",
+  manager?: string
+): Lineup | null {
+  if (!players?.length) return null;
+  return mapTeamLineup(players as unknown[], [], normalizeFormation(formation), team, manager);
 }
 
 export function mapWcLineups(raw: WcLineup | null): Lineup[] {
   if (!raw) return [];
   const lineups: Lineup[] = [];
+
+  if (raw.startingXI?.home || raw.startingXI?.away) {
+    const home = mapNestedSide(
+      raw.startingXI.home,
+      raw.formation?.home,
+      "home",
+      raw.coaches?.home?.name
+    );
+    const away = mapNestedSide(
+      raw.startingXI.away,
+      raw.formation?.away,
+      "away",
+      raw.coaches?.away?.name
+    );
+    if (home) {
+      home.substitutes = (raw.substitutes?.home ?? []).map((p, i) =>
+        mapPlayer(p as RawPlayer, i, "")
+      );
+      lineups.push(home);
+    }
+    if (away) {
+      away.substitutes = (raw.substitutes?.away ?? []).map((p, i) =>
+        mapPlayer(p as RawPlayer, i, "")
+      );
+      lineups.push(away);
+    }
+    return lineups;
+  }
 
   if (raw.homeTeam) {
     const { startingXI, substitutes } = raw.homeTeam as {

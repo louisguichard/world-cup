@@ -14,9 +14,12 @@ export type ApiSourceId =
   | "wc2026Teams"
   | "wc2026Live"
   | "sofascore"
+  | "sofascoreRapid"
   | "clubElo"
   | "zafronix"
   | "oddsIntelligence"
+  | "footballPrediction"
+  | "worldCupHistory"
   | "openWeather";
 
 export type ApiAuditStatus = "pass" | "fail" | "untested";
@@ -82,7 +85,7 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
   sportApi7: {
     enabled: true,
     splashPath: false,
-    label: "SportAPI7 (WC)",
+    label: "SofaScore6 RapidAPI (SportAPI7 alias)",
     lastAudit: "pass",
     lastLatencyMs: 260,
   },
@@ -101,13 +104,18 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     lastLatencyMs: 238,
   },
   sofascore: {
-    enabled: false,
+    enabled: true,
     splashPath: false,
-    label: "SofaScore Live",
-    lastAudit: "fail",
-    lastLatencyMs: 800,
-    failureReason: "Akamai TLS fingerprinting returns 403 challenge (headers alone insufficient)",
-    disableReason: "Demoted to tertiary fallback — RapidAPI FootballData + SportAPI7 primary",
+    label: "SofaScore6 RapidAPI",
+    lastAudit: "pass",
+    lastLatencyMs: 260,
+  },
+  sofascoreRapid: {
+    enabled: true,
+    splashPath: false,
+    label: "SofaScore RapidAPI",
+    lastAudit: "pass",
+    lastLatencyMs: 200,
   },
   clubElo: {
     enabled: true,
@@ -130,6 +138,21 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     label: "Sports Odds Intelligence",
     lastAudit: "pass",
     lastLatencyMs: 216,
+  },
+  footballPrediction: {
+    enabled: true,
+    splashPath: false,
+    label: "Today Football Prediction",
+    lastAudit: "pass",
+    lastLatencyMs: 200,
+  },
+  worldCupHistory: {
+    enabled: true,
+    splashPath: false,
+    label: "World Cup History (world-cup1)",
+    lastAudit: "untested",
+    lastLatencyMs: 662,
+    failureReason: "BASIC plan daily quota — cached 24h",
   },
   openWeather: {
     enabled: true,

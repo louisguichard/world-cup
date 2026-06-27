@@ -12,7 +12,6 @@ import { isApiEnabled } from "../../config/apiFlags";
 import { fetchTeamForm } from "../ZafronixClient";
 import { getBestLines } from "../OddsIntelligenceClient";
 import { getWeatherByCity } from "../WeatherClient";
-import { fetchEventDetail } from "../SofaScoreClient";
 import { fetchMatchBundle } from "../matchDetail/fetchMatchBundle";
 import { materializeFullSchedule } from "../../lib/materializeFullSchedule";
 import { logger } from "../Logger";
@@ -120,7 +119,11 @@ async function runEnrichment(
 
   if (wants.has("commentary") || wants.has("lineups") || wants.has("stats")) {
     tasks.push(
-      fetchMatchBundle(match, wcMatchId).then((bundle) => {
+      fetchMatchBundle(match, wcMatchId, false, {
+        teams,
+        homeName: home?.name,
+        awayName: away?.name,
+      }).then((bundle) => {
         if (wants.has("commentary") && bundle.commentary.length > 0) {
           result.commentary = toCommentaryEntry(bundle.commentary);
           result.sources.commentary = "wclive";
@@ -137,14 +140,6 @@ async function runEnrichment(
         logger.warn("EnrichmentQueue bundle failed", "EnrichmentQueue", {
           error: err instanceof Error ? err.message : String(err),
         });
-      })
-    );
-  }
-
-  if (wants.has("stats") && match.sofaEventId) {
-    tasks.push(
-      fetchEventDetail(match.sofaEventId).then(() => {
-        if (!result.statistics) result.sources.stats = "sofascore";
       })
     );
   }

@@ -102,7 +102,7 @@
 }
 
 .tableRow:hover {
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(48, 79, 255, 0.06);
 }
 
 .timeCell {
@@ -163,9 +163,9 @@
 }
 
 .badge--live {
-  color: #fff;
-  background: rgba(255, 77, 77, 0.18);
-  border: 1px solid rgba(255, 77, 77, 0.45);
+  color: var(--on-live);
+  background: var(--live-surface);
+  border: 1px solid var(--live-border);
 }
 
 .badge--ft {
@@ -175,7 +175,7 @@
 }
 
 .badge--scheduled {
-  color: var(--faint);
+  color: var(--muted);
   background: transparent;
   border: 1px solid var(--line);
   font-variant-numeric: tabular-nums;
@@ -190,8 +190,8 @@
   height: 6px;
   border-radius: 999px;
   background: var(--color-live);
-  box-shadow: 0 0 6px rgba(255, 77, 77, 0.8);
-  animation: live-pulse 1.4s ease-in-out infinite;
+  box-shadow: var(--glow-red);
+  animation: livePulse 1.4s ease-in-out infinite;
 }
 
 .dayGroup {
@@ -202,7 +202,9 @@
   border: 1px solid var(--line);
   border-radius: var(--r);
   background: var(--surface);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
   margin-bottom: 12px;
 }
 
@@ -388,8 +390,44 @@
 }
 
 .emptyState {
-  padding: 48px 16px;
+  padding: clamp(32px, 8vw, 48px) 16px;
   text-align: center;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+/* Narrow phones — hide stadium & status columns; table scrolls if needed */
+@media (max-width: 640px) {
+  .table th:nth-child(5),
+  .table td:nth-child(5),
+  .table th:nth-child(6),
+  .table td:nth-child(6) {
+    display: none;
+  }
+
+  .teamCell {
+    max-width: none;
+    min-width: 0;
+  }
+
+  .toolbarRow {
+    gap: 8px 10px;
+  }
+
+  .selectLabel {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .select {
+    flex: 1;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .table th:nth-child(1),
+  .table td:nth-child(1) {
+    display: none;
+  }
 }

@@ -37,7 +37,7 @@
 }
 
 .venueLabelTrigger:focus-visible {
-  outline: 2px solid var(--accent, #6366f1);
+  outline: 2px solid var(--fwc-royal-blue);
   outline-offset: 2px;
 }
 
@@ -192,8 +192,8 @@
   padding: 10px 12px;
   border: none;
   border-radius: 8px;
-  background: var(--accent, #6366f1);
-  color: #fff;
+  background: var(--action-primary);
+  color: var(--fwc-white);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;

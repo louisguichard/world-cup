@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { APP_COPY } from "./appCopy";
 import { formatLiveClock, formatPeriodLabel } from "./formatMatchClock";
 
 describe("formatLiveClock", () => {
-  it("returns FT for completed matches", () => {
-    expect(formatLiveClock({ status: "completed" })).toBe("FT");
-    expect(formatLiveClock({ status: "live", period: "full_time" })).toBe("FT");
+  it("returns Final for completed matches", () => {
+    expect(formatLiveClock({ status: "completed" })).toBe(APP_COPY.match.final);
+    expect(formatLiveClock({ status: "live", period: "full_time" })).toBe(APP_COPY.match.final);
   });
 
   it("normalizes ESPN displayClock with stoppage", () => {
@@ -59,16 +60,16 @@ describe("formatLiveClock", () => {
 
 describe("formatPeriodLabel", () => {
   it("maps period values to human labels", () => {
-    expect(formatPeriodLabel("first_half", "live")).toBe("1st Half");
-    expect(formatPeriodLabel("second_half", "live")).toBe("2nd Half");
-    expect(formatPeriodLabel("half_time", "live")).toBe("Half Time");
-    expect(formatPeriodLabel("extra_time_first", "live")).toBe("ET 1st");
-    expect(formatPeriodLabel("extra_time_second", "live")).toBe("ET 2nd");
-    expect(formatPeriodLabel("penalties", "live")).toBe("Penalties");
+    expect(formatPeriodLabel("first_half", "live")).toBe(APP_COPY.match.firstHalf);
+    expect(formatPeriodLabel("second_half", "live")).toBe(APP_COPY.match.secondHalf);
+    expect(formatPeriodLabel("half_time", "live")).toBe(APP_COPY.match.halftime);
+    expect(formatPeriodLabel("extra_time_first", "live")).toBe(APP_COPY.match.extraTimeFirst);
+    expect(formatPeriodLabel("extra_time_second", "live")).toBe(APP_COPY.match.extraTimeSecond);
+    expect(formatPeriodLabel("penalties", "live")).toBe(APP_COPY.match.penalties);
   });
 
-  it("returns Full Time for completed", () => {
-    expect(formatPeriodLabel("full_time", "completed")).toBe("Full Time");
-    expect(formatPeriodLabel(undefined, "completed")).toBe("Full Time");
+  it("returns Game over for completed", () => {
+    expect(formatPeriodLabel("full_time", "completed")).toBe(APP_COPY.match.fullTime);
+    expect(formatPeriodLabel(undefined, "completed")).toBe(APP_COPY.match.fullTime);
   });
 });

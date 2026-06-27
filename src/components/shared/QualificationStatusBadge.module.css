@@ -3,8 +3,10 @@
   align-items: center;
   gap: 3px;
   font-weight: 700;
-  border-radius: 999px;
-  letter-spacing: 0.03em;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: var(--text-xs);
   width: fit-content;
   line-height: 1.2;
   border: 1px solid transparent;
@@ -20,35 +22,32 @@
   padding: 1px 6px;
 }
 
-/* Qualified — green family */
 .confirmedQualified {
-  background: #059669;
-  color: #ecfdf5;
-  border-color: #34d399;
+  background: var(--qual-badge-confirmed-bg);
+  color: var(--qual-badge-confirmed-fg);
+  border-color: var(--qual-badge-confirmed-border);
 }
 
 .projectedQualified {
-  background: color-mix(in srgb, #059669 22%, transparent);
-  color: #6ee7b7;
-  border-color: color-mix(in srgb, #34d399 55%, transparent);
+  background: var(--qual-badge-projected-bg);
+  color: var(--qual-badge-projected-fg);
+  border-color: var(--qual-badge-projected-border);
 }
 
-/* Eliminated — red family */
 .confirmedEliminated {
-  background: #dc2626;
-  color: #fef2f2;
-  border-color: #f87171;
+  background: var(--qual-badge-eliminated-bg);
+  color: var(--qual-badge-eliminated-fg);
+  border-color: var(--qual-badge-eliminated-border);
 }
 
 .projectedEliminated {
-  background: color-mix(in srgb, #dc2626 18%, transparent);
-  color: #fca5a5;
-  border-color: color-mix(in srgb, #f87171 45%, transparent);
+  background: var(--qual-badge-proj-out-bg);
+  color: var(--qual-badge-proj-out-fg);
+  border-color: var(--qual-badge-proj-out-border);
 }
 
-/* Bubble / live race */
 .inContention {
-  background: color-mix(in srgb, #d97706 20%, transparent);
-  color: #fcd34d;
-  border-color: color-mix(in srgb, #f59e0b 50%, transparent);
+  background: var(--qual-badge-contention-bg);
+  color: var(--qual-badge-contention-fg);
+  border-color: var(--qual-badge-contention-border);
 }

@@ -36,8 +36,11 @@ import { formatPercent } from "../../lib/normalize";
 import { projectTournament, simulateTournamentOutcomes, toTeamsById } from "../../lib/tournament";
 import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
 import { useStore } from "../../store";
+import { resolveTeamLogo } from "../../lib/resolveTeamLogo";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_BRAND } from "../../config/appMeta";
+import { BrandLogo } from "../shared/BrandLogo";
+import { APP_COPY } from "../../lib/appCopy";
 import { TeamLabel } from "../team/TeamLabel";
 import { VenueLabel } from "../venue/VenueLabel";
 import { BracketTeamButton } from "../team/BracketTeamButton";
@@ -409,13 +412,13 @@ export function SimulatorView() {
   if (loading && !data) {
     return (
       <main className="app-shell app-loading">
-        <span className="brand-mark loading-mark" aria-hidden="true">
-          <Trophy size={26} strokeWidth={2} />
+        <span className="brand-mark loading-mark brand-mark--logo" aria-hidden="true">
+          <BrandLogo size="md" variant="mark" alt="" />
         </span>
         <strong>{APP_BRAND.shortName}</strong>
         <span className="app-loading-note">
           <span className="loader sm" />
-          Loading live scores and markets…
+          {APP_COPY.simulator.loading}
         </span>
       </main>
     );
@@ -424,14 +427,14 @@ export function SimulatorView() {
   if (error && !data) {
     return (
       <main className="app-shell app-error">
-        <span className="brand-mark error-mark" aria-hidden="true">
-          <Trophy size={26} strokeWidth={2} />
+        <span className="brand-mark error-mark brand-mark--logo" aria-hidden="true">
+          <BrandLogo size="md" variant="mark" alt="" />
         </span>
-        <strong>The simulator could not load.</strong>
+        <strong>{APP_COPY.simulator.loadError}</strong>
         <span>{error}</span>
         <button className="primary-button" onClick={() => location.reload()}>
           <RotateCcw size={16} />
-          Try again
+          {APP_COPY.simulator.tryAgain}
         </button>
       </main>
     );
@@ -441,8 +444,8 @@ export function SimulatorView() {
     <main className="app-shell">
       <header className="topbar">
         <button className="brand" onClick={() => setSimulatorMode("tournament")} aria-label="Home">
-          <span className="brand-mark" aria-hidden="true">
-            <Trophy size={22} strokeWidth={2} />
+          <span className="brand-mark brand-mark--logo" aria-hidden="true">
+            <BrandLogo size="md" variant="mark" alt="" />
           </span>
           <span className="brand-text">
             <strong>{APP_BRAND.shortName}</strong>
@@ -459,7 +462,7 @@ export function SimulatorView() {
               onClick={() => setSimulatorMode("tournament")}
             >
               <Trophy size={16} />
-              <span>Tournament</span>
+              <span>{APP_COPY.simulator.tabTournament}</span>
             </button>
             <button
               type="button"
@@ -469,7 +472,7 @@ export function SimulatorView() {
               onClick={() => setSimulatorMode("probabilities")}
             >
               <BarChart3 size={16} />
-              <span>Probabilities</span>
+              <span>{APP_COPY.simulator.tabProbabilities}</span>
             </button>
           </div>
           <button
@@ -479,7 +482,7 @@ export function SimulatorView() {
             onClick={() => setSimulatorMode("methodology")}
           >
             <BookOpen size={16} />
-            <span>Methodology</span>
+            <span>{APP_COPY.simulator.tabMethodology}</span>
           </button>
         </div>
       </header>
@@ -493,19 +496,12 @@ export function SimulatorView() {
             <h1>
               The road to the final, <span className="accent">yours to simulate.</span>
             </h1>
-            <p>
-              Live scores, market-implied odds, FIFA tie-breakers and thousands of Monte-Carlo runs — explore the bracket,
-              then rewrite it as you like.
-            </p>
+            <p>{APP_COPY.simulator.heroLead}</p>
           </section>
 
           <section className="status-strip">
-            <span className="stat-chip">
-              <b>{stats.real}</b> results in
-            </span>
-            <span className="stat-chip">
-              <b>{stats.polymarket}</b> market-priced
-            </span>
+            <span className="stat-chip">{APP_COPY.simulator.resultsIn(stats.real)}</span>
+            <span className="stat-chip">{APP_COPY.simulator.marketPriced(stats.polymarket)}</span>
             {stats.edited > 0 ? (
               <button className="stat-chip edited" onClick={resetAll} title="Reset all your edits">
                 <b>{stats.edited}</b> {stats.edited > 1 ? "edits" : "edit"} · reset
@@ -514,7 +510,7 @@ export function SimulatorView() {
             {championId ? (
               <span className="stat-chip champion">
                 <Trophy size={13} />
-                Projected winner · {teamDisplayName(teamsById[championId], championId)}
+                {APP_COPY.simulator.projectedWinner(teamDisplayName(teamsById[championId], championId))}
               </span>
             ) : null}
             <span className="updated-at">{data?.loadedAt ? `Updated ${formatDate(data.loadedAt)}` : ""}</span>
@@ -549,13 +545,13 @@ export function SimulatorView() {
           {simulatorMode === "probabilities" && data && !simulations ? (
             <section className="probability-prep">
               <span className="loader sm" />
-              <strong>Preparing Monte Carlo paths…</strong>
+              <strong>{APP_COPY.simulator.preparingRuns}</strong>
               <p>
-                The bracket is being replayed{" "}
-                {(import.meta.env.PROD ? MONTE_CARLO_ITERATIONS_PROD : MONTE_CARLO_ITERATIONS_DEV).toLocaleString(
-                  "en-GB"
-                )}{" "}
-                times.
+                {APP_COPY.simulator.preparingRunsDetail(
+                  (import.meta.env.PROD ? MONTE_CARLO_ITERATIONS_PROD : MONTE_CARLO_ITERATIONS_DEV).toLocaleString(
+                    "en-GB"
+                  )
+                )}
               </p>
             </section>
           ) : null}
@@ -656,10 +652,10 @@ function TournamentView({
     <section className="tournament-layout">
       <div className="section-heading">
         <div>
-          <span className="section-kicker">Group stage</span>
-          <h2>Projected standings</h2>
+          <span className="section-kicker">{APP_COPY.groups.eyebrow}</span>
+          <h2>{APP_COPY.simulator.projectedStandings}</h2>
         </div>
-        <span className="quiet-note">Tap any group to open its matches.</span>
+        <span className="quiet-note">{APP_COPY.simulator.tapGroupHint}</span>
       </div>
 
       <div className="groups-grid">
@@ -721,7 +717,7 @@ function TournamentView({
             return (
               <div className={`third-row ${index < 8 ? "qualified" : ""}`} key={record.teamId}>
                 <span>{index + 1}</span>
-                <img src={team.logo} alt="" />
+                <img src={resolveTeamLogo(team) ?? ""} alt="" />
                 <strong className="team-name-text">{teamDisplayName(team)}</strong>
                 <em>Grp {record.group}</em>
                 <span className="third-gd">{record.goalDifference > 0 ? `+${record.goalDifference}` : record.goalDifference}</span>
@@ -768,7 +764,7 @@ function GroupPanel({
           <div className="mini-qualifiers">
             {projectedQualifiers.map((record) => {
               const team = teamsById[record.teamId];
-              return <img src={team.logo} alt="" key={record.teamId} title={team.name} />;
+              return <img src={resolveTeamLogo(team) ?? ""} alt="" key={record.teamId} title={team.name} />;
             })}
           </div>
         </div>
@@ -780,9 +776,9 @@ function GroupPanel({
       <table className="standing-table">
         <thead>
           <tr>
-            <th>Team</th>
-            <th>Pts</th>
-            <th>GD</th>
+            <th>{APP_COPY.table.team}</th>
+            <th>{APP_COPY.table.points}</th>
+            <th>{APP_COPY.table.goalDiff}</th>
           </tr>
         </thead>
         <tbody>
@@ -793,7 +789,7 @@ function GroupPanel({
               <tr className={qualified ? "qualified" : ""} key={record.teamId}>
                 <td>
                   <span className="rank">{index + 1}</span>
-                  <img src={team.logo} alt="" />
+                  <img src={resolveTeamLogo(team) ?? ""} alt="" />
                   <strong className="team-name-text">{teamDisplayName(team)}</strong>
                 </td>
                 <td>{record.points}</td>
@@ -1067,21 +1063,21 @@ function ProbabilityView({
         <div className="probability-column">
           <div className="section-heading compact">
             <div>
-              <span className="section-kicker">Monte Carlo</span>
-              <h2>Title odds</h2>
+              <span className="section-kicker">{APP_COPY.simulator.monteCarloKicker}</span>
+              <h2>{APP_COPY.simulator.titleOdds}</h2>
             </div>
             <button className={`subtle-toggle ${showMarketOdds ? "active" : ""}`} onClick={() => setShowMarketOdds((value) => !value)}>
-              {showMarketOdds ? "Hide Polymarket" : "Show Polymarket"}
+              {showMarketOdds ? APP_COPY.simulator.hideMarket : APP_COPY.simulator.showMarket}
             </button>
           </div>
           <div className="title-odds">
             <div className={`title-row title-row-head ${showMarketOdds ? "with-market" : ""}`}>
               <span>#</span>
               <span />
-              <strong>Team</strong>
+              <strong>{APP_COPY.table.team}</strong>
               <span />
-              <b>Model</b>
-              {showMarketOdds ? <b>Mkt</b> : null}
+              <b>{APP_COPY.simulator.model}</b>
+              {showMarketOdds ? <b>{APP_COPY.simulator.market}</b> : null}
             </div>
             {topOdds.map((row, index) => {
               const team = teamsById[row.teamId];
@@ -1102,7 +1098,7 @@ function ProbabilityView({
                   }}
                 >
                   <span className="title-rank">{index + 1}</span>
-                  <img src={team.logo} alt="" />
+                  <img src={resolveTeamLogo(team) ?? ""} alt="" />
                   <strong className="team-name-text">{teamDisplayName(team)}</strong>
                   <div className="title-track">
                     <i style={{ width: `${Math.max(3, (row.probability / maxOdds) * 100)}%` }} />
@@ -1137,7 +1133,7 @@ function ProbabilityView({
               <h2>Likely path</h2>
             </div>
             <div className="team-picker">
-              {selected ? <img src={selected.logo} alt="" /> : null}
+              {selected ? <img src={resolveTeamLogo(selected) ?? ""} alt="" /> : null}
               <select value={selectedTeamId} onChange={(event) => onSelectTeam(event.target.value)}>
                 {sortedTeams.map((team) => (
                   <option value={team.id} key={team.id}>
@@ -1184,7 +1180,7 @@ function ProbabilityView({
                   const team = item.opponentId ? teamsById[item.opponentId] : undefined;
                   return (
                     <div className={`opponent-row ${team ? "" : "other"}`} key={item.opponentId ?? `${stage}-other`}>
-                      {team ? <img src={team.logo} alt="" /> : <span className="opponent-dot" />}
+                      {team ? <img src={resolveTeamLogo(team) ?? ""} alt="" /> : <span className="opponent-dot" />}
                       <span className="team-name-text">{teamDisplayName(team, "Others")}</span>
                       <div>
                         <i style={{ width: `${Math.min(100, item.probability * 100)}%` }} />

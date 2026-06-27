@@ -1,5 +1,6 @@
 import { GROUP_STAGE_MATCH_COUNT } from "../../types";
 import { deriveStandingsIfScored } from "../../lib/qualification";
+import { applyTeamLogoOverrides } from "../../lib/resolveTeamLogo";
 import type { DataLoadResult, GroupStanding, MergedMatch, PolymarketMatchMarket, ScoreOverride, Team } from "../../types";
 
 export type TournamentSliceState = {
@@ -41,8 +42,11 @@ export const createTournamentSlice = (
     set(() => {
       const derived = deriveStandingsIfScored(data.matches, data.teams);
       const groupStandings = derived ?? get().groupStandings;
+      const teams = applyTeamLogoOverrides(
+        Object.fromEntries(data.teams.map((t) => [t.id, t]))
+      );
       return {
-        teams: Object.fromEntries(data.teams.map((t) => [t.id, t])),
+        teams,
         groupStandings,
         knockoutMarkets: data.knockoutMarkets,
         sources: data.sources,

@@ -3,12 +3,13 @@
   align-items: center;
   gap: 3px;
   font-weight: 700;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   width: fit-content;
-  color: #fff;
+  color: var(--fwc-white);
   line-height: 1.2;
+  font-size: var(--text-xs);
 }
 
 .sm {
@@ -22,29 +23,27 @@
 }
 
 .confirmed {
-  background: #10b981;
+  background: var(--qual-certainty-confirmed-bg);
+  color: var(--qual-certainty-confirmed-fg);
 }
 
 .projected {
-  background: #6366f1;
+  background: var(--qual-certainty-projected-bg);
+  color: var(--qual-certainty-projected-fg);
 }
 
 .onTrack {
-  background: #d97706;
+  background: var(--fwc-yellow);
+  color: var(--fwc-black);
 }
 
 .simulated {
-  background: #64748b;
-}
-
-.onTrack {
-  background: #d97706;
-}
-
-.simulated {
-  background: #64748b;
+  background: var(--qual-certainty-simulated-bg);
+  color: var(--qual-certainty-simulated-fg);
 }
 
 .tbd {
-  background: #374151;
+  background: var(--surface-overlay);
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-border);
 }

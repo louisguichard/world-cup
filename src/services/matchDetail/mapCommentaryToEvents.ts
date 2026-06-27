@@ -11,10 +11,14 @@ function parseMinute(raw: string | number | undefined): { minute: number; minute
 
 function typeFromEntry(entry: WcCommentaryEntry): MatchEventType | null {
   const tag = (entry.type ?? "").toLowerCase();
-  if (tag === "goal") return "goal";
+  if (tag === "goal" || tag === "penalty_scored") return "goal";
+  if (tag === "own_goal") return "own_goal";
+  if (tag === "yellow_card") return "yellow_card";
+  if (tag === "red_card") return "red_card";
   if (tag === "card") return "yellow_card";
-  if (tag === "sub" || tag === "substitution") return "substitution";
+  if (tag === "sub_in" || tag === "sub_out" || tag === "sub" || tag === "substitution") return "substitution";
   if (tag === "var") return "var_review";
+  if (tag === "assist") return null;
 
   const text = entry.text.toLowerCase();
   if (text.includes("own goal")) return "own_goal";
@@ -69,14 +73,19 @@ export function mapCommentaryToEvents(
     if (!type) return;
 
     const { minute, minuteExtra } = parseMinute(entry.minute);
-    const { playerName, assistName } = extractPlayer(entry.text, type);
+    const playerName = entry.player ?? extractPlayer(entry.text, type).playerName;
+    const { assistName } = extractPlayer(entry.text, type);
+
+    let teamId = inferTeamId(entry.text, homeTeamId, awayTeamId, homeName, awayName);
+    if (entry.side === "home") teamId = homeTeamId;
+    if (entry.side === "away") teamId = awayTeamId;
 
     events.push({
       providerId: `wc-commentary-${index}-${minute}-${type}`,
       minute,
       minuteExtra,
       type,
-      teamId: inferTeamId(entry.text, homeTeamId, awayTeamId, homeName, awayName),
+      teamId,
       playerName,
       assistName,
     });

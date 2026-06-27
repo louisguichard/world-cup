@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { MatchPeriod } from "../types";
+import { APP_COPY } from "../lib/appCopy";
 
 export type ClockDisplay = {
   label: string;
@@ -13,9 +14,9 @@ export function computeDisplay(
 ): ClockDisplay {
   switch (period) {
     case "not_started":
-      return { label: "KO", running: false };
+      return { label: APP_COPY.match.kickoff, running: false };
     case "half_time":
-      return { label: "HT", running: false };
+      return { label: APP_COPY.match.halftime, running: false };
     case "first_half":
     case "second_half":
     case "extra_time_first":
@@ -25,15 +26,15 @@ export function computeDisplay(
       }
       return { label: `${minute}'`, running: true };
     case "extra_time_break":
-      return { label: "ET Break", running: false };
+      return { label: APP_COPY.match.extraTimeBreak, running: false };
     case "penalties":
-      return { label: "PENS", running: false };
+      return { label: APP_COPY.match.penalties, running: false };
     case "full_time":
-      return { label: "FT", running: false };
+      return { label: APP_COPY.match.final, running: false };
     case "postponed":
-      return { label: "PST", running: false };
+      return { label: APP_COPY.match.postponed, running: false };
     case "interrupted":
-      return { label: "INT", running: false };
+      return { label: APP_COPY.match.interrupted, running: false };
     default: {
       const _exhaustive: never = period;
       return _exhaustive;

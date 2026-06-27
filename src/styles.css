@@ -1,59 +1,208 @@
 /* =========================================================================
-   World Cup 2026 — Simulator
-   Design system : "Pressroom" — deep ink canvas, one electric green accent,
-   characterful display type (Bricolage Grotesque) + mono numerics (JetBrains).
+   FIFA World Cup 2026 — Official design language
+   Dark canvas, royal blue accents, WorldCup26 display type.
    ========================================================================= */
 
+@font-face {
+  font-family: "WorldCup26";
+  src: url("/fonts/WorldCup26-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "FWC2026";
+  src: url("/fonts/FWC2026_Normal_Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  /* Canvas & surfaces */
-  --bg: #0a0c0e;
-  --surface: #101316;
-  --surface-2: #161a1e;
-  --surface-3: #1d2228;
-  --inset: #0c0e10;
+  /* ── FWC 2026 OFFICIAL COLOR PALETTE ── */
+  --fwc-burgundy: #751312;
+  --fwc-deep-purple: #6101eb;
+  --fwc-navy: #1a247d;
+  --fwc-dark-teal: #004c3f;
+  --fwc-bright-red: #d60000;
+  --fwc-lavender: #b387ff;
+  --fwc-royal-blue: #304fff;
+  --fwc-green: #00c752;
+  --fwc-orange-red: #ff3d00;
+  --fwc-magenta: #ba69c6;
+  --fwc-sky-blue: #2196f3;
+  --fwc-lime: #b1eb00;
+  --fwc-peach: #ff9e81;
+  --fwc-hot-pink: #e81f63;
+  --fwc-aqua: #63ffd8;
+  --fwc-yellow: #ecff43;
+  --fwc-black: #000000;
+  --fwc-white: #ffffff;
 
-  /* Lines */
-  --line: rgba(255, 255, 255, 0.07);
-  --line-2: rgba(255, 255, 255, 0.13);
-  --line-strong: rgba(255, 255, 255, 0.22);
+  /* ── METALLIC ── */
+  --fwc-gold: #d4af37;
+  --fwc-silver: #c0c0c0;
+  --fwc-bronze: #cd7f32;
 
-  /* Text */
-  --text: #f3f6f4;
-  --muted: #98a29d;
-  --faint: #606b66;
+  /* ── SEMANTIC SURFACE TOKENS (dark theme) ── */
+  --surface-base: #08091a;
+  --surface-raised: #0d1235;
+  --surface-overlay: #141b4d;
+  --surface-border: rgba(48, 79, 255, 0.25);
+  --surface-border-active: var(--fwc-royal-blue);
 
-  /* Accent — electric pitch green */
-  --accent: #36e8a0;
-  --accent-bright: #5bf4b6;
-  --accent-ink: #042016;
-  --accent-soft: rgba(54, 232, 160, 0.12);
-  --accent-line: rgba(54, 232, 160, 0.3);
-  --accent-glow: rgba(54, 232, 160, 0.45);
+  /* ── SEMANTIC TEXT TOKENS ── */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-muted: rgba(255, 255, 255, 0.38);
+  --text-accent: var(--fwc-royal-blue);
+  --text-live: var(--fwc-bright-red);
+  --text-goal: var(--fwc-gold);
 
-  /* Semantic */
-  --gold: #f2c75a;
-  --gold-soft: rgba(242, 199, 90, 0.13);
-  --sky: #6fb7ff;
-  --coral: #ff9168;
-  --warn: #ffd27d;
+  /* ── SEMANTIC INTERACTIVE TOKENS ── */
+  --action-primary: var(--fwc-royal-blue);
+  --action-primary-hover: var(--fwc-deep-purple);
+  --action-danger: var(--fwc-bright-red);
+  --action-success: var(--fwc-green);
+  --action-warning: var(--fwc-yellow);
 
-  /* Type */
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  --font-ui: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  /* ── STATUS BADGE TOKENS ── */
+  --status-live-bg: rgba(214, 0, 0, 0.15);
+  --status-live-text: var(--fwc-bright-red);
+  --status-live-border: var(--fwc-bright-red);
+  --status-ht-bg: rgba(236, 255, 67, 0.1);
+  --status-ht-text: var(--fwc-yellow);
+  --status-ft-bg: rgba(255, 255, 255, 0.06);
+  --status-ft-text: var(--text-secondary);
+  --status-ns-bg: rgba(48, 79, 255, 0.1);
+  --status-ns-text: var(--fwc-sky-blue);
+  --status-ns-border: rgba(33, 150, 243, 0.3);
 
-  /* Radii & shadows */
-  --r-sm: 10px;
-  --r: 14px;
-  --r-lg: 20px;
-  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 16px 36px -26px rgba(0, 0, 0, 0.8);
-  --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 34px 70px -44px rgba(0, 0, 0, 0.9);
+  /* ── SPACING SCALE ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ── RADIUS SCALE ── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* ── TYPOGRAPHY ── */
+  --font-display: "WorldCup26", "FWC2026", "Anton", "Impact", "Arial Black", sans-serif;
+  --font-body: "Noto Sans", "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: 3rem;
+  --text-5xl: 4rem;
+
+  /* ── SHADOW / GLOW ── */
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--surface-border);
+  --glow-blue: 0 0 16px rgba(48, 79, 255, 0.4);
+  --glow-gold: 0 0 16px rgba(212, 175, 55, 0.45);
+  --glow-red: 0 0 12px rgba(214, 0, 0, 0.45);
+
+  /* ── AMPLIFY PATTERN (16-color conic) ── */
+  --fwc-amplify-gradient: conic-gradient(
+    from 0deg,
+    #751312 0deg 22.5deg,
+    #6101eb 22.5deg 45deg,
+    #1a247d 45deg 67.5deg,
+    #004c3f 67.5deg 90deg,
+    #d60000 90deg 112.5deg,
+    #b387ff 112.5deg 135deg,
+    #304fff 135deg 157.5deg,
+    #00c752 157.5deg 180deg,
+    #ff3d00 180deg 202.5deg,
+    #ba69c6 202.5deg 225deg,
+    #2196f3 225deg 247.5deg,
+    #b1eb00 247.5deg 270deg,
+    #ff9e81 270deg 292.5deg,
+    #e81f63 292.5deg 315deg,
+    #63ffd8 315deg 337.5deg,
+    #ecff43 337.5deg 360deg
+  );
+
+  /* ── UNIFY PATTERN (16-color stripe) ── */
+  --fwc-unify-stripe: linear-gradient(
+    90deg,
+    #751312 0% 6.25%,
+    #6101eb 6.25% 12.5%,
+    #1a247d 12.5% 18.75%,
+    #004c3f 18.75% 25%,
+    #d60000 25% 31.25%,
+    #b387ff 31.25% 37.5%,
+    #304fff 37.5% 43.75%,
+    #00c752 43.75% 50%,
+    #ff3d00 50% 56.25%,
+    #ba69c6 56.25% 62.5%,
+    #2196f3 62.5% 68.75%,
+    #b1eb00 68.75% 75%,
+    #ff9e81 75% 81.25%,
+    #e81f63 81.25% 87.5%,
+    #63ffd8 87.5% 93.75%,
+    #ecff43 93.75% 100%
+  );
+
+  /* Legacy aliases (Pressroom → FWC bridge; overridden in tokens.css) */
+  --bg: var(--surface-base);
+  --surface: var(--surface-raised);
+  --surface-2: var(--surface-overlay);
+  --surface-3: #1a2260;
+  --inset: #060818;
+
+  --line: var(--surface-border);
+  --line-2: rgba(48, 79, 255, 0.35);
+  --line-strong: rgba(48, 79, 255, 0.5);
+
+  --text: var(--text-primary);
+  --muted: var(--text-secondary);
+  --faint: var(--text-muted);
+
+  --accent: var(--action-primary);
+  --accent-bright: #4d65ff;
+  --accent-ink: var(--fwc-white);
+  --accent-soft: rgba(48, 79, 255, 0.12);
+  --accent-line: rgba(48, 79, 255, 0.35);
+  --accent-glow: rgba(48, 79, 255, 0.45);
+
+  --gold: var(--fwc-gold);
+  --gold-soft: rgba(212, 175, 55, 0.13);
+  --sky: var(--fwc-sky-blue);
+  --coral: var(--fwc-orange-red);
+  --warn: var(--fwc-yellow);
+
+  --font-ui: var(--font-body);
+
+  --r-sm: var(--radius-sm);
+  --r: var(--radius-lg);
+  --r-lg: var(--radius-xl);
+  --shadow: var(--shadow-card);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.7), var(--shadow-card);
 
   --bracket-gap: 34px;
 
-  color: var(--text);
-  background: var(--bg);
-  font-family: var(--font-ui);
+  color: var(--text-primary);
+  background: var(--surface-base);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -64,6 +213,17 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 96px;
@@ -72,8 +232,8 @@ html {
 body {
   min-width: 320px;
   margin: 0;
-  color: var(--text);
-  background: var(--bg);
+  color: var(--text-primary);
+  background: var(--surface-base);
   background-image:
     radial-gradient(900px 520px at 84% -10%, var(--body-gradient-a), transparent 60%),
     radial-gradient(700px 420px at 6% 2%, var(--body-gradient-b), transparent 55%);
@@ -104,6 +264,16 @@ button {
 
 h1,
 h2,
+h3 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-primary);
+  font-weight: 900;
+}
+
+h1,
+h2,
 h3,
 p {
   margin: 0;
@@ -115,8 +285,8 @@ a {
 }
 
 ::selection {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--fwc-royal-blue);
+  color: var(--fwc-white);
 }
 
 /* Consistent keyboard focus ring (production a11y) */
@@ -126,11 +296,17 @@ a {
 
 button:focus-visible,
 a:focus-visible,
-select:focus-visible,
 [role="button"]:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--fwc-royal-blue);
   outline-offset: 2px;
+}
+
+select:focus-visible,
+input:focus-visible {
+  outline: none;
+  border-color: var(--fwc-royal-blue);
+  box-shadow: 0 0 0 3px rgba(48, 79, 255, 0.2);
 }
 
 /* Subtle press feedback for tactile, fluid interactions */
@@ -160,6 +336,99 @@ select:focus-visible,
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
+}
+
+/* ── FWC brand pattern utilities ── */
+.fwc-unify-stripe {
+  display: block;
+  width: 100%;
+  height: 4px;
+  background: var(--fwc-unify-stripe);
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.fwc-amplify-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  background: var(--fwc-amplify-gradient);
+  opacity: 0.05;
+  transform: scale(2);
+}
+
+/* Scrollbars (webkit) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(48, 79, 255, 0.4);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fwc-royal-blue);
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes countdownPip {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* =========================================================================
@@ -296,14 +565,10 @@ select:focus-visible,
   min-height: 62px;
   margin: 18px 0 32px;
   padding: 9px 12px 9px 14px;
-  border: 1px solid var(--line-2);
-  border-radius: 16px;
-  background: rgba(13, 16, 18, 0.72);
-  backdrop-filter: blur(18px) saturate(135%);
-  -webkit-backdrop-filter: blur(18px) saturate(135%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 16px 44px -38px rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-card);
 }
 
 .brand {
@@ -333,15 +598,144 @@ select:focus-visible,
   border: 1px solid var(--accent-line);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+  overflow: visible;
 }
 
-.brand:hover .brand-mark {
-  border-color: rgba(54, 232, 160, 0.5);
+.brand-mark--logo {
+  padding: 0;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.brand-logo-shell {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.brand-logo-accents {
+  position: absolute;
+  inset: -18%;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      from 210deg at 50% 50%,
+      transparent 0deg,
+      rgba(48, 79, 255, 0.28) 38deg,
+      transparent 72deg,
+      rgba(214, 0, 0, 0.22) 118deg,
+      transparent 152deg,
+      rgba(0, 166, 81, 0.2) 198deg,
+      transparent 232deg,
+      rgba(255, 205, 0, 0.18) 278deg,
+      transparent 312deg,
+      transparent 360deg
+    ),
+    radial-gradient(circle at 50% 58%, rgba(48, 79, 255, 0.34), transparent 62%),
+    radial-gradient(circle at 50% 62%, rgba(212, 175, 55, 0.12), transparent 48%);
+  filter: blur(10px);
+  opacity: 0.82;
+  transform: scale(1.05);
+}
+
+.brand-logo-shell--xl .brand-logo-accents {
+  inset: -24%;
+  filter: blur(18px);
+  opacity: 0.9;
+}
+
+.brand-logo-shell--lg .brand-logo-accents {
+  inset: -20%;
+  filter: blur(14px);
+}
+
+.brand-logo {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter:
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45))
+    drop-shadow(0 8px 18px rgba(0, 0, 0, 0.28))
+    drop-shadow(0 0 14px rgba(48, 79, 255, 0.18));
+}
+
+.brand-logo--xl {
+  width: 128px;
+  height: 128px;
+}
+
+.brand-logo-shell--xl {
+  width: 128px;
+  height: 128px;
+}
+
+.brand-logo--lg {
+  width: 64px;
+  height: 64px;
+}
+
+.brand-logo-shell--lg {
+  width: 64px;
+  height: 64px;
+}
+
+.brand-logo--md {
+  width: 100%;
+  height: 100%;
+}
+
+.brand-logo-shell--md {
+  width: 100%;
+  height: 100%;
+}
+
+.brand-logo--sm {
+  width: 32px;
+  height: 32px;
+}
+
+.brand-logo-shell--sm {
+  width: 32px;
+  height: 32px;
+}
+
+.brand-logo {
+  transition: transform 0.22s ease, filter 0.22s ease;
+}
+
+.brand-logo-accents {
+  transition: opacity 0.22s ease, filter 0.22s ease, transform 0.22s ease;
+}
+
+.brand:hover .brand-mark:not(.brand-mark--logo) {
+  border-color: rgba(48, 79, 255, 0.5);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    0 0 18px -4px rgba(54, 232, 160, 0.28),
+    0 0 18px -4px rgba(48, 79, 255, 0.28),
     0 8px 22px -10px rgba(0, 0, 0, 0.7);
   transform: translateY(-1px) scale(1.03);
+}
+
+.brand:hover .brand-mark--logo .brand-logo-accents {
+  opacity: 1;
+  filter: blur(12px);
+  transform: scale(1.08);
+}
+
+.brand:hover .brand-mark--logo .brand-logo {
+  transform: translateY(-1px) scale(1.04);
+  filter:
+    drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 10px 22px rgba(0, 0, 0, 0.32))
+    drop-shadow(0 0 20px rgba(48, 79, 255, 0.28));
 }
 
 .brand-text {
@@ -404,9 +798,13 @@ select:focus-visible,
 }
 
 .segmented button.active {
-  color: var(--accent-ink);
-  background: linear-gradient(135deg, var(--accent), var(--accent-bright));
-  box-shadow: 0 10px 26px -16px var(--accent-glow);
+  color: var(--fwc-white);
+  background: var(--action-primary);
+  box-shadow: var(--glow-blue);
+}
+
+.segmented button.active:hover {
+  background: var(--action-primary-hover);
 }
 
 .method-link {
@@ -463,12 +861,25 @@ select:focus-visible,
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  padding: 0 18px;
+  padding: var(--space-3) var(--space-6);
   min-height: 44px;
-  border-radius: 12px;
-  color: var(--accent-ink);
-  background: var(--accent);
+  border-radius: var(--radius-md);
+  color: var(--fwc-white);
+  background: var(--action-primary);
+  font-family: var(--font-display);
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primary-button:hover {
+  background: var(--action-primary-hover);
+  box-shadow: var(--glow-blue);
+}
+
+.primary-button:active {
+  background: var(--fwc-navy);
 }
 
 .text-button {
@@ -497,7 +908,7 @@ select:focus-visible,
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   background:
-    radial-gradient(640px 320px at 100% 0%, rgba(54, 232, 160, 0.1), transparent 64%),
+    radial-gradient(640px 320px at 100% 0%, rgba(48, 79, 255, 0.1), transparent 64%),
     linear-gradient(160deg, var(--surface-2), var(--surface) 64%);
   box-shadow: var(--shadow-lg);
   animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -688,12 +1099,13 @@ h1 .accent {
 
 h2 {
   margin-top: 8px;
-  color: var(--text);
+  color: var(--text-primary);
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: var(--text-2xl);
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .quiet-note {
@@ -895,7 +1307,7 @@ h2 {
 }
 
 .standing-table tr.qualified td:first-child {
-  box-shadow: inset 3px 0 0 var(--accent);
+  box-shadow: inset 3px 0 0 var(--fwc-green);
 }
 
 .rank {
@@ -906,7 +1318,7 @@ h2 {
 }
 
 .standing-table tr.qualified .rank {
-  color: var(--accent);
+  color: var(--fwc-green);
 }
 
 .standing-table img:not(.team-flag-img),
@@ -914,12 +1326,17 @@ h2 {
 .third-row img:not(.team-flag-img),
 .opponent-row img:not(.team-flag-img),
 .team-picker img:not(.team-flag-img),
-.bracket-team img:not(.team-flag-img) {
+.bracket-team img:not(.team-flag-img):not(.bracket-ghost-crest) {
   width: 20px;
   height: 20px;
+  max-width: 20px;
+  max-height: 20px;
   object-fit: contain;
+  object-position: center;
   border-radius: 3px;
   flex: 0 0 auto;
+  box-sizing: border-box;
+  padding: 1px;
 }
 
 .standing-table strong,
@@ -1312,17 +1729,21 @@ h2 {
   position: absolute;
   top: 50%;
   left: 100%;
+  z-index: 0;
   width: var(--bracket-gap);
   height: 1px;
-  background: var(--line-2);
+  background: var(--bracket-connector, var(--line-2));
+  pointer-events: none;
 }
 
 .bracket-round:not(.is-final) .bracket-cell::after {
   content: "";
   position: absolute;
   left: calc(100% + var(--bracket-gap));
+  z-index: 0;
   width: 0;
-  border-left: 1px solid var(--line-2);
+  border-left: 1px solid var(--bracket-connector, var(--line-2));
+  pointer-events: none;
 }
 
 .bracket-round:not(.is-final) .bracket-cell:nth-child(odd)::after {
@@ -1668,8 +2089,13 @@ h2 {
 .title-row img {
   width: 22px;
   height: 22px;
+  max-width: 22px;
+  max-height: 22px;
   object-fit: contain;
+  object-position: center;
   border-radius: 3px;
+  box-sizing: border-box;
+  padding: 1px;
 }
 
 .title-row strong {

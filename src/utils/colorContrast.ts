@@ -25,8 +25,8 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   return { r, g, b };
 }
 
-/** Relative luminance (WCAG) */
-function luminance(hex: string): number {
+/** Relative luminance (WCAG) — exported for crest contrast tuning. */
+export function hexRelativeLuminance(hex: string): number {
   const rgb = hexToRgb(hex);
   if (!rgb) return 0;
   const channels = [rgb.r, rgb.g, rgb.b].map((c) => {
@@ -34,6 +34,10 @@ function luminance(hex: string): number {
     return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
   });
   return 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
+}
+
+function luminance(hex: string): number {
+  return hexRelativeLuminance(hex);
 }
 
 export function pickOnPrimary(primary: string): string {

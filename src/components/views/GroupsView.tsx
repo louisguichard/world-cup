@@ -21,7 +21,9 @@ import {
   type ResultsSortOrder
 } from "../../store/selectors/historySelectors";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
+import { TournamentInsightsPanel } from "../tournament/TournamentInsightsPanel";
 
 export function GroupsView() {
   const standings = useStore((s) => s.groupStandings);
@@ -60,20 +62,19 @@ export function GroupsView() {
     [completed, resultsSort, resultsTeamId]
   );
 
+  const copy = APP_COPY.groups;
+
   return (
     <div className="groups-view dashboard-view">
       <section className="hero-panel hero-panel--compact">
-        <div className="eyebrow">Group stage</div>
+        <div className="eyebrow">{copy.eyebrow}</div>
         <h1>
-          Twelve groups. <span className="accent">Forty-eight teams.</span>
+          Twelve groups. <span className="accent">{copy.titleAccent}</span>
         </h1>
-        <p>
-          Live tables use color accents: <strong className="qual-legend qual-legend--confirmed-qualified">Confirmed Qualified</strong>,{" "}
-          <strong className="qual-legend qual-legend--projected-qualified">Projected to Qualify</strong>,{" "}
-          <strong className="qual-legend qual-legend--confirmed-eliminated">Confirmed Eliminated</strong>,{" "}
-          <strong className="qual-legend qual-legend--projected-eliminated">Projected to Be Eliminated</strong>.
-        </p>
+        <p>{copy.heroLead}</p>
       </section>
+
+      <TournamentInsightsPanel />
 
       <div className="groups-view-toggle" role="group" aria-label="Standings view mode">
         <button
@@ -82,7 +83,7 @@ export function GroupsView() {
           onClick={() => setGroupsViewMode("flags")}
           aria-pressed={groupsViewMode === "flags"}
         >
-          Flags
+          {copy.viewFlags}
         </button>
         <button
           type="button"
@@ -90,7 +91,7 @@ export function GroupsView() {
           onClick={() => setGroupsViewMode("table")}
           aria-pressed={groupsViewMode === "table"}
         >
-          Table
+          {copy.viewTable}
         </button>
       </div>
 
@@ -99,8 +100,8 @@ export function GroupsView() {
           <section aria-label="Qualification flags" className="dashboard-section">
             <div className="section-heading compact">
               <div>
-                <div className="section-kicker">Qualification</div>
-                <h2 className="section-title-text">Who&apos;s through</h2>
+                <div className="section-kicker">{copy.qualKicker}</div>
+                <h2 className="section-title-text">{APP_COPY.qual.sectionTitle}</h2>
               </div>
             </div>
             <div className="live-qual-row">
@@ -122,7 +123,7 @@ export function GroupsView() {
           <section aria-label="Group standings" className="dashboard-section">
             <div className="section-heading compact">
               <div>
-                <div className="section-kicker">Standings</div>
+                <div className="section-kicker">{copy.standingsKicker}</div>
                 <h2 className="section-title-text">All groups</h2>
               </div>
             </div>
@@ -146,10 +147,10 @@ export function GroupsView() {
                   <table className="standing-table">
                     <thead>
                       <tr>
-                        <th>Team</th>
-                        <th>MP</th>
-                        <th>GD</th>
-                        <th>Pts</th>
+                        <th>{APP_COPY.table.team}</th>
+                        <th title={APP_COPY.glossary.points}>{APP_COPY.table.gamesPlayed}</th>
+                        <th title={APP_COPY.glossary.goalDiff}>{APP_COPY.table.goalDiff}</th>
+                        <th title={APP_COPY.glossary.points}>{APP_COPY.table.points}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -187,7 +188,7 @@ export function GroupsView() {
         <section aria-label="Group tables" className="dashboard-section">
           <div className="section-heading compact">
             <div>
-              <div className="section-kicker">Standings</div>
+              <div className="section-kicker">{copy.standingsKicker}</div>
               <h2 className="section-title-text">Full tables</h2>
             </div>
           </div>
@@ -203,7 +204,7 @@ export function GroupsView() {
       <section aria-label="Recent results" className="dashboard-section">
         <div className="section-heading compact results-heading">
           <div>
-            <div className="section-kicker">Results</div>
+            <div className="section-kicker">{copy.resultsKicker}</div>
             <h2 className="section-title-text">Latest scores</h2>
           </div>
           <div className="results-controls">
@@ -243,7 +244,7 @@ export function GroupsView() {
             />
           ))}
           {displayedResults.length === 0 ? (
-            <p className="view-note">No completed group matches match this filter.</p>
+            <p className="view-note">{copy.noResults}</p>
           ) : null}
         </div>
       </section>
@@ -251,7 +252,7 @@ export function GroupsView() {
       <section aria-label="Upcoming matches" className="dashboard-section">
         <div className="section-heading compact">
           <div>
-            <div className="section-kicker">Fixtures</div>
+            <div className="section-kicker">{copy.fixturesKicker}</div>
             <h2 className="section-title-text">Coming up</h2>
           </div>
         </div>

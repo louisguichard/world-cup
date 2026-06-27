@@ -8,15 +8,22 @@ import {
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { getTeamElo } from "../../services/ClubEloClient";
 import { getHistoricalMatchesForTeam, type ZafronixMatch } from "../../services/ZafronixClient";
 import { TeamThemeRoot } from "../team/TeamThemeRoot";
 import { TeamFlag } from "../team/TeamFlag";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
+import { TeamMediaList, TeamMatchLists, TeamSquadList, TeamStatsPanel } from "./TeamProfileSections";
+import { Wc2026SquadList } from "./Wc2026SquadList";
+import { useTeamProfile } from "../../hooks/useTeamProfile";
+import { useWc2026TeamSquad } from "../../hooks/useWc2026TeamSquad";
+import { useZafronixTeamRoster } from "../../hooks/useZafronixTeamRoster";
+import { formatPredictionPick, predictionsForTeam } from "../../lib/matchFootballPredictions";
 import type { MergedMatch } from "../../types";
 
-type Tab = "overview" | "fixtures" | "stats" | "betting";
+type Tab = "overview" | "squad" | "fixtures" | "stats" | "media" | "betting";
 type MatchOutcome = "W" | "D" | "L";
 
 function outcomeForTeam(match: MergedMatch, teamId: string): MatchOutcome {
@@ -41,6 +48,17 @@ export function TeamDetailSheet() {
   const [recentForm, setRecentForm] = useState<ZafronixMatch[]>([]);
 
   const team = teamId ? teams[teamId] : null;
+  const { profile: sofaProfile, loading: sofaLoading } = useTeamProfile(team?.abbreviation);
+  const { players: wcSquad, loading: wcSquadLoading } = useWc2026TeamSquad(team);
+  const { players: zafronixSquad, loading: zafronixRosterLoading } = useZafronixTeamRoster(
+    team,
+    tab === "squad" && wcSquad.length === 0 && !wcSquadLoading
+  );
+  const footballPredictionBundle = useStore((s) => s.footballPredictionBundle);
+  const teamPredictions = useMemo(() => {
+    if (!team || !footballPredictionBundle) return [];
+    return predictionsForTeam(team, footballPredictionBundle.dailyPredictions);
+  }, [team, footballPredictionBundle]);
   const qualContext = useMemo(
     () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
     [liveMatches, teams]
@@ -115,15 +133,18 @@ export function TeamDetailSheet() {
         aria-label={`${teamDisplayName(team)} profile`}
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="fwc-unify-stripe" aria-hidden="true" />
         <TeamThemeRoot teamId={team.id} className="team-sheet-header-themed">
-          <div className="team-accent-bar" aria-hidden />
           <header className="team-sheet-header">
             <div className="team-sheet-header-main">
               <TeamFlag team={team} teamId={team.id} size="xl" />
               <div>
                 <h2>{team.name}</h2>
                 <p className="team-sheet-sub">
-                  Group {team.group} · FIFA rank {team.fifaRank ?? "—"}
+                  Group {team.group} · FIFA rank {team.fifaRank ?? sofaProfile?.details?.fifaRanking ?? "—"}
+                  {sofaProfile?.details?.managerName
+                    ? ` · Coach ${sofaProfile.details.managerName}`
+                    : null}
                 </p>
               </div>
               {qual ? <QualificationStatusBadge qual={qual} size="sm" /> : null}
@@ -135,7 +156,7 @@ export function TeamDetailSheet() {
         </TeamThemeRoot>
 
         <div className="team-sheet-tabs">
-          {(["overview", "fixtures", "stats", "betting"] as Tab[]).map((t) => (
+          {(["overview", "squad", "fixtures", "stats", "media", "betting"] as Tab[]).map((t) => (
             <button key={t} type="button" className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
@@ -164,14 +185,14 @@ export function TeamDetailSheet() {
                 <table className="team-sheet-standings">
                   <thead>
                     <tr>
-                      <th>P</th>
-                      <th>W</th>
-                      <th>D</th>
-                      <th>L</th>
-                      <th>GF</th>
-                      <th>GA</th>
-                      <th>GD</th>
-                      <th>Pts</th>
+                      <th>{APP_COPY.table.gamesPlayed}</th>
+                      <th>{APP_COPY.table.wins}</th>
+                      <th>{APP_COPY.table.ties}</th>
+                      <th>{APP_COPY.table.losses}</th>
+                      <th>{APP_COPY.table.goalsFor}</th>
+                      <th>{APP_COPY.table.goalsAgainst}</th>
+                      <th>{APP_COPY.table.goalDiff}</th>
+                      <th>{APP_COPY.table.points}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -189,6 +210,21 @@ export function TeamDetailSheet() {
                     </tr>
                   </tbody>
                 </table>
+              ) : null}
+
+              {sofaProfile ? (
+                <>
+                  <TeamMatchLists
+                    title="Recent results (SofaScore)"
+                    matches={sofaProfile.lastMatches}
+                    teamName={team.name}
+                  />
+                  <TeamMatchLists
+                    title="Upcoming (SofaScore)"
+                    matches={sofaProfile.nextMatches}
+                    teamName={team.name}
+                  />
+                </>
               ) : null}
 
               {qual && qualDisplay ? (
@@ -217,6 +253,34 @@ export function TeamDetailSheet() {
             </>
           ) : null}
 
+          {tab === "squad" ? (
+            wcSquadLoading ? (
+              <p className="team-sheet-empty">Loading squad photos…</p>
+            ) : wcSquad.length > 0 ? (
+              <Wc2026SquadList players={wcSquad} />
+            ) : zafronixRosterLoading ? (
+              <p className="team-sheet-empty">Loading squad…</p>
+            ) : zafronixSquad.length > 0 ? (
+              <ul className="team-squad-list">
+                {zafronixSquad.map((p) => (
+                  <li key={p.name} className="team-squad-row">
+                    <span className="team-squad-num">{p.number ?? "—"}</span>
+                    <span className="team-squad-photo team-squad-photo--placeholder" aria-hidden />
+                    <span className="team-squad-name">
+                      <strong>{p.name}</strong>
+                      {p.club ? <span className="team-squad-club">{p.club}</span> : null}
+                    </span>
+                    <span className="team-squad-pos">{p.position ?? "—"}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : sofaLoading ? (
+              <p className="team-sheet-empty">Loading squad…</p>
+            ) : (
+              <TeamSquadList players={sofaProfile?.players ?? []} />
+            )
+          ) : null}
+
           {tab === "fixtures" ? (
             <ul className="team-match-history-list">
               {allFixtures.map((match) => {
@@ -227,7 +291,13 @@ export function TeamDetailSheet() {
                 const oppScore = isHome ? (match.awayScore ?? 0) : (match.homeScore ?? 0);
                 return (
                   <li key={match.id} className="team-match-history-row">
-                    <span>{match.status === "live" ? "LIVE" : match.status === "completed" ? "FT" : formatKickoffTime(match.date)}</span>
+                    <span>
+                      {match.status === "live"
+                        ? APP_COPY.match.live
+                        : match.status === "completed"
+                          ? APP_COPY.match.final
+                          : formatKickoffTime(match.date)}
+                    </span>
                     <span>
                       <TeamFlag team={opponent} teamId={opponentId} />{" "}
                       <span className="team-name-text">{teamDisplayName(opponent, opponentId)}</span>
@@ -242,30 +312,44 @@ export function TeamDetailSheet() {
             </ul>
           ) : null}
 
-          {tab === "stats" && stats ? (
-            <div className="team-sheet-stats">
-              <p>
-                Goals {stats.gf} / Conceded {stats.ga} / GD {stats.gd >= 0 ? "+" : ""}
-                {stats.gd}
-              </p>
-              <p>Avg goals per game: {stats.avgGoals}</p>
-              <div className="team-wdl-bar" aria-label="Win draw loss breakdown">
-                <span style={{ flex: stats.wdl.w }} className="team-wdl-bar--w" />
-                <span style={{ flex: stats.wdl.d }} className="team-wdl-bar--d" />
-                <span style={{ flex: stats.wdl.l }} className="team-wdl-bar--l" />
-              </div>
-              <p>
-                W {stats.wdl.w} · D {stats.wdl.d} · L {stats.wdl.l}
-              </p>
-            </div>
+          {tab === "stats" ? (
+            <TeamStatsPanel groupStats={stats} sofaStats={sofaProfile?.statistics ?? null} />
+          ) : null}
+
+          {tab === "media" ? (
+            sofaLoading ? (
+              <p className="team-sheet-empty">Loading media…</p>
+            ) : (
+              <TeamMediaList items={sofaProfile?.media ?? []} />
+            )
           ) : null}
 
           {tab === "betting" ? (
             <div>
               <p>Title market: {team.titleProbability ? `${(team.titleProbability * 100).toFixed(1)}%` : "—"}</p>
               <p>ClubElo rating: {elo ?? "Loading…"}</p>
+              {teamPredictions.length > 0 ? (
+                <div className="fp-team-picks">
+                  <h3 className="team-sheet-section-title">Today Football Prediction picks</h3>
+                  <ul className="fp-picks-list">
+                    {teamPredictions.slice(0, 6).map((p) => (
+                      <li key={p.id} className="fp-pick-row">
+                        <span>
+                          {p.homeTeam} vs {p.awayTeam}
+                        </span>
+                        <span>
+                          {formatPredictionPick(p.prediction)}
+                          {p.predictionProbability != null ? ` (${p.predictionProbability}%)` : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="team-sheet-empty">No third-party picks matched for this team in today&apos;s feed.</p>
+              )}
               {simulationRunning ? <p className="odds-recalc">Recalculating…</p> : null}
-              <p className="odds-disclaimer">Based on simulated tournaments. For entertainment only — not financial advice.</p>
+              <p className="odds-disclaimer">Based on simulated tournaments and cached third-party tips. For entertainment only — not financial advice.</p>
             </div>
           ) : null}
         </div>

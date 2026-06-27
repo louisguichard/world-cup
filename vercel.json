@@ -21,6 +21,10 @@
       "destination": "https://inside.fifa.com/:path*"
     },
     {
+      "source": "/api/sofascore6/:path*",
+      "destination": "/api/sofascore6/:path*"
+    },
+    {
       "source": "/api/sofascore/:path*",
       "destination": "/api/sofascore?path=:path*"
     },
@@ -39,7 +43,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; connect-src 'self' https://site.api.espn.com https://site.web.api.espn.com https://gamma-api.polymarket.com https://api.fifa.com https://www.fifa.com https://api.sofascore.com http://api.clubelo.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'"
+          "value": "default-src 'self'; connect-src 'self' https://site.api.espn.com https://site.web.api.espn.com https://gamma-api.polymarket.com https://api.fifa.com https://www.fifa.com https://api.sofascore.com https://sofascore6.p.rapidapi.com http://api.clubelo.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'"
         }
       ]
     }

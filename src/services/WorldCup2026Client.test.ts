@@ -1,5 +1,11 @@
-import { describe, expect, it } from "vitest";
-import { mergeTeamMetadata } from "./WorldCup2026Client";
+import { describe, expect, it, afterEach } from "vitest";
+import {
+  getPlayerPhotoUrl,
+  lookupWc2026Player,
+  mergeTeamMetadata,
+  resetWorldCup2026SessionForTests,
+  seedWc2026PlayerIndexForTests,
+} from "./WorldCup2026Client";
 import type { Team } from "../types";
 
 describe("mergeTeamMetadata", () => {
@@ -62,5 +68,21 @@ describe("mergeTeamMetadata", () => {
     const { teams, patched } = mergeTeamMetadata(espnTeams, []);
     expect(patched).toBe(0);
     expect(teams).toEqual(espnTeams);
+  });
+});
+
+describe("WC2026 player photos", () => {
+  afterEach(() => {
+    resetWorldCup2026SessionForTests();
+  });
+
+  it("resolves photo URL from cached player index", () => {
+    seedWc2026PlayerIndexForTests([
+      { id: "99", fullName: "Test Player", image: "https://example.com/photo.jpg" },
+    ]);
+    expect(getPlayerPhotoUrl("99")).toBe("https://example.com/photo.jpg");
+    expect(lookupWc2026Player({ playerName: "Test Player" })?.image).toBe(
+      "https://example.com/photo.jpg"
+    );
   });
 });

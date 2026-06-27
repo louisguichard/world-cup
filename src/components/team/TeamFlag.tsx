@@ -1,4 +1,5 @@
 import type { Team } from "../../types";
+import { resolveTeamLogo } from "../../lib/resolveTeamLogo";
 import { getTeamWorldCupTitles } from "../../lib/worldCupTitles";
 import { TeamThemeRoot } from "./TeamThemeRoot";
 import { WorldCupStars } from "./WorldCupStars";
@@ -27,6 +28,7 @@ const innerSizeClass: Record<NonNullable<Props["size"]>, string> = {
 export function TeamFlag({ team, teamId, size = "sm", dim, className }: Props) {
   const id = team?.id ?? teamId;
   const label = team?.shortName ?? teamId;
+  const logo = team ? resolveTeamLogo(team) : undefined;
   const titles = getTeamWorldCupTitles(team);
   const wrapClass = [
     "team-flag-wrap",
@@ -42,8 +44,14 @@ export function TeamFlag({ team, teamId, size = "sm", dim, className }: Props) {
       <WorldCupStars count={titles} size={size} />
       <TeamThemeRoot teamId={id} className={wrapClass}>
         <span className={`team-flag-inner ${innerSizeClass[size]}`}>
-          {team?.logo ? (
-            <img src={team.logo} alt="" className="team-flag-img" />
+          {logo ? (
+            <img
+              src={logo}
+              alt=""
+              className="team-flag-img"
+              loading="lazy"
+              decoding="async"
+            />
           ) : (
             <span className="team-flag-fallback" aria-hidden>
               {label.slice(0, 3).toUpperCase()}

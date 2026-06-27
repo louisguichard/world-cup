@@ -58,8 +58,8 @@ export function MatchStatisticsTab({ statistics, loading, homeTeamName, awayTeam
         title={isUpcoming ? "Statistics available during the match." : "Statistics not available for this match."}
         detail={
           isUpcoming
-            ? "Possession, shots, and xG appear once play begins via WC 2026 Live API."
-            : "The stats feed returned no data — try again during or after a live match."
+            ? "Possession, shots, and xG appear once play begins (WC Live, SofaScore, or ESPN)."
+            : "Stats may be unavailable pre-match or when all feeds return empty — try refresh during a live match."
         }
       />
     );

@@ -85,10 +85,20 @@ const rapidApiProxies = {
   "/rapidapi": rapidApiProxy("https://free-api-live-football-data.p.rapidapi.com", "/rapidapi"),
   "/api/footballdata": rapidApiProxy("https://free-api-live-football-data.p.rapidapi.com", "/api/footballdata"),
   "/api/sportapi": rapidApiProxy("https://sportapi7.p.rapidapi.com", "/api/sportapi"),
+  "/api/sofascore6": rapidApiProxy("https://sofascore6.p.rapidapi.com", "/api/sofascore6"),
+  "/api/sofascore-rapid": rapidApiProxy("https://sofascore.p.rapidapi.com", "/api/sofascore-rapid"),
   "/api/wc2026": rapidApiProxy("https://world-cup-2026.p.rapidapi.com", "/api/wc2026"),
   "/api/wc-live": rapidApiProxy("https://world-cup-2026-live-api.p.rapidapi.com", "/api/wc-live"),
   "/api/weather": rapidApiProxy("https://open-weather13.p.rapidapi.com", "/api/weather"),
   "/api/odds": rapidApiProxy("https://sports-odds-intelligence-api.p.rapidapi.com", "/api/odds"),
+  "/api/football-prediction": rapidApiProxy(
+    "https://today-football-prediction.p.rapidapi.com",
+    "/api/football-prediction"
+  ),
+  "/api/world-cup-history": rapidApiProxy(
+    "https://world-cup1.p.rapidapi.com",
+    "/api/world-cup-history"
+  ),
   "/api/espn-web": {
     target: "https://site.web.api.espn.com",
     changeOrigin: true,

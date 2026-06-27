@@ -3,6 +3,7 @@ import { buildQualificationContext, computeQualificationStatus } from "../../lib
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { APP_COPY } from "../../lib/appCopy";
 import type { GroupStanding, MergedMatch, TeamRecord } from "../../types";
 import { useStore } from "../../store";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
@@ -107,28 +108,28 @@ export function BestThirdTableBento({ standings }: BestThirdTableBentoProps) {
     return map;
   }, [ranked, thirdPlaceIds, lockedGroupMatches]);
 
+  const copy = APP_COPY.bestThirdTable;
+  const tbl = APP_COPY.table;
+
   return (
-    <section className="best-third-table-bento" aria-label="Best third place teams">
+    <section className="best-third-table-bento" aria-label={copy.title}>
       <header className="group-table-bento-header">
-        <h3>Best 3rd — FIFA tiebreaker</h3>
-        <p className="best-third-table-lead">
-          All twelve third-placed teams ranked for eight berths.{" "}
-          <strong>Confirmed</strong> = mathematically locked; <strong>Projected</strong> = live standings only.
-        </p>
+        <h3>{copy.title}</h3>
+        <p className="best-third-table-lead">{copy.lead}</p>
       </header>
 
       <div className="group-table-scroll">
         <table className="group-table best-third-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Team</th>
-              <th>Pts</th>
-              <th>GD</th>
-              <th>GF</th>
-              <th>W</th>
-              <th>H2H</th>
-              <th>Discipline</th>
+              <th>{tbl.rank}</th>
+              <th>{tbl.team}</th>
+              <th>{tbl.points}</th>
+              <th>{tbl.goalDiff}</th>
+              <th>{tbl.goalsFor}</th>
+              <th>{tbl.wins}</th>
+              <th>{copy.h2h}</th>
+              <th>{copy.discipline}</th>
             </tr>
           </thead>
           <tbody>
@@ -170,11 +171,7 @@ export function BestThirdTableBento({ standings }: BestThirdTableBentoProps) {
       </div>
 
       <div className="best-third-legend">
-        <p>
-          <strong>H2H</strong> — informational only; not used in FIFA best-third ranking. W/D/L vs other
-          third-placed teams.{" "}
-          <strong>Discipline</strong> — fair play score: yellow −1, red −4, second yellow −5 (0 is clean).
-        </p>
+        <p>{copy.legend}</p>
       </div>
     </section>
   );

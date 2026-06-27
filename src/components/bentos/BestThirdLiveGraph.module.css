@@ -1,0 +1,324 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: var(--module-padding-compact, 14px) var(--module-padding, 16px) 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--status-danger) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--status-danger) 35%, transparent);
+  color: var(--status-danger);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.liveDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--fwc-bright-red);
+  animation: livePulse 1.4s ease-in-out infinite;
+}
+
+.cutoffBanner {
+  padding: 8px 16px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+  border-bottom: 1px solid var(--line);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  animation: cutoff-banner 3s ease-out;
+}
+
+@keyframes cutoff-banner {
+  0%,
+  25% {
+    background: color-mix(in srgb, var(--status-success) 18%, var(--surface-2));
+  }
+  100% {
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+  }
+}
+
+.focusStrip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.focusCard {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--r);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  background: var(--surface);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.focusRank {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent);
+  min-width: 2rem;
+}
+
+.focusMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.focusMeta strong {
+  font-size: 0.82rem;
+}
+
+.focusStats {
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+
+.bubblePill {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bubble--safe {
+  background: color-mix(in srgb, var(--status-success) 20%, transparent);
+  color: var(--status-success);
+}
+
+.bubble--bubble {
+  background: color-mix(in srgb, var(--warn) 20%, transparent);
+  color: var(--warn);
+}
+
+.bubble--outside {
+  background: var(--surface-3);
+  color: var(--muted);
+}
+
+.focusDelta {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 1.5rem;
+  text-align: right;
+}
+
+.eventCallout {
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.ladder {
+  list-style: none;
+  margin: 0;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.ladderRow {
+  display: grid;
+  grid-template-columns: 1.5rem 1.25rem minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.ladderFocus {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.ladderCut {
+  border-bottom: 1px dashed color-mix(in srgb, var(--warn) 60%, var(--line));
+  margin-bottom: 2px;
+  padding-bottom: 7px;
+}
+
+.ladderBelow {
+  opacity: 0.5;
+}
+
+.ladderBelow.ladderFocus,
+.ladderBelow.ladderCutoffIn {
+  opacity: 1;
+}
+
+.ladderCutoffIn {
+  animation: ladder-cutoff-in 3s ease-out;
+}
+
+.ladderCutoffOut {
+  animation: ladder-cutoff-out 3s ease-out;
+}
+
+@keyframes ladder-cutoff-in {
+  0%,
+  30% {
+    background: color-mix(in srgb, var(--status-success) 22%, transparent);
+  }
+}
+
+@keyframes ladder-cutoff-out {
+  0%,
+  30% {
+    background: color-mix(in srgb, var(--status-danger) 15%, transparent);
+  }
+}
+
+.ladderRank {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+}
+
+.ladderName {
+  font-weight: 600;
+  min-width: 0;
+}
+
+.ladderPts,
+.ladderGd {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.ladderDelta {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.68rem;
+  min-width: 1.25rem;
+  text-align: right;
+}
+
+.ladderCutLabel {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--warn);
+  padding: 6px 0 2px;
+}
+
+.deltaUp {
+  color: var(--status-success);
+}
+
+.deltaDown {
+  color: var(--status-danger);
+}
+
+.deltaFlat {
+  color: var(--faint);
+}
+
+.footer {
+  padding: 8px 12px 12px;
+  border-top: 1px solid var(--line);
+}
+
+.expandBtn {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.expandBtn:hover {
+  color: var(--text);
+  border-color: var(--line-2);
+}
+
+.panel :global(.chartArea) {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+@media (max-width: 1023px) {
+  .panel {
+    max-height: none;
+  }
+
+  .focusCard {
+    grid-template-columns: auto auto 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .bubblePill,
+  .focusDelta {
+    grid-column: 3;
+    justify-self: end;
+  }
+}

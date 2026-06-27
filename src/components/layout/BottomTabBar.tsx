@@ -1,16 +1,17 @@
 import type { TabId } from "../../types";
 import { useStore } from "../../store";
 import { ThemeToggle } from "../shared/ThemeToggle";
+import { APP_COPY } from "../../lib/appCopy";
 
 const TABS: { id: TabId; label: string }[] = [
-  { id: "live", label: "Live" },
-  { id: "tournament", label: "Tourn." },
-  { id: "schedule", label: "Schedule" },
-  { id: "results", label: "Results" },
-  { id: "groups", label: "Groups" },
-  { id: "bracket", label: "Bracket" },
-  { id: "teams", label: "Teams" },
-  { id: "simulator", label: "Sim" }
+  { id: "live", label: APP_COPY.tabs.live },
+  { id: "tournament", label: APP_COPY.tabs.tournament },
+  { id: "schedule", label: APP_COPY.tabs.schedule },
+  { id: "results", label: APP_COPY.tabs.results },
+  { id: "groups", label: APP_COPY.tabs.groups },
+  { id: "bracket", label: APP_COPY.tabs.bracket },
+  { id: "teams", label: APP_COPY.tabs.teams },
+  { id: "simulator", label: APP_COPY.tabs.simulator }
 ];
 
 export function BottomTabBar() {

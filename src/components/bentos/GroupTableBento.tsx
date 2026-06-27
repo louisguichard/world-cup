@@ -3,6 +3,7 @@ import type { GroupStanding } from "../../types";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
 import { StandingThemeRow } from "../team/StandingThemeRow";
@@ -22,6 +23,8 @@ export function GroupTableBento({ standing }: GroupTableBentoProps) {
     [liveMatches, teams]
   );
 
+  const tbl = APP_COPY.table;
+
   return (
     <article className="group-table-bento">
       <header className="group-table-bento-header">
@@ -31,16 +34,16 @@ export function GroupTableBento({ standing }: GroupTableBentoProps) {
         <table className="group-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Team</th>
-              <th>MP</th>
-              <th>W</th>
-              <th>D</th>
-              <th>L</th>
-              <th>GF</th>
-              <th>GA</th>
-              <th>GD</th>
-              <th>Pts</th>
+              <th>{tbl.rank}</th>
+              <th>{tbl.team}</th>
+              <th>{tbl.gamesPlayed}</th>
+              <th>{tbl.wins}</th>
+              <th>{tbl.ties}</th>
+              <th>{tbl.losses}</th>
+              <th>{tbl.goalsFor}</th>
+              <th>{tbl.goalsAgainst}</th>
+              <th>{tbl.goalDiff}</th>
+              <th>{tbl.points}</th>
             </tr>
           </thead>
           <tbody>

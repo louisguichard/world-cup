@@ -1,0 +1,326 @@
+/**
+ * Unified module / bento / card sizing — one system for every panel in the app.
+ * Scales with viewport and adapts for touch (mobile) vs pointer (desktop).
+ */
+
+:root {
+  /* Shell */
+  --module-radius: clamp(10px, 1.1vw, 14px);
+  --module-padding: clamp(12px, 2vw, 20px);
+  --module-padding-compact: clamp(10px, 1.5vw, 14px);
+  --module-padding-header: clamp(10px, 1.4vw, 14px);
+  --module-gap: clamp(10px, 1.6vw, 16px);
+  --module-gap-lg: clamp(14px, 2vw, 24px);
+  --module-border: var(--surface-border, var(--line));
+  --module-bg: var(--surface-raised, var(--surface));
+  --module-bg-alt: var(--surface, var(--surface-2));
+  --module-shadow: var(--shadow-card, var(--shadow));
+
+  /* Grid column minimums */
+  --module-grid-min: clamp(260px, 42vw, 320px);
+  --module-grid-min-wide: clamp(280px, 36vw, 520px);
+  --module-grid-min-qual: clamp(220px, 32vw, 280px);
+
+  /* Normalized card heights */
+  --card-height-compact: clamp(168px, 24vw, 192px);
+  --card-height-standard: clamp(188px, 26vw, 220px);
+  --card-height-schedule: clamp(152px, 22vw, 180px);
+  --card-height-result: clamp(88px, 12vw, 108px);
+  --card-height-qual: clamp(160px, 24vw, 200px);
+  --card-height-featured: clamp(240px, 34vw, 320px);
+
+  /* Live strip uses standard height */
+  --live-secondary-card-width: var(--module-grid-min);
+  --live-secondary-card-height: var(--card-height-standard);
+}
+
+/* ── Shared module shell (all bentos & cards) ─────────────────── */
+
+:is(
+  .qual-bento,
+  .group-table-bento,
+  .best-third-table-bento,
+  .best-third-race-panel,
+  .schedule-card,
+  .live-hero-card,
+  .result-match-card,
+  .recent-result-row,
+  .teams-group-panel--open,
+  .idle-banner,
+  .best-third-timeline
+) {
+  box-sizing: border-box;
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-bg-alt);
+  box-shadow: var(--module-shadow);
+}
+
+/* Panels that use raised surface */
+:is(
+  .schedule-card,
+  .live-hero-card,
+  .group-table-bento,
+  .best-third-table-bento,
+  .best-third-race-panel
+) {
+  background: var(--module-bg);
+}
+
+/* ── Unified responsive grids ───────────────────────────────────── */
+
+.schedule-list,
+.groups-table-grid,
+.live-qual-row,
+.results-day-grid {
+  display: grid;
+  gap: var(--module-gap);
+  align-items: stretch;
+}
+
+.schedule-list {
+  grid-template-columns: repeat(auto-fill, minmax(var(--module-grid-min), 1fr));
+}
+
+.groups-table-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--module-grid-min-wide)), 1fr));
+  margin-bottom: var(--module-gap-lg);
+}
+
+.live-qual-row {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--module-grid-min-qual)), 1fr));
+}
+
+.results-day-grid {
+  grid-template-columns: 1fr;
+  gap: var(--module-gap);
+}
+
+/* ── Section rhythm ─────────────────────────────────────────────── */
+
+.dashboard-section {
+  margin-bottom: var(--module-gap-lg);
+}
+
+.dashboard-section + .dashboard-section {
+  margin-top: 0;
+}
+
+.section-heading.compact {
+  margin-bottom: var(--module-gap);
+}
+
+/* ── Qual bentos — equal height in row ──────────────────────────── */
+
+.qual-bento {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--card-height-qual);
+  height: 100%;
+  padding: var(--module-padding-compact);
+}
+
+.group-table-bento-header,
+.best-third-race-head,
+.qual-bento-title {
+  padding: 0;
+}
+
+.group-table-bento-header {
+  padding: var(--module-padding-header) var(--module-padding-compact);
+}
+
+/* ── Schedule cards — uniform height in grid ───────────────────── */
+
+.schedule-card {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--card-height-schedule);
+  height: 100%;
+  padding: var(--module-padding-compact) var(--module-padding);
+  overflow: hidden;
+}
+
+.schedule-card .score-line.schedule-score-line {
+  flex: 1 1 auto;
+  min-height: 44px;
+  align-items: center;
+}
+
+.schedule-card .match-goal-scorers-slot {
+  flex: 0 0 32px;
+  min-height: 32px;
+  max-height: 32px;
+  overflow: hidden;
+}
+
+.schedule-card .broadcast-bar-slot,
+.schedule-card .match-meta {
+  flex-shrink: 0;
+}
+
+/* ── Live hero cards ────────────────────────────────────────────── */
+
+.live-hero-card {
+  padding: var(--module-padding);
+}
+
+.live-hero-card--primary {
+  min-height: var(--card-height-featured);
+}
+
+.live-hero-card--secondary {
+  min-height: var(--live-secondary-card-height);
+  max-height: var(--live-secondary-card-height);
+  height: 100%;
+  padding: var(--module-padding-compact);
+}
+
+.live-now-strip {
+  gap: var(--module-gap);
+}
+
+.live-now-strip-item {
+  flex: 0 0 var(--live-secondary-card-width);
+  width: var(--live-secondary-card-width);
+  height: var(--live-secondary-card-height);
+  min-height: var(--live-secondary-card-height);
+}
+
+/* ── Result cards ───────────────────────────────────────────────── */
+
+.result-match-card {
+  min-height: var(--card-height-result);
+  padding: var(--module-padding-compact) var(--module-padding);
+}
+
+.recent-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--module-gap) - 2px);
+}
+
+.recent-result-row {
+  min-height: var(--card-height-result);
+  padding: var(--module-padding-compact);
+  align-items: center;
+}
+
+.results-list {
+  gap: var(--module-gap);
+}
+
+/* ── Table bentos ───────────────────────────────────────────────── */
+
+.group-table-bento,
+.best-third-table-bento,
+.best-third-race-panel {
+  overflow: hidden;
+}
+
+.best-third-race-panel.dashboard-section {
+  margin-bottom: var(--module-gap-lg);
+}
+
+.idle-banner,
+.teams-group-panel--open {
+  padding: var(--module-padding);
+}
+
+.teams-group-panel--open {
+  padding: 0;
+}
+
+.teams-group-panel--open .teams-group-header {
+  padding: var(--module-padding-header) var(--module-padding);
+}
+
+/* ── Best third live graph panel (CSS module hook) ──────────────── */
+
+.best-third-live-panel {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-bg);
+  box-shadow: var(--module-shadow);
+  max-height: min(720px, calc(100dvh - 8rem - var(--safe-bottom, 0px)));
+}
+
+/* ── Mobile: tighter modules, single column bias ────────────────── */
+
+@media (max-width: 640px) {
+  :root {
+    --module-grid-min: min(100%, 320px);
+    --module-grid-min-wide: min(100%, 100%);
+    --module-grid-min-qual: min(100%, 100%);
+    --card-height-standard: clamp(180px, 48vw, 204px);
+    --card-height-schedule: clamp(140px, 38vw, 168px);
+    --card-height-qual: clamp(140px, 40vw, 180px);
+  }
+
+  .live-now-strip {
+    grid-template-columns: none;
+  }
+
+  .live-qual-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Tablet ─────────────────────────────────────────────────────── */
+
+@media (min-width: 641px) and (max-width: 1023px) {
+  :root {
+    --module-grid-min: clamp(240px, 44vw, 300px);
+  }
+
+  .live-qual-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 721px) {
+  .live-now-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-auto-rows: var(--live-secondary-card-height);
+    overflow: visible;
+  }
+
+  .live-now-strip-item {
+    flex: none;
+    width: auto;
+    height: var(--live-secondary-card-height);
+  }
+}
+
+/* ── Desktop: wider grids, slightly taller cards ────────────────── */
+
+@media (min-width: 1024px) {
+  :root {
+    --module-gap: 16px;
+    --module-grid-min: 300px;
+    --card-height-standard: 220px;
+    --card-height-schedule: 176px;
+    --card-height-qual: 196px;
+  }
+
+  .live-qual-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Touch devices — slightly taller tap targets inside cards */
+[data-touch="true"] {
+  --module-padding-compact: clamp(12px, 2vw, 16px);
+}
+
+/* Desktop pointer — compact padding, multi-column grids breathe */
+[data-touch="false"] {
+  --module-padding-compact: clamp(10px, 1.2vw, 14px);
+}
+
+@media (min-width: 1280px) {
+  .schedule-list {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}

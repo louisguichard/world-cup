@@ -1,8 +1,24 @@
 import { PollingEngine } from "../services/PollingEngine";
 import { logger } from "../services/Logger";
+import { useStore } from "../store";
+import { syncTournamentProfileIfNeeded } from "../services/teamProfile/TeamProfileSync";
+import { syncWc2026CatalogIfNeeded } from "../services/wc2026/Wc2026PlayerSync";
+import { syncWcLiveDrawIfNeeded } from "../services/WorldCup2026LiveClient";
 
 /** Start background services after a successful bootstrap (idempotent). */
 export function startAppServices(): void {
   PollingEngine.getInstance().start();
+
+  const store = useStore.getState();
+  store.hydrateTeamProfiles();
+  store.startTeamProfileSync();
+  store.hydrateFootballPredictions();
+  store.startFootballPredictionSync();
+  store.hydrateWorldCupHistory();
+  store.startWorldCupHistorySync();
+  void syncTournamentProfileIfNeeded();
+  void syncWc2026CatalogIfNeeded();
+  void syncWcLiveDrawIfNeeded();
+
   logger.info("App services started", "AppLifecycle");
 }

@@ -1,14 +1,15 @@
 import type { MatchEvent, MergedMatch } from "../../types";
 import { isApiEnabled } from "../../config/apiFlags";
 import { fetchMatchPlayByPlay } from "../ESPNClient";
-import { fetchIncidents } from "../SportAPI7Client";
-import { fetchCommentary, type WcCommentaryEntry } from "../WorldCup2026LiveClient";
+import { fetchIncidents } from "../SofaScore6Client";
+import { fetchCommentary, isWc2026LiveDisabled, type WcCommentaryEntry } from "../WorldCup2026LiveClient";
 import { logger } from "../Logger";
 import { useStore } from "../../store";
 import { mapCommentaryToEvents } from "./mapCommentaryToEvents";
 import { mapEspnPlayByPlayToEvents } from "./mapEspnToEvents";
 import { mapIncidentsToEvents } from "./mapIncidentsToEvents";
 import { normalizeProviderIncidents } from "./normalizeProviderIncidents";
+import { resolveWcLiveApiMatchId } from "./resolveWcLiveMatchId";
 
 function dedupeEvents(events: MatchEvent[]): MatchEvent[] {
   const seen = new Set<string>();
@@ -37,7 +38,7 @@ export async function fetchMatchEvents(
 ): Promise<MatchEvent[]> {
   const { homeTeamId, awayTeamId } = match;
 
-  if (match.sofaEventId && isApiEnabled("sportApi7")) {
+  if (match.sofaEventId && (isApiEnabled("sofascore") || isApiEnabled("sportApi7"))) {
     try {
       const raw = await fetchIncidents(Number(match.sofaEventId));
       if (raw.length > 0) {
@@ -46,7 +47,7 @@ export async function fetchMatchEvents(
         if (events.length > 0) return dedupeEvents(events);
       }
     } catch (error) {
-      logger.warn("SportAPI7 incidents fetch failed", "fetchMatchEvents", {
+      logger.warn("SofaScore6 incidents fetch failed", "fetchMatchEvents", {
         matchId: match.id,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -67,8 +68,12 @@ export async function fetchMatchEvents(
   }
 
   let commentary = opts?.commentary;
-  if (!commentary?.length && wcMatchId && isApiEnabled("wc2026Live")) {
-    commentary = (await fetchCommentary(wcMatchId)) ?? [];
+  if (!commentary?.length && isApiEnabled("wc2026Live") && !isWc2026LiveDisabled()) {
+    const teams = useStore.getState().teams;
+    const apiId = await resolveWcLiveApiMatchId(match, wcMatchId, teams);
+    if (apiId) {
+      commentary = (await fetchCommentary(apiId)) ?? [];
+    }
   }
 
   if (commentary?.length) {

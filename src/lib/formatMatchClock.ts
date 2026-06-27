@@ -1,5 +1,6 @@
 import type { MatchPeriod, MatchStatus } from "../types";
 import type { MergedMatch } from "../types";
+import { APP_COPY } from "./appCopy";
 
 type ClockFields = Pick<
   MergedMatch,
@@ -16,10 +17,10 @@ function normalizeDisplayClock(displayClock: string): string {
   return trimmed.endsWith("'") ? trimmed : `${trimmed}'`;
 }
 
-/** Running match clock for live UI — returns FT for completed matches. */
+/** Running match clock for live UI — returns Final for completed matches. */
 export function formatLiveClock(match: ClockFields): string {
   if (match.status === "completed" || match.period === "full_time") {
-    return "FT";
+    return APP_COPY.match.final;
   }
 
   if (match.displayClock) {
@@ -47,30 +48,30 @@ export function formatPeriodLabel(
   status?: MatchStatus
 ): string | null {
   if (status === "completed" || period === "full_time") {
-    return "Full Time";
+    return APP_COPY.match.fullTime;
   }
 
   switch (period) {
     case "first_half":
-      return "1st Half";
+      return APP_COPY.match.firstHalf;
     case "second_half":
-      return "2nd Half";
+      return APP_COPY.match.secondHalf;
     case "half_time":
-      return "Half Time";
+      return APP_COPY.match.halftime;
     case "extra_time_first":
-      return "ET 1st";
+      return APP_COPY.match.extraTimeFirst;
     case "extra_time_second":
-      return "ET 2nd";
+      return APP_COPY.match.extraTimeSecond;
     case "penalties":
-      return "Penalties";
+      return APP_COPY.match.penalties;
     case "not_started":
       return null;
     case "extra_time_break":
-      return "ET Break";
+      return APP_COPY.match.extraTimeBreak;
     case "postponed":
-      return "Postponed";
+      return APP_COPY.match.postponed;
     case "interrupted":
-      return "Interrupted";
+      return APP_COPY.match.interrupted;
     default:
       if (period === undefined) return null;
       return null;

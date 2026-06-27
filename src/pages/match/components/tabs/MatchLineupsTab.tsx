@@ -34,8 +34,8 @@ export function MatchLineupsTab({ lineups, loading, homeTeamName, awayTeamName, 
         title={isUpcoming ? "Lineups not yet announced." : "Lineups unavailable."}
         detail={
           isUpcoming
-            ? "Starting elevens are usually published about an hour before kickoff."
-            : "WC 2026 Live API did not return lineup data for this match."
+            ? "Starting elevens are usually published about an hour before kickoff (WC Live or SofaScore)."
+            : "Lineups may not be published yet, or no feed returned squad data for this fixture."
         }
       />
     );

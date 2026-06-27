@@ -1,25 +1,26 @@
 import { useMemo, useState } from "react";
 import { BentoErrorBoundary } from "../shared/ErrorBoundary";
 import { LiveMatchBento } from "../bentos/LiveMatchBento";
+import { BestThirdLiveGraph } from "../bentos/BestThirdLiveGraph";
 import { MatchScheduleCard } from "../match/MatchScheduleCard";
 import { RecentResultsBento } from "../bentos/RecentResultsBento";
 import { QualifiedBento, EliminatedBento, InContentionBento } from "../bentos/QualifiedBento";
 import { groupMatchesByDay } from "../../lib/groupMatchesByDay";
+import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 
 export function LiveView() {
+  const copy = APP_COPY.live;
   const liveMatchesMap = useStore((s) => s.liveMatches);
   const teams = useStore((s) => s.teams);
   const primaryId = useStore((s) => s.primaryLiveMatchId);
   const setPrimary = useStore((s) => s.setPrimaryMatch);
 
-  // Live hero — no locked filter (ESPN sets locked:true for live matches)
   const live = useMemo(
     () => Object.values(liveMatchesMap).filter((m) => m.status === "live"),
     [liveMatchesMap]
   );
 
-  // Schedule — only upcoming, non-locked matches
   const scheduleMatches = useMemo(
     () => Object.values(liveMatchesMap).filter((m) => m.status === "scheduled" && !m.locked),
     [liveMatchesMap]
@@ -30,6 +31,14 @@ export function LiveView() {
   const allDayGroups = useMemo(() => groupMatchesByDay(scheduleMatches), [scheduleMatches]);
   const dayGroups = scheduleExpanded ? allDayGroups : allDayGroups.slice(0, 3);
 
+  const nextFixtureId = useMemo(() => {
+    if (scheduleMatches.length === 0) return null;
+    const sorted = [...scheduleMatches].sort(
+      (a, b) => Date.parse(a.date) - Date.parse(b.date)
+    );
+    return sorted[0]?.id ?? sorted[0]?.matchId ?? null;
+  }, [scheduleMatches]);
+
   const todayMatchCount = allDayGroups.find((g) => g.isToday)?.matches.length ?? 0;
 
   const primary = live.find((m) => m.id === primaryId) ?? live[0];
@@ -38,25 +47,36 @@ export function LiveView() {
   return (
     <div className="dashboard-view" data-state={live.length > 0 ? "live" : "idle"}>
       <section className="hero-panel hero-panel--compact">
-        <div className="eyebrow">United States · Canada · Mexico</div>
+        <div className="eyebrow">{copy.eyebrow}</div>
         <h1>
-          Road to the <span className="accent">Final.</span>
+          Road to the <span className="accent">{copy.titleAccent}</span>
         </h1>
-        <p>Live scores, qualification pulse, and every match on your schedule — in your local time.</p>
+        <p>{copy.heroLead}</p>
       </section>
 
       {live.length > 0 ? (
         <section className="dashboard-section" aria-label="Live now">
           <div className="section-heading compact">
             <div>
-              <div className="section-kicker">Live now</div>
-              <h2 className="section-title-text">On the pitch</h2>
+              <div className="section-kicker">{copy.liveNowKicker}</div>
+              <h2 className="section-title-text">{copy.liveNowTitle}</h2>
             </div>
           </div>
 
-          <BentoErrorBoundary bento="LiveMatchBento">
-            {primary ? <LiveMatchBento match={primary} variant="primary" /> : null}
-          </BentoErrorBoundary>
+          <div className="live-command-row">
+            <div className="live-command-hero">
+              <BentoErrorBoundary bento="LiveMatchBento">
+                {primary ? <LiveMatchBento match={primary} variant="primary" /> : null}
+              </BentoErrorBoundary>
+            </div>
+            <BentoErrorBoundary bento="BestThirdLiveGraph">
+              <BestThirdLiveGraph
+                focusTeamIds={
+                  primary ? [primary.homeTeamId, primary.awayTeamId] : []
+                }
+              />
+            </BentoErrorBoundary>
+          </div>
 
           {secondary.length > 0 ? (
             <div className="live-now-strip" role="list">
@@ -66,7 +86,7 @@ export function LiveView() {
                     type="button"
                     className="live-secondary-tap"
                     onClick={() => setPrimary(m.id)}
-                    aria-label="Promote match to hero"
+                    aria-label={copy.promoteMatch}
                   >
                     <LiveMatchBento match={m} variant="secondary" />
                   </button>
@@ -78,12 +98,12 @@ export function LiveView() {
       ) : (
         <section className="dashboard-section">
           <div className="idle-banner">
-            <span className="section-kicker">No live matches</span>
-            <p>
-              No live matches right now. Check the Results tab for completed matches or the schedule
-              for upcoming kickoffs.
-            </p>
+            <span className="section-kicker">{copy.noLiveKicker}</span>
+            <p>{copy.noLiveBody}</p>
           </div>
+          <BentoErrorBoundary bento="BestThirdLiveGraph">
+            <BestThirdLiveGraph focusTeamIds={[]} />
+          </BentoErrorBoundary>
         </section>
       )}
 
@@ -92,8 +112,8 @@ export function LiveView() {
       <section className="dashboard-section" aria-label="Upcoming fixtures">
         <div className="section-heading compact">
           <div>
-            <div className="section-kicker">Schedule</div>
-            <h2 className="section-title-text">Upcoming fixtures</h2>
+            <div className="section-kicker">{copy.scheduleKicker}</div>
+            <h2 className="section-title-text">{copy.scheduleTitle}</h2>
           </div>
         </div>
         {dayGroups.map((group) => (
@@ -111,15 +131,16 @@ export function LiveView() {
                   match={m}
                   home={teams[m.homeTeamId]}
                   away={teams[m.awayTeamId]}
+                  showKickoffCountdown={
+                    nextFixtureId != null && (m.id === nextFixtureId || m.matchId === nextFixtureId)
+                  }
                 />
               ))}
             </div>
           </div>
         ))}
         {allDayGroups.length === 0 ? (
-          <p className="view-note">
-            No upcoming fixtures — check the Results tab for completed matches.
-          </p>
+          <p className="view-note">{copy.noUpcoming}</p>
         ) : null}
         {allDayGroups.length > 3 ? (
           <button
@@ -128,9 +149,7 @@ export function LiveView() {
             onClick={() => setScheduleExpanded((v) => !v)}
             aria-expanded={scheduleExpanded}
           >
-            {scheduleExpanded
-              ? "Show less"
-              : `Show all ${allDayGroups.length} days`}
+            {scheduleExpanded ? copy.showLess : copy.showAllDays(allDayGroups.length)}
           </button>
         ) : null}
       </section>
@@ -138,12 +157,9 @@ export function LiveView() {
       <section className="dashboard-section qual-dashboard-row" aria-label="Qualification">
         <div className="section-heading compact">
           <div>
-            <div className="section-kicker">Qualification</div>
-            <h2 className="section-title-text">Who&apos;s through</h2>
-            <p className="section-note">
-              <strong>Confirmed</strong> = 100% locked in by FIFA math — no remaining result can change it.{" "}
-              <strong>Projected</strong> = based on live results; outcome can still change.
-            </p>
+            <div className="section-kicker">{copy.qualKicker}</div>
+            <h2 className="section-title-text">{copy.qualTitle}</h2>
+            <p className="section-note">{APP_COPY.qual.sectionLead}</p>
           </div>
         </div>
         <div className="live-qual-row">

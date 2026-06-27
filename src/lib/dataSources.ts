@@ -3,6 +3,7 @@ import { isApiEnabled } from "../config/apiFlags";
 import { buildPrediction, makeFallbackPrediction, normalizeProbabilities } from "./predictions";
 import { normalizeName, pairKey } from "./normalize";
 import { addModelRatings, calibrateRatingsToTitleMarket, type FifaRanking, type MatchMarket, type RatingMarket } from "./ratings";
+import { applyTeamLogoOverridesList } from "./resolveTeamLogo";
 import { simulateTournamentOutcomes } from "./tournament";
 
 const ESPN_SCOREBOARD_PATH =
@@ -567,7 +568,7 @@ export async function loadWorldCupData(options: LoadWorldCupDataOptions = {}): P
   }
 
   return {
-    teams,
+    teams: applyTeamLogoOverridesList(teams),
     matches,
     knockoutMarkets: polymarketMarkets,
     loadedAt: new Date().toISOString(),

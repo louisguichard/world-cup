@@ -29,8 +29,8 @@ export function MatchCommentaryTab({ commentary, loading, matchStatus }: Props) 
         title={isUpcoming ? "Commentary starts at kickoff." : "No commentary available."}
         detail={
           isUpcoming
-            ? "Live play-by-play from WC 2026 Live API appears once the match is in progress."
-            : "This match may not have commentary coverage yet, or the feed returned no entries."
+            ? "Live play-by-play appears once the match starts (WC Live, SofaScore, ESPN, or derived from events)."
+            : "Commentary may not be available yet for this fixture across connected feeds."
         }
       />
     );
@@ -66,6 +66,21 @@ export function MatchCommentaryTab({ commentary, loading, matchStatus }: Props) 
               <span style={{ minWidth: 32, flexShrink: 0 }} />
             )}
             <span style={{ fontSize: 13, color: "var(--ss-text)", lineHeight: 1.5 }}>
+              {entry.type ? (
+                <span
+                  style={{
+                    display: "inline-block",
+                    marginRight: 8,
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    color: "var(--ss-muted)",
+                  }}
+                >
+                  {entry.type.replace(/_/g, " ")}
+                </span>
+              ) : null}
               {entry.text}
             </span>
           </li>

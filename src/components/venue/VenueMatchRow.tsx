@@ -1,5 +1,6 @@
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
+import { APP_COPY } from "../../lib/appCopy";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import type { MergedMatch, Team } from "../../types";
 import styles from "./VenueMatchRow.module.css";
@@ -13,12 +14,15 @@ type Props = {
 
 function statusBadge(match: MergedMatch): { label: string; className: string } {
   if (match.status === "live") {
-    return { label: formatLiveClock(match) || "LIVE", className: styles["statusBadge--live"] };
+    return {
+      label: formatLiveClock(match) || APP_COPY.match.live,
+      className: styles["statusBadge--live"],
+    };
   }
   if (match.status === "completed" || match.locked) {
-    return { label: "FT", className: styles["statusBadge--ft"] };
+    return { label: APP_COPY.match.final, className: styles["statusBadge--ft"] };
   }
-  return { label: "Upcoming", className: styles["statusBadge--scheduled"] };
+  return { label: "Coming up", className: styles["statusBadge--scheduled"] };
 }
 
 export function VenueMatchRow({ match, home, away, onSelect }: Props) {

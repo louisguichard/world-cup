@@ -11,6 +11,7 @@ import { publishMatchEvents } from "../matchDetail/fetchMatchEvents";
 import {
   fetchAllTeams as fetchZafronixTeams,
   fetchBracket as fetchZafronixBracket,
+  fetchStandings as fetchZafronixStandings,
   isZafronixDisabled,
 } from "../ZafronixClient";
 import {
@@ -36,7 +37,9 @@ import {
   normalizeWCLiveStandings,
   normalizeWC2026Groups,
   normalizeZafronixBracket,
+  normalizeZafronixStandings,
 } from "../adapters/normalizeStandings";
+import { applyTeamLogoOverrides } from "../../lib/resolveTeamLogo";
 import { logger } from "../Logger";
 import {
   fetchWithFallback,
@@ -121,7 +124,7 @@ async function mergeTeamsFromCascade(
     }
   }
 
-  return teams;
+  return applyTeamLogoOverrides(teams);
 }
 
 async function loadStandingsWithFallback(
@@ -139,8 +142,9 @@ async function loadStandingsWithFallback(
           ? normalizeWCLiveStandings(await fetchWcLiveStandings())
           : [],
       zafronix: async () => {
-        const raw = await fetchZafronixBracket(2026);
-        return normalizeZafronixBracket(raw);
+        const fromStandings = normalizeZafronixStandings(await fetchZafronixStandings(2026));
+        if (fromStandings.length > 0) return fromStandings;
+        return normalizeZafronixBracket(await fetchZafronixBracket(2026));
       },
       wc2026teams: async () => {
         const raw = await fetchGroups();
