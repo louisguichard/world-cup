@@ -37,6 +37,7 @@
   --layout-section-gap: clamp(16px, 2.5vw, 28px);
   /* Room for fixture glow pseudo-elements + feathered card shadows at column edges */
   --surface-shadow-bleed: clamp(20px, 2.8vw, 40px);
+  --fixture-glow-spread: 16px;
   --fixture-glow-bleed: calc(var(--fixture-glow-spread, 16px) + 32px);
   --touch-target-min: 44px;
   --content-readable: min(100%, 72ch);

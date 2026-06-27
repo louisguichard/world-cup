@@ -78,17 +78,18 @@
   align-items: stretch;
 }
 
-.dashboard-section:has(.schedule-list) {
-  padding-inline: calc(var(--fixture-glow-spread, 16px) / 2);
-  box-sizing: border-box;
-}
-
 .schedule-list {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: var(--module-gap);
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  overflow: visible;
+}
+
+.dashboard-section:has(.schedule-list) {
+  overflow: visible;
+  box-sizing: border-box;
 }
 
 .groups-table-grid {

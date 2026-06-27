@@ -185,6 +185,11 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
           (el.classList.contains("accent") && parent.tagName === "H1") ||
           parent.classList.contains("fixture-glow-wrap") ||
           Boolean(el.closest(".wc-main-simulator")) ||
+          (parent.classList.contains("schedule-day-group") &&
+            el.classList.contains("fixture-glow-wrap")) ||
+          (parent.classList.contains("dashboard-section") &&
+            el.classList.contains("fixture-glow-wrap") &&
+            Boolean(el.closest(".schedule-list"))) ||
           (el.classList.contains("bracket-scroll") && parent.classList.contains("bracket-section")) ||
           (parent.classList.contains("dashboard-section--defer") &&
             el.classList.contains("live-bracket-embed")) ||

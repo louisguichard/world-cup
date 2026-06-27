@@ -8,6 +8,7 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 2** (2026-06-27): 4 file(s) in src — 4 files changed, 16 insertions(+), 7 deletions(-)
 
 ## [3.0.0] — 2026-06-27
 

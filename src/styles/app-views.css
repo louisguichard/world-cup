@@ -529,13 +529,13 @@
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  overflow: visible;
 }
 
 .schedule-list .fixture-glow-wrap {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  margin-inline: 0;
   box-sizing: border-box;
 }
 
@@ -544,7 +544,9 @@
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  overflow-x: clip;
+  overflow: visible;
+  padding-inline: calc(var(--fixture-glow-spread, 16px) + 14px);
+  padding-block: calc(var(--fixture-glow-spread, 16px) / 2);
 }
 
 @media (min-width: 900px) {
