@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-27T14:40:01.531Z",
+  "updatedAt": "2026-06-27T14:40:33.567Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -155,6 +155,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "a7e7a1107b29c70028d04e3d55644314193d4107",
+      "shortHash": "a7e7a11",
+      "message": "Sync build-manifest commit record for c6a26f9.",
+      "version": "4.0.0",
+      "build": 9,
+      "timestamp": "2026-06-27T14:40:33.567Z"
+    },
     {
       "hash": "c6a26f9702f9c8086c85a44841117668d7426aa3",
       "shortHash": "c6a26f9",
@@ -386,14 +394,6 @@
       "version": "3.0.0",
       "build": 17,
       "timestamp": "2026-06-27T06:54:00.652Z"
-    },
-    {
-      "hash": "fbef695016d2e0abbe74dd0f21cb69cef8356641",
-      "shortHash": "fbef695",
-      "message": "Record production deploy for v3.0.0 build 16.",
-      "version": "3.0.0",
-      "build": 17,
-      "timestamp": "2026-06-27T06:51:45.796Z"
     }
   ],
   "deploys": [
