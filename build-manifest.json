@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-27T14:27:17.487Z",
+  "updatedAt": "2026-06-27T14:28:01.873Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -139,6 +139,14 @@
     }
   ],
   "commits": [
+    {
+      "hash": "cd21e5f0aa599e5832e794147cc7267a02b4cf29",
+      "shortHash": "cd21e5f",
+      "message": "Sync build-manifest commit record for cb36242.",
+      "version": "4.0.0",
+      "build": 7,
+      "timestamp": "2026-06-27T14:28:01.873Z"
+    },
     {
       "hash": "cb362421d091099af32856d8792e701df7cda704",
       "shortHash": "cb36242",
@@ -370,14 +378,6 @@
       "version": "3.0.0",
       "build": 16,
       "timestamp": "2026-06-27T06:48:34.812Z"
-    },
-    {
-      "hash": "d470c93009219c16dc187d5f93855fbf253c809f",
-      "shortHash": "d470c93",
-      "message": "Record production deploy for v3.0.0 build 15.",
-      "version": "3.0.0",
-      "build": 15,
-      "timestamp": "2026-06-27T06:44:26.836Z"
     }
   ],
   "deploys": [
