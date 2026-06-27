@@ -13,4 +13,5 @@ dist/
 .vercel
 tools/api-portal/.portal-keys.enc
 tools/api-portal/.portal-keys.enc.bak*
-tools/api-portal/node_modules/
+scripts/*-test-results.json
+scripts/api-audit-results.json

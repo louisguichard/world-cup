@@ -185,6 +185,46 @@ export const testAllKeys = (options?: { includeDisabled?: boolean; onlyUntested?
     body: JSON.stringify(options ?? {}),
   });
 
+export type RapidApiProbeResult = {
+  providerId?: string;
+  id?: string;
+  label: string;
+  endpointId?: string;
+  fn?: string;
+  host: string;
+  path?: string;
+  url: string;
+  ok: boolean;
+  skipped?: boolean;
+  status: number;
+  latencyMs: number;
+  detail: string;
+  marketplaceUrl: string;
+};
+
+export const testAllRapidApiHosts = () =>
+  request<{
+    keyLabel: string;
+    envVarName: string;
+    summary: { hosts: number; passed: number; failed: number };
+    results: RapidApiProbeResult[];
+  }>("/rapidapi/test-all", { method: "POST" });
+
+export const testAllRapidApiEndpoints = () =>
+  request<{
+    keyLabel: string;
+    envVarName: string;
+    resolverContext: Record<string, string>;
+    summary: {
+      endpoints: number;
+      tested: number;
+      passed: number;
+      failed: number;
+      skipped: number;
+    };
+    results: RapidApiProbeResult[];
+  }>("/rapidapi/test-full", { method: "POST" });
+
 export const updateKeyMeta = (
   id: string,
   data: Partial<ApiKeyCreate> & {

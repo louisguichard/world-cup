@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  auditProjectionViolations,
   bucketQualificationTeams,
   buildQualificationContext,
   computeQualificationStatus,
@@ -92,34 +91,6 @@ export function TeamsView() {
     () => bucketQualificationTeams(Object.keys(teams), standings, qualContext),
     [teams, standings, qualContext]
   );
-
-  // #region agent log
-  useEffect(() => {
-    const teamIds = Object.keys(teams);
-    const violations = auditProjectionViolations(teamIds, standings, qualContext);
-    const eliminatedInProjected = buckets.projectedThrough.filter((id) => {
-      const q = computeQualificationStatus(id, standings, qualContext);
-      return !q.canQualify || q.lifeState === "eliminated";
-    });
-    fetch("http://127.0.0.1:7681/ingest/f800a0a9-8d11-45c6-8805-1b187f693046", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "93a833" },
-      body: JSON.stringify({
-        sessionId: "93a833",
-        location: "TeamsView.tsx:buckets",
-        message: "teams view projection audit",
-        data: {
-          violationCount: violations.length,
-          violations: violations.slice(0, 5).map((v) => ({ teamId: v.teamId, issue: v.issue })),
-          eliminatedInProjected,
-          projectedCount: buckets.projectedThrough.length
-        },
-        timestamp: Date.now(),
-        hypothesisId: "H3-ui-buckets"
-      })
-    }).catch(() => {});
-  }, [teams, standings, qualContext, buckets]);
-  // #endregion
 
   const filterSet = useMemo(() => {
     const through = new Set([...buckets.confirmedThrough, ...buckets.projectedThrough]);

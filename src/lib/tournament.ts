@@ -95,7 +95,11 @@ function formMarginMultiplier(homeScore: number, awayScore: number): number {
 }
 
 import { rankThirdPlaceRecords } from "./thirdPlaceRanking";
-import { rankAliveBestThirds } from "./thirdPlaceQualification";
+import {
+  isKnockoutEliminated,
+  rankAliveBestThirds,
+  type QualificationMatchContext
+} from "./thirdPlaceQualification";
 
 function rankingValue(record: TeamRecord): number {
   return record.fifaRank ? 10000 - record.fifaRank : record.rating;
@@ -358,10 +362,17 @@ export function rankBestThirds(standings: GroupStanding[]): TeamRecord[] {
   return rankThirdPlaceRecords(thirds);
 }
 
-function seedToTeamId(seed: string, standingsByGroup: Record<GroupLetter, TeamRecord[]>, thirdMapping: Record<string, string>): string | undefined {
+function seedToTeamId(
+  seed: string,
+  standingsByGroup: Record<GroupLetter, TeamRecord[]>,
+  thirdMapping: Record<string, string>,
+  qualifiedThirdTeamIds: Set<string>
+): string | undefined {
   if (seed.startsWith("3:")) {
     const group = thirdMapping[seed.slice(2)] as GroupLetter | undefined;
-    return group ? standingsByGroup[group]?.[2]?.teamId : undefined;
+    if (!group) return undefined;
+    const thirdId = standingsByGroup[group]?.[2]?.teamId;
+    return thirdId && qualifiedThirdTeamIds.has(thirdId) ? thirdId : undefined;
   }
 
   const rank = Number(seed[0]) - 1;
@@ -507,12 +518,15 @@ function buildBracketFromStandings(
   teamsById: TeamsById,
   knockoutMarkets: PolymarketMatchMarket[] = [],
   random?: () => number,
-  picks: Record<string, string> = {}
+  picks: Record<string, string> = {},
+  qualContext: QualificationMatchContext = { lockedGroupMatchCount: {}, lockedStandingsByGroup: {} }
 ): BracketMatch[] {
   const standingsByGroup = Object.fromEntries(
     standings.map((standing) => [standing.group, standing.rows])
   ) as Record<GroupLetter, TeamRecord[]>;
-  const qualifiedThirdGroups = rankBestThirds(standings)
+  const aliveBestThirds = rankAliveBestThirds(standings, qualContext);
+  const qualifiedThirdTeamIds = new Set(aliveBestThirds.slice(0, 8).map((record) => record.teamId));
+  const qualifiedThirdGroups = aliveBestThirds
     .slice(0, 8)
     .map((record) => record.group)
     .sort()
@@ -523,8 +537,8 @@ function buildBracketFromStandings(
     playKnockoutMatch(
       id,
       "R32",
-      seedToTeamId(homeSeed, standingsByGroup, thirdMapping),
-      seedToTeamId(awaySeed, standingsByGroup, thirdMapping),
+      seedToTeamId(homeSeed, standingsByGroup, thirdMapping, qualifiedThirdTeamIds),
+      seedToTeamId(awaySeed, standingsByGroup, thirdMapping, qualifiedThirdTeamIds),
       teamsById,
       knockoutMarkets,
       random,
@@ -611,13 +625,15 @@ function parseSeedLabelToGroupSlot(label: string): { rank: number; group: GroupL
   return { rank, group };
 }
 
-// Rough probability estimates for ghost candidates ranked below the projected winner.
-const GHOST_FREQ = [0.35, 0.15] as const;
+// Rule-based alternate-slot scores for teams still mathematically in contention (not true probabilities).
+const GHOST_CONFIDENCE = [35, 15] as const;
 
 function computeR32SlotAnnotation(
   projectedTeamId: string,
   parsed: { rank: number; group: GroupLetter },
+  standings: GroupStanding[],
   standingsMap: Map<GroupLetter, TeamRecord[]>,
+  qualContext: QualificationMatchContext,
   lockedGroupMatchCount?: number,
   lockedStandingsByGroup: Partial<Record<GroupLetter, TeamRecord[]>> = {}
 ): { certainty: BracketSlotCertainty; ghosts: BracketGhostCandidate[] } {
@@ -643,13 +659,14 @@ function computeR32SlotAnnotation(
 
   const others = groupRows
     .filter((r) => r.teamId !== projectedTeamId)
+    .filter((r) => !isKnockoutEliminated(r.teamId, standings, qualContext))
     .map((r) => ({ r, dist: Math.abs(groupRows.findIndex((x) => x.teamId === r.teamId) - projectedIdx) }))
     .sort((a, b) => a.dist - b.dist || 0)
     .slice(0, 2);
 
   const ghosts: BracketGhostCandidate[] = others.map(({ r }, i) => ({
     teamId: r.teamId,
-    frequency: GHOST_FREQ[i] ?? 0.05
+    frequency: (GHOST_CONFIDENCE[i] ?? 5) / 100
   }));
 
   return { certainty, ghosts };
@@ -695,6 +712,7 @@ export function annotateBracketCertainty(
   lockedGroupMatchCount: Partial<Record<GroupLetter, number>> = {},
   lockedStandingsByGroup: Partial<Record<GroupLetter, TeamRecord[]>> = {}
 ): BracketMatch[] {
+  const qualContext: QualificationMatchContext = { lockedGroupMatchCount, lockedStandingsByGroup };
   const standingsMap = new Map<GroupLetter, TeamRecord[]>(
     standings.map((s) => [s.group, s.rows])
   );
@@ -712,7 +730,9 @@ export function annotateBracketCertainty(
           ? computeR32SlotAnnotation(
               match.homeTeamId,
               homeParsed,
+              standings,
               standingsMap,
+              qualContext,
               lockedGroupMatchCount[homeParsed.group],
               lockedStandingsByGroup
             )
@@ -723,7 +743,9 @@ export function annotateBracketCertainty(
           ? computeR32SlotAnnotation(
               match.awayTeamId,
               awayParsed,
+              standings,
               standingsMap,
+              qualContext,
               lockedGroupMatchCount[awayParsed.group],
               lockedStandingsByGroup
             )
@@ -796,7 +818,14 @@ export function projectTournament(
     .map((record) => record.group)
     .sort();
   const bracketTeamsById = toTeamsById(applyProjectedGroupForm(teams, scoredMatches));
-  const rawBracket = buildBracketFromStandings(standings, bracketTeamsById, knockoutMarkets, undefined, bracketPicks);
+  const rawBracket = buildBracketFromStandings(
+    standings,
+    bracketTeamsById,
+    knockoutMarkets,
+    undefined,
+    bracketPicks,
+    qualContext
+  );
   const bracket = annotateBracketCertainty(
     rawBracket,
     standings,

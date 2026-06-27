@@ -145,4 +145,14 @@ After first run, add a sync target via the UI:
 
 - **Name**: `Road to the World Cup Final 2026`
 - **Path**: `/Users/<you>/Developer/world-cup/.env.local`
-- **Keys**: `VITE_RAPIDAPI_KEY`, `VITE_ZAFRONIX_API_KEY`, `VITE_THESTATS_API_KEY`, `VITE_ODDS_API_KEY`
+- **Keys**: `VITE_RAPIDAPI_KEY` and `RAPIDAPI_KEY` (same RapidAPI application key)
+
+Use **Test RapidAPI hosts** (smoke) or **Test all endpoints** (full matrix) on the My Secret Keys tab.
+
+CLI from repo root:
+
+```bash
+npm run test:rapidapi          # 1 probe per hub
+npm run test:rapidapi:full     # every client endpoint (27 paths)
+npm run test:rapidapi:proxy    # full matrix via Vite dev proxies (:5173)
+```

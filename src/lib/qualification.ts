@@ -372,23 +372,6 @@ export function auditProjectionViolations(
     }
   }
 
-  // #region agent log
-  if (violations.length > 0 && typeof fetch !== "undefined") {
-    fetch("http://127.0.0.1:7681/ingest/f800a0a9-8d11-45c6-8805-1b187f693046", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "93a833" },
-      body: JSON.stringify({
-        sessionId: "93a833",
-        location: "qualification.ts:auditProjectionViolations",
-        message: "projection violations detected",
-        data: { count: violations.length, sample: violations.slice(0, 5) },
-        timestamp: Date.now(),
-        hypothesisId: "H-projection"
-      })
-    }).catch(() => {});
-  }
-  // #endregion
-
   return violations;
 }
 

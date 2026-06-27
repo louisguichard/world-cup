@@ -1,6 +1,9 @@
+import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
 import { logger } from "./Logger";
 
-const RAPIDAPI_HOST = "sports-odds-intelligence-api.p.rapidapi.com";
+const RAPIDAPI_HOST =
+  providerByHost("sports-odds-intelligence-api.p.rapidapi.com")?.host ??
+  "sports-odds-intelligence-api.p.rapidapi.com";
 
 let oddsSessionDisabled = false;
 
@@ -53,15 +56,7 @@ function baseUrl(): string {
 }
 
 function rapidHeaders(): HeadersInit {
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-    "x-rapidapi-host": RAPIDAPI_HOST,
-  };
-  const devKey = import.meta.env.VITE_RAPIDAPI_KEY;
-  if (import.meta.env.DEV && devKey) {
-    headers["x-rapidapi-key"] = devKey;
-  }
-  return headers;
+  return rapidApiHeaders(RAPIDAPI_HOST);
 }
 
 async function fetchJson<T>(path: string): Promise<T | null> {

@@ -1,6 +1,8 @@
+import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
 import { logger } from "./Logger";
 
-const RAPIDAPI_HOST = "open-weather13.p.rapidapi.com";
+const RAPIDAPI_HOST =
+  providerByHost("open-weather13.p.rapidapi.com")?.host ?? "open-weather13.p.rapidapi.com";
 
 let weatherSessionDisabled = false;
 
@@ -38,15 +40,7 @@ function baseUrl(): string {
 }
 
 function rapidHeaders(): HeadersInit {
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-    "x-rapidapi-host": RAPIDAPI_HOST,
-  };
-  const devKey = import.meta.env.VITE_RAPIDAPI_KEY;
-  if (import.meta.env.DEV && devKey) {
-    headers["x-rapidapi-key"] = devKey;
-  }
-  return headers;
+  return rapidApiHeaders(RAPIDAPI_HOST);
 }
 
 function kelvinToF(k: number): number {
@@ -70,7 +64,7 @@ export async function getWeatherByCity(city: string, lang = "EN"): Promise<Weath
   if (weatherSessionDisabled) return null;
 
   const encodedCity = encodeURIComponent(city);
-  const url = `${baseUrl()}/city/${encodedCity}/${lang}`;
+  const url = `${baseUrl()}/city?city=${encodedCity}&lang=${lang}`;
 
   try {
     const res = await fetch(url, { headers: rapidHeaders() });

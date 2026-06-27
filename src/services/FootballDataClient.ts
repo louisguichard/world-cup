@@ -1,10 +1,13 @@
 import type { MergedMatch, Team } from "../types";
+import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
 import type { SofaEvent } from "./SofaScoreClient";
 import { normalizeFreeAPIMatch } from "./adapters/normalizeMatch";
 import { normalizeFreeAPITeam } from "./adapters/normalizeTeam";
 import { logger } from "./Logger";
 
-const RAPIDAPI_HOST = "free-api-live-football-data.p.rapidapi.com";
+const RAPIDAPI_HOST =
+  providerByHost("free-api-live-football-data.p.rapidapi.com")?.host ??
+  "free-api-live-football-data.p.rapidapi.com";
 
 let footballDataSessionDisabled = false;
 let loggedIncidentsUnavailable = false;
@@ -24,18 +27,7 @@ function baseUrl(): string {
 }
 
 function rapidHeaders(): HeadersInit {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    "x-rapidapi-host": RAPIDAPI_HOST,
-  };
-
-  const devKey = import.meta.env.VITE_RAPIDAPI_KEY;
-  if (import.meta.env.DEV && devKey) {
-    headers["x-rapidapi-key"] = devKey;
-  }
-
-  return headers;
+  return rapidApiHeaders(RAPIDAPI_HOST);
 }
 
 function todayYyyymmdd(): string {

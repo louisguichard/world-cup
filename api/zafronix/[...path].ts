@@ -1,11 +1,24 @@
 export const config = { runtime: "edge" };
 
-const BASE = "https://api.zafronix.com";
+const HOST = "zafronix-fifa-world-cup-api.p.rapidapi.com";
 
-const ALLOWED_PREFIXES = ["/tournaments/", "/matches/", "/teams/", "/trivia/"] as const;
+const ALLOWED_PREFIXES = [
+  "/tournaments",
+  "/teams",
+  "/matches",
+  "/bracket",
+  "/stadiums",
+  "/trivia",
+  "/search",
+  "/aggregates",
+  "/compare",
+  "/health",
+  "/players",
+  "/referees",
+] as const;
 
 function isAllowed(path: string): boolean {
-  return ALLOWED_PREFIXES.some((p) => path.startsWith(p));
+  return ALLOWED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`) || path.startsWith(`${p}?`));
 }
 
 export default async function handler(request: Request): Promise<Response> {
@@ -21,22 +34,29 @@ export default async function handler(request: Request): Promise<Response> {
     });
   }
 
-  const key = process.env.ZAFRONIX_API_KEY;
-  if (!key) {
-    return new Response(JSON.stringify({ error: "ZAFRONIX_API_KEY not configured" }), {
+  const rapidKey = process.env.RAPIDAPI_KEY;
+  if (!rapidKey) {
+    return new Response(JSON.stringify({ error: "RAPIDAPI_KEY not configured" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  const upstream = `${BASE}${path}${url.search}`;
+  const upstreamHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "x-rapidapi-host": HOST,
+    "x-rapidapi-key": rapidKey,
+  };
+
+  const zafronixKey = process.env.ZAFRONIX_API_KEY;
+  if (zafronixKey) {
+    upstreamHeaders["X-API-Key"] = zafronixKey;
+  }
+
+  const upstream = `https://${HOST}${path}${url.search}`;
   try {
-    const res = await fetch(upstream, {
-      headers: {
-        Accept: "application/json",
-        "X-API-Key": key,
-      },
-    });
+    const res = await fetch(upstream, { headers: upstreamHeaders });
     return new Response(res.body, {
       status: res.status,
       headers: { "Content-Type": "application/json" },

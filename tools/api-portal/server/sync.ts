@@ -22,6 +22,12 @@ export async function syncToEnvFile(
     }
   }
 
+  // Mirror browser RapidAPI key to server twin when both are in this target
+  const viteRapid = toWrite.get("VITE_RAPIDAPI_KEY");
+  if (viteRapid && target.keyIds.some((id) => vault.keys.find((k) => k.id === id)?.envVarName === "RAPIDAPI_KEY")) {
+    toWrite.set("RAPIDAPI_KEY", viteRapid);
+  }
+
   // Read existing env file (may not exist yet)
   let existingLines: string[] = [];
   if (existsSync(target.envFilePath)) {

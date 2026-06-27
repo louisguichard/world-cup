@@ -40,6 +40,7 @@ import {
   ApplyDiscoveredSchema,
 } from "./schemas.js";
 import { testApiKey } from "./testKey.js";
+import { testAllRapidApiHosts, testAllRapidApiEndpoints } from "./rapidApiTest.js";
 import { syncToEnvFile } from "./sync.js";
 import { isPlaceholderValue, parseEnvFile } from "./envParse.js";
 import {
@@ -429,6 +430,60 @@ router.post("/keys/test-all", async (req, res) => {
       skipped: outcomes.filter((o) => o.skipped).length,
     },
     keys: maskKeys(vault.keys),
+  });
+});
+
+router.post("/rapidapi/test-all", async (_req, res) => {
+  const vault = await readVault();
+  const rapidKey =
+    vault.keys.find((k) => k.envVarName === "VITE_RAPIDAPI_KEY" && !k.disabled && !isPlaceholderValue(k.value)) ??
+    vault.keys.find((k) => k.envVarName === "RAPIDAPI_KEY" && !k.disabled && !isPlaceholderValue(k.value));
+
+  if (!rapidKey) {
+    res.status(400).json({
+      error: "No configured VITE_RAPIDAPI_KEY or RAPIDAPI_KEY in vault. Paste your RapidAPI key first.",
+    });
+    return;
+  }
+
+  const results = await testAllRapidApiHosts(rapidKey.value);
+  const passed = results.filter((r) => r.ok).length;
+  res.json({
+    keyLabel: rapidKey.label,
+    envVarName: rapidKey.envVarName,
+    summary: { hosts: results.length, passed, failed: results.length - passed },
+    results,
+  });
+});
+
+router.post("/rapidapi/test-full", async (_req, res) => {
+  const vault = await readVault();
+  const rapidKey =
+    vault.keys.find((k) => k.envVarName === "VITE_RAPIDAPI_KEY" && !k.disabled && !isPlaceholderValue(k.value)) ??
+    vault.keys.find((k) => k.envVarName === "RAPIDAPI_KEY" && !k.disabled && !isPlaceholderValue(k.value));
+
+  if (!rapidKey) {
+    res.status(400).json({
+      error: "No configured VITE_RAPIDAPI_KEY or RAPIDAPI_KEY in vault. Paste your RapidAPI key first.",
+    });
+    return;
+  }
+
+  const { results, resolverContext } = await testAllRapidApiEndpoints(rapidKey.value);
+  const tested = results.filter((r) => !r.skipped);
+  const passed = tested.filter((r) => r.ok).length;
+  res.json({
+    keyLabel: rapidKey.label,
+    envVarName: rapidKey.envVarName,
+    resolverContext,
+    summary: {
+      endpoints: results.length,
+      tested: tested.length,
+      passed,
+      failed: tested.length - passed,
+      skipped: results.filter((r) => r.skipped).length,
+    },
+    results,
   });
 });
 

@@ -162,6 +162,27 @@ const tests = [
     }
   },
   {
+    label: "RapidAPI Zafronix health (direct)",
+    url: "https://zafronix-fifa-world-cup-api.p.rapidapi.com/health",
+    headers: rapidHeaders("zafronix-fifa-world-cup-api.p.rapidapi.com"),
+    skip: !RAPIDAPI_KEY,
+    parse: ({ body, status }) => {
+      if (status === 401 || status === 403) return `FAIL: HTTP ${status}`;
+      const d = JSON.parse(body);
+      return d.ok ? "health ok" : `keys=${Object.keys(d).join(",")}`;
+    },
+  },
+  {
+    label: "RapidAPI Zafronix health (vite proxy)",
+    url: `${PROXY_BASE}/api/zafronix/health`,
+    skip: !RAPIDAPI_KEY,
+    parse: ({ body, status }) => {
+      if (status === 401 || status === 403) return `FAIL: HTTP ${status}`;
+      const d = JSON.parse(body);
+      return d.ok ? "health ok" : `keys=${Object.keys(d).join(",")}`;
+    },
+  },
+  {
     label: "RapidAPI FotMob matches-by-date (direct)",
     url: `https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date?date=${TODAY}`,
     headers: rapidHeaders("free-api-live-football-data.p.rapidapi.com"),
@@ -255,7 +276,7 @@ const tests = [
   },
   {
     label: "Open Weather 13 (direct)",
-    url: "https://open-weather13.p.rapidapi.com/city/New%20York/EN",
+    url: "https://open-weather13.p.rapidapi.com/city?city=New%20York&lang=EN",
     headers: rapidHeaders("open-weather13.p.rapidapi.com"),
     skip: !RAPIDAPI_KEY,
     parse: ({ body, status }) => {
@@ -266,7 +287,7 @@ const tests = [
   },
   {
     label: "Open Weather 13 (vite proxy)",
-    url: `${PROXY_BASE}/rapidapi-weather/city/New%20York/EN`,
+    url: `${PROXY_BASE}/rapidapi-weather/city?city=New%20York&lang=EN`,
     headers: rapidHeaders("open-weather13.p.rapidapi.com"),
     skip: !RAPIDAPI_KEY,
     parse: ({ body, status }) => {

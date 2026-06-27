@@ -2,10 +2,10 @@ export const config = { runtime: "edge" };
 
 const HOST = "open-weather13.p.rapidapi.com";
 
-const ALLOWED_PREFIXES = ["/city/", "/fivedaysforcast/"] as const;
+const ALLOWED_PREFIXES = ["/city", "/city/", "/fivedaysforcast/"] as const;
 
 function isAllowed(path: string): boolean {
-  return ALLOWED_PREFIXES.some((p) => path.startsWith(p));
+  return ALLOWED_PREFIXES.some((p) => path === p || path.startsWith(p));
 }
 
 export default async function handler(request: Request): Promise<Response> {

@@ -1,9 +1,11 @@
 import type { MergedMatch, Team } from "../types";
+import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
 import type { SofaEvent } from "./SofaScoreClient";
 import { normalizeSportAPI7Match } from "./adapters/normalizeMatch";
 import { logger } from "./Logger";
 
-const RAPIDAPI_HOST = "sportapi7.p.rapidapi.com";
+const RAPIDAPI_HOST =
+  providerByHost("sportapi7.p.rapidapi.com")?.host ?? "sportapi7.p.rapidapi.com";
 
 export const SPORTAPI_WC_CATEGORY_ID = 1468;
 
@@ -24,18 +26,7 @@ function baseUrl(): string {
 }
 
 function rapidHeaders(): HeadersInit {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    "x-rapidapi-host": RAPIDAPI_HOST,
-  };
-
-  const devKey = import.meta.env.VITE_RAPIDAPI_KEY;
-  if (import.meta.env.DEV && devKey) {
-    headers["x-rapidapi-key"] = devKey;
-  }
-
-  return headers;
+  return rapidApiHeaders(RAPIDAPI_HOST);
 }
 
 function todayIsoDate(): string {

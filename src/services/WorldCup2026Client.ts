@@ -1,7 +1,9 @@
 import type { Team } from "../types";
+import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
 import { logger } from "./Logger";
 
-const RAPIDAPI_HOST = "world-cup-2026.p.rapidapi.com";
+const RAPIDAPI_HOST =
+  providerByHost("world-cup-2026.p.rapidapi.com")?.host ?? "world-cup-2026.p.rapidapi.com";
 
 let worldCup2026SessionDisabled = false;
 
@@ -30,18 +32,7 @@ function baseUrl(): string {
 }
 
 function rapidHeaders(): HeadersInit {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    "x-rapidapi-host": RAPIDAPI_HOST,
-  };
-
-  const devKey = import.meta.env.VITE_RAPIDAPI_KEY;
-  if (import.meta.env.DEV && devKey) {
-    headers["x-rapidapi-key"] = devKey;
-  }
-
-  return headers;
+  return rapidApiHeaders(RAPIDAPI_HOST);
 }
 
 async function handleBlocked(res: Response): Promise<boolean> {

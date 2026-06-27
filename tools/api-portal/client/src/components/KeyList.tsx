@@ -3,7 +3,7 @@ import type { ApiKey, SyncTarget, KeyStatus } from "../api.js";
 import KeyCard from "./KeyCard.js";
 import AddEditDrawer from "./AddEditDrawer.js";
 import { KEY_STATUS_FILTER_LABELS, PASTE_KEY_STEPS } from "../lib/portalCopy.js";
-import { testAllKeys, ApiError } from "../api.js";
+import { testAllKeys, testAllRapidApiHosts, testAllRapidApiEndpoints, ApiError } from "../api.js";
 
 type Props = {
   keys: ApiKey[];
@@ -32,7 +32,10 @@ export default function KeyList({ keys, syncTargets, onKeysChanged, openKey, onO
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [testingAll, setTestingAll] = useState(false);
+  const [testingRapidApiFull, setTestingRapidApiFull] = useState(false);
+  const [rapidApiFullMsg, setRapidApiFullMsg] = useState("");
   const [testAllMsg, setTestAllMsg] = useState("");
+  const [rapidApiMsg, setRapidApiMsg] = useState("");
   const [hideDisabled, setHideDisabled] = useState(true);
 
   useEffect(() => {
@@ -162,6 +165,43 @@ export default function KeyList({ keys, syncTargets, onKeysChanged, openKey, onO
     }
   }, [onKeysChanged]);
 
+  const handleTestRapidApi = useCallback(async () => {
+    setTestingRapidApi(true);
+    setRapidApiMsg("");
+    try {
+      const { summary, results } = await testAllRapidApiHosts();
+      const failed = results.filter((r) => !r.ok);
+      setRapidApiMsg(
+        `RapidAPI hosts: ${summary.passed}/${summary.hosts} passed` +
+          (failed.length > 0
+            ? ` — subscribe or fix: ${failed.map((f) => f.label).join(", ")}`
+            : "")
+      );
+    } catch (e) {
+      setRapidApiMsg(e instanceof ApiError ? e.message : "RapidAPI test failed.");
+    } finally {
+      setTestingRapidApi(false);
+    }
+  }, []);
+
+  const handleTestRapidApiFull = useCallback(async () => {
+    setTestingRapidApiFull(true);
+    setRapidApiFullMsg("");
+    try {
+      const { summary, results } = await testAllRapidApiEndpoints();
+      const failed = results.filter((r) => !r.skipped && !r.ok);
+      setRapidApiFullMsg(
+        `All endpoints: ${summary.passed}/${summary.tested} passed` +
+          (summary.skipped > 0 ? `, ${summary.skipped} skipped` : "") +
+          (failed.length > 0 ? ` — failed: ${failed.map((f) => `${f.label}/${f.fn}`).join(", ")}` : "")
+      );
+    } catch (e) {
+      setRapidApiFullMsg(e instanceof ApiError ? e.message : "Full RapidAPI test failed.");
+    } finally {
+      setTestingRapidApiFull(false);
+    }
+  }, []);
+
   const placeholderCount = useMemo(
     () => keys.filter((k) => !k.disabled && k.keyStatus === "placeholder").length,
     [keys]
@@ -235,6 +275,24 @@ export default function KeyList({ keys, syncTargets, onKeysChanged, openKey, onO
 
         <button
           className="btn btn-ghost btn-sm"
+          disabled={testingRapidApiFull}
+          onClick={() => void handleTestRapidApiFull()}
+          title="Probe every client endpoint path (full matrix)"
+        >
+          {testingRapidApiFull ? <span className="spinner" /> : null}
+          Test all endpoints
+        </button>
+        <button
+          className="btn btn-ghost btn-sm"
+          disabled={testingRapidApi}
+          onClick={() => void handleTestRapidApi()}
+          title="Probe every RapidAPI host with your shared key"
+        >
+          {testingRapidApi ? <span className="spinner" /> : null}
+          Test RapidAPI hosts
+        </button>
+        <button
+          className="btn btn-ghost btn-sm"
           disabled={testingAll}
           onClick={() => void handleTestAll()}
           title="Test every key that has a test URL"
@@ -263,6 +321,18 @@ export default function KeyList({ keys, syncTargets, onKeysChanged, openKey, onO
           Paste JSON
         </button>
       </div>
+
+      {rapidApiFullMsg && (
+        <div className={`curl-paste-message curl-paste-message--${rapidApiFullMsg.includes("failed:") ? "warn" : "ok"}`}>
+          {rapidApiFullMsg}
+        </div>
+      )}
+
+      {rapidApiMsg && (
+        <div className={`curl-paste-message curl-paste-message--${rapidApiMsg.includes("failed") || rapidApiMsg.includes("subscribe") ? "warn" : "ok"}`}>
+          {rapidApiMsg}
+        </div>
+      )}
 
       {testAllMsg && (
         <div className={`curl-paste-message curl-paste-message--${testAllMsg.includes("failed") && !testAllMsg.includes("0 failed") ? "warn" : "ok"}`}>

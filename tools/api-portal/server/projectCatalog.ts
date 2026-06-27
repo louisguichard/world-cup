@@ -18,14 +18,7 @@ export const KNOWN_PROJECTS: KnownProject[] = [
     name: "World Cup Tracker",
     envFilePath: join(HOME, "Developer/world-cup/.env.local"),
     rootPath: join(HOME, "Developer/world-cup"),
-    expectedVars: [
-      "VITE_RAPIDAPI_KEY",
-      "VITE_ZAFRONIX_API_KEY",
-      "VITE_THESTATS_API_KEY",
-      "VITE_ODDS_API_KEY",
-      "VITE_BETFAIR_SESSION_TOKEN",
-      "VITE_SD_USERNAME",
-    ],
+    expectedVars: ["VITE_RAPIDAPI_KEY", "RAPIDAPI_KEY"],
   },
   {
     name: "Textbook Manager",

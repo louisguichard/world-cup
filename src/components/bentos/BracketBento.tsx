@@ -41,7 +41,7 @@ function GhostTeamList({
           <div key={teamId} className="bracket-ghost-team">
             {t?.logo ? <img src={t.logo} alt="" /> : <span className="bracket-dot" style={{ width: 12, height: 12 }} />}
             <span className="team-name-text">{teamDisplayName(t, teamId)}</span>
-            {showFrequency ? <span className="bracket-ghost-freq">{Math.round(frequency * 100)}%</span> : null}
+            {showFrequency ? <span className="bracket-ghost-freq">{Math.round(frequency * 100)} conf.</span> : null}
           </div>
         );
       })}

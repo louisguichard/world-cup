@@ -67,7 +67,7 @@ const rapidApiProxies = {
   "/api/weather": rapidApiProxy("https://open-weather13.p.rapidapi.com", "^/api/weather"),
   "/api/odds": rapidApiProxy("https://sports-odds-intelligence-api.p.rapidapi.com", "^/api/odds"),
   "/api/zafronix": {
-    target: "https://api.zafronix.com",
+    target: "https://zafronix-fifa-world-cup-api.p.rapidapi.com",
     changeOrigin: true,
     rewrite: (path: string) => path.replace(/^\/api\/zafronix/, ""),
   },

@@ -1,5 +1,20 @@
 import { isApiEnabled } from "../config/apiFlags";
+import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
 import { logger } from "./Logger";
+
+const ZAFRONIX_RAPIDAPI_HOST =
+  providerByHost("zafronix-fifa-world-cup-api.p.rapidapi.com")?.host ??
+  "zafronix-fifa-world-cup-api.p.rapidapi.com";
+/** RapidAPI Zafronix hub uses root paths (/tournaments, /teams), not /fifa/worldcup/v1. */
+const ZAFRONIX_BASE_PATH = "";
+
+// RapidAPI endpoint trace:
+// fetchBracket(2026) → fetchJson("/bracket?year=2026")
+//   → fullPath = "/fifa/worldcup/v1/bracket?year=2026"
+//   → browser URL = "/api/zafronix/fifa/worldcup/v1/bracket?year=2026"
+//   → Vite/Vercel proxy strips /api/zafronix
+//   → forwards to https://zafronix-fifa-world-cup-api.p.rapidapi.com/fifa/worldcup/v1/bracket?year=2026
+// fetchTeamProfile("Brazil") → /fifa/worldcup/v1/teams/Brazil
 
 let zafronixSessionDisabled = false;
 
@@ -26,22 +41,15 @@ export type ZafronixTournament = {
 };
 
 function baseUrl(): string {
-  if (typeof window === "undefined") {
-    return "https://api.zafronix.com";
-  }
-  if (import.meta.env.DEV) {
-    return "/api/zafronix";
-  }
-  return "/api/zafronix";
+  if (typeof window !== "undefined") return "/api/zafronix";
+  return `https://${ZAFRONIX_RAPIDAPI_HOST}`;
 }
 
 function zafronixHeaders(): HeadersInit {
-  const headers: Record<string, string> = {
-    Accept: "application/json",
-  };
-  const devKey = import.meta.env.VITE_ZAFRONIX_API_KEY;
-  if (devKey) {
-    headers["X-API-Key"] = devKey;
+  const headers = rapidApiHeaders(ZAFRONIX_RAPIDAPI_HOST) as Record<string, string>;
+  const zafronixKey = import.meta.env.VITE_ZAFRONIX_API_KEY;
+  if (zafronixKey) {
+    headers["X-API-Key"] = zafronixKey;
   }
   return headers;
 }
@@ -50,7 +58,11 @@ async function fetchJson<T>(path: string): Promise<T | null> {
   if (!isApiEnabled("zafronix") || zafronixSessionDisabled) return null;
 
   try {
-    const res = await fetch(`${baseUrl()}${path}`, { headers: zafronixHeaders() });
+    const fullPath = `${ZAFRONIX_BASE_PATH}${path}`;
+    const res = await fetch(`${baseUrl()}${fullPath}`, {
+      method: "GET",
+      headers: zafronixHeaders(),
+    });
 
     if (res.status === 401 || res.status === 403 || res.status === 429) {
       zafronixSessionDisabled = true;
@@ -85,15 +97,27 @@ export async function getHistoricalMatchesForTeam(
   limit = 7
 ): Promise<ZafronixMatch[]> {
   const encoded = encodeURIComponent(teamName);
-  const data = await fetchJson<ZafronixMatch[] | { matches?: ZafronixMatch[] }>(
-    `/teams/${encoded}/matches?limit=${limit}`
+  const profile = await fetchJson<{ matches?: ZafronixMatch[]; recentMatches?: ZafronixMatch[] }>(
+    `/teams/${encoded}`
   );
-  if (!data) return [];
-  return Array.isArray(data) ? data : (data.matches ?? []);
+  if (profile?.matches?.length) return profile.matches.slice(0, limit);
+  if (profile?.recentMatches?.length) return profile.recentMatches.slice(0, limit);
+
+  const data = await fetchJson<ZafronixMatch[] | { matches?: ZafronixMatch[] }>(
+    `/matches?limit=${limit * 4}`
+  );
+  const list = Array.isArray(data) ? data : (data?.matches ?? []);
+  const lower = teamName.toLowerCase();
+  return list
+    .filter(
+      (m) =>
+        m.homeTeam.toLowerCase().includes(lower) || m.awayTeam.toLowerCase().includes(lower)
+    )
+    .slice(0, limit);
 }
 
 export async function getTrivia(): Promise<unknown> {
-  return fetchJson("/trivia/");
+  return fetchJson("/trivia");
 }
 
 export type ZafronixTeamProfile = {

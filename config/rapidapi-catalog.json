@@ -1,0 +1,269 @@
+[
+  {
+    "id": "zafronix",
+    "label": "Zafronix FIFA World Cup",
+    "host": "zafronix-fifa-world-cup-api.p.rapidapi.com",
+    "marketplaceSlug": "zafronix-fifa-world-cup-api",
+    "client": "ZafronixClient.ts",
+    "devProxyPrefix": "/api/zafronix",
+    "testPath": "/health",
+    "endpoints": [
+      {
+        "id": "health",
+        "fn": "healthCheck",
+        "path": "/health",
+        "acceptStatuses": [200]
+      },
+      {
+        "id": "listTournaments",
+        "fn": "getTournament",
+        "path": "/tournaments",
+        "acceptStatuses": [200]
+      },
+      {
+        "id": "getTournament",
+        "fn": "getTournament",
+        "path": "/tournaments/2026",
+        "acceptStatuses": [200, 401],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchBracket",
+        "fn": "fetchBracket",
+        "path": "/bracket?year=2026",
+        "acceptStatuses": [200, 401, 404],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchTeamProfile",
+        "fn": "fetchTeamProfile",
+        "path": "/teams/Brazil",
+        "acceptStatuses": [200, 401, 404],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchTeamForm",
+        "fn": "getHistoricalMatchesForTeam",
+        "path": "/teams/Brazil",
+        "acceptStatuses": [200, 401, 404],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchTeamRoster",
+        "fn": "fetchTeamRoster",
+        "path": "/teams/Brazil/roster?year=2026",
+        "acceptStatuses": [200, 401, 404],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "getTrivia",
+        "fn": "getTrivia",
+        "path": "/trivia",
+        "acceptStatuses": [200, 401, 404],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchStadiums",
+        "fn": "fetchStadiums",
+        "path": "/stadiums",
+        "acceptStatuses": [200, 401, 404],
+        "requiresZafronixKey": true
+      },
+      {
+        "id": "fetchLiveMatches",
+        "fn": "fetchLiveMatches",
+        "path": "/matches/live",
+        "acceptStatuses": [200, 401, 404],
+        "requiresZafronixKey": true
+      }
+    ]
+  },
+  {
+    "id": "footballData",
+    "label": "Free API Live Football Data (FotMob)",
+    "host": "free-api-live-football-data.p.rapidapi.com",
+    "marketplaceSlug": "free-api-live-football-data",
+    "client": "FootballDataClient.ts",
+    "devProxyPrefix": "/rapidapi",
+    "testPath": "/football-get-matches-by-date?date={todayYyyymmdd}",
+    "endpoints": [
+      {
+        "id": "fetchMatchesByDate",
+        "fn": "fetchMatchesByDate",
+        "path": "/football-get-matches-by-date?date={todayYyyymmdd}",
+        "acceptStatuses": [200]
+      },
+      {
+        "id": "fetchCurrentLive",
+        "fn": "fetchCurrentLive",
+        "path": "/football-current-live",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "fetchTeamDetails",
+        "fn": "fetchTeamDetails",
+        "path": "/football-get-team-details?teamId={footballTeamId}",
+        "resolveKeys": ["footballTeamId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
+      }
+    ]
+  },
+  {
+    "id": "sportApi7",
+    "label": "SportAPI7",
+    "host": "sportapi7.p.rapidapi.com",
+    "marketplaceSlug": "sportapi7",
+    "client": "SportAPI7Client.ts",
+    "devProxyPrefix": "/rapidapi-sportapi",
+    "testPath": "/api/v1/category/1468/scheduled-events/{todayIso}",
+    "endpoints": [
+      {
+        "id": "fetchScheduledEvents",
+        "fn": "fetchScheduledEvents",
+        "path": "/api/v1/category/1468/scheduled-events/{todayIso}",
+        "acceptStatuses": [200]
+      },
+      {
+        "id": "fetchLiveEvents",
+        "fn": "fetchLiveEvents",
+        "path": "/api/v1/category/1468/events/live",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "fetchIncidents",
+        "fn": "fetchIncidents",
+        "path": "/api/v1/event/{sportApiEventId}/incidents",
+        "resolveKeys": ["sportApiEventId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
+      }
+    ]
+  },
+  {
+    "id": "wc2026Teams",
+    "label": "World Cup 2026 Teams",
+    "host": "world-cup-2026.p.rapidapi.com",
+    "marketplaceSlug": "world-cup-2026",
+    "client": "WorldCup2026Client.ts",
+    "devProxyPrefix": "/rapidapi-wc2026",
+    "testPath": "/world-cup-2026/teams",
+    "endpoints": [
+      {
+        "id": "fetchTeams",
+        "fn": "fetchTeams",
+        "path": "/world-cup-2026/teams",
+        "acceptStatuses": [200]
+      },
+      {
+        "id": "fetchGroups",
+        "fn": "fetchGroups",
+        "path": "/world-cup-2026/groups",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "fetchTeam",
+        "fn": "fetchTeam",
+        "path": "/world-cup-2026/teams/{wc2026TeamId}",
+        "resolveKeys": ["wc2026TeamId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
+      }
+    ]
+  },
+  {
+    "id": "wc2026Live",
+    "label": "World Cup 2026 Live",
+    "host": "world-cup-2026-live-api.p.rapidapi.com",
+    "marketplaceSlug": "world-cup-2026-live-api",
+    "client": "WorldCup2026LiveClient.ts",
+    "devProxyPrefix": "/rapidapi-wc-live",
+    "testPath": "/wc/live",
+    "endpoints": [
+      {
+        "id": "fetchLive",
+        "fn": "fetchLive",
+        "path": "/wc/live",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "fetchStandings",
+        "fn": "fetchStandings",
+        "path": "/wc/standings",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "fetchDraw",
+        "fn": "fetchDraw",
+        "path": "/wc/draw",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "fetchMatchDetail",
+        "fn": "fetchMatchDetail",
+        "path": "/wc/match/{sampleMatchId}",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "fetchCommentary",
+        "fn": "fetchCommentary",
+        "path": "/wc/commentary/{sampleMatchId}",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "fetchLineups",
+        "fn": "fetchLineups",
+        "path": "/wc/lineups/{sampleMatchId}",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "fetchStats",
+        "fn": "fetchStats",
+        "path": "/wc/stats/{sampleMatchId}",
+        "acceptStatuses": [200, 404]
+      }
+    ]
+  },
+  {
+    "id": "openWeather",
+    "label": "Open Weather 13",
+    "host": "open-weather13.p.rapidapi.com",
+    "marketplaceSlug": "open-weather13",
+    "client": "WeatherClient.ts",
+    "devProxyPrefix": "/rapidapi-weather",
+    "testPath": "/city?city=New%20York&lang=EN",
+    "endpoints": [
+      {
+        "id": "getWeatherByCity",
+        "fn": "getWeatherByCity",
+        "path": "/city?city=New%20York&lang=EN",
+        "acceptStatuses": [200]
+      }
+    ]
+  },
+  {
+    "id": "oddsIntelligence",
+    "label": "Sports Odds Intelligence",
+    "host": "sports-odds-intelligence-api.p.rapidapi.com",
+    "marketplaceSlug": "sports-odds-intelligence-api",
+    "client": "OddsIntelligenceClient.ts",
+    "devProxyPrefix": "/rapidapi-odds",
+    "testPath": "/soccer/",
+    "endpoints": [
+      {
+        "id": "getLiveOdds",
+        "fn": "getLiveOdds",
+        "path": "/soccer/",
+        "acceptStatuses": [200, 404]
+      },
+      {
+        "id": "getBestLines",
+        "fn": "getBestLines",
+        "path": "/odds/?eventId={oddsEventId}",
+        "resolveKeys": ["oddsEventId"],
+        "acceptStatuses": [200, 404],
+        "skipIfUnresolved": true
+      }
+    ]
+  }
+]

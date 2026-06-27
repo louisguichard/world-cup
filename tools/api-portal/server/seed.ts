@@ -27,44 +27,11 @@ const HOME = homedir();
 type SeedKeyDef = Omit<ApiKey, "id" | "createdAt" | "updatedAt"> & { _seedId: string };
 
 const SEED_KEYS: SeedKeyDef[] = [
-  // ── World Cup: RapidAPI ──────────────────────────────────────────────────
+  // ── World Cup: RapidAPI (browser) ───────────────────────────────────────
   {
     _seedId: "world-cup:VITE_RAPIDAPI_KEY",
     serviceGroup: "RapidAPI",
-    label: "RapidAPI Shared Key",
-    envVarName: "VITE_RAPIDAPI_KEY",
-    value: "FILL_ME_IN",
-    endpoint:
-      "https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date?date=20260626",
-    testMethod: "GET",
-    testHeaders: {
-      "x-rapidapi-host": "free-api-live-football-data.p.rapidapi.com",
-    },
-    notes:
-      "Shared RapidAPI key for Football Data, SportAPI7, WC2026 Teams, WC2026 Live, Open Weather, Sports Odds, SofaScore, Zafronix FIFA WC. world-cup: FootballDataClient.ts, SportAPI7Client.ts, WorldCup2026Client.ts, WorldCup2026LiveClient.ts, OddsIntelligenceClient.ts, WeatherClient.ts, SofaScoreClient.ts, dev proxy, Vercel edge proxies.",
-  },
-
-  // ── World Cup: Zafronix ──────────────────────────────────────────────────
-  {
-    _seedId: "world-cup:VITE_ZAFRONIX_API_KEY",
-    serviceGroup: "Zafronix",
-    label: "Zafronix API Key",
-    envVarName: "VITE_ZAFRONIX_API_KEY",
-    value: "FILL_ME_IN",
-    endpoint: "https://api.zafronix.com",
-    testMethod: "GET",
-    testHeaders: {
-      "X-API-Key": "FILL_ME_IN",
-    },
-    notes:
-      "Direct auth via X-API-Key header. Separate from RapidAPI shared key. world-cup: ZafronixClient.ts. RapidAPI mirror also available via zafronix-fifa-world-cup-api.p.rapidapi.com (uses VITE_RAPIDAPI_KEY).",
-  },
-
-  // ── World Cup: Zafronix (RapidAPI hub) ───────────────────────────────────
-  {
-    _seedId: "world-cup:rapidapi-zafronix-wc",
-    serviceGroup: "RapidAPI — Zafronix",
-    label: "Zafronix FIFA World Cup (RapidAPI hub)",
+    label: "RapidAPI Shared Key (browser)",
     envVarName: "VITE_RAPIDAPI_KEY",
     value: "FILL_ME_IN",
     endpoint:
@@ -74,52 +41,24 @@ const SEED_KEYS: SeedKeyDef[] = [
       "x-rapidapi-host": "zafronix-fifa-world-cup-api.p.rapidapi.com",
     },
     notes:
-      "RapidAPI mirror of Zafronix WC API. Same VITE_RAPIDAPI_KEY as other hubs. Primary app client uses direct VITE_ZAFRONIX_API_KEY.",
+      "One RapidAPI key for all hubs: Zafronix, Football Data, SportAPI7, WC2026 Teams, WC2026 Live, Open Weather, Odds Intelligence. Subscribe to each listing at rapidapi.com. world-cup clients: ZafronixClient, FootballDataClient, SportAPI7Client, WorldCup2026Client, WorldCup2026LiveClient, WeatherClient, OddsIntelligenceClient.",
   },
 
-  // ── World Cup: TheStats ──────────────────────────────────────────────────
+  // ── World Cup: RapidAPI (server proxies) ────────────────────────────────
   {
-    _seedId: "world-cup:VITE_THESTATS_API_KEY",
-    serviceGroup: "TheStats API",
-    label: "TheStats API Key",
-    envVarName: "VITE_THESTATS_API_KEY",
+    _seedId: "world-cup:RAPIDAPI_KEY",
+    serviceGroup: "RapidAPI",
+    label: "RapidAPI Shared Key (server)",
+    envVarName: "RAPIDAPI_KEY",
     value: "FILL_ME_IN",
+    endpoint:
+      "https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date?date=20260626",
     testMethod: "GET",
-    notes: "Optional. world-cup stub: stubs/TheStatsAPIClient.ts.",
-  },
-
-  // ── World Cup: Odds API ──────────────────────────────────────────────────
-  {
-    _seedId: "world-cup:VITE_ODDS_API_KEY",
-    serviceGroup: "Odds API",
-    label: "Odds API Key",
-    envVarName: "VITE_ODDS_API_KEY",
-    value: "FILL_ME_IN",
-    endpoint: "https://api.the-odds-api.com/v4/sports",
-    testMethod: "GET",
-    notes: "Optional. world-cup stub: stubs/OddsAPIClient.ts.",
-  },
-
-  // ── World Cup: Betfair ───────────────────────────────────────────────────
-  {
-    _seedId: "world-cup:VITE_BETFAIR_SESSION_TOKEN",
-    serviceGroup: "Betfair",
-    label: "Betfair Session Token",
-    envVarName: "VITE_BETFAIR_SESSION_TOKEN",
-    value: "FILL_ME_IN",
-    testMethod: "GET",
-    notes: "Betfair Exchange session token. world-cup: stubs/BetfairClient.ts.",
-  },
-
-  // ── World Cup: Schedules Direct ──────────────────────────────────────────
-  {
-    _seedId: "world-cup:VITE_SD_USERNAME",
-    serviceGroup: "Schedules Direct",
-    label: "Schedules Direct Username",
-    envVarName: "VITE_SD_USERNAME",
-    value: "FILL_ME_IN",
+    testHeaders: {
+      "x-rapidapi-host": "free-api-live-football-data.p.rapidapi.com",
+    },
     notes:
-      "TV broadcast schedule lookup. world-cup: BroadcastLookup.ts. Username, not secret.",
+      "Same value as VITE_RAPIDAPI_KEY — used by Vercel edge proxies (api/footballdata, sportapi, wc2026, wc-live, weather, odds, zafronix). Sync mirrors browser key automatically.",
   },
 
   // ── Textbook Manager: Sentry renderer ────────────────────────────────────
@@ -210,14 +149,7 @@ const SEED_TARGETS: SeedTarget[] = [
   {
     name: "World Cup Tracker",
     envFilePath: join(HOME, "Developer/world-cup/.env.local"),
-    seedKeyIds: [
-      "world-cup:VITE_RAPIDAPI_KEY",
-      "world-cup:VITE_ZAFRONIX_API_KEY",
-      "world-cup:VITE_THESTATS_API_KEY",
-      "world-cup:VITE_ODDS_API_KEY",
-      "world-cup:VITE_BETFAIR_SESSION_TOKEN",
-      "world-cup:VITE_SD_USERNAME",
-    ],
+    seedKeyIds: ["world-cup:VITE_RAPIDAPI_KEY", "world-cup:RAPIDAPI_KEY"],
   },
   {
     name: "Textbook Manager",
@@ -408,12 +340,7 @@ async function seed() {
   3. Click "Sync All" to write keys to all project .env.local files
 
   ┌─ Key acquisition guide ─────────────────────────────────────────────┐
-  │  VITE_RAPIDAPI_KEY       → rapidapi.com → My Apps                  │
-  │  VITE_ZAFRONIX_API_KEY   → zafronix.com dashboard                  │
-  │  VITE_THESTATS_API_KEY   → thestatsapi.com                         │
-  │  VITE_ODDS_API_KEY       → the-odds-api.com → Account              │
-  │  VITE_BETFAIR_SESSION_TOKEN → betfair.com API login endpoint        │
-  │  VITE_SD_USERNAME        → schedulesdirect.org → Your username      │
+  │  VITE_RAPIDAPI_KEY + RAPIDAPI_KEY → rapidapi.com → My Apps (same key) │
   │  SENTRY_DSN              → sentry.io → Project Settings → SDK Setup│
   │  SENTRY_AUTH_TOKEN       → sentry.io → Settings → Auth Tokens       │
   │  GEMINI_API_KEY          → aistudio.google.com → Get API Key        │
