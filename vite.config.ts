@@ -90,7 +90,7 @@ const rapidApiProxies = {
   "/api/sofascore-rapid": rapidApiProxy("https://sofascore.p.rapidapi.com", "/api/sofascore-rapid"),
   "/api/wc2026": rapidApiProxy("https://world-cup-2026.p.rapidapi.com", "/api/wc2026"),
   "/api/wc-live": rapidApiProxy("https://world-cup-2026-live-api.p.rapidapi.com", "/api/wc-live"),
-  "/api/weather": rapidApiProxy("https://open-weather13.p.rapidapi.com", "/api/weather"),
+  "/api/weather": rapidApiProxy("https://ai-weather-by-meteosource.p.rapidapi.com", "/api/weather"),
   "/api/odds": rapidApiProxy("https://sports-odds-intelligence-api.p.rapidapi.com", "/api/odds"),
   "/api/football-prediction": rapidApiProxy(
     "https://football-prediction-api.p.rapidapi.com",
@@ -105,7 +105,7 @@ const rapidApiProxies = {
     "/api/world-cup-history"
   ),
   "/api/sport-highlights": rapidApiProxy(
-    "https://sport-highlights-api.p.rapidapi.com",
+    "https://football-highlights-api.p.rapidapi.com",
     "/api/sport-highlights"
   ),
   "/api/all-sport-live-stream": rapidApiProxy(
@@ -126,6 +126,26 @@ const rapidApiProxies = {
   ),
   "/api/tvview": rapidApiProxy("https://tvview.p.rapidapi.com", "/api/tvview"),
   "/api/flashlive": rapidApiProxy("https://flashlive-sports.p.rapidapi.com", "/api/flashlive"),
+  "/api/pldata": rapidApiProxy("https://pldata.p.rapidapi.com", "/api/pldata"),
+  "/api/getty-images": rapidApiProxy(
+    "https://gettyimagesraygorodskijv1.p.rapidapi.com",
+    "/api/getty-images"
+  ),
+  "/api/fifa-football-data": rapidApiProxy(
+    "https://fifa-football-player-team-stats-records-matches-api-data.p.rapidapi.com",
+    "/api/fifa-football-data"
+  ),
+  "/api/ai-sports-highlights": rapidApiProxy(
+    "https://ai-sports-highlights-api-football-basketball-tennis.p.rapidapi.com",
+    "/api/ai-sports-highlights"
+  ),
+  "/api/allsportsapi2": rapidApiProxy("https://allsportsapi2.p.rapidapi.com", "/api/allsportsapi2"),
+  "/api/tvpro-api": rapidApiProxy("https://tvpro-api.p.rapidapi.com", "/api/tvpro-api"),
+  "/api/google-api31": rapidApiProxy("https://google-api31.p.rapidapi.com", "/api/google-api31"),
+  "/api/social-scraper": rapidApiProxy(
+    "https://website-social-scraper-api.p.rapidapi.com",
+    "/api/social-scraper"
+  ),
   "/api/espn-web": {
     target: "https://site.web.api.espn.com",
     changeOrigin: true,

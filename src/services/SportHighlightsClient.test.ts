@@ -3,17 +3,18 @@ import { sportHighlightsEndpoints } from "../config/sportHighlightsEndpoints";
 import { mapHighlightlyStatistics } from "./matchDetail/fetchHighlightlyMatchBundle";
 
 describe("sportHighlightsEndpoints", () => {
-  it("builds football routes", () => {
-    expect(sportHighlightsEndpoints.countries()).toBe("/football/countries");
-    expect(sportHighlightsEndpoints.match(123)).toBe("/football/matches/123");
+  it("builds football-highlights-api routes without /football prefix", () => {
+    expect(sportHighlightsEndpoints.countries()).toBe("/countries");
+    expect(sportHighlightsEndpoints.match(123)).toBe("/matches/123");
+    expect(sportHighlightsEndpoints.team(5890)).toBe("/teams/5890");
     expect(sportHighlightsEndpoints.highlights({ date: "2026-06-26", limit: 5 })).toBe(
-      "/football/highlights?date=2026-06-26&limit=5"
+      "/highlights?date=2026-06-26&limit=5"
     );
     expect(sportHighlightsEndpoints.head2Head(1, 2)).toBe(
-      "/football/head-2-head?teamIdOne=1&teamIdTwo=2"
+      "/head-2-head?teamIdOne=1&teamIdTwo=2"
     );
     expect(sportHighlightsEndpoints.teamStatistics(5890, { fromDate: "2026-01-01" })).toBe(
-      "/football/teams/statistics/5890?fromDate=2026-01-01"
+      "/teams/statistics/5890?fromDate=2026-01-01"
     );
   });
 });

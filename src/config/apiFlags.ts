@@ -29,7 +29,14 @@ export type ApiSourceId =
   | "iptvTvView"
   | "sportsLiveScores"
   | "openWeather"
-  | "flashLive";
+  | "flashLive"
+  | "plData"
+  | "gettyImages"
+  | "fifaFootballData"
+  | "aiSportsHighlights"
+  | "allSportsApi2"
+  | "tvproApi"
+  | "youtubeMatchVideos";
 
 export type ApiAuditStatus = "pass" | "fail" | "untested";
 
@@ -182,7 +189,7 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
   sportHighlights: {
     enabled: true,
     splashPath: false,
-    label: "Sport Highlights API (Highlightly)",
+    label: "Football Highlights API (Highlightly)",
     lastAudit: "untested",
     lastLatencyMs: 0,
   },
@@ -240,6 +247,62 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     lastAudit: "untested",
     lastLatencyMs: 0,
     failureReason: "Requires RapidAPI subscription; live scores, teams, transfers",
+  },
+  plData: {
+    enabled: true,
+    splashPath: false,
+    label: "PL Data (players, teams, fixtures)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription",
+  },
+  gettyImages: {
+    enabled: true,
+    splashPath: false,
+    label: "Getty Images (raygorodskij V1)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI + Getty API credentials (GETTY_API_KEY)",
+  },
+  fifaFootballData: {
+    enabled: true,
+    splashPath: false,
+    label: "FIFA Football Data API",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — match clips and stats",
+  },
+  aiSportsHighlights: {
+    enabled: true,
+    splashPath: false,
+    label: "AI Sports Highlights",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — AI-generated highlight reels",
+  },
+  allSportsApi2: {
+    enabled: true,
+    splashPath: false,
+    label: "AllSportsAPI2",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — multi-sport live data",
+  },
+  tvproApi: {
+    enabled: true,
+    splashPath: false,
+    label: "TVPro API (broadcast channels)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription",
+  },
+  youtubeMatchVideos: {
+    enabled: true,
+    splashPath: false,
+    label: "YouTube Match Highlights (Google API31)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — video search verification",
   },
 };
 

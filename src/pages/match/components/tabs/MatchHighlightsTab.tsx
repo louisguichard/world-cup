@@ -1,4 +1,4 @@
-import type { HighlightlyHighlight } from "../../../../types/sportHighlights";
+import type { HighlightlyHighlight, HighlightlyMatchIntro } from "../../../../types/sportHighlights";
 import styles from "./MatchHighlightsTab.module.css";
 
 type Props = {
@@ -6,6 +6,9 @@ type Props = {
   loading: boolean;
   homeTeamName: string;
   awayTeamName: string;
+  introHighlight?: HighlightlyHighlight | null;
+  attribution?: string;
+  quotaLabel?: string;
 };
 
 function highlightHost(url?: string): string | null {
@@ -22,6 +25,9 @@ export function MatchHighlightsTab({
   loading,
   homeTeamName,
   awayTeamName,
+  introHighlight,
+  attribution,
+  quotaLabel,
 }: Props) {
   if (loading && highlights.length === 0) {
     return (
@@ -39,12 +45,34 @@ export function MatchHighlightsTab({
           Clips for {homeTeamName} vs {awayTeamName} appear after kickoff — full recaps
           usually land within 1–48 hours. Free-tier coverage varies by league.
         </p>
+        {attribution ? <p className={styles.attribution}>{attribution}</p> : null}
+        {quotaLabel ? <p className={styles.quota}>{quotaLabel}</p> : null}
       </div>
     );
   }
 
+  const featured = introHighlight ?? highlights[0] ?? null;
+  const featuredLink = featured?.url || featured?.embedUrl;
+
   return (
     <div className={styles.panel}>
+      {featured ? (
+        <section className={styles.intro}>
+          <p className={styles.introLabel}>Match intro</p>
+          <h3 className={styles.introTitle}>{featured.title ?? "Highlight recap"}</h3>
+          {featured.description ? <p className={styles.desc}>{featured.description}</p> : null}
+          {featuredLink ? (
+            <a
+              href={featuredLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.link}
+            >
+              Watch intro{highlightHost(featuredLink) ? ` on ${highlightHost(featuredLink)}` : ""}
+            </a>
+          ) : null}
+        </section>
+      ) : null}
       <ul className={styles.list}>
         {highlights.map((h) => {
           const link = h.url || h.embedUrl;
@@ -80,6 +108,8 @@ export function MatchHighlightsTab({
           );
         })}
       </ul>
+      {attribution ? <p className={styles.attribution}>{attribution}</p> : null}
+      {quotaLabel ? <p className={styles.quota}>{quotaLabel}</p> : null}
     </div>
   );
 }

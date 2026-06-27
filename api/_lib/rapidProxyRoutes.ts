@@ -1,5 +1,7 @@
 export type RapidProxyRoute = {
   host: string;
+  /** Override x-rapidapi-host when it differs from upstream host (e.g. Getty Images). */
+  rapidApiHostHeader?: string;
   /** Exact paths allowed (if set, only these paths match). */
   allowedPaths?: readonly string[];
   /** Path prefix allowlist (path === prefix, starts with prefix, or starts with prefix?). */
@@ -51,8 +53,17 @@ export const RAPID_PROXY_ROUTES: Record<string, RapidProxyRoute> = {
     host: "sofascore.p.rapidapi.com",
   },
   weather: {
-    host: "open-weather13.p.rapidapi.com",
-    allowedPrefixes: ["/city", "/city/", "/fivedaysforcast/"],
+    host: "ai-weather-by-meteosource.p.rapidapi.com",
+    allowedPrefixes: [
+      "/point",
+      "/point/",
+      "/time_machine",
+      "/time_machine/",
+      "/find_places",
+      "/find_places/",
+      "/find_places_prefix",
+      "/find_places_prefix/",
+    ],
   },
   odds: {
     host: "sports-odds-intelligence-api.p.rapidapi.com",
@@ -65,8 +76,95 @@ export const RAPID_PROXY_ROUTES: Record<string, RapidProxyRoute> = {
     host: "world-cup1.p.rapidapi.com",
   },
   "sport-highlights": {
-    host: "sport-highlights-api.p.rapidapi.com",
-    allowedPrefixes: ["/football/"],
+    host: "football-highlights-api.p.rapidapi.com",
+    allowedPrefixes: [
+      "/countries",
+      "/leagues",
+      "/teams",
+      "/matches",
+      "/highlights",
+      "/bookmakers",
+      "/odds",
+      "/standings",
+      "/last-five-games",
+      "/head-2-head",
+      "/lineups",
+      "/statistics",
+      "/events",
+      "/players",
+      "/box-score",
+    ],
+  },
+  footapi7: {
+    host: "footapi7.p.rapidapi.com",
+    allowedPrefixes: [
+      "/api/search",
+      "/api/leagues",
+      "/api/tournaments/",
+      "/api/tournament/",
+      "/api/matches/",
+      "/api/match/",
+      "/api/event/",
+      "/api/team/",
+      "/api/player/",
+    ],
+  },
+  pldata: {
+    host: "pldata.p.rapidapi.com",
+    allowedPrefixes: [
+      "/player/",
+      "/players",
+      "/team/",
+      "/teams",
+      "/club/",
+      "/clubs",
+      "/squad/",
+      "/manager/",
+      "/coach/",
+      "/match/",
+      "/matches",
+      "/fixture/",
+      "/fixtures",
+      "/standings",
+      "/table",
+      "/league",
+      "/leagues",
+      "/season/",
+      "/seasons",
+      "/stats",
+    ],
+  },
+  "getty-images": {
+    host: "gettyimagesraygorodskijv1.p.rapidapi.com",
+    rapidApiHostHeader: "GettyImagesraygorodskijV1.p.rapidapi.com",
+    allowMutating: true,
+  },
+  "fifa-football-data": {
+    host: "fifa-football-player-team-stats-records-matches-api-data.p.rapidapi.com",
+    allowedPrefixes: ["/fifa-"],
+  },
+  "ai-sports-highlights": {
+    host: "ai-sports-highlights-api-football-basketball-tennis.p.rapidapi.com",
+    allowedPrefixes: ["/generateHighlights"],
+  },
+  allsportsapi2: {
+    host: "allsportsapi2.p.rapidapi.com",
+    requiredPathPrefix: "/api/",
+  },
+  "tvpro-api": {
+    host: "tvpro-api.p.rapidapi.com",
+    allowedPrefixes: [
+      "/apps-oficial.com/apps/views/forms/entretenimiento/api_tv",
+      "/apps/views/forms/entretenimiento/api_tv",
+    ],
+  },
+  "google-api31": {
+    host: "google-api31.p.rapidapi.com",
+    allowedPaths: ["/", "/websearch", "/videosearch", "/imagesearch"],
+  },
+  "social-scraper": {
+    host: "website-social-scraper-api.p.rapidapi.com",
+    allowedPrefixes: ["/contacts"],
   },
   "sports-live-scores": {
     host: "sports-live-scores.p.rapidapi.com",
@@ -175,7 +273,7 @@ export function buildUpstreamHeaders(
 ): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: "application/json",
-    "x-rapidapi-host": route.host,
+    "x-rapidapi-host": route.rapidApiHostHeader ?? route.host,
     "x-rapidapi-key": rapidKey,
   };
   if (MUTATING_METHODS.has(method.toUpperCase())) {

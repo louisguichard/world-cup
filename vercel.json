@@ -73,6 +73,42 @@
       "destination": "/api/rapid?service=today-football-prediction"
     },
     {
+      "source": "/api/footapi7/:path*",
+      "destination": "/api/rapid?service=footapi7"
+    },
+    {
+      "source": "/api/pldata/:path*",
+      "destination": "/api/rapid?service=pldata"
+    },
+    {
+      "source": "/api/getty-images/:path*",
+      "destination": "/api/rapid?service=getty-images"
+    },
+    {
+      "source": "/api/fifa-football-data/:path*",
+      "destination": "/api/rapid?service=fifa-football-data"
+    },
+    {
+      "source": "/api/ai-sports-highlights/:path*",
+      "destination": "/api/rapid?service=ai-sports-highlights"
+    },
+    {
+      "source": "/api/allsportsapi2/:path*",
+      "destination": "/api/rapid?service=allsportsapi2"
+    },
+    {
+      "source": "/api/tvpro-api/:path*",
+      "destination": "/api/rapid?service=tvpro-api"
+    },
+    {
+      "source": "/api/google-api31/:path*",
+      "destination": "/api/rapid?service=google-api31"
+    },
+    {
+      "source": "/api/social-scraper/:path*",
+      "destination": "/api/rapid?service=social-scraper"
+    },
+    {
       "source": "/api/zafronix/:path*",
       "destination": "/api/rapid?service=zafronix"
     },
