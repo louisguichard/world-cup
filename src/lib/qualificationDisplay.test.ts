@@ -53,10 +53,11 @@ describe("resolveQualificationDisplay", () => {
     expect(d.label).toBe(APP_COPY.qual.projectedEliminated);
   });
 
-  it("labels third-place race as probably · moving on", () => {
+  it("labels third-place race as still in it", () => {
     const d = resolveQualificationDisplay(
       qual({ status: "at_risk", certainty: "projected_weak", lifeState: "alive" })
     );
-    expect(d.variant).toBe("projected-qualified");
+    expect(d.variant).toBe("in-contention");
+    expect(d.shortLabel).toBe(APP_COPY.qual.inContentionShort);
   });
 });

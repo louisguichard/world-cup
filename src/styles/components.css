@@ -346,3 +346,47 @@
 .teams-row img {
   flex-shrink: 0;
 }
+
+.data-freshness-banner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 16px;
+  padding: 8px 16px;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+  border-bottom: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--fwc-green) 8%, var(--surface-raised));
+  color: var(--text-primary);
+}
+
+.data-freshness-banner--stale {
+  background: color-mix(in srgb, var(--fwc-orange-red) 12%, var(--surface-raised));
+  border-bottom-color: color-mix(in srgb, var(--fwc-orange-red) 35%, transparent);
+}
+
+.data-freshness-banner--proxy-dead {
+  background: color-mix(in srgb, var(--fwc-hot-pink) 14%, var(--surface-raised));
+  border-bottom-color: color-mix(in srgb, var(--fwc-hot-pink) 45%, transparent);
+  animation: proxy-dead-pulse 1.6s ease-in-out infinite;
+}
+
+.data-freshness-banner__item strong {
+  color: var(--fwc-hot-pink);
+  letter-spacing: 0.04em;
+}
+
+.data-freshness-banner__item--stale {
+  color: var(--fwc-orange-red);
+}
+
+@keyframes proxy-dead-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}

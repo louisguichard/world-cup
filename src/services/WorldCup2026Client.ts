@@ -1,3 +1,4 @@
+import { markProxyDead } from "../lib/proxyHealthMonitor";
 import type { Team } from "../types";
 import { isApiEnabled } from "../config/apiFlags";
 import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
@@ -165,9 +166,13 @@ function parsePlayersPayload(raw: unknown): Wc2026Player[] {
 
 async function handleBlocked(res: Response): Promise<boolean> {
   if (res.status !== 401 && res.status !== 403 && res.status !== 429) {
+    if (res.status >= 500) {
+      markProxyDead("wc2026", `HTTP ${res.status}`);
+    }
     return false;
   }
   worldCup2026SessionDisabled = true;
+  markProxyDead("wc2026", `HTTP ${res.status}`);
   const bodySnippet = await res.text().then((t) => t.slice(0, 300)).catch(() => "");
   logger.warn("WorldCup2026 blocked for session", "WorldCup2026Client", {
     status: res.status,

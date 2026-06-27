@@ -143,7 +143,7 @@ export function LiveGroupStandingsPanel({
                       className={styles.teamBtn}
                       onClick={() => openTeamSheet(row.teamId)}
                     >
-                      <TeamFlag team={team} teamId={row.teamId} size="sm" />
+                      <TeamFlag team={team} teamId={row.teamId} size="sm" compact />
                       <span className="team-name-text">
                         {teamDisplayName(team, row.teamId)}
                       </span>

@@ -1,11 +1,22 @@
 import type { GroupStanding, MergedMatch, Team } from "../types";
+import { BOOT_CACHE_VERSION } from "./bootCacheVersion";
 import { readLiveMatchCache, writeLiveMatchCache } from "./liveMatchCache";
 import { readStandingsCache, writeStandingsCache } from "./standingsCache";
 
-export const BOOT_TEAMS_CACHE_KEY = "wc-boot-teams-v1";
+export { BOOT_CACHE_VERSION } from "./bootCacheVersion";
+export { LIVE_MATCH_CACHE_KEY } from "./liveMatchCache";
+export { STANDINGS_CACHE_KEY } from "./standingsCache";
+
+export const BOOT_TEAMS_CACHE_KEY = `wc-boot-teams-v${BOOT_CACHE_VERSION}`;
+
+const LEGACY_CACHE_KEYS = [
+  "wc-boot-teams-v1",
+  "wc-live-matches-v1",
+  "wc-standings-v1",
+] as const;
 
 type BootTeamsCacheStore = {
-  version: 1;
+  version: typeof BOOT_CACHE_VERSION;
   savedAt: string;
   teams: Record<string, Team>;
 };
@@ -21,13 +32,27 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
 
+function purgeLegacyBootCaches(): void {
+  if (typeof localStorage === "undefined") return;
+  for (const key of LEGACY_CACHE_KEYS) {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
 function readBootTeamsCache(): Record<string, Team> | null {
   if (typeof localStorage === "undefined") return null;
   try {
     const raw = localStorage.getItem(BOOT_TEAMS_CACHE_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed) || parsed.version !== 1) return null;
+    if (!isRecord(parsed) || parsed.version !== BOOT_CACHE_VERSION) {
+      localStorage.removeItem(BOOT_TEAMS_CACHE_KEY);
+      return null;
+    }
     if (!isRecord(parsed.teams)) return null;
     return parsed.teams as Record<string, Team>;
   } catch {
@@ -39,7 +64,7 @@ function writeBootTeamsCache(teams: Record<string, Team>): void {
   if (typeof localStorage === "undefined") return;
   try {
     const store: BootTeamsCacheStore = {
-      version: 1,
+      version: BOOT_CACHE_VERSION,
       savedAt: new Date().toISOString(),
       teams,
     };
@@ -50,6 +75,8 @@ function writeBootTeamsCache(teams: Record<string, Team>): void {
 }
 
 export function hydrateBootFromCache(): BootCacheHydration {
+  purgeLegacyBootCaches();
+
   const teams = readBootTeamsCache() ?? {};
   const matches = readLiveMatchCache() ?? {};
   const standings = readStandingsCache() ?? [];

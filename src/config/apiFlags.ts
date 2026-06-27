@@ -76,7 +76,7 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     lastAudit: "fail",
     lastLatencyMs: 94,
     failureReason: "Returns HTML instead of JSON (bot protection)",
-    disableReason: "FIFA API blocked — bootstrap uses Sports Live Scores fallback when available",
+    disableReason: "Replaced by static June 11 2026 snapshot in src/data/fifaRankings2026PreTournament.json",
   },
   footballDataApi: {
     enabled: true,

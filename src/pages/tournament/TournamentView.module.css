@@ -211,8 +211,16 @@
 }
 
 .matchCardTime {
-  width: 42px;
+  width: 52px;
+  min-width: 52px;
+  max-width: 64px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  overflow: hidden;
   text-align: center;
 }
 
@@ -251,6 +259,13 @@
 .matchCardBody {
   flex: 1;
   min-width: 0;
+}
+
+.matchCardVenue {
+  display: block;
+  max-width: 100%;
+  margin-bottom: 4px;
+  overflow: hidden;
 }
 
 .matchCardScoreLine {

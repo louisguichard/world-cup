@@ -32,6 +32,7 @@ import type {
 import { groupLetters } from "../../types";
 import { knockoutSchedule } from "../../data/knockoutSchedule";
 import { loadWorldCupData } from "../../lib/dataSources";
+import { buildQualificationContext } from "../../lib/qualification";
 import { formatPercent } from "../../lib/normalize";
 import { projectTournament, simulateTournamentOutcomes, toTeamsById } from "../../lib/tournament";
 import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
@@ -203,6 +204,8 @@ function sourceClass(match: MatchWithScore): string {
 export function SimulatorView() {
   const simulatorMode = useStore((s) => s.simulatorMode);
   const setSimulatorMode = useStore((s) => s.setSimulatorMode);
+  const storeLiveMatches = useStore((s) => s.liveMatches);
+  const storeKnockoutMarkets = useStore((s) => s.knockoutMarkets);
   const [data, setData] = useState<DataLoadResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

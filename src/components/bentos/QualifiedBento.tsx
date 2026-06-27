@@ -1,22 +1,21 @@
 import { useMemo } from "react";
-import { bucketQualificationTeams, buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
+import { buildQualificationContext } from "../../lib/qualification";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
+import { useQualificationSnapshot, useTeamQualificationView } from "../../store/selectors/qualificationSelectors";
 import { useStore } from "../../store";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
 import { TeamFlag } from "../team/TeamFlag";
 import { TeamClickTarget } from "../team/TeamClickTarget";
 import type { OpenTeamSheetOptions } from "../../lib/teamDrawer";
 
-function thirdRankHint(teamId: string, ranked: ReturnType<typeof rankAliveBestThirds>): string | undefined {
-  const idx = ranked.findIndex((r) => r.teamId === teamId);
-  if (idx < 0) return undefined;
-  const rank = idx + 1;
+function thirdRankHint(bestThirdRank?: number): string | undefined {
+  if (bestThirdRank === undefined) return undefined;
   const td = APP_COPY.teamDrawer;
-  if (rank === 8) return td.thirdRankCutoff;
-  if (rank >= 7 && rank <= 10) return td.thirdRankBubble(rank);
-  if (rank > 8) return td.thirdRankOutside(rank);
+  if (bestThirdRank === 8) return td.thirdRankCutoff;
+  if (bestThirdRank >= 7 && bestThirdRank <= 10) return td.thirdRankBubble(bestThirdRank);
+  if (bestThirdRank > 8) return td.thirdRankOutside(bestThirdRank);
   return undefined;
 }
 
@@ -30,18 +29,13 @@ function QualTeamChip({
   sheetOptions?: OpenTeamSheetOptions;
 }) {
   const teams = useStore((s) => s.teams);
-  const standings = useStore((s) => s.groupStandings);
-  const liveMatches = useStore((s) => s.liveMatches);
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
+  const view = useTeamQualificationView(teamId);
   const team = teams[teamId];
   const label = teamDisplayName(team, teamId);
-  const qual = computeQualificationStatus(teamId, standings, qualContext);
-  const ranked = useMemo(() => rankAliveBestThirds(standings, qualContext), [standings, qualContext]);
-  const rankHint = thirdRankHint(teamId, ranked);
-  const title = [qual.reason ?? team?.name ?? label, rankHint].filter(Boolean).join(" · ");
+  const rankHint = thirdRankHint(view?.bestThirdRank);
+  const title = [view?.status.reason ?? team?.name ?? label, rankHint].filter(Boolean).join(" · ");
+
+  if (!view) return null;
 
   return (
     <TeamClickTarget
@@ -50,8 +44,8 @@ function QualTeamChip({
       options={sheetOptions}
       title={title}
     >
-      <QualificationStatusBadge qual={qual} size="xs" />
-      <TeamFlag team={team} teamId={teamId} size="lg" dim={dim} />
+      <QualificationStatusBadge qual={view.status} size="xs" />
+      <TeamFlag team={team} teamId={teamId} size="sm" dim={dim} />
       <span className="qual-team-name team-name-text">{label}</span>
       {rankHint ? <span className="qual-team-rank-hint">{rankHint}</span> : null}
     </TeamClickTarget>
@@ -89,22 +83,9 @@ function QualSection({
 }
 
 export function QualifiedBento() {
-  const teams = useStore((s) => s.teams);
-  const standings = useStore((s) => s.groupStandings);
-  const liveMatches = useStore((s) => s.liveMatches);
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
-
-  const buckets = useMemo(
-    () => bucketQualificationTeams(Object.keys(teams), standings, qualContext),
-    [teams, standings, qualContext]
-  );
-
-  const hasAny = buckets.confirmedThrough.length > 0 || buckets.projectedThrough.length > 0;
-
+  const { layout } = useQualificationSnapshot();
   const q = APP_COPY.qual;
+  const hasAny = layout.movingOn.confirmed.length > 0 || layout.movingOn.projected.length > 0;
 
   return (
     <section className="qual-bento qual-bento--qualified" aria-label="Qualified teams">
@@ -115,12 +96,12 @@ export function QualifiedBento() {
           <QualSection
             title={q.confirmedQualifiedSection}
             hint={q.confirmedQualifiedHint}
-            teamIds={buckets.confirmedThrough}
+            teamIds={layout.movingOn.confirmed}
           />
           <QualSection
             title={q.projectedQualifiedSection}
             hint={q.projectedQualifiedHint}
-            teamIds={buckets.projectedThrough}
+            teamIds={layout.movingOn.projected}
           />
         </>
       ) : (
@@ -131,45 +112,23 @@ export function QualifiedBento() {
 }
 
 export function EliminatedBento() {
-  const teams = useStore((s) => s.teams);
-  const standings = useStore((s) => s.groupStandings);
-  const liveMatches = useStore((s) => s.liveMatches);
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
-
-  const buckets = useMemo(
-    () => bucketQualificationTeams(Object.keys(teams), standings, qualContext),
-    [teams, standings, qualContext]
-  );
-
-  const hasAny = buckets.confirmedOut.length > 0 || buckets.projectedOut.length > 0;
-
+  const { layout } = useQualificationSnapshot();
   const q = APP_COPY.qual;
   const contextTab = { tab: "context" as const };
+  const hasAny = layout.out.confirmed.length > 0;
 
   return (
     <section className="qual-bento qual-bento--eliminated" aria-label="Eliminated teams">
       <h3 className="qual-bento-title">{q.eliminatedTitle}</h3>
       <p className="qual-bento-lead">{q.eliminatedLead}</p>
       {hasAny ? (
-        <>
-          <QualSection
-            title={q.confirmedEliminatedSection}
-            hint={q.confirmedEliminatedHint}
-            teamIds={buckets.confirmedOut}
-            dim
-            sheetOptions={contextTab}
-          />
-          <QualSection
-            title={q.projectedEliminatedSection}
-            hint={q.projectedEliminatedHint}
-            teamIds={buckets.projectedOut}
-            dim
-            sheetOptions={contextTab}
-          />
-        </>
+        <QualSection
+          title={q.confirmedEliminatedSection}
+          hint={q.confirmedEliminatedHint}
+          teamIds={layout.out.confirmed}
+          dim
+          sheetOptions={contextTab}
+        />
       ) : (
         <p className="qual-bento-empty">{q.noEliminated}</p>
       )}
@@ -178,31 +137,30 @@ export function EliminatedBento() {
 }
 
 export function InContentionBento() {
-  const teams = useStore((s) => s.teams);
-  const standings = useStore((s) => s.groupStandings);
-  const liveMatches = useStore((s) => s.liveMatches);
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
-
-  const inContention = useMemo(
-    () => bucketQualificationTeams(Object.keys(teams), standings, qualContext).inContention,
-    [teams, standings, qualContext]
-  );
-
+  const { layout } = useQualificationSnapshot();
   const q = APP_COPY.qual;
+  const { alive, projectedOut } = layout.inContention;
+  const hasAny = alive.length > 0 || projectedOut.length > 0;
 
   return (
     <section className="qual-bento qual-bento--contention" aria-label="Teams still in contention">
       <h3 className="qual-bento-title">{q.contentionTitle}</h3>
       <p className="qual-bento-lead">{q.contentionLead}</p>
-      {inContention.length > 0 ? (
-        <div className="qual-bento-crests">
-          {inContention.slice(0, 12).map((id) => (
-            <QualTeamChip key={id} teamId={id} sheetOptions={{ tab: "context" }} />
-          ))}
-        </div>
+      {hasAny ? (
+        <>
+          <QualSection
+            title={q.contentionAliveSection}
+            hint={q.contentionAliveHint}
+            teamIds={alive}
+            sheetOptions={{ tab: "context" }}
+          />
+          <QualSection
+            title={q.contentionProjectedOutSection}
+            hint={q.contentionProjectedOutHint}
+            teamIds={projectedOut}
+            sheetOptions={{ tab: "context" }}
+          />
+        </>
       ) : (
         <p className="qual-bento-empty">{q.noContention}</p>
       )}

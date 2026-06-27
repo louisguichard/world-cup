@@ -1,4 +1,5 @@
 import type { MergedMatch } from "../../types";
+import { useMemo } from "react";
 import { useStore } from "../../store";
 import { BroadcastBar } from "../match/BroadcastBar";
 import { MatchGoalScorers } from "../match/MatchGoalScorers";
@@ -10,6 +11,7 @@ import { formatLiveClock, formatPeriodLabel } from "../../lib/formatMatchClock";
 import { APP_COPY } from "../../lib/appCopy";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { useGoalDetector } from "../../hooks/useGoalDetector";
+import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
 import { teamLiveCardName } from "../../lib/teamIdentity";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
@@ -40,6 +42,16 @@ export function LiveMatchBento({ match, variant }: Props) {
   const { isGoalActive, latestGoal, secondsRemaining } = useGoalDetector(match.id);
   const homeName = teamLiveCardName(home, match.homeTeamId);
   const awayName = teamLiveCardName(away, match.awayTeamId);
+  const isCompact = true;
+
+  const scorerEvents = useMemo(
+    () => (latestGoal?.scorerEvent ? [latestGoal.scorerEvent] : []),
+    [latestGoal?.scorerEvent]
+  );
+  const scorerPhotos = useEventPlayerPhotos({ events: scorerEvents, homeTeam: home, awayTeam: away });
+  const scorerPhotoUrl = latestGoal?.scorerEvent
+    ? scorerPhotos[latestGoal.scorerEvent.providerId]
+    : undefined;
 
   return (
     <div
@@ -53,6 +65,7 @@ export function LiveMatchBento({ match, variant }: Props) {
           secondsRemaining={secondsRemaining}
           homeTeamName={homeName}
           awayTeamName={awayName}
+          scorerPhotoUrl={scorerPhotoUrl}
         />
         <div className={`live-hero-card-body ${goalStyles.cardContentLayer}`}>
       <div className="team-accent-bar" aria-hidden />
@@ -77,17 +90,17 @@ export function LiveMatchBento({ match, variant }: Props) {
 
       <div className="score-line live-hero-scoreline">
         {home ? (
-          <TeamLabel team={home} displayName={homeName} />
+          <TeamLabel team={home} displayName={homeName} flagCompact={isCompact} />
         ) : (
-          <TeamLabelById teamId={match.homeTeamId} displayName={homeName} />
+          <TeamLabelById teamId={match.homeTeamId} displayName={homeName} flagCompact={isCompact} />
         )}
         <strong className="live-hero-score">{match.homeScore ?? 0}</strong>
         <span className="schedule-score-sep">:</span>
         <strong className="live-hero-score">{match.awayScore ?? 0}</strong>
         {away ? (
-          <TeamLabel team={away} align="right" displayName={awayName} />
+          <TeamLabel team={away} align="right" displayName={awayName} flagCompact={isCompact} />
         ) : (
-          <TeamLabelById teamId={match.awayTeamId} align="right" displayName={awayName} />
+          <TeamLabelById teamId={match.awayTeamId} align="right" displayName={awayName} flagCompact={isCompact} />
         )}
       </div>
 

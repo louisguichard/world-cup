@@ -439,7 +439,7 @@ export function bucketQualificationTeams(
         buckets.inContention.push(teamId);
         break;
       case "projected_out":
-        if (q.canQualify) buckets.projectedOut.push(teamId);
+        if (q.canQualify) buckets.inContention.push(teamId);
         else buckets.confirmedOut.push(teamId);
         break;
       default: {
@@ -454,9 +454,20 @@ export function bucketQualificationTeams(
 
 export function assertBucketMutualExclusion(buckets: QualificationBuckets): void {
   const through = new Set([...buckets.confirmedThrough, ...buckets.projectedThrough]);
+  const out = new Set([...buckets.confirmedOut, ...buckets.projectedOut]);
+
   for (const teamId of buckets.inContention) {
     if (through.has(teamId)) {
       throw new Error(`Bucket mutual-exclusion violated: ${teamId} is both through and in contention`);
+    }
+    if (out.has(teamId)) {
+      throw new Error(`Bucket mutual-exclusion violated: ${teamId} is both out and in contention`);
+    }
+  }
+
+  for (const teamId of through) {
+    if (out.has(teamId)) {
+      throw new Error(`Bucket mutual-exclusion violated: ${teamId} is both through and out`);
     }
   }
 }

@@ -133,8 +133,17 @@
   text-align: left;
 }
 
-.teamBtn:hover {
-  color: var(--text);
+.teamBtn .team-flag-badge {
+  flex-shrink: 0;
+  width: 28px;
+  min-width: 28px;
+}
+
+.teamBtn .team-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .statCell {

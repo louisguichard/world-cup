@@ -229,9 +229,7 @@ export function LiveView() {
       </section>
 
       <Suspense fallback={<DeferredSectionSkeleton />}>
-        <div className="dashboard-section--defer">
-          <LiveBracketEmbed />
-        </div>
+        <LiveBracketEmbed />
       </Suspense>
     </div>
   );

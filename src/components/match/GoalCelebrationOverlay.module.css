@@ -228,6 +228,27 @@
   flex: 1;
   text-align: center;
   opacity: 0.9;
+  min-width: 0;
+}
+
+.goalScorer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.goalScorerPhoto {
+  flex-shrink: 0;
+}
+
+.goalScorerName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .countdownPip {

@@ -65,7 +65,7 @@ function LadderRow({
   const rowInner = (
     <>
       <span className={styles.ladderRank}>{rank}</span>
-      <TeamFlag team={teams[row.teamId]} teamId={row.teamId} size="sm" />
+      <TeamFlag team={teams[row.teamId]} teamId={row.teamId} size="sm" compact />
       <span className={`${styles.ladderName} team-name-text`}>
         {teamDisplayName(teams[row.teamId], row.teamId)}
       </span>
@@ -172,7 +172,7 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
                 options={{ tab: "context" }}
               >
                 <div className={styles.focusRank}>#{row.rank}</div>
-                <TeamFlag team={team} teamId={row.teamId} size="sm" />
+                <TeamFlag team={team} teamId={row.teamId} size="sm" compact />
                 <div className={styles.focusMeta}>
                   <strong className="team-name-text">
                     {teamDisplayName(team, row.teamId)}

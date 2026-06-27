@@ -20,8 +20,8 @@
   background: linear-gradient(90deg, var(--match-home-primary, var(--team-gradient-start)), var(--match-away-primary, var(--team-gradient-end)));
   border-radius: var(--r-lg, 14px) var(--r-lg, 14px) 0 0;
   box-shadow:
-    0 0 16px color-mix(in srgb, var(--match-home-primary, var(--team-gradient-start)) 50%, transparent),
-    0 0 24px color-mix(in srgb, var(--match-away-primary, var(--team-gradient-end)) 40%, transparent);
+    0 0 16px color-mix(in srgb, var(--match-home-primary, var(--team-gradient-start)) 38%, transparent),
+    0 0 24px color-mix(in srgb, var(--match-away-primary, var(--team-gradient-end)) 30%, transparent);
 }
 
 /* Animated dual-team glow around fixture cards (schedule + live hero) */
@@ -51,7 +51,7 @@
     color-mix(in srgb, var(--match-away-secondary, var(--match-away-primary, #9ca3af)) 58%, transparent) 352deg
   );
   filter: blur(28px);
-  opacity: 0.88;
+  opacity: 0.72;
   animation: none;
   pointer-events: none;
 }
@@ -72,7 +72,7 @@
     var(--match-home-primary, #6b7280)
   );
   filter: blur(12px);
-  opacity: 0.68;
+  opacity: 0.54;
   animation: none;
   pointer-events: none;
 }
@@ -93,14 +93,14 @@
 .fixture-glow-wrap.is-live::before {
   inset: calc(-1 * var(--fixture-glow-spread) - 18px);
   filter: blur(34px);
-  opacity: 0.96;
+  opacity: 0.78;
   animation-duration: 8s;
 }
 
 .fixture-glow-wrap.is-live::after {
   inset: calc(-1 * var(--fixture-glow-spread) / 2 - 4px);
   filter: blur(14px);
-  opacity: 0.78;
+  opacity: 0.62;
   animation-duration: 8s;
 }
 
@@ -432,7 +432,7 @@ button.team-label:focus-visible,
 }
 
 .schedule-list .fixture-glow-wrap {
-  margin: calc(var(--fixture-glow-spread, 16px) + 4px) calc(var(--fixture-glow-spread, 16px) / 2 + 2px);
+  margin: calc(var(--fixture-glow-spread, 16px) + 4px) 0;
 }
 
 .live-command-hero .live-hero-card-wrap {
@@ -451,6 +451,13 @@ button.team-label:focus-visible,
 .qual-dashboard-row {
   overflow: visible;
   padding-block: calc(var(--surface-shadow-bleed) / 3);
+  padding-inline: calc(var(--surface-shadow-bleed) / 2);
+  box-sizing: border-box;
+}
+
+.qual-dashboard-row .live-qual-row {
+  padding-inline: calc(var(--fixture-glow-spread, 16px) / 2);
+  box-sizing: border-box;
 }
 
 .live-hero-card-wrap {

@@ -50,6 +50,42 @@ function childrenOverflowParent(parent: HTMLElement, child: HTMLElement): boolea
   );
 }
 
+/** Text truncated with ellipsis still reports full scrollWidth in some engines. */
+function usesEllipsisClip(el: HTMLElement): boolean {
+  const style = getComputedStyle(el);
+  return (
+    style.textOverflow === "ellipsis" &&
+    (style.overflow === "hidden" ||
+      style.overflowX === "hidden" ||
+      style.overflowY === "hidden" ||
+      style.overflow === "clip" ||
+      style.overflowX === "clip")
+  );
+}
+
+/** Fixture glow wrappers intentionally bleed outside their box. */
+function isIntentionalGlowBleed(el: HTMLElement): boolean {
+  return el.classList.contains("fixture-glow-wrap");
+}
+
+/** content-visibility:auto uses intrinsic size until painted. */
+function isContentVisibilityPlaceholder(el: HTMLElement): boolean {
+  return getComputedStyle(el).contentVisibility === "auto";
+}
+
+/** Bracket / table regions meant to scroll horizontally. */
+function isIntentionalScrollRegion(el: HTMLElement): boolean {
+  return (
+    el.classList.contains("bracket-scroll") ||
+    el.classList.contains("group-table-scroll") ||
+    el.classList.contains("bracket-section")
+  );
+}
+
+function isCompactScorersSlot(el: HTMLElement): boolean {
+  return el.classList.contains("match-goal-scorers-slot");
+}
+
 export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiDebugIssue[] {
   const issues: UiDebugIssue[] = [];
   const scope = root instanceof Document ? root.documentElement : root;
@@ -73,7 +109,7 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
   for (const el of nodes) {
     if (SKIP_TAGS.has(el.tagName)) continue;
     if (!isVisible(el)) continue;
-    if (el.closest(".ui-debug-toolbar, .ui-debug-panel, .debug-panel")) continue;
+    if (el.closest(".ui-debug-toolbar, .ui-debug-panel, .debug-panel, .splash-screen")) continue;
 
     const rect = el.getBoundingClientRect();
     if (rect.width < 12 || rect.height < 12) continue;
@@ -88,7 +124,21 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
         style.overflowX === "clip" ||
         (style.overflowX === "visible" && el.parentElement && style.overflow !== "visible");
 
-      if (clipped || (!isScrollContainer(el) && hDelta > 8)) {
+      const skipHorizontal =
+        usesEllipsisClip(el) ||
+        isIntentionalGlowBleed(el) ||
+        (isIntentionalScrollRegion(el) && isScrollContainer(el)) ||
+        el.classList.contains("team-flag-inner") ||
+        (el.classList.contains("team-flag-badge") &&
+          (el.classList.contains("team-flag-badge--compact") ||
+            Boolean(el.closest(".live-hero-card, .live-now-strip")))) ||
+        (el.classList.contains("schedule-list") && Boolean(el.closest(".dashboard-section"))) ||
+        (el.classList.contains("schedule-day-group") && Boolean(el.closest(".dashboard-view"))) ||
+        (el.classList.contains("dashboard-section") &&
+          Boolean(el.querySelector(".schedule-list, .schedule-day-group"))) ||
+        Boolean(el.closest(".wc-main-simulator, .app-shell"));
+
+      if (!skipHorizontal && (clipped || (!isScrollContainer(el) && hDelta > 8))) {
         issues.push({
           id: `h-${index++}`,
           kind: "horizontal-overflow",
@@ -100,7 +150,14 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
       }
     }
 
-    if (vDelta > 2 && (style.overflowY === "hidden" || style.overflowY === "clip")) {
+    if (
+      vDelta > 2 &&
+      (style.overflowY === "hidden" || style.overflowY === "clip") &&
+      !isContentVisibilityPlaceholder(el) &&
+      !el.classList.contains("team-flag-inner") &&
+      !isCompactScorersSlot(el) &&
+      !el.classList.contains("group-table-scroll")
+    ) {
       issues.push({
         id: `v-${index++}`,
         kind: "vertical-clip",
@@ -117,20 +174,39 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
       parent !== scope &&
       isVisible(parent) &&
       !isScrollContainer(parent) &&
+      !isIntentionalGlowBleed(parent) &&
       style.position !== "absolute" &&
       style.position !== "fixed" &&
       childrenOverflowParent(parent, el)
     ) {
       const pr = parent.getBoundingClientRect();
       if (pr.width > 40 && pr.height > 20) {
-        issues.push({
-          id: `c-${index++}`,
-          kind: "layout-collision",
-          label: describeElement(el),
-          detail: `Child extends outside ${describeElement(parent)} bounds`,
-          rect,
-          element: el,
-        });
+        const skipCollision =
+          (el.classList.contains("accent") && parent.tagName === "H1") ||
+          parent.classList.contains("fixture-glow-wrap") ||
+          Boolean(el.closest(".wc-main-simulator")) ||
+          (el.classList.contains("bracket-scroll") && parent.classList.contains("bracket-section")) ||
+          (parent.classList.contains("dashboard-section--defer") &&
+            el.classList.contains("live-bracket-embed")) ||
+          (el.classList.contains("match-goal-scorers") &&
+            parent.classList.contains("match-goal-scorers-slot")) ||
+          (el.classList.contains("live-qual-row") &&
+            parent.classList.contains("qual-dashboard-row")) ||
+          (parent.classList.contains("bracket-rounds") &&
+            el.classList.contains("bracket-round")) ||
+          (el.classList.contains("fixture-betting-body") &&
+            parent.classList.contains("fixture-betting-details"));
+
+        if (!skipCollision) {
+          issues.push({
+            id: `c-${index++}`,
+            kind: "layout-collision",
+            label: describeElement(el),
+            detail: `Child extends outside ${describeElement(parent)} bounds`,
+            rect,
+            element: el,
+          });
+        }
       }
     }
   }

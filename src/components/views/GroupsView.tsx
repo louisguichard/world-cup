@@ -149,6 +149,7 @@ export function GroupsView() {
                       </div>
                     </div>
                   </header>
+                  <div className="standing-table-wrap">
                   <table className="standing-table">
                     <thead>
                       <tr>
@@ -189,6 +190,7 @@ export function GroupsView() {
                       })}
                     </tbody>
                   </table>
+                  </div>
                 </article>
               ))}
             </div>

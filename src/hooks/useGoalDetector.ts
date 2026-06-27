@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import type { MatchEvent } from "../types";
+import { resolveLatestGoalEvent } from "../lib/resolveLatestGoalEvent";
 import { useStore } from "../store";
 
 export type GoalEvent = {
@@ -7,9 +9,24 @@ export type GoalEvent = {
   newScore: { home: number; away: number };
   minute?: number;
   minuteExtra?: number;
+  playerName?: string;
+  scorerEvent?: MatchEvent;
 };
 
 const GOAL_DURATION_SEC = 60;
+
+function matchEventsForId(
+  matchEvents: Record<string, MatchEvent[]>,
+  matchId: string,
+  match: { matchId?: string; espnEventId?: string }
+): MatchEvent[] {
+  return (
+    matchEvents[matchId] ??
+    (match.matchId ? matchEvents[match.matchId] : undefined) ??
+    (match.espnEventId ? matchEvents[match.espnEventId] : undefined) ??
+    []
+  );
+}
 
 /**
  * Watches a match's score. Returns true for 60s after any goal.
@@ -21,6 +38,7 @@ export function useGoalDetector(matchId: string): {
   secondsRemaining: number;
 } {
   const match = useStore((s) => s.liveMatches[matchId]);
+  const matchEvents = useStore((s) => s.matchEvents);
   const [isGoalActive, setIsGoalActive] = useState(false);
   const [latestGoal, setLatestGoal] = useState<GoalEvent | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState(0);
@@ -92,18 +110,37 @@ export function useGoalDetector(matchId: string): {
       else if (away > prev.away) scoringTeamId = "away";
 
       if (scoringTeamId !== null) {
+        const teamId = scoringTeamId === "home" ? match.homeTeamId : match.awayTeamId;
+        const teamGoalCount = scoringTeamId === "home" ? home : away;
+        const events = matchEventsForId(matchEvents, matchId, match);
+        const scorerEvent = resolveLatestGoalEvent(events, teamId, teamGoalCount);
+
         startCelebration({
           matchId,
           scoringTeamId,
           newScore: { home, away },
-          minute: match.clockMinute,
-          minuteExtra: match.clockExtra,
+          minute: scorerEvent?.minute ?? match.clockMinute,
+          minuteExtra: scorerEvent?.minuteExtra ?? match.clockExtra,
+          playerName: scorerEvent?.playerName,
+          scorerEvent,
         });
       }
     }
 
     prevScoresRef.current = { home, away };
-  }, [match, match?.homeScore, match?.awayScore, match?.clockMinute, match?.clockExtra, matchId]);
+  }, [
+    match,
+    match?.homeScore,
+    match?.awayScore,
+    match?.clockMinute,
+    match?.clockExtra,
+    match?.homeTeamId,
+    match?.awayTeamId,
+    match?.matchId,
+    match?.espnEventId,
+    matchEvents,
+    matchId,
+  ]);
 
   if (!match) {
     return { isGoalActive: false, latestGoal: null, secondsRemaining: 0 };

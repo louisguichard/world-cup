@@ -58,9 +58,28 @@
   line-height: 1.2;
 }
 
+.venueLabel--compact {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.venueLabel--compact .venueLabelTrigger {
+  min-height: auto;
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  display: block;
+}
+
 .venueLabel--compact .venueLabelStadium {
-  font-size: inherit;
-  font-weight: inherit;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .venueLabel--compact .venueLabelCity {

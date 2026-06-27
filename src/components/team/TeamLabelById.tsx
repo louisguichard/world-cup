@@ -11,6 +11,7 @@ type Props = {
   align?: "left" | "right";
   className?: string;
   displayName?: string;
+  flagCompact?: boolean;
   clickable?: boolean;
   nested?: boolean;
   onTeamClick?: (teamId: string) => void;
@@ -22,6 +23,7 @@ export function TeamLabelById({
   align = "left",
   className = "",
   displayName,
+  flagCompact,
   clickable = true,
   nested = false,
   onTeamClick,
@@ -53,7 +55,7 @@ export function TeamLabelById({
 
   const content = (
     <>
-      <TeamFlag team={team} teamId={teamId} />
+      <TeamFlag team={team} teamId={teamId} compact={flagCompact} />
       <span className="team-name-text">{label}</span>
     </>
   );

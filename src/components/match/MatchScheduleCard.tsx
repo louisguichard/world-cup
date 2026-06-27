@@ -21,6 +21,7 @@ import { FixtureBettingSection } from "./FixtureBettingSection";
 import { teamDisplayName, teamLiveCardName } from "../../lib/teamIdentity";
 import { useStore } from "../../store";
 import { useGoalDetector } from "../../hooks/useGoalDetector";
+import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
 import { GoalCelebrationOverlay } from "./GoalCelebrationOverlay";
 import goalStyles from "./GoalCelebrationOverlay.module.css";
 
@@ -72,6 +73,14 @@ export function MatchScheduleCard({
   );
 
   const { isGoalActive, latestGoal, secondsRemaining } = useGoalDetector(match.id);
+  const scorerEvents = useMemo(
+    () => (latestGoal?.scorerEvent ? [latestGoal.scorerEvent] : []),
+    [latestGoal?.scorerEvent]
+  );
+  const scorerPhotos = useEventPlayerPhotos({ events: scorerEvents, homeTeam: home, awayTeam: away });
+  const scorerPhotoUrl = latestGoal?.scorerEvent
+    ? scorerPhotos[latestGoal.scorerEvent.providerId]
+    : undefined;
   const homeDisplayName = teamDisplayName(home, match.homeTeamId);
   const awayDisplayName = teamDisplayName(away, match.awayTeamId);
   const homeName = isLive
@@ -114,6 +123,7 @@ export function MatchScheduleCard({
       secondsRemaining={secondsRemaining}
       homeTeamName={homeName}
       awayTeamName={awayName}
+      scorerPhotoUrl={scorerPhotoUrl}
     />
   ) : null;
 
@@ -151,9 +161,19 @@ export function MatchScheduleCard({
 
       <div className="score-line schedule-score-line">
         {home ? (
-          <TeamLabel team={home} displayName={isLive ? homeName : undefined} nested={Boolean(onSelect)} />
+          <TeamLabel
+            team={home}
+            displayName={isLive ? homeName : undefined}
+            flagCompact={isLive}
+            nested={Boolean(onSelect)}
+          />
         ) : (
-          <TeamLabelById teamId={match.homeTeamId} displayName={isLive ? homeName : undefined} nested={Boolean(onSelect)} />
+          <TeamLabelById
+            teamId={match.homeTeamId}
+            displayName={isLive ? homeName : undefined}
+            flagCompact={isLive}
+            nested={Boolean(onSelect)}
+          />
         )}
         <strong className="schedule-score">
           {isDone || isLive ? (match.homeScore ?? 0) : "–"}
@@ -163,9 +183,21 @@ export function MatchScheduleCard({
           {isDone || isLive ? (match.awayScore ?? 0) : "–"}
         </strong>
         {away ? (
-          <TeamLabel team={away} align="right" displayName={isLive ? awayName : undefined} nested={Boolean(onSelect)} />
+          <TeamLabel
+            team={away}
+            align="right"
+            displayName={isLive ? awayName : undefined}
+            flagCompact={isLive}
+            nested={Boolean(onSelect)}
+          />
         ) : (
-          <TeamLabelById teamId={match.awayTeamId} align="right" displayName={isLive ? awayName : undefined} nested={Boolean(onSelect)} />
+          <TeamLabelById
+            teamId={match.awayTeamId}
+            align="right"
+            displayName={isLive ? awayName : undefined}
+            flagCompact={isLive}
+            nested={Boolean(onSelect)}
+          />
         )}
       </div>
 

@@ -57,15 +57,17 @@ export function TournamentMatchCard({ match }: Props) {
             {formatKickoffTime(match.date)}
           </span>
         )}
-        <VenueLabel
-          matchId={match.matchId ?? match.id}
-          venueString={match.venue}
-          compact
-        />
       </div>
 
-      {/* Score / teams */}
       <div className={styles.matchCardBody}>
+        {(match.matchId || match.venue) ? (
+          <VenueLabel
+            matchId={match.matchId ?? match.id}
+            venueString={match.venue}
+            compact
+            className={styles.matchCardVenue}
+          />
+        ) : null}
         <div className={styles.matchCardScoreLine}>
           <span className={`${styles.matchCardTeam} team-name-text`}>{homeTeamName}</span>
           {isLive || isDone ? (

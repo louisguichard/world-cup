@@ -1,3 +1,4 @@
+import { markProxyDead } from "../lib/proxyHealthMonitor";
 import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
 import { logger } from "./Logger";
 
@@ -68,6 +69,7 @@ export async function getWeatherByCity(city: string, lang = "EN"): Promise<Weath
 
     if (res.status === 401 || res.status === 403 || res.status === 429) {
       weatherSessionDisabled = true;
+      markProxyDead("weather", `HTTP ${res.status}`);
       const bodySnippet = await res.text().then((t) => t.slice(0, 300)).catch(() => "");
       logger.warn("WeatherClient blocked for session", "WeatherClient", {
         status: res.status,
@@ -77,6 +79,9 @@ export async function getWeatherByCity(city: string, lang = "EN"): Promise<Weath
     }
 
     if (!res.ok) {
+      if (res.status >= 500) {
+        markProxyDead("weather", `HTTP ${res.status}`);
+      }
       logger.warn("WeatherClient non-OK response", "WeatherClient", { status: res.status, city });
       return null;
     }

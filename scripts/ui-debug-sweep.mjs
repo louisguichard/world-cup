@@ -38,11 +38,12 @@ function log(line = "") {
 }
 
 async function waitForApp(page) {
-  await page.goto(`${BASE}/?uidebug=1`, { waitUntil: "networkidle", timeout: 60_000 });
+  await page.goto(`${BASE}/?uidebug=1`, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await page.waitForFunction(
     () => {
       const main = document.querySelector(".wc-main");
-      return main && !main.hasAttribute("inert");
+      const splash = document.querySelector(".splash-screen");
+      return main && !main.hasAttribute("inert") && !splash;
     },
     { timeout: 90_000 }
   );
@@ -54,6 +55,15 @@ async function scanRoute(page, route) {
     window.location.hash = hash;
   }, route.hash);
   await page.waitForTimeout(2000);
+
+  if (route.hash === "#live") {
+    await page
+      .waitForFunction(() => !document.querySelector(".qual-dashboard-row .dashboard-section-skeleton"), {
+        timeout: 15_000,
+      })
+      .catch(() => {});
+    await page.waitForTimeout(500);
+  }
 
   return page.evaluate(() => {
     const scan = window.__wcUiDebugScan;

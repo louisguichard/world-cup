@@ -1,28 +1,19 @@
-/** Official FWC 2026 color sequences for goal animation layers */
+/** Official FWC 2026 color sequences for goal animation layers — sourced from design-tokens. */
 
-export const FWC_PALETTE = {
-  deep: ["#6B1A1A", "#5B0EA6", "#0D1B4B", "#003D2E"],
-  pure: ["#E00000", "#9B59B6", "#1E3EEF", "#00D26A"],
-  vivid: ["#FF4500", "#B784D4", "#1AACFF", "#C8FF00"],
-  bright: ["#FFA07A", "#FF1493", "#40FFD4", "#EEFF00"],
-  metal: { gold: "#D4AF37", silver: "#C0C0C0", bronze: "#CD7F32" },
-} as const;
+import {
+  FWC_PALETTE,
+  GOAL_ANIMATION_STRIPE_COLORS,
+} from "./design-tokens";
 
-/** All 16 palette colors as a flat array for stripe rotation */
-export const FWC_STRIPE_COLORS: readonly string[] = [
-  ...FWC_PALETTE.deep,
-  ...FWC_PALETTE.pure,
-  ...FWC_PALETTE.vivid,
-  ...FWC_PALETTE.bright,
-];
+export { FWC_PALETTE, GOAL_ANIMATION_STRIPE_COLORS as FWC_STRIPE_COLORS };
 
 /**
  * Returns a CSS conic-gradient string for the Amplify burst.
  * 16 equal wedges (22.5deg each), one per palette color, in brand order.
  */
 export function buildAmplifyGradient(): string {
-  const degPer = 360 / FWC_STRIPE_COLORS.length;
-  const stops = FWC_STRIPE_COLORS.map(
+  const degPer = 360 / GOAL_ANIMATION_STRIPE_COLORS.length;
+  const stops = GOAL_ANIMATION_STRIPE_COLORS.map(
     (color, i) => `${color} ${i * degPer}deg ${(i + 1) * degPer}deg`
   );
   return `conic-gradient(from 0deg, ${stops.join(", ")})`;
@@ -33,10 +24,10 @@ export function buildAmplifyGradient(): string {
  */
 export function getBorderSequence(act: 1 | 2 | 3): [string, string, string] {
   if (act === 1) {
-    return [FWC_PALETTE.deep[0], FWC_PALETTE.pure[0], FWC_PALETTE.vivid[0]];
+    return [FWC_PALETTE.burgundy, FWC_PALETTE.hotPink, FWC_PALETTE.orangeRed];
   }
   if (act === 2) {
-    return [FWC_PALETTE.pure[0], FWC_PALETTE.vivid[0], FWC_PALETTE.bright[0]];
+    return [FWC_PALETTE.limeGreen, FWC_PALETTE.hotPink, FWC_PALETTE.aqua];
   }
-  return [FWC_PALETTE.metal.gold, FWC_PALETTE.pure[0], FWC_PALETTE.metal.gold];
+  return [FWC_PALETTE.gold, FWC_PALETTE.limeGreen, FWC_PALETTE.gold];
 }

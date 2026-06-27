@@ -83,6 +83,58 @@ describe("resolveEspnMergeTarget", () => {
     const result = resolveEspnMergeTarget(merged, incoming);
     expect(result.mode).toBe("new");
   });
+
+  it("fuzzy-matches catalog ids to ESPN numeric ids by nation name", () => {
+    const teams = {
+      bra: {
+        id: "bra",
+        name: "Brazil",
+        shortName: "BRA",
+        abbreviation: "BRA",
+        group: "C" as const,
+        rating: 1500
+      },
+      jpn: {
+        id: "jpn",
+        name: "Japan",
+        shortName: "JPN",
+        abbreviation: "JPN",
+        group: "F" as const,
+        rating: 1500
+      },
+      "229": {
+        id: "229",
+        name: "Brazil",
+        shortName: "Brazil",
+        abbreviation: "BRA",
+        group: "C" as const,
+        rating: 1500
+      },
+      "445": {
+        id: "445",
+        name: "Japan",
+        shortName: "Japan",
+        abbreviation: "JPN",
+        group: "F" as const,
+        rating: 1500
+      }
+    };
+    const merged = {
+      M76: makeMatch("M76", {
+        matchId: "M76",
+        homeTeamId: "bra",
+        awayTeamId: "jpn",
+        date: "2026-07-04T20:00:00Z"
+      })
+    };
+    const incoming = makeMatch("776459", {
+      homeTeamId: "229",
+      awayTeamId: "445",
+      date: "2026-07-04T20:05:00Z"
+    });
+    const result = resolveEspnMergeTarget(merged, incoming, teams);
+    expect(result).toEqual({ storeKey: "M76", mode: "fuzzy" });
+  });
 });
 
 describe("mergeEspnMatchIntoStore", () => {
@@ -105,5 +157,65 @@ describe("mergeEspnMatchIntoStore", () => {
     const mode = mergeEspnMatchIntoStore(merged, incoming, {});
     expect(mode).toBe("new");
     expect(merged["999888"]).toBeDefined();
+  });
+
+  it("merges ESPN scores onto static M-id row and keeps catalog team ids", () => {
+    const teams = {
+      bra: {
+        id: "bra",
+        name: "Brazil",
+        shortName: "BRA",
+        abbreviation: "BRA",
+        group: "C" as const,
+        rating: 1500
+      },
+      jpn: {
+        id: "jpn",
+        name: "Japan",
+        shortName: "JPN",
+        abbreviation: "JPN",
+        group: "F" as const,
+        rating: 1500
+      },
+      "229": {
+        id: "229",
+        name: "Brazil",
+        shortName: "Brazil",
+        abbreviation: "BRA",
+        group: "C" as const,
+        rating: 1500
+      },
+      "445": {
+        id: "445",
+        name: "Japan",
+        shortName: "Japan",
+        abbreviation: "JPN",
+        group: "F" as const,
+        rating: 1500
+      }
+    };
+    const merged: Record<string, MergedMatch> = {
+      M76: makeMatch("M76", {
+        matchId: "M76",
+        homeTeamId: "bra",
+        awayTeamId: "jpn",
+        date: "2026-07-04T20:00:00Z"
+      })
+    };
+    const incoming = makeMatch("776459", {
+      homeTeamId: "229",
+      awayTeamId: "445",
+      status: "completed",
+      homeScore: 2,
+      awayScore: 1,
+      locked: true,
+      date: "2026-07-04T20:05:00Z"
+    });
+    const mode = mergeEspnMatchIntoStore(merged, incoming, teams);
+    expect(mode).toBe("fuzzy");
+    expect(merged["M76"]?.homeScore).toBe(2);
+    expect(merged["M76"]?.homeTeamId).toBe("bra");
+    expect(merged["M76"]?.awayTeamId).toBe("jpn");
+    expect(merged["776459"]).toBeUndefined();
   });
 });

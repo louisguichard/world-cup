@@ -1,5 +1,6 @@
 import { buildAmplifyGradient } from "../../lib/goalAnimationPalette";
 import type { GoalEvent } from "../../hooks/useGoalDetector";
+import { PlayerPhoto } from "../player/PlayerPhoto";
 import styles from "./GoalCelebrationOverlay.module.css";
 
 type GoalCelebrationOverlayProps = {
@@ -8,6 +9,7 @@ type GoalCelebrationOverlayProps = {
   secondsRemaining: number;
   homeTeamName: string;
   awayTeamName: string;
+  scorerPhotoUrl?: string | null;
 };
 
 function formatMinute(minute?: number, minuteExtra?: number): string {
@@ -16,21 +18,30 @@ function formatMinute(minute?: number, minuteExtra?: number): string {
   return ` ${minute}'`;
 }
 
+function resolveScorerLabel(
+  latestGoal: GoalEvent,
+  homeTeamName: string,
+  awayTeamName: string
+): string {
+  const trimmed = latestGoal.playerName?.trim();
+  if (trimmed) return trimmed;
+
+  if (latestGoal.scoringTeamId === "home") return homeTeamName;
+  if (latestGoal.scoringTeamId === "away") return awayTeamName;
+  return "";
+}
+
 export function GoalCelebrationOverlay({
   isActive,
   latestGoal,
   secondsRemaining,
   homeTeamName,
   awayTeamName,
+  scorerPhotoUrl,
 }: GoalCelebrationOverlayProps) {
   if (!isActive) return null;
 
-  const scorerName =
-    latestGoal?.scoringTeamId === "home"
-      ? homeTeamName
-      : latestGoal?.scoringTeamId === "away"
-        ? awayTeamName
-        : "";
+  const scorerName = latestGoal ? resolveScorerLabel(latestGoal, homeTeamName, awayTeamName) : "";
 
   return (
     <>
@@ -44,8 +55,25 @@ export function GoalCelebrationOverlay({
         <div className={styles.goalBanner} role="status" aria-live="polite">
           <span className={styles.goalWord}>GOAL</span>
           <span className={styles.goalDetail}>
-            {scorerName}
-            {formatMinute(latestGoal.minute, latestGoal.minuteExtra)}
+            {scorerPhotoUrl || scorerName ? (
+              <span className={styles.goalScorer}>
+                <PlayerPhoto
+                  name={scorerName || "Scorer"}
+                  photoUrl={scorerPhotoUrl}
+                  size="sm"
+                  className={styles.goalScorerPhoto}
+                />
+                <span className={styles.goalScorerName}>
+                  {scorerName}
+                  {formatMinute(latestGoal.minute, latestGoal.minuteExtra)}
+                </span>
+              </span>
+            ) : (
+              <>
+                {scorerName}
+                {formatMinute(latestGoal.minute, latestGoal.minuteExtra)}
+              </>
+            )}
           </span>
           <span className={styles.countdownPip}>{secondsRemaining}s</span>
         </div>

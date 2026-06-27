@@ -12,6 +12,8 @@ type Props = {
   className?: string;
   /** Override visible label (e.g. compact live-card name). */
   displayName?: string;
+  /** Tighter crest frame without WC stars (compact live cards). */
+  flagCompact?: boolean;
   /** When false, renders a non-interactive label. Default true. */
   clickable?: boolean;
   /** Use span + role=button when nested inside another clickable (e.g. match card). */
@@ -24,6 +26,7 @@ export function TeamLabel({
   align = "left",
   className = "",
   displayName,
+  flagCompact,
   clickable = true,
   nested = false,
   onTeamClick,
@@ -54,7 +57,7 @@ export function TeamLabel({
 
   const content = (
     <>
-      <TeamFlag team={team} teamId={team.id} />
+      <TeamFlag team={team} teamId={team.id} compact={flagCompact} />
       <span className="team-name-text">{label}</span>
     </>
   );

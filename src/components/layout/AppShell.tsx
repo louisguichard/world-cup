@@ -6,6 +6,7 @@ import { InstallAppBanner } from "./InstallAppBanner";
 import { DebugPanel } from "../shared/DebugPanel";
 import { UiDebugHost } from "../debug/UiDebugHost";
 import { ApiSetupBanner } from "../shared/ApiSetupBanner";
+import { DataFreshnessBanner } from "../shared/DataFreshnessBanner";
 import { useColorScheme } from "../../hooks/useColorScheme";
 import { useHashSync } from "../../hooks/useHashSync";
 import { useQualificationChangeLogger } from "../../hooks/useQualificationChangeLogger";
@@ -102,6 +103,7 @@ export function AppShell() {
     >
       <div className="wc-chrome">
       <ApiSetupBanner />
+      <DataFreshnessBanner />
       <TopNavBar compact={activeTab === "simulator"} />
       <main
         ref={mainRef}

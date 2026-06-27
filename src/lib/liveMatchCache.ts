@@ -1,17 +1,12 @@
 import type { MergedMatch } from "../types";
+import { BOOT_CACHE_VERSION } from "./bootCacheVersion";
 
-export const LIVE_MATCH_CACHE_KEY = "wc-live-matches-v1";
+export const LIVE_MATCH_CACHE_KEY = `wc-live-matches-v${BOOT_CACHE_VERSION}`;
 
 type LiveMatchCacheStore = {
-  version: 1;
+  version: typeof BOOT_CACHE_VERSION;
   savedAt: string;
   matches: Record<string, MergedMatch>;
-};
-
-const EMPTY: LiveMatchCacheStore = {
-  version: 1,
-  savedAt: "",
-  matches: {},
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -24,7 +19,10 @@ export function readLiveMatchCache(): Record<string, MergedMatch> | null {
     const raw = localStorage.getItem(LIVE_MATCH_CACHE_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed) || parsed.version !== 1) return null;
+    if (!isRecord(parsed) || parsed.version !== BOOT_CACHE_VERSION) {
+      localStorage.removeItem(LIVE_MATCH_CACHE_KEY);
+      return null;
+    }
     if (!isRecord(parsed.matches)) return null;
     return parsed.matches as Record<string, MergedMatch>;
   } catch {
@@ -36,7 +34,7 @@ export function writeLiveMatchCache(matches: Record<string, MergedMatch>): void 
   if (typeof localStorage === "undefined") return;
   try {
     const store: LiveMatchCacheStore = {
-      version: 1,
+      version: BOOT_CACHE_VERSION,
       savedAt: new Date().toISOString(),
       matches,
     };

@@ -1,3 +1,5 @@
+import { THEME_DARK, THEME_LIGHT } from "./design-tokens";
+
 export type ColorSchemePreference = "light" | "dark" | "system";
 export type ResolvedColorScheme = "light" | "dark";
 
@@ -28,8 +30,8 @@ export function resolveColorScheme(preference: ColorSchemePreference): ResolvedC
 }
 
 const THEME_COLOR: Record<ResolvedColorScheme, string> = {
-  dark: "#08091A",
-  light: "#F4F5FA",
+  dark: THEME_DARK.surfaceBase,
+  light: THEME_LIGHT.surfaceBase,
 };
 
 /** Applies resolved theme to the document root (call on preference or OS change). */

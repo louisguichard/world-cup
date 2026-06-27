@@ -1,4 +1,5 @@
 import type { MergedMatch, Team } from "../types";
+import { resolveCanonicalTeamId } from "../data/wc2026TeamCatalog";
 import { applyLiveScore } from "./DataMerger";
 import { enrichMatchWithScheduleId } from "./ScheduleLinker";
 import { logger } from "./Logger";
@@ -7,30 +8,76 @@ export type EspnMergeMode = "id" | "fuzzy" | "new";
 
 const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
 
+function normalizeTeamName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+function teamNameMatches(team: Team, label: string): boolean {
+  const norm = normalizeTeamName(label);
+  return (
+    normalizeTeamName(team.name) === norm ||
+    normalizeTeamName(team.shortName) === norm ||
+    normalizeTeamName(team.abbreviation) === norm
+  );
+}
+
+function sameFixture(
+  a: MergedMatch,
+  b: MergedMatch,
+  teams: Record<string, Team>
+): boolean {
+  const aHome = teams[a.homeTeamId];
+  const aAway = teams[a.awayTeamId];
+  const bHome = teams[b.homeTeamId];
+  const bAway = teams[b.awayTeamId];
+  if (!aHome || !aAway || !bHome || !bAway) {
+    return a.homeTeamId === b.homeTeamId && a.awayTeamId === b.awayTeamId;
+  }
+  return teamNameMatches(aHome, bHome.name) && teamNameMatches(aAway, bAway.name);
+}
+
+/** Rewrite match team ids to catalog ids (bra, fra, …) so standings stay unified. */
+export function canonicalizeMatchTeamIds(
+  match: MergedMatch,
+  teams: Record<string, Team>
+): MergedMatch {
+  const homeTeam = teams[match.homeTeamId];
+  const awayTeam = teams[match.awayTeamId];
+  return {
+    ...match,
+    homeTeamId: resolveCanonicalTeamId(match.homeTeamId, homeTeam),
+    awayTeamId: resolveCanonicalTeamId(match.awayTeamId, awayTeam),
+  };
+}
+
 /**
  * Resolves which existing store entry (if any) should receive an incoming ESPN match.
  * Priority: exact ESPN id → espnEventId pointer → same teams + close kickoff.
  */
 export function resolveEspnMergeTarget(
   merged: Record<string, MergedMatch>,
-  incoming: MergedMatch
+  incoming: MergedMatch,
+  teams: Record<string, Team> = {}
 ): { storeKey: string; mode: EspnMergeMode } {
   // 1. Exact id match (happy path)
   if (merged[incoming.id]) {
     return { storeKey: incoming.id, mode: "id" };
   }
 
-  // 2. Fuzzy: find entry whose espnEventId equals incoming id, OR same teams with close kickoff
+  // 2. Fuzzy: espnEventId pointer, same ids + kickoff, or same nation names + kickoff
   const kickoffMs = Date.parse(incoming.date);
   for (const [key, existing] of Object.entries(merged)) {
     if (existing.espnEventId === incoming.id) {
       return { storeKey: key, mode: "fuzzy" };
     }
+    if (Math.abs(Date.parse(existing.date) - kickoffMs) > FOUR_HOURS_MS) continue;
     if (
       existing.homeTeamId === incoming.homeTeamId &&
-      existing.awayTeamId === incoming.awayTeamId &&
-      Math.abs(Date.parse(existing.date) - kickoffMs) <= FOUR_HOURS_MS
+      existing.awayTeamId === incoming.awayTeamId
     ) {
+      return { storeKey: key, mode: "fuzzy" };
+    }
+    if (sameFixture(existing, incoming, teams)) {
       return { storeKey: key, mode: "fuzzy" };
     }
   }
@@ -48,18 +95,24 @@ export function mergeEspnMatchIntoStore(
   incoming: MergedMatch,
   teams: Record<string, Team>
 ): EspnMergeMode {
-  const { storeKey, mode } = resolveEspnMergeTarget(merged, incoming);
+  const normalized = canonicalizeMatchTeamIds(incoming, teams);
+  const { storeKey, mode } = resolveEspnMergeTarget(merged, normalized, teams);
+  const existing = merged[storeKey];
 
   logger.debug(`[PollingEngine] Match linked by ${mode}`, "espnMatchMerge", {
     incomingId: incoming.id,
     storeKey,
-    homeTeamId: incoming.homeTeamId,
-    awayTeamId: incoming.awayTeamId
+    homeTeamId: normalized.homeTeamId,
+    awayTeamId: normalized.awayTeamId
   });
 
-  // Preserve the original store key on fuzzy/new merge (set espnEventId pointer)
-  const applied = applyLiveScore(merged[storeKey], {
-    ...incoming,
+  const homeTeamId = existing?.homeTeamId ?? normalized.homeTeamId;
+  const awayTeamId = existing?.awayTeamId ?? normalized.awayTeamId;
+
+  const applied = applyLiveScore(existing, {
+    ...normalized,
+    homeTeamId,
+    awayTeamId,
     espnEventId: incoming.id
   }, "espn");
 

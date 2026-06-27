@@ -1,0 +1,4 @@
+#!/bin/sh
+# Record commit hash + sync release canvas.
+set -e
+node scripts/version.mjs record-commit

@@ -59,12 +59,16 @@ export const APP_COPY = {
     confirmedQualifiedSection: "Locked in · Moving on",
     projectedQualifiedSection: "Probably · Moving on",
     eliminatedTitle: "Out of the tournament",
-    eliminatedLead:
-      "Locked in when a team cannot catch up; probably when they are likely out but not final yet.",
+    eliminatedLead: "Teams with no remaining path to the round of 32.",
     confirmedEliminatedSection: "Locked in · Out",
     projectedEliminatedSection: "Probably · Out",
     contentionTitle: "Still in the race",
     contentionLead: "Third-place teams still fighting for a spot in the round of 32.",
+    contentionAliveSection: "Still fighting",
+    contentionAliveHint: "Still has a real path — outcome depends on remaining group games.",
+    contentionProjectedOutSection: "Probably · Out",
+    contentionProjectedOutHint:
+      "Unlikely to advance, but not mathematically eliminated yet — must win out and need help.",
     noQualified: "No teams in the top two yet.",
     noEliminated: "No teams are fully out yet.",
     noContention: "No teams on the bubble right now.",

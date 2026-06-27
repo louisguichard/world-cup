@@ -1,0 +1,4 @@
+#!/bin/sh
+# Auto-increment build when substantive files are staged.
+set -e
+node scripts/version-auto-bump.mjs

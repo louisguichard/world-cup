@@ -1,15 +1,10 @@
 import { useMemo, useState, type CSSProperties } from "react";
-import {
-  bucketQualificationTeams,
-  buildQualificationContext,
-  computeQualificationStatus,
-  type QualificationMatchContext
-} from "../../lib/qualification";
+import { buildQualificationContext } from "../../lib/qualification";
+import { useQualificationSnapshot, useTeamQualificationView } from "../../store/selectors/qualificationSelectors";
 import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import type { GroupLetter } from "../../types";
-import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
 import { TeamFlag } from "../team/TeamFlag";
 import { useStore } from "../../store";
@@ -33,38 +28,36 @@ function TeamRow({
   rank,
   points,
   gd,
-  qualContext,
   accentAnimated = false
 }: {
   teamId: string;
   rank: number | string;
   points: number;
   gd: number;
-  qualContext: QualificationMatchContext;
   accentAnimated?: boolean;
 }) {
   const teams = useStore((s) => s.teams);
   const teamProfiles = useStore((s) => s.teamProfiles);
-  const standings = useStore((s) => s.groupStandings);
   const openTeamSheet = useStore((s) => s.openTeamSheet);
   const team = teams[teamId];
   const theme = useTeamTheme(teamId);
-  const qual = computeQualificationStatus(teamId, standings, qualContext);
-  const display = resolveQualificationDisplay(qual);
+  const view = useTeamQualificationView(teamId);
   const abbrev = team?.abbreviation?.toUpperCase() ?? "";
   const squadSize = abbrev ? teamProfiles[abbrev]?.players.length : 0;
+
+  if (!view) return null;
 
   return (
     <li>
       <button
         type="button"
-        className={`teams-row teams-row--accent${accentAnimated ? " teams-row--accent-animated" : ""} ${display.rowClass}`}
+        className={`teams-row teams-row--accent${accentAnimated ? " teams-row--accent-animated" : ""} ${view.display.rowClass}`}
         style={theme as CSSProperties}
         onClick={() => openTeamSheet(teamId)}
       >
         <TeamFlag team={team} teamId={teamId} />
         <span className="teams-row-name team-name-text">{teamDisplayName(team, teamId)}</span>
-        <QualificationStatusBadge qual={qual} size="xs" />
+        <QualificationStatusBadge qual={view.status} size="xs" />
         <span className="teams-stats">
           {APP_COPY.teams.rankLabel(rank, points, gd)}
           {squadSize > 0 ? ` · ${squadSize} players` : ""}
@@ -90,48 +83,43 @@ export function TeamsView() {
     [standings, qualContext]
   );
 
-  const buckets = useMemo(
-    () => bucketQualificationTeams(Object.keys(teams), standings, qualContext),
-    [teams, standings, qualContext]
-  );
+  const { teamIds, layout } = useQualificationSnapshot();
 
   const filterSet = useMemo(() => {
-    const through = new Set([...buckets.confirmedThrough, ...buckets.projectedThrough]);
-    const out = new Set([...buckets.confirmedOut, ...buckets.projectedOut]);
+    const movingOn = new Set([...layout.movingOn.confirmed, ...layout.movingOn.projected]);
+    const out = new Set(layout.out.confirmed);
+    const inContention = new Set([...layout.inContention.alive, ...layout.inContention.projectedOut]);
     switch (filter) {
       case "qualified":
-        return new Set(buckets.confirmedThrough);
+        return new Set(layout.movingOn.confirmed);
       case "projected":
-        return new Set(buckets.projectedThrough);
+        return new Set(layout.movingOn.projected);
       case "at_risk":
-        return new Set(buckets.inContention);
+        return inContention;
       case "eliminated":
-        return new Set([...buckets.confirmedOut, ...buckets.projectedOut]);
+        return out;
       case "contention":
-        return new Set(
-          Object.keys(teams).filter((id) => !through.has(id) && !out.has(id))
-        );
+        return new Set(teamIds.filter((id) => !movingOn.has(id) && !out.has(id)));
       default:
         return null;
     }
-  }, [filter, buckets, teams]);
+  }, [filter, layout, teamIds]);
 
   const counts: Record<QualFilter, number> = useMemo(
     () => ({
-      all: Object.keys(teams).length,
-      qualified: buckets.confirmedThrough.length,
-      projected: buckets.projectedThrough.length,
-      at_risk: buckets.inContention.length,
-      eliminated: buckets.confirmedOut.length + buckets.projectedOut.length,
-      contention: Object.keys(teams).filter(
+      all: teamIds.length,
+      qualified: layout.movingOn.confirmed.length,
+      projected: layout.movingOn.projected.length,
+      at_risk: layout.inContention.alive.length + layout.inContention.projectedOut.length,
+      eliminated: layout.out.confirmed.length,
+      contention: teamIds.filter(
         (id) =>
-          !buckets.confirmedThrough.includes(id) &&
-          !buckets.projectedThrough.includes(id) &&
-          !buckets.confirmedOut.includes(id) &&
-          !buckets.projectedOut.includes(id)
+          !layout.movingOn.confirmed.includes(id) &&
+          !layout.movingOn.projected.includes(id) &&
+          !layout.out.confirmed.includes(id)
       ).length
     }),
-    [teams, buckets]
+    [teamIds, layout]
   );
 
   const groupsWithTeams = useMemo(() => {
@@ -209,7 +197,6 @@ export function TeamsView() {
                     rank={rank}
                     points={row?.points ?? 0}
                     gd={row?.goalDifference ?? 0}
-                    qualContext={qualContext}
                     accentAnimated={bubbleTeamIds.has(t.id)}
                   />
                 );

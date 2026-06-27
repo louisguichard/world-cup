@@ -21,14 +21,14 @@ function ResultRow({ match, home, away, onSelect }: ResultRowProps) {
   return (
     <button type="button" className="recent-result-row" onClick={() => onSelect(match.homeTeamId)}>
       <span className="recent-result-team recent-result-team--home">
-        <TeamFlag team={home} teamId={match.homeTeamId} />
+        <TeamFlag team={home} teamId={match.homeTeamId} size="sm" compact />
         <span className="team-name-text">{homeName}</span>
       </span>
       <span className="recent-result-score">
         {match.homeScore ?? 0} – {match.awayScore ?? 0}
       </span>
       <span className="recent-result-team recent-result-team--away">
-        <TeamFlag team={away} teamId={match.awayTeamId} />
+        <TeamFlag team={away} teamId={match.awayTeamId} size="sm" compact />
         <span className="team-name-text">{awayName}</span>
       </span>
       <span className="recent-result-meta">

@@ -56,7 +56,6 @@ import {
 } from "../adapters/normalizeStandings";
 import { applyTeamLogoOverrides } from "../../lib/resolveTeamLogo";
 import {
-  buildWc2026TeamCatalog,
   mergeTeamsWithCatalog,
   resolveCatalogTeamIdByName,
 } from "../../data/wc2026TeamCatalog";
@@ -316,11 +315,9 @@ export async function runBoot(): Promise<void> {
     startBackgroundEnrichment();
 
     const espnTeamsMap = Object.fromEntries(espnData.teams.map((t) => [t.id, t]));
-    const catalog = buildWc2026TeamCatalog();
-    const mergedIncoming = mergeTeamsWithCatalog(
+    const baseTeams = mergeTeamsWithCatalog(
       Object.keys(store.teams).length ? store.teams : espnTeamsMap
     );
-    const baseTeams = { ...catalog, ...mergedIncoming };
 
     startBootPhase("teams-merge");
     const teams = deferHeavy

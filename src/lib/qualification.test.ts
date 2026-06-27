@@ -277,4 +277,36 @@ describe("bucketQualificationTeams", () => {
     expect(matchesInGroup(4)).toBe(6);
     expect(matchesInGroup(3)).toBe(3);
   });
+
+  it("documents dual team ids putting the same nation in through and out buckets", () => {
+    const splitIdentityStandings: GroupStanding[] = [
+      standing("C", [
+        row("crc", "C", 2, 7, 3),
+        row("229", "C", 2, 6, 2),
+        row("sco", "C", 2, 4, 0),
+        row("bra", "C", 2, 3, -1)
+      ])
+    ];
+    const badBuckets = bucketQualificationTeams(["bra", "229"], splitIdentityStandings);
+    expect(badBuckets.projectedThrough.includes("229") || badBuckets.confirmedThrough.includes("229")).toBe(
+      true
+    );
+    expect(badBuckets.inContention.includes("bra")).toBe(true);
+    expect(badBuckets.confirmedOut.includes("bra") || badBuckets.projectedOut.includes("bra")).toBe(false);
+
+    const unifiedStandings: GroupStanding[] = [
+      standing("C", [
+        row("crc", "C", 2, 7, 3),
+        row("bra", "C", 2, 6, 2),
+        row("sco", "C", 2, 3, 0),
+        row("sui", "C", 2, 0, -5)
+      ])
+    ];
+    const goodBuckets = bucketQualificationTeams(["bra"], unifiedStandings);
+    assertBucketMutualExclusion(goodBuckets);
+    expect(goodBuckets.projectedThrough.includes("bra") || goodBuckets.confirmedThrough.includes("bra")).toBe(
+      true
+    );
+    expect(goodBuckets.confirmedOut.includes("bra") || goodBuckets.projectedOut.includes("bra")).toBe(false);
+  });
 });

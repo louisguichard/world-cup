@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Builds
+- **3.0.0 build 13** (2026-06-27): 87 file(s) in .cursor, .githooks, build-manifest.json, docs, package.json, public — 87 files changed, 4970 insertions(+), 900 deletions(-)
+- **3.0.0 build 12** (2026-06-27): Auto version pipeline: git hooks, build-manifest, release dashboard canvas, CHANGELOG [Unreleased] builds, agent rule + version-bump skill
+
 ## [3.0.0] — 2026-06-27
 
 ### Changed

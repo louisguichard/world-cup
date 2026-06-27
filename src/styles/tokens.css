@@ -5,6 +5,31 @@
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
 
+  /* FWC2026 semantic aliases (see src/lib/design-tokens.ts) */
+  --color-surface: var(--surface-base);
+  --color-card: var(--surface-raised);
+  --color-elevated: var(--surface-overlay);
+  --color-border: var(--surface-border);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-navy: var(--fwc-navy);
+  --color-royal: var(--fwc-royal-blue);
+  --color-lime: var(--fwc-lime);
+  --color-hot-pink: var(--fwc-hot-pink);
+  --color-aqua: var(--fwc-aqua);
+  --color-purple: var(--fwc-deep-purple);
+  --color-lavender: var(--fwc-lavender);
+  --color-yellow: var(--fwc-yellow);
+  --color-green: var(--fwc-green);
+  --color-orange: var(--fwc-orange-red);
+  --color-burgundy: var(--fwc-burgundy);
+  --radius-card: 12px;
+  --radius-badge: 6px;
+  --radius-pill: 999px;
+  --shadow-card: 0 4px 24px rgba(48, 79, 255, 0.15);
+  --shadow-glow-lime: 0 0 20px rgba(177, 235, 0, 0.4);
+  --shadow-glow-pink: 0 0 20px rgba(232, 31, 99, 0.4);
+
   /* Fluid layout — scales from phone to ultra-wide desktop */
   --layout-max: 1420px;
   --layout-gutter: clamp(12px, 2.5vw, 24px);
@@ -40,4 +65,12 @@
 
   /* Venue / location overlay — above hub (1100), sheets, nav, debug */
   --z-venue-overlay: 10000;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --color-surface: #f0f2f8;
+    --color-card: #ffffff;
+    --color-text-primary: var(--fwc-navy);
+  }
 }

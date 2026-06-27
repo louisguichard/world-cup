@@ -1,11 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { formatKickoffDate, formatKickoffTime } from "../../lib/formatKickoff";
-import {
-  buildQualificationContext,
-  computeQualificationStatus,
-} from "../../lib/qualification";
-import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
+import { buildQualificationContext } from "../../lib/qualification";
+import { useTeamQualificationView } from "../../store/selectors/qualificationSelectors";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
 import { buildThirdPlaceCutoffScenario } from "../../lib/thirdPlaceCutoffScenario";
 import { buildTeamHistoricalFacts } from "../../lib/teamHistoricalFacts";
@@ -73,14 +70,12 @@ export function TeamDetailSheet() {
     return predictionsForTeam(team, footballPredictionBundle.dailyPredictions);
   }, [team, footballPredictionBundle]);
 
+  const qualView = useTeamQualificationView(teamId ?? "");
+  const qual = qualView?.status ?? null;
+
   const qualContext = useMemo(
     () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
     [liveMatches, teams]
-  );
-
-  const qual = useMemo(
-    () => (teamId ? computeQualificationStatus(teamId, standings, qualContext) : null),
-    [teamId, standings, qualContext]
   );
 
   const { story: eliminationStory } = useEliminationStory(teamId);
@@ -164,7 +159,7 @@ export function TeamDetailSheet() {
 
   if (!open || !team || !teamId) return null;
 
-  const qualDisplay = qual ? resolveQualificationDisplay(qual) : null;
+  const qualDisplay = qualView?.display ?? null;
   const isEliminated = qual && (!qual.canQualify || qual.lifeState === "eliminated");
 
   const openFixture = (match: MergedMatch) => {

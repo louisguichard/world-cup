@@ -9,6 +9,8 @@ type Props = {
   team?: Team;
   teamId: string;
   size?: "sm" | "lg" | "xl";
+  /** Hide WC stars and tighten frame for compact live cards */
+  compact?: boolean;
   /** Muted treatment for eliminated / out-of-contention teams */
   dim?: boolean;
   className?: string;
@@ -26,7 +28,7 @@ const innerSizeClass: Record<NonNullable<Props["size"]>, string> = {
   xl: "xl",
 };
 
-export function TeamFlag({ team, teamId, size = "sm", dim, className }: Props) {
+export function TeamFlag({ team, teamId, size = "sm", compact, dim, className }: Props) {
   const storeTeam = useStore((s) => s.teams[teamId]);
   const effectiveTeam = team ?? storeTeam;
   const id = effectiveTeam?.id ?? teamId;
@@ -46,8 +48,8 @@ export function TeamFlag({ team, teamId, size = "sm", dim, className }: Props) {
     .join(" ");
 
   return (
-    <span className="team-flag-badge">
-      <WorldCupStars count={titles} size={size} />
+    <span className={`team-flag-badge${compact ? " team-flag-badge--compact" : ""}`}>
+      {compact ? null : <WorldCupStars count={titles} size={size} />}
       <TeamThemeRoot teamId={id} className={wrapClass}>
         <span className={`team-flag-inner ${innerSizeClass[size]}`}>
           {logo ? (

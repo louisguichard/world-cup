@@ -214,16 +214,39 @@ export function resolveCatalogTeamIdByName(name: string): string | undefined {
   return abbrev ? abbrev.toLowerCase() : undefined;
 }
 
+/** Map any upstream team id (ESPN numeric, abbrev, name) to the catalog id (e.g. bra). */
+export function resolveCanonicalTeamId(teamId: string, team?: Pick<Team, "abbreviation" | "name" | "shortName">): string {
+  const fromTeam =
+    resolveTeamAbbrevFromHint(team?.abbreviation) ??
+    resolveTeamAbbrevFromHint(team?.name) ??
+    resolveTeamAbbrevFromHint(team?.shortName);
+  if (fromTeam) return fromTeam.toLowerCase();
+
+  const fromId = resolveTeamAbbrevFromHint(teamId);
+  if (fromId) return fromId.toLowerCase();
+
+  return teamId;
+}
+
+/** One id per nation — used for qualification bucketing and standings keys. */
+export function uniqueCanonicalTeamIds(teams: Record<string, Team>): string[] {
+  const ids = new Set<string>();
+  for (const team of Object.values(teams)) {
+    ids.add(resolveCanonicalTeamId(team.id, team));
+  }
+  return [...ids].sort((a, b) => a.localeCompare(b));
+}
+
 export function mergeTeamsWithCatalog(teams: Record<string, Team>): Record<string, Team> {
   const catalog = buildWc2026TeamCatalog();
   const merged: Record<string, Team> = { ...catalog };
 
-  for (const [id, team] of Object.entries(teams)) {
+  for (const team of Object.values(teams)) {
     const patched = mergeTeamWithCatalog(team);
-    merged[id] = patched;
-    const abbrev = patched.abbreviation.toUpperCase();
+    const abbrev = patched.abbreviation?.toUpperCase();
+    if (!abbrev) continue;
     const catalogId = abbrev.toLowerCase();
-    if (catalogId !== id && merged[catalogId]) {
+    if (merged[catalogId]) {
       merged[catalogId] = { ...merged[catalogId], ...patched, id: catalogId };
     }
   }

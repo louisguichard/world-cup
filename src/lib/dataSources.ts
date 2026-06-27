@@ -2,7 +2,7 @@ import type { DataLoadResult, GroupLetter, Match, OutcomeProbabilities, Polymark
 import { isApiEnabled } from "../config/apiFlags";
 import { buildPrediction, makeFallbackPrediction, normalizeProbabilities } from "./predictions";
 import { normalizeName, pairKey } from "./normalize";
-import { fetchSportsLiveScoresFifaRankings } from "../services/SportsLiveScoresClient";
+import { loadStaticFifaRankings } from "./loadStaticFifaRankings";
 import { addModelRatings, calibrateRatingsToTitleMarket, type FifaRanking, type MatchMarket, type RatingMarket } from "./ratings";
 import { applyTeamLogoOverridesList } from "./resolveTeamLogo";
 import { simulateTournamentOutcomes } from "./tournament";
@@ -10,7 +10,6 @@ import { simulateTournamentOutcomes } from "./tournament";
 const ESPN_SCOREBOARD_PATH =
   "/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=300";
 const POLYMARKET_WINNER_PATH = "/events/slug/world-cup-winner";
-const FIFA_RANKINGS_PATH = "/api/v3/rankings?gender=1&count=211&locale=en";
 const TITLE_FORCE_CALIBRATION_ITERATIONS = 3000;
 const TITLE_FORCE_CALIBRATION_SEED = 20260624;
 const POLYMARKET_GAMES_PATHS = Array.from({ length: 8 }, (_, index) => index * 100).map(
@@ -201,50 +200,9 @@ async function loadTitleProbabilities(): Promise<Record<string, number>> {
   return probabilities;
 }
 
-function parseOfficialFifaRankings(response: unknown): Record<string, FifaRanking> {
-  const rankings: Record<string, FifaRanking> = {};
-  const results = (response as { Results?: unknown[] } | null)?.Results ?? [];
-
-  for (const item of results) {
-    const row = item as {
-      TeamName?: Array<{ Description?: string }>;
-      Rank?: number | string;
-      DecimalTotalPoints?: number | string;
-      TotalPoints?: number | string;
-    };
-    const name = row?.TeamName?.[0]?.Description;
-    const rank = Number(row?.Rank);
-    const points = Number(row?.DecimalTotalPoints ?? row?.TotalPoints);
-    if (name && Number.isFinite(rank) && Number.isFinite(points)) {
-      rankings[normalizeName(name)] = { rank, points };
-    }
-  }
-
-  return rankings;
-}
-
-async function loadOfficialFifaRankings(): Promise<Record<string, FifaRanking>> {
-  if (!isApiEnabled("fifaRankings")) return {};
-  const response = await fetchJson<unknown>(FIFA_RANKINGS_PATH, "fifa-api");
-  return parseOfficialFifaRankings(response);
-}
-
+/** Pre-tournament static snapshot — see `src/data/fifaRankings2026PreTournament.json`. */
 async function loadFifaRankings(): Promise<Record<string, FifaRanking>> {
-  if (isApiEnabled("fifaRankings")) {
-    try {
-      const official = await loadOfficialFifaRankings();
-      if (Object.keys(official).length > 0) return official;
-    } catch {
-      // Fall through to Sports Live Scores.
-    }
-  }
-
-  if (isApiEnabled("sportsLiveScores")) {
-    const fallback = await fetchSportsLiveScoresFifaRankings();
-    if (Object.keys(fallback).length > 0) return fallback;
-  }
-
-  return {};
+  return loadStaticFifaRankings();
 }
 
 async function loadPolymarketGames(): Promise<any[]> {
@@ -568,9 +526,7 @@ export async function loadWorldCupData(options: LoadWorldCupDataOptions = {}): P
     rankingResult.status === "fulfilled"
       ? rankingResult.value
       : (() => {
-          warnings.push(
-            "Could not load FIFA rankings (official API or Sports Live Scores fallback); using strength index."
-          );
+          warnings.push("Could not load FIFA rankings static snapshot; using strength index.");
           return {};
         })();
 

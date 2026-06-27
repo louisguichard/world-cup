@@ -1,4 +1,3 @@
-import { thirdPlaceMap } from "../data/thirdPlaceMap";
 import { knockoutSchedule } from "../data/knockoutSchedule";
 import type {
   BracketGhostCandidate,
@@ -26,25 +25,6 @@ type TeamsById = Record<string, Team>;
 const FORM_LOGIT_SCALE = 180;
 const PROJECTED_FORM_K = 8;
 const PROJECTED_FORM_CAP = 36;
-
-const roundOf32Definitions = [
-  ["M73", "2A", "2B"],
-  ["M74", "1E", "3:1E"],
-  ["M75", "1F", "2C"],
-  ["M76", "1C", "2F"],
-  ["M77", "1I", "3:1I"],
-  ["M78", "2E", "2I"],
-  ["M79", "1A", "3:1A"],
-  ["M80", "1L", "3:1L"],
-  ["M81", "1D", "3:1D"],
-  ["M82", "1G", "3:1G"],
-  ["M83", "2K", "2L"],
-  ["M84", "1H", "2J"],
-  ["M85", "1B", "3:1B"],
-  ["M86", "1J", "2H"],
-  ["M87", "1K", "3:1K"],
-  ["M88", "2D", "2G"]
-] as const;
 
 const nextRoundDefinitions: Record<Exclude<Stage, "R32">, Array<[string, string, string]>> = {
   R16: [
@@ -94,6 +74,7 @@ function formMarginMultiplier(homeScore: number, awayScore: number): number {
   return 1 + Math.min(0.65, Math.log1p(Math.abs(homeScore - awayScore)) * 0.35);
 }
 
+import { getR32Slots } from "./brackets/getR32Slots";
 import { rankThirdPlaceRecords } from "./thirdPlaceRanking";
 import {
   isKnockoutEliminated,
@@ -362,33 +343,6 @@ export function rankBestThirds(standings: GroupStanding[]): TeamRecord[] {
   return rankThirdPlaceRecords(thirds);
 }
 
-function seedToTeamId(
-  seed: string,
-  standingsByGroup: Record<GroupLetter, TeamRecord[]>,
-  thirdMapping: Record<string, string>,
-  qualifiedThirdTeamIds: Set<string>
-): string | undefined {
-  if (seed.startsWith("3:")) {
-    const group = thirdMapping[seed.slice(2)] as GroupLetter | undefined;
-    if (!group) return undefined;
-    const thirdId = standingsByGroup[group]?.[2]?.teamId;
-    return thirdId && qualifiedThirdTeamIds.has(thirdId) ? thirdId : undefined;
-  }
-
-  const rank = Number(seed[0]) - 1;
-  const group = seed[1] as GroupLetter;
-  return standingsByGroup[group]?.[rank]?.teamId;
-}
-
-function seedLabel(seed: string, thirdMapping: Record<string, string>): string {
-  if (seed.startsWith("3:")) {
-    const group = thirdMapping[seed.slice(2)];
-    return group ? `3${group}` : "3?";
-  }
-
-  return seed;
-}
-
 function playKnockoutMatch(
   id: string,
   stage: Stage,
@@ -521,30 +475,19 @@ function buildBracketFromStandings(
   picks: Record<string, string> = {},
   qualContext: QualificationMatchContext = { lockedGroupMatchCount: {}, lockedStandingsByGroup: {} }
 ): BracketMatch[] {
-  const standingsByGroup = Object.fromEntries(
-    standings.map((standing) => [standing.group, standing.rows])
-  ) as Record<GroupLetter, TeamRecord[]>;
-  const aliveBestThirds = rankAliveBestThirds(standings, qualContext);
-  const qualifiedThirdTeamIds = new Set(aliveBestThirds.slice(0, 8).map((record) => record.teamId));
-  const qualifiedThirdGroups = aliveBestThirds
-    .slice(0, 8)
-    .map((record) => record.group)
-    .sort()
-    .join("");
-  const thirdMapping = thirdPlaceMap[qualifiedThirdGroups] ?? {};
-
-  const r32 = roundOf32Definitions.map(([id, homeSeed, awaySeed]) =>
+  const r32Slots = getR32Slots(standings, teamsById, qualContext);
+  const r32 = r32Slots.map((slot) =>
     playKnockoutMatch(
-      id,
+      slot.matchId,
       "R32",
-      seedToTeamId(homeSeed, standingsByGroup, thirdMapping, qualifiedThirdTeamIds),
-      seedToTeamId(awaySeed, standingsByGroup, thirdMapping, qualifiedThirdTeamIds),
+      slot.homeTeamId,
+      slot.awayTeamId,
       teamsById,
       knockoutMarkets,
       random,
       picks,
-      seedLabel(homeSeed, thirdMapping),
-      seedLabel(awaySeed, thirdMapping)
+      slot.homeSource,
+      slot.awaySource
     )
   );
 

@@ -1,4 +1,5 @@
 import type { MergedMatch, Team } from "../types";
+import { markProxyDead } from "../lib/proxyHealthMonitor";
 import { rapidApiHeaders, providerByHost } from "../config/rapidApiCatalog";
 import {
   SOFA_FOOTBALL_SPORT_SLUG,
@@ -122,6 +123,7 @@ async function fetchJson<T = unknown>(path: string, context: string): Promise<T 
     const res = await fetch(`${baseUrl()}${path}`, { headers: rapidHeaders() });
     if (res.status === 401 || res.status === 403 || res.status === 429) {
       sessionDisabled = true;
+      markProxyDead("sportapi7", `HTTP ${res.status}`);
       const bodySnippet = await res.text().then((t) => t.slice(0, 300)).catch(() => "");
       logger.warn(`SofaScore6 blocked for session (${context})`, "SofaScore6Client", {
         status: res.status,
@@ -131,6 +133,9 @@ async function fetchJson<T = unknown>(path: string, context: string): Promise<T 
     }
     if (res.status === 404) return null;
     if (!res.ok) {
+      if (res.status >= 500) {
+        markProxyDead("sportapi7", `HTTP ${res.status}`);
+      }
       logger.warn(`SofaScore6 ${context} failed`, "SofaScore6Client", { status: res.status, path });
       return null;
     }

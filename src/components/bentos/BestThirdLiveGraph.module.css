@@ -187,7 +187,7 @@
 
 .ladderClick {
   display: grid;
-  grid-template-columns: 1.5rem 1.25rem minmax(0, 1fr) auto auto auto auto;
+  grid-template-columns: 1.5rem 28px minmax(0, 1fr) auto auto auto auto;
   align-items: center;
   gap: 6px;
   width: 100%;
@@ -200,6 +200,17 @@
   text-align: left;
 }
 
+.ladderClick .team-flag-badge {
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  flex-shrink: 0;
+}
+
+.ladderClick .team-flag-stars {
+  display: none;
+}
+
 .ladderClick:focus-visible {
   outline: 2px solid var(--fwc-royal-blue);
   outline-offset: -2px;
@@ -207,11 +218,22 @@
 
 .focusCard.team-click-target {
   display: grid;
-  grid-template-columns: auto auto 1fr auto auto;
+  grid-template-columns: auto 28px 1fr auto auto;
   align-items: center;
   gap: 8px;
   width: 100%;
   text-align: left;
+}
+
+.focusCard .team-flag-badge {
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  flex-shrink: 0;
+}
+
+.focusCard .team-flag-stars {
+  display: none;
 }
 
 .ladderFocus {

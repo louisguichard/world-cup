@@ -78,9 +78,17 @@
   align-items: stretch;
 }
 
+.dashboard-section:has(.schedule-list) {
+  padding-inline: calc(var(--fixture-glow-spread, 16px) / 2);
+  box-sizing: border-box;
+}
+
 .schedule-list {
-  grid-template-columns: repeat(auto-fill, minmax(var(--module-grid-min), 1fr));
-  gap: calc(var(--module-gap) + var(--fixture-glow-spread, 16px));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: var(--module-gap);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .groups-table-grid {
@@ -104,6 +112,14 @@
 .dashboard-section {
   margin-bottom: var(--module-gap-lg);
   overflow: visible;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.dashboard-section > * {
+  max-width: 100%;
+  min-width: 0;
 }
 
 .dashboard-section + .dashboard-section {
@@ -116,9 +132,16 @@
 }
 
 .dashboard-section-skeleton {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   min-height: 320px;
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+}
+
+.qual-dashboard-row > .dashboard-section-skeleton {
+  min-height: min(240px, 42vh);
 }
 
 .section-heading.compact {
@@ -267,10 +290,10 @@
 }
 
 .schedule-card .match-goal-scorers-slot {
-  flex: 0 0 32px;
+  flex: 0 0 auto;
   min-height: 32px;
-  max-height: 32px;
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
 }
 
 .schedule-card .broadcast-bar-slot,

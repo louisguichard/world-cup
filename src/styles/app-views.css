@@ -16,7 +16,22 @@
 
 .hero-panel--compact h1 {
   margin-top: 12px;
-  max-width: 22ch;
+  max-width: none;
+  overflow: visible;
+  line-height: 1.05;
+  padding-bottom: 2px;
+}
+
+.hero-panel--compact h1 .accent {
+  display: inline;
+  position: relative;
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+}
+
+.dashboard-view .hero-panel h1 {
+  overflow: visible;
+  line-height: 1.08;
 }
 
 .hero-panel--compact p {
@@ -183,10 +198,14 @@
 }
 
 .live-hero-scoreline {
-  grid-template-columns: minmax(0, 1fr) 44px 12px 44px minmax(0, 1fr);
+  grid-template-columns: minmax(52px, 1fr) 44px 12px 44px minmax(52px, 1fr);
   align-items: center;
   flex-shrink: 0;
   min-height: 48px;
+}
+
+.live-hero-card .score-line.live-hero-scoreline {
+  grid-template-columns: minmax(52px, 1fr) 44px 12px 44px minmax(52px, 1fr);
 }
 
 .live-hero-card--secondary .live-hero-scoreline {
@@ -215,15 +234,59 @@
   color: var(--text-primary);
 }
 
-.live-hero-card--primary .team-name-text,
-.live-hero-card--secondary .team-name-text {
-  font-size: var(--text-sm);
-  white-space: nowrap;
+.live-hero-card .team-flag-badge,
+.live-now-strip .team-flag-badge {
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+}
+
+.live-hero-card .team-flag-stars,
+.live-now-strip .team-flag-stars {
+  display: none;
+}
+
+.live-now-strip .team-label {
+  min-width: 28px;
+  flex-shrink: 0;
+}
+
+.team-flag-badge--compact {
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  min-height: 28px;
+  flex-shrink: 0;
   overflow: hidden;
 }
 
-.live-hero-card--secondary .team-flag-badge {
-  min-height: 28px;
+.team-flag-badge--compact .team-flag-inner.sm {
+  width: 24px;
+  height: 24px;
+  padding: var(--team-crest-inset, 10%);
+}
+
+.live-hero-card--primary .team-label,
+.live-hero-card--secondary .team-label {
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.live-hero-card--primary .team-label.right,
+.live-hero-card--secondary .team-label.right {
+  align-items: center;
+}
+
+.live-hero-card--primary .team-name-text,
+.live-hero-card--secondary .team-name-text {
+  font-size: 0.62rem;
+  max-width: 72px;
+  text-align: center;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .live-hero-card .team-flag-badge {
@@ -231,8 +294,21 @@
   justify-content: flex-end;
 }
 
+.live-hero-card--secondary .team-flag-badge {
+  width: auto;
+  min-width: 0;
+  max-width: 24px;
+  min-height: auto;
+  justify-content: center;
+}
+
+.live-hero-card--secondary .team-flag-inner.sm {
+  width: 22px;
+  height: 22px;
+}
+
 .live-hero-score {
-  font-family: var(--font-brand);
+  font-family: var(--font-display);
   font-size: var(--text-4xl);
   font-weight: 400;
   font-variant-numeric: tabular-nums;
@@ -446,9 +522,29 @@
 
 .schedule-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: 12px;
   align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.schedule-list .fixture-glow-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: 0;
+  box-sizing: border-box;
+}
+
+.schedule-day-group {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: clip;
 }
 
 @media (min-width: 900px) {
@@ -540,9 +636,25 @@
   letter-spacing: 0.02em;
 }
 
+.schedule-card.is-live .team-label {
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.schedule-card.is-live .team-label.right {
+  align-items: center;
+}
+
 .schedule-card.is-live .team-name-text {
+  font-size: 0.62rem;
+  max-width: 72px;
+  text-align: center;
+  line-height: 1.15;
   overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .schedule-card.is-live .match-goal-scorers-slot {
@@ -617,7 +729,7 @@
 }
 
 .schedule-score {
-  font-family: var(--font-brand);
+  font-family: var(--font-display);
   font-size: var(--text-2xl);
   font-weight: 400;
   font-variant-numeric: tabular-nums;
@@ -791,6 +903,7 @@
   border: 1px solid var(--line);
   background: var(--surface-2);
   overflow: hidden;
+  max-width: 100%;
 }
 
 .fixture-betting-summary {
@@ -838,6 +951,9 @@
 .fixture-betting-body {
   padding: 0 10px 10px;
   border-top: 1px solid var(--line);
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
 }
 
 .fixture-betting-body .odds-panel {
@@ -845,6 +961,20 @@
   border: none;
   background: transparent;
   padding: 0;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.fixture-betting-details[open] .fixture-betting-body {
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.fixture-betting-details[open] .fixture-betting-body > * {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .fixture-betting-body .fp-match-badge {
@@ -1418,11 +1548,22 @@
 .bracket-view .bracket-cell {
   position: relative;
   margin-bottom: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.bracket-view .bracket-round:not(.is-final) .bracket-cell::before,
+.bracket-view .bracket-round:not(.is-final) .bracket-cell::after {
+  display: none;
 }
 
 .bracket-view .bracket-round {
   flex: none;
   margin-right: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .bracket-view .bracket-card {
@@ -1438,14 +1579,20 @@
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 /* Constrain venue label inside card head */
 .bracket-card-head .venue-label,
 .bracket-card-head [class*="venue"] {
-  max-width: 90px;
+  flex: 0 1 auto;
+  max-width: min(90px, 42%);
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1579,7 +1726,8 @@
 
 .bracket-view .bracket-section {
   margin-bottom: 18px;
-  overflow: visible;
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 .live-bracket-embed {
@@ -1845,7 +1993,9 @@
 
 .group-table-bento-header h3 {
   margin: 0;
+  font-family: var(--font-display);
   font-size: 1rem;
+  letter-spacing: var(--tracking-label, 0.02em);
 }
 
 .best-third-table-lead {
@@ -1854,8 +2004,22 @@
   font-size: 0.82rem;
 }
 
+.live-bracket-embed .bracket-rounds .bracket-round:nth-child(2),
+.live-bracket-embed .bracket-rounds .bracket-round:nth-child(3),
+.live-bracket-embed .bracket-rounds .bracket-round:nth-child(4),
+.live-bracket-embed .bracket-rounds .bracket-round:nth-child(5) {
+  margin-top: 0;
+}
+
+.live-bracket-embed .bracket-rounds {
+  align-items: start;
+  padding-bottom: 8px;
+}
+
 .group-table-scroll {
   overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 8px;
 }
 
 .group-table {
@@ -2110,8 +2274,13 @@ tr.qual-row--in-contention {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
   gap: 1px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .team-flag-stars {
@@ -2240,6 +2409,9 @@ tr.qual-row--in-contention {
 .team-flag-inner.sm {
   width: 28px;
   height: 28px;
+  max-width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
   padding: var(--team-crest-inset, 13%);
 }
 
@@ -2463,6 +2635,17 @@ tr.qual-row--in-contention {
   min-width: 0;
 }
 
+.recent-result-team .team-flag-badge {
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  flex-shrink: 0;
+}
+
+.recent-result-team .team-flag-stars {
+  display: none;
+}
+
 .recent-result-team .team-name-text {
   flex: 1 1 auto;
   min-width: 0;
@@ -2513,6 +2696,8 @@ tr.qual-row--in-contention {
   align-items: flex-start;
   gap: 10px;
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 10px 12px;
   border: none;
   border-left: 3px solid var(--team-primary, #6b7280);
@@ -2527,13 +2712,13 @@ tr.qual-row--in-contention {
 .teams-row--accent.teams-row--accent-animated {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .teams-row--accent.teams-row--accent-animated::before {
   content: "";
   position: absolute;
-  inset: -14px;
+  inset: -8px;
   z-index: 0;
   border-radius: calc(var(--radius-md) + 14px);
   --fixture-glow-angle: 38deg;
@@ -2553,6 +2738,20 @@ tr.qual-row--in-contention {
 .teams-row--accent.teams-row--accent-animated > * {
   position: relative;
   z-index: 1;
+  min-width: 0;
+}
+
+.result-match-card .team-flag-stars {
+  display: none;
+}
+
+.result-match-card .team-flag-badge {
+  min-height: auto;
+}
+
+.result-match-card .team-flag-inner.sm {
+  width: 26px;
+  height: 26px;
 }
 
 .teams-filter-pill.active.teams-filter-pill--qualified {

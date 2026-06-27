@@ -31,9 +31,7 @@ function isConfirmedQualified(qual: QualificationStatus): boolean {
 
 function isProjectedQualified(qual: QualificationStatus): boolean {
   if (!qual.canQualify) return false;
-  if (qual.status === "qualified" && qual.certainty !== "confirmed") return true;
-  if (qual.status === "at_risk") return true;
-  return false;
+  return qual.status === "qualified" && qual.certainty !== "confirmed";
 }
 
 function isProjectedEliminated(qual: QualificationStatus): boolean {
