@@ -1,6 +1,7 @@
 import type { SofaTeamMatchSummary, SofaTeamPlayer, SofaTeamStatistics } from "../../types/teamProfile";
 import { formatKickoffDate } from "../../lib/formatKickoff";
 import { formatMarketValue, positionLabel } from "../../services/teamProfile/normalizeTeamProfile";
+import { PlayerPhoto } from "../player/PlayerPhoto";
 
 type Props = {
   players: SofaTeamPlayer[];
@@ -16,11 +17,12 @@ export function TeamSquadList({ players }: Props) {
       {players.map((p) => (
         <li key={p.id} className="team-squad-row">
           <span className="team-squad-num">{p.shirtNumber ?? p.jerseyNumber ?? "—"}</span>
-          {p.imagePath ? (
-            <img src={p.imagePath} alt="" className="team-squad-photo" loading="lazy" />
-          ) : (
-            <span className="team-squad-photo team-squad-photo--placeholder" aria-hidden />
-          )}
+          <PlayerPhoto
+            name={p.shortName ?? p.name}
+            photoUrl={p.imagePath}
+            size="lg"
+            className="team-squad-photo"
+          />
           <span className="team-squad-name">
             <strong>{p.shortName ?? p.name}</strong>
             {p.clubName ? <span className="team-squad-club">{p.clubName}</span> : null}

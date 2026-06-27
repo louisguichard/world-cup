@@ -1,0 +1,84 @@
+.wrap {
+  padding: 0 0 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px 12px;
+  font-size: 11px;
+  color: var(--ss-muted);
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  gap: 12px;
+  animation: fadeSlideIn 0.25s ease both;
+  animation-fill-mode: both;
+}
+
+.side {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
+.sideHome {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.sideAway {
+  justify-content: flex-start;
+}
+
+.sideHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.eventLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ss-text);
+  min-width: 0;
+}
+
+.sideHome .eventLabel {
+  flex-direction: row-reverse;
+}
+
+.spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 48px;
+  flex-shrink: 0;
+}
+
+.icon {
+  font-size: 16px;
+}
+
+.minute {
+  font-size: 10px;
+  color: var(--ss-brand);
+  font-weight: 600;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

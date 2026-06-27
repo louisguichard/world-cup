@@ -15,12 +15,15 @@ import { getHistoricalMatchesForTeam, type ZafronixMatch } from "../../services/
 import { TeamThemeRoot } from "../team/TeamThemeRoot";
 import { TeamFlag } from "../team/TeamFlag";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
-import { TeamMediaList, TeamMatchLists, TeamSquadList, TeamStatsPanel } from "./TeamProfileSections";
+import { TeamMatchLists, TeamSquadList, TeamStatsPanel } from "./TeamProfileSections";
 import { Wc2026SquadList } from "./Wc2026SquadList";
+import { PlayerPhoto } from "../player/PlayerPhoto";
 import { useTeamProfile } from "../../hooks/useTeamProfile";
 import { useWc2026TeamSquad } from "../../hooks/useWc2026TeamSquad";
 import { useZafronixTeamRoster } from "../../hooks/useZafronixTeamRoster";
 import { TeamBettingPanel } from "./TeamBettingPanel";
+import { TeamHighlightlyPanel } from "./TeamHighlightlyPanel";
+import { useHighlightlyTeamData } from "../../hooks/useHighlightlyTeamData";
 import { predictionsForTeam } from "../../lib/matchFootballPredictions";
 import type { MergedMatch } from "../../types";
 
@@ -31,7 +34,7 @@ const TAB_LABELS: Record<Tab, string> = {
   squad: "Squad",
   fixtures: "Fixtures",
   stats: "Stats",
-  media: "Media",
+  media: "Highlights",
   betting: APP_COPY.odds.tabLabel,
 };
 type MatchOutcome = "W" | "D" | "L";
@@ -58,6 +61,8 @@ export function TeamDetailSheet() {
   const [recentForm, setRecentForm] = useState<ZafronixMatch[]>([]);
 
   const team = teamId ? teams[teamId] : null;
+  const teamDisplay = team ? teamDisplayName(team, team.id) : "";
+  const highlightlyTeam = useHighlightlyTeamData(teamDisplay, tab === "media" && Boolean(team));
   const { profile: sofaProfile, loading: sofaLoading } = useTeamProfile(team?.abbreviation);
   const { players: wcSquad, loading: wcSquadLoading } = useWc2026TeamSquad(team);
   const { players: zafronixSquad, loading: zafronixRosterLoading } = useZafronixTeamRoster(
@@ -275,7 +280,11 @@ export function TeamDetailSheet() {
                 {zafronixSquad.map((p) => (
                   <li key={p.name} className="team-squad-row">
                     <span className="team-squad-num">{p.number ?? "—"}</span>
-                    <span className="team-squad-photo team-squad-photo--placeholder" aria-hidden />
+                    <PlayerPhoto
+                      name={p.name ?? "Player"}
+                      size="lg"
+                      className="team-squad-photo"
+                    />
                     <span className="team-squad-name">
                       <strong>{p.name}</strong>
                       {p.club ? <span className="team-squad-club">{p.club}</span> : null}
@@ -327,10 +336,16 @@ export function TeamDetailSheet() {
           ) : null}
 
           {tab === "media" ? (
-            sofaLoading ? (
-              <p className="team-sheet-empty">Loading media…</p>
+            highlightlyTeam.loading && highlightlyTeam.highlights.length === 0 ? (
+              <p className="team-sheet-empty">Loading highlights…</p>
             ) : (
-              <TeamMediaList items={sofaProfile?.media ?? []} />
+              <TeamHighlightlyPanel
+                teamName={teamDisplay}
+                highlights={highlightlyTeam.highlights}
+                lastFive={highlightlyTeam.lastFive}
+                seasonStats={highlightlyTeam.seasonStats}
+                loading={highlightlyTeam.loading}
+              />
             )
           ) : null}
 

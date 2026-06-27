@@ -1,4 +1,7 @@
 import type { Lineup, LineupPlayer } from "../../../../types";
+import { resolveLineupPlayerPhoto } from "../../../../lib/resolveLineupPlayerPhoto";
+import { PlayerPhoto } from "../../../../components/player/PlayerPhoto";
+import styles from "./PitchDiagram.module.css";
 
 type Props = {
   homeLineup: Lineup;
@@ -13,26 +16,24 @@ type PlayerCardProps = {
 };
 
 function PlayerCard({ player, x, y, side }: PlayerCardProps) {
+  const photoUrl = resolveLineupPlayerPhoto(player.player);
+  const surname = player.player.displayName.split(" ").pop() ?? player.player.displayName;
+
   return (
     <g transform={`translate(${x}, ${y})`}>
-      {/* Circle */}
+      <foreignObject x={-14} y={-14} width={28} height={28}>
+        <div className={styles.photoWrap}>
+          <PlayerPhoto name={player.player.displayName} photoUrl={photoUrl} size="sm" />
+        </div>
+      </foreignObject>
       <circle
         r={14}
-        fill={side === "home" ? "var(--ss-brand)" : "var(--ss-danger)"}
-        opacity={0.9}
+        cy={0}
+        fill="none"
+        stroke={side === "home" ? "var(--ss-brand)" : "var(--ss-danger)"}
+        strokeWidth={2}
+        opacity={0.85}
       />
-      {/* Jersey number */}
-      <text
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill="#fff"
-        fontSize={10}
-        fontWeight={700}
-        fontFamily="inherit"
-      >
-        {player.player.jerseyNumber ?? ""}
-      </text>
-      {/* Name below */}
       <text
         textAnchor="middle"
         y={20}
@@ -41,9 +42,8 @@ function PlayerCard({ player, x, y, side }: PlayerCardProps) {
         fontFamily="inherit"
         opacity={0.9}
       >
-        {player.player.displayName.split(" ").pop() ?? player.player.displayName}
+        {player.player.jerseyNumber ?? ""} {surname}
       </text>
-      {/* Captain band */}
       {player.isCaptain ? (
         <text
           textAnchor="middle"
@@ -65,27 +65,19 @@ export function PitchDiagram({ homeLineup, awayLineup }: Props) {
   const HEIGHT = 420;
   const PADDING = 20;
 
-  // Map 0–100 grid coordinates to SVG coordinates
   const toSvgX = (x: number) => PADDING + (x / 100) * (WIDTH - PADDING * 2);
-  // Home team: bottom half (y 50–100 → SVG 210–400)
-  // Away team: top half (y 0–50 → SVG 20–210) — mirrored
   const toSvgYHome = (y: number) => HEIGHT - PADDING - ((y / 100) * (HEIGHT / 2 - PADDING));
-  const toSvgYAway = (y: number) =>
-    PADDING + ((y / 100) * (HEIGHT / 2 - PADDING));
+  const toSvgYAway = (y: number) => PADDING + ((y / 100) * (HEIGHT / 2 - PADDING));
 
   return (
-    <div style={{ overflow: "hidden", borderRadius: 10 }}>
+    <div className={styles.wrap}>
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         width="100%"
-        style={{ display: "block", maxWidth: 340, margin: "0 auto" }}
+        className={styles.svg}
         aria-label="Pitch diagram with player positions"
       >
-        {/* Pitch background */}
         <rect width={WIDTH} height={HEIGHT} fill="#1a3a1a" rx={8} />
-
-        {/* Pitch lines */}
-        {/* Outer border */}
         <rect
           x={PADDING}
           y={PADDING}
@@ -95,7 +87,6 @@ export function PitchDiagram({ homeLineup, awayLineup }: Props) {
           stroke="var(--ss-pitch-line, rgba(255,255,255,0.25))"
           strokeWidth={1}
         />
-        {/* Center line */}
         <line
           x1={PADDING}
           y1={HEIGHT / 2}
@@ -104,7 +95,6 @@ export function PitchDiagram({ homeLineup, awayLineup }: Props) {
           stroke="var(--ss-pitch-line, rgba(255,255,255,0.25))"
           strokeWidth={1}
         />
-        {/* Center circle */}
         <circle
           cx={WIDTH / 2}
           cy={HEIGHT / 2}
@@ -113,7 +103,6 @@ export function PitchDiagram({ homeLineup, awayLineup }: Props) {
           stroke="var(--ss-pitch-line, rgba(255,255,255,0.2))"
           strokeWidth={1}
         />
-        {/* Penalty areas */}
         <rect
           x={WIDTH / 2 - 60}
           y={PADDING}
@@ -133,7 +122,6 @@ export function PitchDiagram({ homeLineup, awayLineup }: Props) {
           strokeWidth={1}
         />
 
-        {/* Away players (top half) */}
         {awayLineup.startingXI.map((player, i) => {
           const pos = player.gridPosition ?? { x: 50, y: i * 9 };
           return (
@@ -147,7 +135,6 @@ export function PitchDiagram({ homeLineup, awayLineup }: Props) {
           );
         })}
 
-        {/* Home players (bottom half) */}
         {homeLineup.startingXI.map((player, i) => {
           const pos = player.gridPosition ?? { x: 50, y: i * 9 };
           return (
@@ -162,43 +149,13 @@ export function PitchDiagram({ homeLineup, awayLineup }: Props) {
         })}
       </svg>
 
-      {/* Legend */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 16,
-          padding: "8px 0",
-          fontSize: 11,
-          color: "var(--ss-muted)"
-        }}
-      >
+      <div className={styles.legend}>
         <span>
-          <span
-            style={{
-              display: "inline-block",
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "var(--ss-brand)",
-              marginRight: 4,
-              verticalAlign: "middle"
-            }}
-          />
+          <span className={`${styles.legendDot} ${styles.legendHome}`} />
           Home
         </span>
         <span>
-          <span
-            style={{
-              display: "inline-block",
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "var(--ss-danger)",
-              marginRight: 4,
-              verticalAlign: "middle"
-            }}
-          />
+          <span className={`${styles.legendDot} ${styles.legendAway}`} />
           Away
         </span>
       </div>

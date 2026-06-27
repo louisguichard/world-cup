@@ -1,4 +1,7 @@
-import type { MatchEvent } from "../../../../types";
+import type { MatchEvent, Team } from "../../../../types";
+import { PlayerPhoto } from "../../../../components/player/PlayerPhoto";
+import { useEventPlayerPhotos } from "../../../../hooks/useEventPlayerPhotos";
+import styles from "./MatchEventTimeline.module.css";
 
 type Props = {
   events: MatchEvent[];
@@ -6,6 +9,8 @@ type Props = {
   awayTeamId: string;
   homeTeamName: string;
   awayTeamName: string;
+  homeTeam?: Team;
+  awayTeam?: Team;
 };
 
 const EVENT_ICON: Record<import("../../../../types").MatchEventType, string> = {
@@ -18,21 +23,42 @@ const EVENT_ICON: Record<import("../../../../types").MatchEventType, string> = {
   var_review: "📺",
   goal_disallowed: "⚽",
   penalty_missed: "🎯",
-  penalty_saved: "🧤"
+  penalty_saved: "🧤",
 };
+
+const PLAYER_EVENT_TYPES = new Set<MatchEvent["type"]>([
+  "goal",
+  "own_goal",
+  "yellow_card",
+  "red_card",
+  "yellow_red_card",
+  "substitution",
+  "penalty_missed",
+  "penalty_saved",
+]);
 
 function eventLabel(event: MatchEvent): string {
   switch (event.type) {
-    case "goal": return `${event.playerName}${event.assistName ? ` (${event.assistName})` : ""}`;
-    case "own_goal": return `${event.playerName} (OG)`;
-    case "yellow_card": return `${event.playerName} (YC)`;
-    case "red_card": return `${event.playerName} (RC)`;
-    case "yellow_red_card": return `${event.playerName} (2Y)`;
-    case "substitution": return `↑ ${event.playerName}${event.assistName ? ` ↓ ${event.assistName}` : ""}`;
-    case "var_review": return `VAR: ${event.playerName} — ${event.varOutcome ?? "review"}`;
-    case "goal_disallowed": return `${event.playerName} (Disallowed)`;
-    case "penalty_missed": return `${event.playerName} (Pen. missed)`;
-    case "penalty_saved": return `${event.playerName} (Pen. saved)`;
+    case "goal":
+      return `${event.playerName}${event.assistName ? ` (${event.assistName})` : ""}`;
+    case "own_goal":
+      return `${event.playerName} (OG)`;
+    case "yellow_card":
+      return `${event.playerName} (YC)`;
+    case "red_card":
+      return `${event.playerName} (RC)`;
+    case "yellow_red_card":
+      return `${event.playerName} (2Y)`;
+    case "substitution":
+      return `↑ ${event.playerName}${event.assistName ? ` ↓ ${event.assistName}` : ""}`;
+    case "var_review":
+      return `VAR: ${event.playerName} — ${event.varOutcome ?? "review"}`;
+    case "goal_disallowed":
+      return `${event.playerName} (Disallowed)`;
+    case "penalty_missed":
+      return `${event.playerName} (Pen. missed)`;
+    case "penalty_saved":
+      return `${event.playerName} (Pen. saved)`;
     default: {
       const _never: never = event.type;
       return String(_never);
@@ -40,102 +66,75 @@ function eventLabel(event: MatchEvent): string {
   }
 }
 
+function EventRow({
+  event,
+  isHome,
+  photoUrl,
+  index,
+}: {
+  event: MatchEvent;
+  isHome: boolean;
+  photoUrl?: string;
+  index: number;
+}) {
+  const minuteLabel = event.minuteExtra
+    ? `${event.minute}+${event.minuteExtra}'`
+    : `${event.minute}'`;
+  const showPhoto = PLAYER_EVENT_TYPES.has(event.type);
+
+  const label = (
+    <span className={styles.eventLabel}>
+      {showPhoto ? (
+        <PlayerPhoto name={event.playerName} photoUrl={photoUrl} size="sm" />
+      ) : null}
+      {eventLabel(event)}
+    </span>
+  );
+
+  return (
+    <div
+      className={styles.row}
+      style={{ animationDelay: `${index * 50}ms` }}
+    >
+      <div className={`${styles.side} ${styles.sideHome}${isHome ? "" : ` ${styles.sideHidden}`}`}>
+        {isHome ? label : null}
+      </div>
+      <div className={styles.spine}>
+        <span className={styles.icon}>{EVENT_ICON[event.type]}</span>
+        <span className={styles.minute}>{minuteLabel}</span>
+      </div>
+      <div className={`${styles.side} ${styles.sideAway}${!isHome ? "" : ` ${styles.sideHidden}`}`}>
+        {!isHome ? label : null}
+      </div>
+    </div>
+  );
+}
+
 export function MatchEventTimeline({
   events,
   homeTeamId,
   homeTeamName,
-  awayTeamName
+  awayTeamName,
+  homeTeam,
+  awayTeam,
 }: Props) {
+  const photos = useEventPlayerPhotos({ events, homeTeam, awayTeam });
+
   return (
-    <div style={{ padding: "0 0 16px" }}>
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "0 16px 12px",
-          fontSize: 11,
-          color: "var(--ss-muted)",
-          fontWeight: 600
-        }}
-      >
+    <div className={styles.wrap}>
+      <div className={styles.header}>
         <span>{homeTeamName}</span>
         <span>{awayTeamName}</span>
       </div>
-
-      {/* Spine */}
-      {events.map((event, i) => {
-        const isHome = event.teamId === homeTeamId;
-        const minuteLabel = event.minuteExtra
-          ? `${event.minute}+${event.minuteExtra}'`
-          : `${event.minute}'`;
-
-        return (
-          <div
-            key={event.providerId}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              padding: "8px 16px",
-              gap: 12,
-              animation: `fadeSlideIn 0.25s ease both`,
-              animationDelay: `${i * 50}ms`,
-              animationFillMode: "both"
-            }}
-          >
-            {/* Home side */}
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                justifyContent: "flex-end",
-                textAlign: "right",
-                opacity: isHome ? 1 : 0,
-                pointerEvents: isHome ? "auto" : "none"
-              }}
-            >
-              {isHome ? (
-                <span style={{ fontSize: 13, color: "var(--ss-text)" }}>
-                  {eventLabel(event)}
-                </span>
-              ) : null}
-            </div>
-
-            {/* Center spine */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 2,
-                minWidth: 48
-              }}
-            >
-              <span style={{ fontSize: 16 }}>{EVENT_ICON[event.type]}</span>
-              <span style={{ fontSize: 10, color: "var(--ss-brand)", fontWeight: 600 }}>
-                {minuteLabel}
-              </span>
-            </div>
-
-            {/* Away side */}
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                justifyContent: "flex-start",
-                opacity: !isHome ? 1 : 0,
-                pointerEvents: !isHome ? "auto" : "none"
-              }}
-            >
-              {!isHome ? (
-                <span style={{ fontSize: 13, color: "var(--ss-text)" }}>
-                  {eventLabel(event)}
-                </span>
-              ) : null}
-            </div>
-          </div>
-        );
-      })}
+      {events.map((event, i) => (
+        <EventRow
+          key={event.providerId}
+          event={event}
+          isHome={event.teamId === homeTeamId}
+          photoUrl={photos[event.providerId]}
+          index={i}
+        />
+      ))}
     </div>
   );
 }

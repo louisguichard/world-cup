@@ -2,6 +2,9 @@ import type { MatchEvent, MergedMatch, Team } from "../../../../types";
 import type { MatchBundle } from "../../../../services/matchDetail/fetchMatchBundle";
 import { MatchFactsPanel } from "../summary/MatchFactsPanel";
 import { MatchEventTimeline } from "../summary/MatchEventTimeline";
+import type { HighlightlyMatchBundle } from "../../../../types/sportHighlights";
+import { HighlightlyFactsPanel } from "../summary/HighlightlyFactsPanel";
+import { HighlightlyStatsPanel } from "../statistics/HighlightlyStatsPanel";
 import { GoalScorersPanel } from "../../../../components/match/GoalScorersPanel";
 import { useGoalScorerProfiles } from "../../../../hooks/useGoalScorerProfiles";
 import { useStore } from "../../../../store";
@@ -15,6 +18,7 @@ type Props = {
   awayTeamName: string;
   homeTeam?: Team;
   awayTeam?: Team;
+  highlightly?: HighlightlyMatchBundle & { loading?: boolean };
 };
 
 export function MatchSummaryTab({
@@ -25,6 +29,7 @@ export function MatchSummaryTab({
   awayTeamName,
   homeTeam,
   awayTeam,
+  highlightly,
 }: Props) {
   const matchEvents = useStore((s) => s.matchEvents);
   const { profiles, loading } = useGoalScorerProfiles({
@@ -67,6 +72,22 @@ export function MatchSummaryTab({
         awayTeam={awayTeam}
         loading={loading}
       />
+      {highlightly ? (
+        <>
+          <HighlightlyFactsPanel
+            detail={highlightly.matchDetail}
+            lastFiveHome={highlightly.lastFiveHome}
+            lastFiveAway={highlightly.lastFiveAway}
+            homeTeamName={homeTeamName}
+            awayTeamName={awayTeamName}
+          />
+          <HighlightlyStatsPanel
+            statistics={highlightly.statistics}
+            homeTeamName={homeTeamName}
+            awayTeamName={awayTeamName}
+          />
+        </>
+      ) : null}
       <MatchFactsPanel
         events={events}
         homeConduct={match.homeConduct}
@@ -80,6 +101,8 @@ export function MatchSummaryTab({
         awayTeamId={match.awayTeamId}
         homeTeamName={homeTeamName}
         awayTeamName={awayTeamName}
+        homeTeam={homeTeam}
+        awayTeam={awayTeam}
       />
     </>
   );

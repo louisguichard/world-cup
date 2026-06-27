@@ -1,5 +1,7 @@
 import type { Wc2026Player } from "../../services/WorldCup2026Client";
+import { photoUrlFromPlayer } from "../../services/playerProfile/resolveEventPlayerPhotos";
 import { formatMarketValue, positionLabel } from "../../services/teamProfile/normalizeTeamProfile";
+import { PlayerPhoto } from "../player/PlayerPhoto";
 
 type Props = {
   players: Wc2026Player[];
@@ -15,11 +17,12 @@ export function Wc2026SquadList({ players }: Props) {
       {players.map((p) => (
         <li key={p.id} className="team-squad-row">
           <span className="team-squad-num">{p.jerseyNumber ?? "—"}</span>
-          {p.image ? (
-            <img src={p.image} alt="" className="team-squad-photo" loading="lazy" />
-          ) : (
-            <span className="team-squad-photo team-squad-photo--placeholder" aria-hidden />
-          )}
+          <PlayerPhoto
+            name={p.fullName}
+            photoUrl={photoUrlFromPlayer(p)}
+            size="lg"
+            className="team-squad-photo"
+          />
           <span className="team-squad-name">
             <strong>{p.fullName}</strong>
             {p.club ? <span className="team-squad-club">{p.club}</span> : null}

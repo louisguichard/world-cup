@@ -15,6 +15,7 @@ import { MatchStatisticsTab } from "./components/tabs/MatchStatisticsTab";
 import { MatchLineupsTab } from "./components/tabs/MatchLineupsTab";
 import { MatchCommentaryTab } from "./components/tabs/MatchCommentaryTab";
 import { MatchH2HTab } from "./components/tabs/MatchH2HTab";
+import { MatchHighlightsTab } from "./components/tabs/MatchHighlightsTab";
 import type { MatchDetailTab, MatchEvent } from "../../types";
 import { clearReturnContext } from "../../store/slices/navigationSlice";
 import { APP_BRAND } from "../../config/appMeta";
@@ -25,11 +26,16 @@ import { WeatherBadge } from "../../components/match/WeatherBadge";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
 import { TeamFlag } from "../../components/team/TeamFlag";
 import { GoalScorerCard } from "../../components/match/GoalScorerCard";
+import { PlayerPhoto } from "../../components/player/PlayerPhoto";
 import { useGoalScorerProfiles } from "../../hooks/useGoalScorerProfiles";
+import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
+import { useHighlightlyMatchData } from "../../hooks/useHighlightlyMatchData";
+import { mapHighlightlyStatistics } from "../../services/matchDetail/fetchHighlightlyMatchBundle";
 import styles from "./MatchDetailView.module.css";
 
 const TABS: { id: MatchDetailTab; label: string }[] = [
   { id: "summary", label: "Summary" },
+  { id: "highlights", label: "Highlights" },
   { id: "statistics", label: "Statistics" },
   { id: "lineups", label: "Lineups" },
   { id: "commentary", label: "Commentary" },
@@ -111,6 +117,22 @@ export function MatchDetailView() {
     awayTeam,
     allMatchEvents: matchEvents,
   });
+  const goalEvents = useMemo(
+    () => events.filter((e) => e.type === "goal" || e.type === "own_goal"),
+    [events]
+  );
+  const eventPhotos = useEventPlayerPhotos({ events: goalEvents, homeTeam, awayTeam });
+  const highlightly = useHighlightlyMatchData(match, homeTeam, awayTeam);
+  const mergedStatistics = useMemo(() => {
+    if (statistics) return statistics;
+    if (!match || highlightly.statistics.length === 0) return null;
+    return mapHighlightlyStatistics(
+      match.id,
+      match.homeTeamId,
+      match.awayTeamId,
+      highlightly.statistics
+    );
+  }, [statistics, match, highlightly.statistics]);
 
   const broadcast = useMemo(
     () =>
@@ -316,23 +338,33 @@ export function MatchDetailView() {
               ))}
             </div>
           </div>
-        ) : events.some((e) => e.type === "goal" || e.type === "own_goal") ? (
+        ) : goalEvents.length > 0 ? (
           <div className={styles.scorersStrip}>
             <div className={styles.scorerList}>
-              {events
-                .filter((e) => (e.type === "goal" || e.type === "own_goal") && e.teamId === match?.homeTeamId)
+              {goalEvents
+                .filter((e) => e.teamId === match?.homeTeamId)
                 .map((e) => (
                   <span key={e.providerId} className={styles.scorerItem}>
+                    <PlayerPhoto
+                      name={e.playerName}
+                      photoUrl={eventPhotos[e.providerId]}
+                      size="sm"
+                    />
                     <strong>{e.playerName}</strong> {e.minute}&apos;
                   </span>
                 ))}
             </div>
             <div className={`${styles.scorerList} ${styles["scorerList--right"]}`}>
-              {events
-                .filter((e) => (e.type === "goal" || e.type === "own_goal") && e.teamId === match?.awayTeamId)
+              {goalEvents
+                .filter((e) => e.teamId === match?.awayTeamId)
                 .map((e) => (
                   <span key={e.providerId} className={styles.scorerItem}>
                     {e.minute}&apos; <strong>{e.playerName}</strong>
+                    <PlayerPhoto
+                      name={e.playerName}
+                      photoUrl={eventPhotos[e.providerId]}
+                      size="sm"
+                    />
                   </span>
                 ))}
             </div>
@@ -366,16 +398,27 @@ export function MatchDetailView() {
             awayTeamName={awayTeamName}
             homeTeam={homeTeam}
             awayTeam={awayTeam}
+            highlightly={highlightly}
+          />
+        ) : null}
+
+        {activeMatchTab === "highlights" ? (
+          <MatchHighlightsTab
+            highlights={highlightly.highlights}
+            loading={highlightly.loading}
+            homeTeamName={homeTeamName}
+            awayTeamName={awayTeamName}
           />
         ) : null}
 
         {activeMatchTab === "statistics" ? (
           <MatchStatisticsTab
-            statistics={statistics}
-            loading={loading}
+            statistics={mergedStatistics}
+            loading={loading || highlightly.loading}
             homeTeamName={homeTeamName}
             awayTeamName={awayTeamName}
             matchStatus={match?.status}
+            highlightlyStats={highlightly.statistics}
           />
         ) : null}
 
