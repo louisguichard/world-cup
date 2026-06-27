@@ -10,6 +10,7 @@ import {
 } from "../WorldCup2026Client";
 import { countTournamentGoals } from "./countTournamentGoals";
 import { matchPlayerInRoster } from "./matchPlayerInRoster";
+import { photoUrlFromPlayer } from "./resolveEventPlayerPhotos";
 
 function isGoalEvent(event: MatchEvent): boolean {
   return event.type === "goal" || event.type === "own_goal";
@@ -37,7 +38,7 @@ function buildProfileFromRoster(
     minuteExtra: event.minuteExtra,
     teamId: event.teamId,
     isOwnGoal: event.type === "own_goal",
-    photoUrl: rosterPlayer?.image ?? undefined,
+    photoUrl: photoUrlFromPlayer(rosterPlayer),
     age: rosterPlayer?.age,
     hometown,
     nationality: rosterPlayer?.citizenship,
@@ -51,16 +52,45 @@ function buildProfileFromRoster(
 }
 
 function buildFallbackProfile(event: MatchEvent, tournamentGoals: number): GoalScorerProfile {
+  const fromIndex = lookupWc2026Player({
+    playerId: event.playerId,
+    playerName: event.playerName,
+  });
+
   return {
     eventId: event.providerId,
-    playerId: event.playerId,
-    displayName: event.playerName,
+    playerId: fromIndex?.id ?? event.playerId,
+    displayName: fromIndex?.fullName ?? event.playerName,
     minute: event.minute,
     minuteExtra: event.minuteExtra,
     teamId: event.teamId,
     isOwnGoal: event.type === "own_goal",
+    photoUrl: photoUrlFromPlayer(fromIndex),
     tournamentGoals,
   };
+}
+
+/** Instant profiles from cached roster index — photos without waiting on network. */
+export function resolveGoalScorerProfilesSync(input: {
+  events: MatchEvent[];
+  allMatchEvents: Record<string, MatchEvent[]>;
+}): GoalScorerProfile[] {
+  const goalEvents = input.events.filter(isGoalEvent);
+  return goalEvents.map((event) => {
+    const fromIndex = lookupWc2026Player({
+      playerId: event.playerId,
+      playerName: event.playerName,
+    });
+    const tournamentGoals = countTournamentGoals(input.allMatchEvents, {
+      playerId: fromIndex?.id ?? event.playerId,
+      playerName: fromIndex?.fullName ?? event.playerName,
+      teamId: event.teamId,
+    });
+    if (fromIndex) {
+      return buildProfileFromRoster(event, fromIndex, tournamentGoals);
+    }
+    return buildFallbackProfile(event, tournamentGoals);
+  });
 }
 
 /** Loads enriched profiles for goal scorers in a match. */

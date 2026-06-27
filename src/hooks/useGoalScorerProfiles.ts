@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import type { GoalScorerProfile, MatchEvent, Team } from "../types";
-import { resolveGoalScorerProfiles } from "../services/playerProfile/resolveGoalScorerProfiles";
+import {
+  resolveGoalScorerProfiles,
+  resolveGoalScorerProfilesSync,
+} from "../services/playerProfile/resolveGoalScorerProfiles";
 
 type Input = {
   events: MatchEvent[];
@@ -18,7 +21,16 @@ export function useGoalScorerProfiles(input: Input): {
     [input.events]
   );
 
-  const [profiles, setProfiles] = useState<GoalScorerProfile[]>([]);
+  const syncProfiles = useMemo(
+    () =>
+      resolveGoalScorerProfilesSync({
+        events: input.events,
+        allMatchEvents: input.allMatchEvents,
+      }),
+    [input.events, input.allMatchEvents]
+  );
+
+  const [profiles, setProfiles] = useState<GoalScorerProfile[]>(syncProfiles);
   const [loading, setLoading] = useState(false);
 
   const goalKey = useMemo(
@@ -35,6 +47,8 @@ export function useGoalScorerProfiles(input: Input): {
       setLoading(false);
       return;
     }
+
+    setProfiles(syncProfiles);
 
     let cancelled = false;
     setLoading(true);
@@ -55,7 +69,7 @@ export function useGoalScorerProfiles(input: Input): {
     return () => {
       cancelled = true;
     };
-  }, [goalKey, input.events, input.homeTeam, input.awayTeam, input.allMatchEvents, goalEvents.length]);
+  }, [goalKey, input.events, input.homeTeam, input.awayTeam, input.allMatchEvents, goalEvents.length, syncProfiles]);
 
   return { profiles, loading };
 }

@@ -23,6 +23,11 @@
   border-width: 2px;
 }
 
+.sizeLg {
+  width: 36px;
+  height: 36px;
+}
+
 .fallback {
   display: flex;
   align-items: center;

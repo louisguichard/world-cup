@@ -28,12 +28,14 @@ function PlayerAvatar({
   loading?: boolean;
   size?: "sm" | "md";
 }) {
+  const showSkeleton = Boolean(loading && !profile.photoUrl);
+
   return (
     <PlayerPhoto
       name={profile.displayName}
       photoUrl={profile.photoUrl}
       size={size}
-      loading={loading}
+      loading={showSkeleton}
       className={styles.avatar}
     />
   );

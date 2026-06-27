@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styles from "./PlayerPhoto.module.css";
 
-export type PlayerPhotoSize = "xs" | "sm" | "md";
+export type PlayerPhotoSize = "xs" | "sm" | "md" | "lg";
 
 type Props = {
   name: string;
@@ -15,12 +15,14 @@ const SIZE_CLASS: Record<PlayerPhotoSize, string> = {
   xs: styles.sizeXs,
   sm: styles.sizeSm,
   md: styles.sizeMd,
+  lg: styles.sizeLg,
 };
 
 const FALLBACK_FONT: Record<PlayerPhotoSize, string> = {
   xs: styles.fallbackSizeXs,
   sm: styles.fallbackSizeSm,
   md: styles.fallbackSizeMd,
+  lg: styles.fallbackSizeMd,
 };
 
 function initialFromName(name: string): string {
@@ -57,8 +59,8 @@ export function PlayerPhoto({
         className={`${styles.photo} ${sizeClass} ${className}`.trim()}
         loading="lazy"
         decoding="async"
-        width={size === "md" ? 56 : size === "sm" ? 24 : 20}
-        height={size === "md" ? 56 : size === "sm" ? 24 : 20}
+        width={size === "lg" ? 36 : size === "md" ? 56 : size === "sm" ? 24 : 20}
+        height={size === "lg" ? 36 : size === "md" ? 56 : size === "sm" ? 24 : 20}
         onError={() => setImageFailed(true)}
       />
     );
