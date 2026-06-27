@@ -43,7 +43,7 @@ export function LiveMatchBento({ match, variant }: Props) {
 
   return (
     <div
-      className={`fixture-glow-wrap live-hero-themed is-live live-hero-card-wrap live-hero-card-wrap--${variant}${isGoalActive ? ` ${goalStyles.cardGoalActive}` : ""}`}
+      className={`fixture-glow-wrap live-hero-themed${isLive ? " is-live" : ""} live-hero-card-wrap live-hero-card-wrap--${variant}${isGoalActive ? ` ${goalStyles.cardGoalActive}` : ""}`}
       style={matchTheme}
     >
       <article className={`live-hero-card live-hero-card--${variant}`}>
@@ -55,6 +55,7 @@ export function LiveMatchBento({ match, variant }: Props) {
           awayTeamName={awayName}
         />
         <div className={`live-hero-card-body ${goalStyles.cardContentLayer}`}>
+      <div className="team-accent-bar" aria-hidden />
       <div className="live-hero-header">
         {isLive ? (
           <span className="live-pill">

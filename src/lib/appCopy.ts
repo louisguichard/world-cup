@@ -313,6 +313,63 @@ export const APP_COPY = {
     loading: "The bracket will show up once tournament data is loaded.",
   },
 
+  odds: {
+    tabLabel: "Odds & picks",
+    panelTitle: "Who might win?",
+    panelTitleCompact: "Win odds",
+    drawLabel: "Tie game",
+    toAdvanceLabel: "Not used (knockout)",
+    favoriteBadge: "Favorite",
+    underdogBadge: "Underdog",
+    impliedChance: (pct: number) => `About ${pct}% chance`,
+    favoriteLead: (team: string, pct: number) =>
+      `${team} is the favorite — traders give them about a ${pct}% chance to win this game.`,
+    drawFavoriteLead: (pct: number) =>
+      `A tie is the favorite — traders give a draw about a ${pct}% chance.`,
+    sourcePolymarket:
+      "Prices come from Polymarket, where many people trade real money on who they think will win.",
+    sourceSportsbook:
+      "Prices come from a sportsbook — a place that takes bets on games.",
+    sourceGeneric: "Prices come from a betting market.",
+    whatNumbersMeanTitle: "What do the numbers mean?",
+    americanOddsExplain:
+      "Negative numbers (like -150) mean the favorite: you risk more to win $100. Positive numbers (like +200) mean the underdog: you risk $100 to win more.",
+    favoriteExplain:
+      "The favorite is the team (or a tie) that traders think is most likely to happen. It has the best chance on the board, not a guarantee.",
+    disclaimer:
+      "For fun and information only — not betting advice. Odds can change and may differ where you live.",
+    titleMarketTitle: "Win the whole World Cup?",
+    titleMarketExplain:
+      "This is the chance traders give this team to lift the trophy — not just win one game.",
+    matchPicksTitle: "Tips for this team's games",
+    matchPicksExplain:
+      "These picks come from a football tips site. They guess who wins each match — home team, away team, or a tie.",
+    noMatchPicks: "No tips listed for this team's upcoming games yet.",
+    noTitleOdds: "No win-the-tournament price for this team yet.",
+    pickForHome: (team: string, opponent: string) => `${team} to beat ${opponent}`,
+    pickForAway: (team: string, opponent: string) => `${team} to beat ${opponent}`,
+    pickForDraw: (home: string, away: string) => `Tie between ${home} and ${away}`,
+    pickExplainHome: (team: string, opponent: string) =>
+      `The tip says ${team} is more likely to beat ${opponent} at home.`,
+    pickExplainAway: (team: string, opponent: string) =>
+      `The tip says ${team} is more likely to beat ${opponent} on the road.`,
+    pickExplainDraw: (home: string, away: string) =>
+      `The tip says ${home} and ${away} are about even — a tie is likely.`,
+    insightsTitle: "Match tips & track record",
+    insightsExplain:
+      "Football tips for upcoming games, plus how well this tipster did lately.",
+    insightsWinRate: "Wins lately",
+    insightsProfit: "Money won/lost (if you followed every tip)",
+    insightsPickColumn: "Their pick",
+    insightsResultColumn: "What happened",
+    insightsPending: "Not played yet",
+    insightsHomeWin: "Home team wins",
+    insightsAwayWin: "Away team wins",
+    insightsDraw: "Tie",
+    simulatorNote:
+      "Want to play with scores yourself? Open the Simulator tab to change results and see who might advance.",
+  },
+
   pwa: {
     installTitle: "Install the app",
     installBodyMobile: "Add to your home screen for a full-screen app with live scores.",

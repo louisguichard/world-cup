@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { GroupStanding } from "../../types";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
+import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
@@ -21,6 +22,10 @@ export function GroupTableBento({ standing }: GroupTableBentoProps) {
   const qualContext = useMemo(
     () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
     [liveMatches, teams]
+  );
+  const bubbleTeamIds = useMemo(
+    () => getBestThirdBubbleTeamIds(standings, qualContext),
+    [standings, qualContext]
   );
 
   const tbl = APP_COPY.table;
@@ -55,6 +60,7 @@ export function GroupTableBento({ standing }: GroupTableBentoProps) {
                 <StandingThemeRow
                   key={row.teamId}
                   teamId={row.teamId}
+                  accentAnimated={bubbleTeamIds.has(row.teamId)}
                   className={display.rowClass}
                 >
                   <td>

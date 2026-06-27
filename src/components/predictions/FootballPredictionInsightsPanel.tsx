@@ -1,13 +1,17 @@
 import { useMemo } from "react";
 import type { FootballPredictionPerformance } from "../../services/FootballPredictionClient";
+import { APP_COPY } from "../../lib/appCopy";
+import { resolvePredictionPick } from "../../lib/matchFootballPredictions";
 import { useStore } from "../../store";
+
+const copy = APP_COPY.odds;
 
 function marketLabel(key: string): string {
   switch (key) {
     case "classic":
-      return "1X2";
+      return "Who wins the game?";
     case "ou25":
-      return "Over/Under 2.5";
+      return "Total goals over or under 2.5";
     case "both":
       return "Both teams score";
     default:
@@ -31,10 +35,10 @@ function PerformanceTable({
       <table className="fp-performance-table">
         <thead>
           <tr>
-            <th>Market</th>
-            <th>Win %</th>
-            <th>P/L</th>
-            <th>Record</th>
+            <th>What they guessed</th>
+            <th>{copy.insightsWinRate}</th>
+            <th>{copy.insightsProfit}</th>
+            <th>{copy.insightsResultColumn}</th>
           </tr>
         </thead>
         <tbody>
@@ -47,7 +51,7 @@ function PerformanceTable({
                 {row.profitLoss.toFixed(2)}
               </td>
               <td>
-                {row.countWon}W–{row.countLost}L
+                {row.countWon} wins · {row.countLost} losses
               </td>
             </tr>
           ))}
@@ -67,8 +71,8 @@ export function FootballPredictionInsightsPanel() {
 
   if (!bundle && syncRunning) {
     return (
-      <section className="fp-insights-panel" aria-label="Football predictions">
-        <p className="fp-insights-loading">Loading daily predictions…</p>
+      <section className="fp-insights-panel" aria-label="Match tips">
+        <p className="fp-insights-loading">Loading today&apos;s tips…</p>
       </section>
     );
   }
@@ -84,63 +88,72 @@ export function FootballPredictionInsightsPanel() {
   );
 
   return (
-    <section className="fp-insights-panel" aria-label="Football predictions">
+    <section className="fp-insights-panel" aria-label="Match tips">
       <header className="fp-insights-header">
-        <h3>Today Football Prediction</h3>
+        <h3>{copy.insightsTitle}</h3>
+        <p className="fp-insights-meta">{copy.insightsExplain}</p>
         <p className="fp-insights-meta">
-          {indexSize} picks cached · updated {new Date(bundle.fetchedAt).toLocaleDateString()}
+          {indexSize} tips saved · updated {new Date(bundle.fetchedAt).toLocaleDateString()}
         </p>
       </header>
 
       {performance ? (
         <div className="fp-performance-grid">
-          <PerformanceTable title="Featured picks performance" bucket={performance.featured} />
-          <PerformanceTable title="All picks performance" bucket={performance.all} />
+          <PerformanceTable title="Featured tips — how they did" bucket={performance.featured} />
+          <PerformanceTable title="All tips — how they did" bucket={performance.all} />
         </div>
       ) : null}
 
       {wcMatches.length > 0 ? (
         <div className="fp-wc-picks">
-          <h4>World Cup nation matches today</h4>
+          <h4>World Cup teams playing today</h4>
           <ul className="fp-picks-list">
-            {wcMatches.slice(0, 8).map((p) => (
-              <li key={p.id} className="fp-pick-row">
-                <span className="fp-pick-teams">
-                  {p.homeTeam} vs {p.awayTeam}
-                </span>
-                <span className="fp-pick-call">
-                  Pick <strong>{p.prediction}</strong>
-                  {p.predictionProbability != null ? ` (${p.predictionProbability}%)` : ""}
-                </span>
-              </li>
-            ))}
+            {wcMatches.slice(0, 8).map((p) => {
+              const resolved = resolvePredictionPick(p.prediction, p.homeTeam, p.awayTeam);
+              const confidence =
+                p.predictionProbability != null ? ` · about ${p.predictionProbability}% sure` : "";
+              return (
+                <li key={p.id} className="fp-pick-row">
+                  <span className="fp-pick-teams">
+                    {p.homeTeam} vs {p.awayTeam}
+                  </span>
+                  <span className="fp-pick-call">
+                    Tip: <strong>{resolved.shortLabel}</strong>
+                    {confidence}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : (
         <p className="fp-insights-note">
-          No World Cup nation picks in today&apos;s feed yet — {bundle.leagues.length} leagues tracked.
-          WC fixtures will show picks here when the API lists them.
+          No World Cup team tips in today&apos;s list yet — we track {bundle.leagues.length} leagues. Tips
+          show up here when this team has a game today.
         </p>
       )}
 
       {bundle.vipFeatured.length > 0 ? (
         <div className="fp-vip-block">
-          <h4>VIP featured</h4>
+          <h4>Extra featured tips</h4>
           <ul className="fp-picks-list">
-            {bundle.vipFeatured.slice(0, 5).map((p) => (
-              <li key={p.id} className="fp-pick-row">
-                {p.homeTeam} vs {p.awayTeam} — <strong>{p.prediction}</strong>
-              </li>
-            ))}
+            {bundle.vipFeatured.slice(0, 5).map((p) => {
+              const resolved = resolvePredictionPick(p.prediction, p.homeTeam, p.awayTeam);
+              return (
+                <li key={p.id} className="fp-pick-row">
+                  {p.homeTeam} vs {p.awayTeam} — <strong>{resolved.shortLabel}</strong>
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : bundle.unavailable.includes("predictions/featured") ? (
         <p className="fp-insights-note fp-insights-note--muted">
-          VIP featured picks require a PRO plan on this API.
+          Extra featured tips need a paid plan on this tips website.
         </p>
       ) : null}
 
-      <p className="fp-disclaimer">Third-party predictions for entertainment only — not financial advice.</p>
+      <p className="fp-disclaimer">{copy.disclaimer}</p>
     </section>
   );
 }

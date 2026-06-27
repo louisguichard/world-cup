@@ -149,9 +149,26 @@
     drop-shadow(0 0 16px color-mix(in srgb, var(--fwc-gold) 36%, transparent))
     drop-shadow(0 0 28px color-mix(in srgb, #000 26%, transparent));
   --trophy-glow-filter-hero:
-    drop-shadow(0 6px 20px color-mix(in srgb, #000 32%, transparent))
-    drop-shadow(0 0 16px color-mix(in srgb, var(--fwc-gold) 42%, transparent))
-    drop-shadow(0 0 32px color-mix(in srgb, var(--fwc-gold) 18%, transparent));
+    drop-shadow(0 8px 28px color-mix(in srgb, #000 38%, transparent))
+    drop-shadow(0 0 24px color-mix(in srgb, var(--fwc-gold) 55%, transparent))
+    drop-shadow(0 0 48px color-mix(in srgb, var(--fwc-royal-blue) 35%, transparent))
+    drop-shadow(0 0 64px color-mix(in srgb, var(--fwc-bright-red) 22%, transparent))
+    drop-shadow(0 0 80px color-mix(in srgb, var(--fwc-green) 18%, transparent));
+  --trophy-celebration-bg:
+    conic-gradient(
+      from 210deg at 50% 50%,
+      color-mix(in srgb, var(--fwc-bright-red) 55%, transparent) 0deg,
+      color-mix(in srgb, var(--fwc-gold) 50%, transparent) 45deg,
+      color-mix(in srgb, var(--fwc-royal-blue) 52%, transparent) 95deg,
+      color-mix(in srgb, var(--fwc-green) 48%, transparent) 145deg,
+      color-mix(in srgb, var(--fwc-lime) 45%, transparent) 195deg,
+      color-mix(in srgb, var(--fwc-sky-blue) 50%, transparent) 245deg,
+      color-mix(in srgb, var(--fwc-hot-pink) 42%, transparent) 295deg,
+      color-mix(in srgb, var(--fwc-bright-red) 55%, transparent) 360deg
+    ),
+    radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--fwc-gold) 45%, transparent), transparent 62%),
+    radial-gradient(circle at 30% 70%, color-mix(in srgb, var(--fwc-royal-blue) 35%, transparent), transparent 48%),
+    radial-gradient(circle at 72% 68%, color-mix(in srgb, var(--fwc-green) 30%, transparent), transparent 44%);
   --trophy-accent-bg:
     radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--fwc-gold) 32%, transparent), transparent 58%),
     radial-gradient(circle at 50% 62%, color-mix(in srgb, #fff 8%, transparent), transparent 48%),
@@ -331,6 +348,7 @@ p {
   .brand-text small,
   .splash-title,
   .splash-subtitle,
+  .splash-kicker,
   .splash-error-title,
   .bottom-tab,
   .bracket-toggle-label,
@@ -685,6 +703,46 @@ input:focus-visible {
   display: inline-grid;
   place-items: center;
   isolation: isolate;
+}
+
+.brand-logo-shell--hero {
+  width: 220px;
+  height: 220px;
+}
+
+.brand-logo--hero {
+  width: 220px;
+  height: 220px;
+}
+
+.brand-logo-shell--celebration .brand-logo {
+  filter: var(--trophy-glow-filter-hero);
+}
+
+.brand-logo-accents--celebration {
+  inset: -42%;
+  filter: blur(36px) saturate(1.45);
+  opacity: 1;
+  background: var(--trophy-celebration-bg);
+  animation: trophyCelebrationPulse 3.2s ease-in-out infinite;
+}
+
+@keyframes trophyCelebrationPulse {
+  0%,
+  100% {
+    transform: scale(1.02);
+    opacity: 0.92;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo-accents--celebration {
+    animation: none;
+  }
 }
 
 .brand-logo-accents {

@@ -1,6 +1,5 @@
 import type { TabId } from "../../types";
 import { useStore } from "../../store";
-import { ThemeToggle } from "../shared/ThemeToggle";
 import { APP_COPY } from "../../lib/appCopy";
 import { navigateToTab } from "../../lib/navigateToTab";
 
@@ -27,9 +26,6 @@ export function BottomTabBar() {
 
   return (
     <nav className="bottom-tab-bar" aria-label="Main navigation">
-      <div className="bottom-tab-theme" aria-label="Theme">
-        <ThemeToggle compact />
-      </div>
       {TABS.map((tab) => (
         <button
           key={tab.id}

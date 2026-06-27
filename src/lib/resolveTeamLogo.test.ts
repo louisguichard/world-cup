@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TEAM_LOGO_ABBREVIATIONS, TEAM_LOGO_OVERRIDES } from "../data/teamLogoOverrides";
-import { applyTeamLogoOverrides, isInvalidTeamLogoUrl, resolveTeamLogo } from "./resolveTeamLogo";
+import { applyTeamLogoOverrides, isInvalidTeamLogoUrl, resolveTeamLogo, resolveTeamLogoFromHint } from "./resolveTeamLogo";
 
 describe("isInvalidTeamLogoUrl", () => {
   it("rejects Wikipedia kit shorts assets", () => {
@@ -61,6 +61,26 @@ describe("resolveTeamLogo", () => {
   it("uses override even when API logo is missing", () => {
     expect(resolveTeamLogo({ abbreviation: "BIH", logo: "" })).toBe(TEAM_LOGO_OVERRIDES.BIH);
     expect(resolveTeamLogo({ abbreviation: "QAT", logo: undefined })).toBe(TEAM_LOGO_OVERRIDES.QAT);
+  });
+
+  it("resolves Mexico by name, id, and abbrev", () => {
+    expect(resolveTeamLogo({ abbreviation: "MEX", logo: "", name: "Mexico", shortName: "MEX", id: "mex" })).toBe(
+      TEAM_LOGO_OVERRIDES.MEX
+    );
+    expect(resolveTeamLogoFromHint("Mexico")).toBe(TEAM_LOGO_OVERRIDES.MEX);
+    expect(resolveTeamLogoFromHint("mex")).toBe(TEAM_LOGO_OVERRIDES.MEX);
+  });
+
+  it("rejects kit assets even for known teams without override key in abbrev field", () => {
+    expect(
+      resolveTeamLogo({
+        abbreviation: "XYZ",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/a/a7/Kit_shorts_mex2526h.png",
+        name: "Mexico",
+        shortName: "Mexico",
+        id: "Mexico",
+      })
+    ).toBe(TEAM_LOGO_OVERRIDES.MEX);
   });
 });
 

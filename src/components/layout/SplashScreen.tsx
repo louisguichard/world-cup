@@ -40,14 +40,31 @@ export function SplashScreen() {
 
   return (
     <div className={`splash-screen splash-screen--${phase}`} role="dialog" aria-label="Loading">
+      <div className="splash-celebration-bg" aria-hidden>
+        <span className="splash-celebration-orbit splash-celebration-orbit--a" />
+        <span className="splash-celebration-orbit splash-celebration-orbit--b" />
+        <span className="splash-celebration-rays" />
+      </div>
+
       <div className="splash-brand">
-        <BrandLogo
-          size="xl"
-          variant="full"
-          blendEdges
-          className="splash-trophy-logo"
-          alt=""
-        />
+        <span className="fwc-unify-stripe splash-unify-stripe" aria-hidden />
+
+        <div className="splash-trophy-stage">
+          <span className="splash-celebration-ring splash-celebration-ring--conic" aria-hidden />
+          <span className="splash-celebration-ring splash-celebration-ring--gold" aria-hidden />
+          <span className="splash-spark splash-spark--1" aria-hidden />
+          <span className="splash-spark splash-spark--2" aria-hidden />
+          <span className="splash-spark splash-spark--3" aria-hidden />
+          <BrandLogo
+            size="hero"
+            variant="full"
+            celebration
+            className="splash-trophy-logo"
+            alt=""
+          />
+        </div>
+
+        <p className="splash-kicker">FIFA World Cup 2026™</p>
         <h1 className="splash-title">{APP_BRAND.splashLine1}</h1>
         <h2 className="splash-subtitle">{APP_BRAND.splashLine2}</h2>
       </div>
@@ -56,7 +73,9 @@ export function SplashScreen() {
         <SplashErrorCard onRetry={handleRetry} />
       ) : (
         <div className="splash-progress">
-          <div className="splash-progress-bar" style={{ width: `${progress}%` }} />
+          <div className="splash-progress-track">
+            <div className="splash-progress-bar" style={{ width: `${progress}%` }} />
+          </div>
           <p className="splash-progress-label">{message}</p>
         </div>
       )}

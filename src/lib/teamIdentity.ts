@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { TEAM_IDENTITY_OVERRIDES } from "../data/teamIdentityOverrides";
+import { resolveTeamLogoByAbbrev } from "../data/wc2026TeamCatalog";
 import type { CrestProfile } from "../data/teamCrestDisplay";
 import type { Team } from "../types";
 import { crestDisplayToCssVars, resolveCrestDisplay } from "./resolveCrestDisplay";
@@ -107,7 +108,7 @@ export function resolveTeamIdentityFromAbbrev(abbrev: string): TeamIdentity | nu
     primary,
     secondary,
     onPrimary: pickOnPrimary(primary),
-    crestUrl: "",
+    crestUrl: resolveTeamLogoByAbbrev(key) ?? "",
     gradient,
     crestProfile: crest.profile,
     crestPad: crest.pad,
@@ -136,7 +137,7 @@ export function matchThemeToStyle(
   const awayPrimary = away?.primary ?? DEFAULT_SECONDARY;
   const homeSecondary = home?.secondary ?? homePrimary;
   const awaySecondary = away?.secondary ?? awayPrimary;
-  const wash = variant === "live" ? "33" : "14";
+  const wash = variant === "live" ? "44" : "18";
 
   return {
     "--match-home-primary": homePrimary,

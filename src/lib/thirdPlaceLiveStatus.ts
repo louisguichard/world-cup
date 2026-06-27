@@ -1,5 +1,6 @@
 import type { GroupStanding, TeamRecord } from "../types";
 import { APP_COPY } from "./appCopy";
+import { rankAliveBestThirds } from "./bestThirds";
 import { isKnockoutEliminated } from "./thirdPlaceQualification";
 import type { QualificationMatchContext } from "./thirdPlaceQualification";
 
@@ -122,6 +123,31 @@ export function detectCutoffCrossings(
   }
 
   return crossings;
+}
+
+/** Team IDs in the best-third bubble (near the top-8 cutoff). */
+export function getBestThirdBubbleTeamIds(
+  standings: GroupStanding[],
+  context: QualificationMatchContext
+): Set<string> {
+  const ranked = rankAliveBestThirds(standings, context);
+  const ids = new Set<string>();
+  for (let i = 0; i < ranked.length; i += 1) {
+    const row = ranked[i];
+    const state = getThirdPlaceBubbleState(row.teamId, i + 1, ranked, standings, context);
+    if (state === "bubble") {
+      ids.add(row.teamId);
+    }
+  }
+  return ids;
+}
+
+/** Whether a fixture involves a third-place team on the bubble. */
+export function matchInvolvesBestThirdBubble(
+  match: { homeTeamId: string; awayTeamId: string },
+  bubbleTeamIds: Set<string>
+): boolean {
+  return bubbleTeamIds.has(match.homeTeamId) || bubbleTeamIds.has(match.awayTeamId);
 }
 
 export function crossedCutoffForDelta(

@@ -165,15 +165,6 @@
   box-sizing: border-box;
 }
 
-.bottom-tab-theme {
-  flex: 0 0 auto;
-  margin-right: 2px;
-}
-
-.bottom-tab-theme .theme-toggle {
-  background: var(--surface-raised);
-}
-
 .bottom-tab {
   flex: 1;
   min-height: 44px;
@@ -235,7 +226,13 @@
   box-shadow: var(--glow-red);
 }
 
-/* Splash */
+/* Splash — full-screen celebration */
+@property --splash-celebration-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
 .splash-screen {
   position: fixed;
   inset: 0;
@@ -244,9 +241,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  overflow: hidden;
   background:
-    radial-gradient(640px 320px at 50% 0%, rgba(48, 79, 255, 0.08), transparent 64%),
+    radial-gradient(ellipse 130% 90% at 50% 110%, rgba(214, 0, 0, 0.18), transparent 55%),
+    radial-gradient(ellipse 80% 55% at 15% 15%, rgba(48, 79, 255, 0.22), transparent 50%),
+    radial-gradient(ellipse 80% 55% at 85% 18%, rgba(0, 199, 82, 0.16), transparent 50%),
+    radial-gradient(ellipse 70% 45% at 50% 38%, rgba(236, 255, 67, 0.1), transparent 45%),
+    radial-gradient(ellipse 55% 40% at 50% 55%, rgba(212, 175, 55, 0.12), transparent 50%),
     var(--surface-base);
 }
 
@@ -256,35 +258,317 @@
   inset: 0;
   pointer-events: none;
   background: var(--fwc-amplify-gradient);
-  opacity: 0.05;
-  transform: scale(2);
+  opacity: 0.07;
+  transform: scale(2.2);
   border-radius: 50%;
+}
+
+.splash-celebration-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.splash-celebration-orbit {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: min(140vw, 900px);
+  height: min(140vw, 900px);
+  translate: -50% -50%;
+  border-radius: 50%;
+  filter: blur(56px);
+  opacity: 0.5;
+  animation: splashOrbitSpin 18s linear infinite;
+}
+
+.splash-celebration-orbit--a {
+  background: var(--fwc-amplify-gradient);
+}
+
+.splash-celebration-orbit--b {
+  width: min(100vw, 640px);
+  height: min(100vw, 640px);
+  opacity: 0.35;
+  filter: blur(40px);
+  background: conic-gradient(
+    from var(--splash-celebration-angle),
+    color-mix(in srgb, var(--fwc-royal-blue) 70%, transparent),
+    color-mix(in srgb, var(--fwc-gold) 65%, transparent),
+    color-mix(in srgb, var(--fwc-bright-red) 60%, transparent),
+    color-mix(in srgb, var(--fwc-green) 55%, transparent),
+    color-mix(in srgb, var(--fwc-royal-blue) 70%, transparent)
+  );
+  animation: splashAngleSpin 12s linear infinite reverse;
+}
+
+.splash-celebration-rays {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: min(160vw, 1000px);
+  height: min(160vw, 1000px);
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    color-mix(in srgb, var(--fwc-gold) 12%, transparent) 0deg 8deg,
+    transparent 8deg 18deg
+  );
+  opacity: 0.55;
+  filter: blur(2px);
+  animation: splashOrbitSpin 24s linear infinite reverse;
+}
+
+@keyframes splashOrbitSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes splashAngleSpin {
+  to {
+    --splash-celebration-angle: 360deg;
+  }
 }
 
 .splash-brand {
   position: relative;
   z-index: 1;
   text-align: center;
-  margin-bottom: 2rem;
+  width: min(520px, 94vw);
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
   animation: fadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.splash-unify-stripe {
+  display: block;
+  width: min(320px, 72vw);
+  height: 5px;
+  margin: 0 auto 1.25rem;
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 20px rgba(48, 79, 255, 0.35);
+}
+
+.splash-trophy-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(460px, 92vw);
+  height: min(500px, 88vw);
+  margin: 0 auto clamp(1rem, 3vw, 1.75rem);
+}
+
+.splash-celebration-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.splash-celebration-ring--conic {
+  inset: -12%;
+  background: conic-gradient(
+    from var(--splash-celebration-angle),
+    color-mix(in srgb, var(--fwc-bright-red) 75%, transparent) 0deg,
+    transparent 40deg,
+    color-mix(in srgb, var(--fwc-royal-blue) 80%, transparent) 120deg,
+    transparent 160deg,
+    color-mix(in srgb, var(--fwc-green) 70%, transparent) 220deg,
+    transparent 260deg,
+    color-mix(in srgb, var(--fwc-gold) 75%, transparent) 320deg,
+    transparent 360deg
+  );
+  filter: blur(36px);
+  opacity: 0.85;
+  animation: splashAngleSpin 10s linear infinite;
+}
+
+.splash-celebration-ring--gold {
+  inset: 4%;
+  background: radial-gradient(
+    circle at 50% 55%,
+    color-mix(in srgb, var(--fwc-gold) 55%, transparent) 0%,
+    color-mix(in srgb, var(--fwc-royal-blue) 25%, transparent) 45%,
+    transparent 72%
+  );
+  filter: blur(20px);
+  opacity: 0.9;
+  animation: splashGoldPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes splashGoldPulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+.splash-spark {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: splashSpark 2.4s ease-in-out infinite;
+}
+
+.splash-spark--1 {
+  top: 8%;
+  left: 18%;
+  background: var(--fwc-gold);
+  box-shadow: 0 0 16px var(--fwc-gold), 0 0 32px var(--fwc-gold);
+  animation-delay: 0s;
+}
+
+.splash-spark--2 {
+  top: 22%;
+  right: 12%;
+  background: var(--fwc-royal-blue);
+  box-shadow: 0 0 16px var(--fwc-royal-blue), 0 0 28px var(--fwc-sky-blue);
+  animation-delay: 0.6s;
+}
+
+.splash-spark--3 {
+  bottom: 18%;
+  left: 22%;
+  background: var(--fwc-green);
+  box-shadow: 0 0 14px var(--fwc-green), 0 0 26px var(--fwc-lime);
+  animation-delay: 1.2s;
+}
+
+@keyframes splashSpark {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
 .splash-trophy-logo.brand-logo-shell {
-  width: min(280px, 64vw);
-  height: min(320px, 72vw);
-  isolation: auto;
+  width: min(380px, 78vw);
+  height: min(420px, 82vw);
+  z-index: 2;
 }
 
 .splash-trophy-logo .brand-logo {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  -webkit-mask-image: radial-gradient(ellipse 98% 98% at 50% 46%, #000 72%, transparent 100%);
-  mask-image: radial-gradient(ellipse 98% 98% at 50% 46%, #000 72%, transparent 100%);
-  filter:
-    drop-shadow(0 4px 18px color-mix(in srgb, #000 28%, transparent))
-    drop-shadow(0 0 14px color-mix(in srgb, var(--fwc-gold) 38%, transparent))
-    drop-shadow(0 0 28px color-mix(in srgb, var(--fwc-gold) 16%, transparent));
+  -webkit-mask-image: none;
+  mask-image: none;
+  filter: var(--trophy-glow-filter-hero);
+}
+
+.splash-trophy-logo {
+  display: inline-grid;
+  animation: splashTrophyIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes splashTrophyIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.splash-kicker {
+  margin: 0 0 0.5rem;
+  color: var(--fwc-gold);
+  font-family: var(--font-brand);
+  font-size: clamp(0.65rem, 2.2vw, 0.75rem);
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-shadow: 0 0 24px color-mix(in srgb, var(--fwc-gold) 45%, transparent);
+}
+
+.splash-title {
+  margin: 0;
+  color: var(--fwc-sky-blue);
+  font-family: var(--font-brand);
+  font-size: clamp(0.75rem, 2.8vw, 0.9rem);
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px color-mix(in srgb, var(--fwc-royal-blue) 40%, transparent);
+}
+
+.splash-subtitle {
+  margin: 0.5rem 0 0;
+  color: var(--text-primary);
+  font-family: var(--font-brand);
+  font-size: clamp(1.65rem, 7vw, 2.85rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 32px color-mix(in srgb, var(--fwc-royal-blue) 35%, transparent),
+    0 2px 24px color-mix(in srgb, #000 40%, transparent);
+}
+
+.splash-progress {
+  position: relative;
+  z-index: 1;
+  width: min(380px, 90vw);
+  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+.splash-progress-track {
+  height: 8px;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--surface-overlay) 80%, transparent);
+  border: 1px solid var(--edge-border);
+  box-shadow: var(--shadow-feather-sm);
+}
+
+.splash-progress-bar {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    var(--fwc-bright-red) 0%,
+    var(--fwc-gold) 25%,
+    var(--fwc-royal-blue) 50%,
+    var(--fwc-green) 75%,
+    var(--fwc-sky-blue) 100%
+  );
+  box-shadow: var(--glow-blue), 0 0 16px color-mix(in srgb, var(--fwc-gold) 35%, transparent);
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-celebration-orbit,
+  .splash-celebration-rays,
+  .splash-celebration-ring--conic,
+  .splash-celebration-ring--gold,
+  .splash-spark,
+  .brand-logo-accents--celebration {
+    animation: none;
+  }
+}
+
+.splash-progress-label {
+  margin: 0.65rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-align: center;
 }
 
 .brand-logo-shell--blend-edges {
@@ -293,67 +577,8 @@
   box-shadow: none;
 }
 
-.brand-logo-shell--blend-edges .brand-logo-accents {
+.brand-logo-shell--blend-edges:not(.brand-logo-shell--celebration) .brand-logo-accents {
   display: none;
-}
-
-.splash-trophy-logo {
-  display: inline-grid;
-  margin: 0 auto 0.75rem;
-  animation: splashTrophyIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes splashTrophyIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.splash-title {
-  margin: 0;
-  color: var(--fwc-royal-blue);
-  font-family: var(--font-brand);
-  font-size: var(--text-xs);
-  font-weight: 400;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-
-.splash-subtitle {
-  margin: 0.35rem 0 0;
-  color: var(--text-primary);
-  font-family: var(--font-brand);
-  font-size: clamp(1.25rem, 4vw, 1.75rem);
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.splash-progress {
-  position: relative;
-  z-index: 1;
-  width: min(320px, 88vw);
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
-}
-
-.splash-progress-bar {
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: linear-gradient(90deg, var(--fwc-royal-blue) 0%, var(--fwc-sky-blue) 100%);
-  box-shadow: var(--glow-blue);
-  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.splash-progress-label {
-  margin: 0.65rem 0 0;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  text-align: center;
 }
 
 .splash-error {

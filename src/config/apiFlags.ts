@@ -167,7 +167,7 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
 export const BOOTSTRAP_FLAGS = {
   /** Background Polymarket/FIFA/ESPN enrichment after splash. */
   backgroundEnrichment: true,
-  /** Monte Carlo sim gate on splash (not an API — main suspect for long splash). */
+  /** Monte Carlo sim — runs after splash (never blocks mobile fast path). */
   bootstrapSimulation: true,
 } as const;
 

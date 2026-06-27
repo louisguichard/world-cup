@@ -1,4 +1,10 @@
 import { TEAM_LOGO_OVERRIDES } from "../data/teamLogoOverrides";
+import {
+  mergeTeamWithCatalog,
+  resolveTeamAbbrevFromHint,
+  resolveTeamLogoByAbbrev,
+  resolveTeamLogoFromHint,
+} from "../data/wc2026TeamCatalog";
 import type { Team } from "../types";
 
 /** Wikipedia kit templates (shorts, shirts, socks) are not team crests. */
@@ -12,27 +18,40 @@ export function isInvalidTeamLogoUrl(url: string | undefined): boolean {
   return false;
 }
 
-export function resolveTeamLogo(team: Pick<Team, "abbreviation" | "logo"> | undefined): string | undefined {
+function resolveTeamAbbrev(team: Pick<Team, "abbreviation" | "name" | "shortName" | "id">): string | undefined {
+  return (
+    resolveTeamAbbrevFromHint(team.abbreviation) ??
+    resolveTeamAbbrevFromHint(team.name) ??
+    resolveTeamAbbrevFromHint(team.shortName) ??
+    resolveTeamAbbrevFromHint(team.id)
+  );
+}
+
+export function resolveTeamLogo(team: Pick<Team, "abbreviation" | "logo" | "name" | "shortName" | "id"> | undefined): string | undefined {
   if (!team) return undefined;
 
-  const abbrev = team.abbreviation?.toUpperCase();
-  if (abbrev && TEAM_LOGO_OVERRIDES[abbrev]) {
-    return TEAM_LOGO_OVERRIDES[abbrev];
+  const abbrev = resolveTeamAbbrev(team);
+  if (abbrev) {
+    const override = TEAM_LOGO_OVERRIDES[abbrev];
+    if (override) return override;
   }
 
   if (team.logo && !isInvalidTeamLogoUrl(team.logo)) {
     return team.logo;
   }
 
-  return undefined;
+  return abbrev ? resolveTeamLogoByAbbrev(abbrev) : undefined;
 }
+
+export { resolveTeamLogoByAbbrev, resolveTeamLogoFromHint };
 
 export function applyTeamLogoOverrides(teams: Record<string, Team>): Record<string, Team> {
   const patched: Record<string, Team> = {};
 
   for (const [id, team] of Object.entries(teams)) {
-    const logo = resolveTeamLogo(team);
-    patched[id] = logo !== team.logo ? { ...team, logo: logo ?? "" } : team;
+    const merged = mergeTeamWithCatalog(team);
+    const logo = resolveTeamLogo(merged);
+    patched[id] = logo && logo !== merged.logo ? { ...merged, logo } : merged;
   }
 
   return patched;

@@ -1,17 +1,20 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { API_SOURCES, BOOTSTRAP_FLAGS, listDisabledApis } from "../../config/apiFlags";
 import { formatVersionLabel } from "../../config/appMeta";
+import { isBootDebugEnabled } from "../../lib/bootProfile";
+import { formatBootReport, getBootMetrics } from "../../lib/bootMetrics";
 import { logger } from "../../services/Logger";
 
 export function DebugPanel() {
   const [open, setOpen] = useState(false);
-
-  if (!import.meta.env.DEV) {
-    return null;
-  }
-
+  const showPanel = isBootDebugEnabled();
   const logs = logger.getBuffer().slice(-20).reverse();
   const disabled = listDisabledApis();
+  const boot = useMemo(() => getBootMetrics(), [open, logs.length]);
+
+  if (!showPanel) {
+    return null;
+  }
 
   return (
     <div className="debug-panel">
@@ -23,6 +26,29 @@ export function DebugPanel() {
           <div className="debug-log debug-log--info">
             <span className="debug-log-module">release</span>
             <span className="debug-log-msg">{formatVersionLabel()}</span>
+          </div>
+          <div className="debug-log debug-log--info">
+            <span className="debug-log-module">boot</span>
+            <span className="debug-log-msg">
+              {boot.totalMs != null ? `${boot.totalMs}ms total` : "boot in progress"} ·{" "}
+              {boot.mobileFastPath ? "mobile fast path" : "full path"}
+              {boot.navigation?.firstContentfulPaint != null
+                ? ` · FCP ${boot.navigation.firstContentfulPaint}ms`
+                : ""}
+            </span>
+          </div>
+          {boot.phases.map((phase) => (
+            <div key={`${phase.id}-${phase.startedAt}`} className="debug-log debug-log--info">
+              <span className="debug-log-module">{phase.durationMs}ms</span>
+              <span className="debug-log-msg">
+                {phase.label}
+                {phase.detail ? ` — ${phase.detail}` : ""}
+              </span>
+            </div>
+          ))}
+          <div className="debug-log debug-log--info">
+            <span className="debug-log-module">boot report</span>
+            <span className="debug-log-msg">{formatBootReport(boot)}</span>
           </div>
           <div className="debug-log debug-log--info">
             <span className="debug-log-module">apiFlags</span>

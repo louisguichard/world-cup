@@ -15,13 +15,13 @@
 }
 
 .team-accent-bar {
-  height: 4px;
+  height: 5px;
   margin: -1px -1px 0;
-  background: linear-gradient(90deg, var(--team-gradient-start), var(--team-gradient-end));
+  background: linear-gradient(90deg, var(--match-home-primary, var(--team-gradient-start)), var(--match-away-primary, var(--team-gradient-end)));
   border-radius: var(--r-lg, 14px) var(--r-lg, 14px) 0 0;
   box-shadow:
-    0 0 12px color-mix(in srgb, var(--team-gradient-start) 45%, transparent),
-    0 0 20px color-mix(in srgb, var(--team-gradient-end) 35%, transparent);
+    0 0 16px color-mix(in srgb, var(--match-home-primary, var(--team-gradient-start)) 50%, transparent),
+    0 0 24px color-mix(in srgb, var(--match-away-primary, var(--team-gradient-end)) 40%, transparent);
 }
 
 /* Animated dual-team glow around fixture cards (schedule + live hero) */
@@ -29,47 +29,51 @@
   position: relative;
   isolation: isolate;
   border-radius: var(--radius-lg, 14px);
+  overflow: visible;
+  --fixture-glow-spread: 16px;
 }
 
 .fixture-glow-wrap::before {
   content: "";
   position: absolute;
-  inset: -18px;
+  inset: calc(-1 * var(--fixture-glow-spread) - 10px);
   z-index: 0;
-  border-radius: calc(var(--radius-lg, 14px) + 18px);
+  border-radius: calc(var(--radius-lg, 14px) + var(--fixture-glow-spread) + 10px);
+  --fixture-glow-angle: 38deg;
   background: conic-gradient(
     from var(--fixture-glow-angle),
-    color-mix(in srgb, var(--match-home-primary, #6b7280) 78%, transparent) 0deg,
-    transparent 55deg,
-    color-mix(in srgb, var(--match-away-primary, #9ca3af) 78%, transparent) 115deg,
-    transparent 170deg,
-    color-mix(in srgb, var(--match-home-secondary, var(--match-home-primary, #6b7280)) 52%, transparent) 235deg,
-    transparent 290deg,
-    color-mix(in srgb, var(--match-away-secondary, var(--match-away-primary, #9ca3af)) 52%, transparent) 350deg
+    color-mix(in srgb, var(--match-home-primary, #6b7280) 82%, transparent) 0deg,
+    transparent 52deg,
+    color-mix(in srgb, var(--match-away-primary, #9ca3af) 82%, transparent) 118deg,
+    transparent 168deg,
+    color-mix(in srgb, var(--match-home-secondary, var(--match-home-primary, #6b7280)) 58%, transparent) 238deg,
+    transparent 288deg,
+    color-mix(in srgb, var(--match-away-secondary, var(--match-away-primary, #9ca3af)) 58%, transparent) 352deg
   );
-  filter: blur(24px);
-  opacity: 0.82;
-  animation: fixture-glow-orbit 11s linear infinite;
+  filter: blur(28px);
+  opacity: 0.88;
+  animation: none;
   pointer-events: none;
 }
 
 .fixture-glow-wrap::after {
   content: "";
   position: absolute;
-  inset: -4px;
+  inset: calc(-1 * var(--fixture-glow-spread) / 2 - 2px);
   z-index: 0;
-  border-radius: calc(var(--radius-lg, 14px) + 4px);
+  border-radius: calc(var(--radius-lg, 14px) + var(--fixture-glow-spread) / 2 + 2px);
+  --fixture-glow-angle: 38deg;
   background: conic-gradient(
     from var(--fixture-glow-angle),
     var(--match-home-primary, #6b7280),
-    color-mix(in srgb, var(--match-home-secondary, var(--match-home-primary)) 70%, transparent),
+    color-mix(in srgb, var(--match-home-secondary, var(--match-home-primary)) 72%, transparent),
     var(--match-away-primary, #9ca3af),
-    color-mix(in srgb, var(--match-away-secondary, var(--match-away-primary)) 70%, transparent),
+    color-mix(in srgb, var(--match-away-secondary, var(--match-away-primary)) 72%, transparent),
     var(--match-home-primary, #6b7280)
   );
-  filter: blur(10px);
-  opacity: 0.62;
-  animation: fixture-glow-orbit 11s linear infinite;
+  filter: blur(12px);
+  opacity: 0.68;
+  animation: none;
   pointer-events: none;
 }
 
@@ -78,17 +82,25 @@
   z-index: 1;
 }
 
+/* Spinning glow — live fixtures and best-third bubble matchups only */
+.fixture-glow-wrap.is-live::before,
+.fixture-glow-wrap.is-live::after,
+.fixture-glow-wrap.is-bubble-match::before,
+.fixture-glow-wrap.is-bubble-match::after {
+  animation: fixture-glow-orbit 11s linear infinite;
+}
+
 .fixture-glow-wrap.is-live::before {
-  inset: -22px;
-  filter: blur(28px);
-  opacity: 0.92;
+  inset: calc(-1 * var(--fixture-glow-spread) - 18px);
+  filter: blur(34px);
+  opacity: 0.96;
   animation-duration: 8s;
 }
 
 .fixture-glow-wrap.is-live::after {
-  inset: -5px;
-  filter: blur(12px);
-  opacity: 0.72;
+  inset: calc(-1 * var(--fixture-glow-spread) / 2 - 4px);
+  filter: blur(14px);
+  opacity: 0.78;
   animation-duration: 8s;
 }
 
@@ -99,8 +111,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fixture-glow-wrap::before,
-  .fixture-glow-wrap::after {
+  .fixture-glow-wrap.is-live::before,
+  .fixture-glow-wrap.is-live::after,
+  .fixture-glow-wrap.is-bubble-match::before,
+  .fixture-glow-wrap.is-bubble-match::after,
+  .standing-row-themed.team-accent-animated td:first-child::before {
+    animation: none;
+  }
+
+  .teams-row--accent.teams-row--accent-animated::before {
     animation: none;
   }
 }
@@ -257,11 +276,55 @@
 }
 
 .schedule-list .fixture-glow-wrap {
-  margin: 10px 2px;
+  margin: calc(var(--fixture-glow-spread, 16px) + 4px) calc(var(--fixture-glow-spread, 16px) / 2 + 2px);
+}
+
+.live-now-strip {
+  gap: calc(var(--module-gap) + var(--fixture-glow-spread, 16px));
+  padding: calc(var(--fixture-glow-spread, 16px) / 2 + 4px) 0;
+}
+
+.live-hero-card-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-height: 100%;
+}
+
+.live-hero-card-wrap .live-hero-card {
+  flex: 1;
 }
 
 .standing-row-themed td:first-child {
   box-shadow: inset 3px 0 0 var(--team-primary);
+}
+
+.standing-row-themed.team-accent-animated td:first-child {
+  position: relative;
+  box-shadow: inset 3px 0 0 var(--team-primary);
+}
+
+.standing-row-themed.team-accent-animated td:first-child::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: -6px;
+  bottom: -6px;
+  width: 18px;
+  border-radius: 999px;
+  --fixture-glow-angle: 38deg;
+  background: conic-gradient(
+    from var(--fixture-glow-angle),
+    color-mix(in srgb, var(--team-primary) 85%, transparent),
+    transparent 100deg,
+    color-mix(in srgb, var(--team-secondary, var(--team-primary)) 70%, transparent) 220deg,
+    transparent 300deg
+  );
+  filter: blur(8px);
+  opacity: 0.8;
+  animation: fixture-glow-orbit 11s linear infinite;
+  pointer-events: none;
 }
 
 .standing-row-themed.qualified td:first-child {

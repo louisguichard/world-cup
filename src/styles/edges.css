@@ -133,11 +133,23 @@
 /* ── Media & themed match cards ───────────────────────────────── */
 
 .fixture-glow-wrap,
+.live-hero-card-wrap {
+  border-radius: var(--edge-radius-lg);
+  overflow: visible;
+}
+
+.fixture-glow-wrap > .schedule-card,
+.fixture-glow-wrap > button,
+.fixture-glow-wrap > article,
+.live-hero-card-wrap > .live-hero-card {
+  overflow: clip;
+  border-radius: inherit;
+}
+
 .schedule-card-themed,
 .live-hero-card-themed,
 .match-card-themed-shell {
   border-radius: var(--edge-radius-lg);
-  overflow: clip;
 }
 
 .team-flag-wrap,

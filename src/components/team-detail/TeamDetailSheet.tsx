@@ -20,10 +20,20 @@ import { Wc2026SquadList } from "./Wc2026SquadList";
 import { useTeamProfile } from "../../hooks/useTeamProfile";
 import { useWc2026TeamSquad } from "../../hooks/useWc2026TeamSquad";
 import { useZafronixTeamRoster } from "../../hooks/useZafronixTeamRoster";
-import { formatPredictionPick, predictionsForTeam } from "../../lib/matchFootballPredictions";
+import { TeamBettingPanel } from "./TeamBettingPanel";
+import { predictionsForTeam } from "../../lib/matchFootballPredictions";
 import type { MergedMatch } from "../../types";
 
 type Tab = "overview" | "squad" | "fixtures" | "stats" | "media" | "betting";
+
+const TAB_LABELS: Record<Tab, string> = {
+  overview: "Overview",
+  squad: "Squad",
+  fixtures: "Fixtures",
+  stats: "Stats",
+  media: "Media",
+  betting: APP_COPY.odds.tabLabel,
+};
 type MatchOutcome = "W" | "D" | "L";
 
 function outcomeForTeam(match: MergedMatch, teamId: string): MatchOutcome {
@@ -158,7 +168,7 @@ export function TeamDetailSheet() {
         <div className="team-sheet-tabs">
           {(["overview", "squad", "fixtures", "stats", "media", "betting"] as Tab[]).map((t) => (
             <button key={t} type="button" className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
+              {TAB_LABELS[t]}
             </button>
           ))}
         </div>
@@ -325,32 +335,11 @@ export function TeamDetailSheet() {
           ) : null}
 
           {tab === "betting" ? (
-            <div>
-              <p>Title market: {team.titleProbability ? `${(team.titleProbability * 100).toFixed(1)}%` : "—"}</p>
-              <p>ClubElo rating: {elo ?? "Loading…"}</p>
-              {teamPredictions.length > 0 ? (
-                <div className="fp-team-picks">
-                  <h3 className="team-sheet-section-title">Today Football Prediction picks</h3>
-                  <ul className="fp-picks-list">
-                    {teamPredictions.slice(0, 6).map((p) => (
-                      <li key={p.id} className="fp-pick-row">
-                        <span>
-                          {p.homeTeam} vs {p.awayTeam}
-                        </span>
-                        <span>
-                          {formatPredictionPick(p.prediction)}
-                          {p.predictionProbability != null ? ` (${p.predictionProbability}%)` : ""}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <p className="team-sheet-empty">No third-party picks matched for this team in today&apos;s feed.</p>
-              )}
-              {simulationRunning ? <p className="odds-recalc">Recalculating…</p> : null}
-              <p className="odds-disclaimer">Based on simulated tournaments and cached third-party tips. For entertainment only — not financial advice.</p>
-            </div>
+            <TeamBettingPanel
+              team={team}
+              teamPredictions={teamPredictions}
+              simulationRunning={simulationRunning}
+            />
           ) : null}
         </div>
       </div>

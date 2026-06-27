@@ -1,29 +1,50 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { Suspense, lazy, useEffect, useRef, useState, useCallback } from "react";
 import { BottomTabBar } from "./BottomTabBar";
 import { TopNavBar } from "./TopNavBar";
 import { SplashScreen } from "./SplashScreen";
 import { InstallAppBanner } from "./InstallAppBanner";
 import { DebugPanel } from "../shared/DebugPanel";
+import { UiDebugHost } from "../debug/UiDebugHost";
 import { ApiSetupBanner } from "../shared/ApiSetupBanner";
 import { useColorScheme } from "../../hooks/useColorScheme";
 import { useHashSync } from "../../hooks/useHashSync";
 import { useQualificationChangeLogger } from "../../hooks/useQualificationChangeLogger";
 import { usePlatform } from "../../hooks/usePlatform";
 import { usePullToRefresh } from "../../hooks/usePullToRefresh";
-import { APP_COPY } from "../../lib/appCopy";
 import { DataOrchestrator } from "../../services/orchestrator/DataOrchestrator";
 import { useStore } from "../../store";
 import { LiveView } from "../views/LiveView";
-import { ResultsView } from "../views/ResultsView";
-import { BracketView } from "../views/BracketView";
-import { GroupsView } from "../views/GroupsView";
-import { TeamsView } from "../views/TeamsView";
-import { SimulatorView } from "../simulator/SimulatorView";
-import { ScheduleView } from "../views/ScheduleView";
-import { TournamentView } from "../../pages/tournament/TournamentView";
-import { VenueHubView } from "../../pages/venue/VenueHubView";
-import { MatchDetailView } from "../../pages/match/MatchDetailView";
-import { TeamDetailSheet } from "../team-detail/TeamDetailSheet";
+
+const ResultsView = lazy(() =>
+  import("../views/ResultsView").then((m) => ({ default: m.ResultsView }))
+);
+const BracketView = lazy(() =>
+  import("../views/BracketView").then((m) => ({ default: m.BracketView }))
+);
+const GroupsView = lazy(() =>
+  import("../views/GroupsView").then((m) => ({ default: m.GroupsView }))
+);
+const TeamsView = lazy(() =>
+  import("../views/TeamsView").then((m) => ({ default: m.TeamsView }))
+);
+const SimulatorView = lazy(() =>
+  import("../simulator/SimulatorView").then((m) => ({ default: m.SimulatorView }))
+);
+const ScheduleView = lazy(() =>
+  import("../views/ScheduleView").then((m) => ({ default: m.ScheduleView }))
+);
+const TournamentView = lazy(() =>
+  import("../../pages/tournament/TournamentView").then((m) => ({ default: m.TournamentView }))
+);
+const VenueHubView = lazy(() =>
+  import("../../pages/venue/VenueHubView").then((m) => ({ default: m.VenueHubView }))
+);
+const MatchDetailView = lazy(() =>
+  import("../../pages/match/MatchDetailView").then((m) => ({ default: m.MatchDetailView }))
+);
+const TeamDetailSheet = lazy(() =>
+  import("../team-detail/TeamDetailSheet").then((m) => ({ default: m.TeamDetailSheet }))
+);
 
 export function AppShell() {
   const activeTab = useStore((s) => s.activeTab);
@@ -31,6 +52,7 @@ export function AppShell() {
   const lastGoalAnnouncement = useStore((s) => s.lastGoalAnnouncement);
   const activeMatchId = useStore((s) => s.activeMatchId);
   const activeVenueSlug = useStore((s) => s.activeVenueSlug);
+  const teamSheetOpen = useStore((s) => s.teamSheetOpen);
   const mainRef = useRef<HTMLElement>(null);
   const [refreshing, setRefreshing] = useState(false);
   const { isTouch } = usePlatform();
@@ -73,7 +95,10 @@ export function AppShell() {
   }, [lastGoalAnnouncement]);
 
   return (
-    <div className="wc-chrome">
+    <UiDebugHost
+      scanKey={`${activeTab}:${activeMatchId ?? ""}:${activeVenueSlug ?? ""}:${teamSheetOpen}`}
+    >
+      <div className="wc-chrome">
       <ApiSetupBanner />
       <TopNavBar compact={activeTab === "simulator"} />
       <main
@@ -82,26 +107,32 @@ export function AppShell() {
       >
         {splashPhase === "done" && !activeMatchId && !activeVenueSlug ? <InstallAppBanner /> : null}
         {activeTab === "live" ? <LiveView /> : null}
-        {activeTab === "results" ? <ResultsView /> : null}
-        {activeTab === "bracket" ? <BracketView /> : null}
-        {activeTab === "groups" ? <GroupsView /> : null}
-        {activeTab === "simulator" ? (
-          <div className="wc-main-simulator">
-            <SimulatorView />
-          </div>
-        ) : null}
-        {activeTab === "teams" ? <TeamsView /> : null}
-        {activeTab === "schedule" ? <ScheduleView /> : null}
-        {activeTab === "tournament" ? <TournamentView /> : null}
+        <Suspense fallback={null}>
+          {activeTab === "results" ? <ResultsView /> : null}
+          {activeTab === "bracket" ? <BracketView /> : null}
+          {activeTab === "groups" ? <GroupsView /> : null}
+          {activeTab === "simulator" ? (
+            <div className="wc-main-simulator">
+              <SimulatorView />
+            </div>
+          ) : null}
+          {activeTab === "teams" ? <TeamsView /> : null}
+          {activeTab === "schedule" ? <ScheduleView /> : null}
+          {activeTab === "tournament" ? <TournamentView /> : null}
+        </Suspense>
       </main>
       <BottomTabBar />
       <SplashScreen />
-      <TeamDetailSheet />
+      <Suspense fallback={null}>
+        <TeamDetailSheet />
+      </Suspense>
       <DebugPanel />
       <div id="sr-live" className="sr-only" aria-live="polite" />
-      {/* Full-page match detail overlays everything when active */}
-      {activeVenueSlug && !activeMatchId ? <VenueHubView /> : null}
-      {activeMatchId ? <MatchDetailView /> : null}
+      <Suspense fallback={null}>
+        {activeVenueSlug && !activeMatchId ? <VenueHubView /> : null}
+        {activeMatchId ? <MatchDetailView /> : null}
+      </Suspense>
     </div>
+    </UiDebugHost>
   );
 }

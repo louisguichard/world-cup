@@ -1,6 +1,18 @@
 import type { GroupStanding, MergedMatch, Team } from "../../types";
 import { BOOTSTRAP_FLAGS, isApiEnabled } from "../../config/apiFlags";
 import { loadWorldCupData } from "../../lib/dataSources";
+import {
+  espnBootTimeoutMs,
+  isMobileBootProfile,
+  splashMinimumHoldMs,
+} from "../../lib/bootProfile";
+import {
+  finishBootTracking,
+  formatBootReport,
+  startBootPhase,
+  startBootTracking,
+  endBootPhase,
+} from "../../lib/bootMetrics";
 import { deriveStandingsIfScored } from "../../lib/qualification";
 import { startAppServices } from "../../lib/appLifecycle";
 import { useStore } from "../../store";
@@ -40,6 +52,11 @@ import {
   normalizeZafronixStandings,
 } from "../adapters/normalizeStandings";
 import { applyTeamLogoOverrides } from "../../lib/resolveTeamLogo";
+import {
+  buildWc2026TeamCatalog,
+  mergeTeamsWithCatalog,
+  resolveCatalogTeamIdByName,
+} from "../../data/wc2026TeamCatalog";
 import { logger } from "../Logger";
 import {
   fetchWithFallback,
@@ -56,12 +73,19 @@ function buildStaticMatches(teams: Record<string, Team>): Record<string, MergedM
   for (const t of Object.values(teams)) {
     byName.set(t.name.toLowerCase(), t.id);
     byName.set(t.shortName.toLowerCase(), t.id);
+    byName.set(t.abbreviation.toLowerCase(), t.id);
   }
 
   const matches: Record<string, MergedMatch> = {};
   for (const entry of entries) {
-    const homeId = byName.get(entry.homeTeam.toLowerCase()) ?? entry.homeTeam;
-    const awayId = byName.get(entry.awayTeam.toLowerCase()) ?? entry.awayTeam;
+    const homeId =
+      resolveCatalogTeamIdByName(entry.homeTeam) ??
+      byName.get(entry.homeTeam.toLowerCase()) ??
+      entry.homeTeam;
+    const awayId =
+      resolveCatalogTeamIdByName(entry.awayTeam) ??
+      byName.get(entry.awayTeam.toLowerCase()) ??
+      entry.awayTeam;
     const id = `M${entry.matchNumber}`;
     matches[id] = {
       id,
@@ -178,18 +202,66 @@ function startBackgroundEnrichment(): void {
   })();
 }
 
+async function runBootstrapSim(): Promise<void> {
+  if (!BOOTSTRAP_FLAGS.bootstrapSimulation) return;
+  startBootPhase("simulation");
+  try {
+    const iterations = import.meta.env.DEV ? DEV_BOOTSTRAP_ITERATIONS : BOOTSTRAP_ITERATIONS;
+    await runCalibration({ iterations });
+    endBootPhase("simulation", `${iterations} iterations`);
+  } catch (simErr) {
+    endBootPhase("simulation", "skipped");
+    logger.warn("Simulation skipped during bootstrap", "DataOrchestrator.boot", {
+      reason: simErr instanceof Error ? simErr.message : String(simErr),
+    });
+    useStore.getState().setSplashProgress(85, "Simulation unavailable — loading app...");
+  }
+}
+
+async function runDeferredMobileEnrichment(
+  espnTeamsMap: Record<string, Team>,
+  liveMatches: MergedMatch[]
+): Promise<void> {
+  startBootPhase("deferred-enrichment");
+  const store = useStore.getState();
+  try {
+    startBootPhase("teams-merge");
+    const teams = await mergeTeamsFromCascade(
+      Object.keys(store.teams).length ? store.teams : espnTeamsMap
+    );
+    store.setTeams(teams);
+    endBootPhase("teams-merge");
+
+    const teamsList = Object.values(teams);
+    const standings = await loadStandingsWithFallback(liveMatches, teamsList);
+    if (standings) {
+      store.setGroupStandings(standings);
+    }
+
+    await runBootstrapSim();
+    endBootPhase("deferred-enrichment", "complete");
+  } catch (error) {
+    endBootPhase("deferred-enrichment", "partial failure");
+    logger.warn("Deferred mobile enrichment failed", "DataOrchestrator.boot", {
+      reason: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
 /** Runs splash bootstrap: ESPN, team cascade, matches, standings, simulation. */
 export async function runBoot(): Promise<void> {
+  startBootTracking();
   const store = useStore.getState();
+  const mobileFast = isMobileBootProfile();
   store.setSplashPhase("loading");
-  store.setSplashProgress(0, "Connecting to live data...");
+  store.setSplashProgress(0, mobileFast ? "Loading live scores..." : "Connecting to live data...");
 
   const slowTimer = setTimeout(() => {
     if (useStore.getState().splashPhase === "loading") {
       store.setSplashPhase("slow");
       store.setSplashProgress(15, "Taking longer than usual...");
     }
-  }, 2000);
+  }, mobileFast ? 3_500 : 2_000);
 
   try {
     let espnData: Awaited<ReturnType<typeof fetchScoreboard>> = {
@@ -198,17 +270,21 @@ export async function runBoot(): Promise<void> {
       eventsByMatchId: {},
     };
 
+    startBootPhase("espn-fetch");
     try {
-      const timeoutPromise = sleep(8000).then(() => {
-        throw new Error("ESPN timeout after 8s");
+      const timeoutMs = espnBootTimeoutMs(mobileFast);
+      const timeoutPromise = sleep(timeoutMs).then(() => {
+        throw new Error(`ESPN timeout after ${timeoutMs / 1000}s`);
       });
       espnData = await Promise.race([fetchScoreboard(), timeoutPromise]);
       clearTimeout(slowTimer);
+      endBootPhase("espn-fetch", `${espnData.matches.length} matches`);
       logger.info("ESPN fetch succeeded", "DataOrchestrator.boot", {
         matchCount: espnData.matches.length,
       });
     } catch (espnErr) {
       clearTimeout(slowTimer);
+      endBootPhase("espn-fetch", "fallback to static schedule");
       logger.warn("ESPN unavailable — continuing with static data", "DataOrchestrator.boot", {
         reason: espnErr instanceof Error ? espnErr.message : String(espnErr),
       });
@@ -218,13 +294,22 @@ export async function runBoot(): Promise<void> {
     startBackgroundEnrichment();
 
     const espnTeamsMap = Object.fromEntries(espnData.teams.map((t) => [t.id, t]));
-    const teams = await mergeTeamsFromCascade(
+    const catalog = buildWc2026TeamCatalog();
+    const mergedIncoming = mergeTeamsWithCatalog(
       Object.keys(store.teams).length ? store.teams : espnTeamsMap
     );
+    const baseTeams = { ...catalog, ...mergedIncoming };
+
+    startBootPhase("teams-merge");
+    const teams = mobileFast
+      ? applyTeamLogoOverrides(baseTeams)
+      : applyTeamLogoOverrides(await mergeTeamsFromCascade(baseTeams));
+    endBootPhase("teams-merge", mobileFast ? "catalog + local (APIs deferred)" : "catalog + API merge");
     store.setTeams(teams);
 
     store.setSplashProgress(35, "Loading live scores...");
 
+    startBootPhase("matches-build");
     const liveMatches: Record<string, MergedMatch> = {};
 
     if (espnData.matches.length > 0) {
@@ -246,40 +331,45 @@ export async function runBoot(): Promise<void> {
     for (const m of Object.values(liveMatches)) {
       if (m.locked) store.addLockedMatchId(m.id);
     }
+    endBootPhase("matches-build", `${Object.keys(liveMatches).length} matches`);
 
+    startBootPhase("standings-load");
     const teamsList = Object.values(useStore.getState().teams);
-    const standings = await loadStandingsWithFallback(Object.values(liveMatches), teamsList);
+    let standings: GroupStanding[] | null;
+    if (mobileFast) {
+      standings = deriveStandingsIfScored(Object.values(liveMatches), teamsList);
+      endBootPhase("standings-load", standings ? "derived locally (APIs deferred)" : "empty");
+    } else {
+      standings = await loadStandingsWithFallback(Object.values(liveMatches), teamsList);
+      endBootPhase("standings-load", standings ? `${standings.length} groups` : "empty");
+    }
     if (standings) {
       store.setGroupStandings(standings);
     }
 
-    store.setSplashProgress(65, "Running simulations...");
+    store.setSplashProgress(mobileFast ? 80 : 65, mobileFast ? "Almost ready..." : "Running simulations...");
 
-    const runBootstrapSim = async (): Promise<void> => {
-      if (!BOOTSTRAP_FLAGS.bootstrapSimulation) return;
-      try {
-        const iterations = import.meta.env.DEV ? DEV_BOOTSTRAP_ITERATIONS : BOOTSTRAP_ITERATIONS;
-        await runCalibration({ iterations });
-      } catch (simErr) {
-        logger.warn("Simulation skipped during bootstrap", "DataOrchestrator.boot", {
-          reason: simErr instanceof Error ? simErr.message : String(simErr),
-        });
-        store.setSplashProgress(85, "Simulation unavailable — loading app...");
-      }
-    };
-
-    if (import.meta.env.DEV) {
-      void runBootstrapSim();
+    if (mobileFast) {
+      void runDeferredMobileEnrichment(espnTeamsMap, Object.values(liveMatches));
     } else {
-      await runBootstrapSim();
+      void runBootstrapSim();
     }
 
-    await sleep(1200);
+    startBootPhase("splash-hold");
+    await sleep(splashMinimumHoldMs(mobileFast));
+    endBootPhase("splash-hold");
+
     store.setSplashPhase("done");
+    startBootPhase("services-start");
     startAppServices();
+    endBootPhase("services-start");
+
+    finishBootTracking(mobileFast ? "mobile fast path" : "full path");
     logger.info("Bootstrap complete", "DataOrchestrator.boot", {
       matchCount: Object.keys(liveMatches).length,
       teamsCount: Object.keys(useStore.getState().teams).length,
+      mobileFast,
+      bootMs: formatBootReport(),
     });
   } catch (err) {
     clearTimeout(slowTimer);
@@ -288,5 +378,6 @@ export async function runBoot(): Promise<void> {
     });
     store.setSplashPhase("error");
     store.setSplashProgress(0, err instanceof Error ? err.message : "Load failed");
+    finishBootTracking("error");
   }
 }

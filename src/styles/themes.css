@@ -352,9 +352,3 @@
     font-size: 9px;
   }
 }
-
-@media (max-width: 640px) {
-  .wc-topbar-meta .theme-toggle {
-    display: none;
-  }
-}

@@ -37,6 +37,11 @@
     <script>
       (function () {
         try {
+          if (window.performance && performance.mark) {
+            performance.mark("wc-script-start");
+          }
+        } catch (e) {}
+        try {
           var pref = localStorage.getItem("wc-color-scheme") || "system";
           var theme =
             pref === "system"

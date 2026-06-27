@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
+import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { StandingThemeRow } from "../team/StandingThemeRow";
 import { TeamFlag } from "../team/TeamFlag";
@@ -32,6 +33,10 @@ export function GroupsView() {
   const qualContext = useMemo(
     () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
     [liveMatches, teams]
+  );
+  const bubbleTeamIds = useMemo(
+    () => getBestThirdBubbleTeamIds(standings, qualContext),
+    [standings, qualContext]
   );
 
   const groupsViewMode = useStore((s) => s.groupsViewMode);
@@ -159,7 +164,12 @@ export function GroupsView() {
                         const qual = computeQualificationStatus(row.teamId, standings, qualContext);
                         const display = resolveQualificationDisplay(qual);
                         return (
-                          <StandingThemeRow key={row.teamId} teamId={row.teamId} className={display.rowClass}>
+                          <StandingThemeRow
+                            key={row.teamId}
+                            teamId={row.teamId}
+                            accentAnimated={bubbleTeamIds.has(row.teamId)}
+                            className={display.rowClass}
+                          >
                             <td>
                               <span className="rank">{i + 1}</span>
                               <QualificationStatusBadge qual={qual} size="xs" />

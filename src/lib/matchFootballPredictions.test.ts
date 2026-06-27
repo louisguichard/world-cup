@@ -3,6 +3,7 @@ import {
   formatPredictionPick,
   linkPredictionToMatch,
   predictionTeamMatchesTeam,
+  resolvePredictionPick,
 } from "./matchFootballPredictions";
 import type { MergedMatch, Team } from "../types";
 
@@ -61,5 +62,15 @@ describe("matchFootballPredictions", () => {
   it("formats prediction picks", () => {
     expect(formatPredictionPick("X")).toBe("Draw");
     expect(formatPredictionPick("1")).toBe("Home win");
+  });
+
+  it("names teams in prediction picks", () => {
+    expect(resolvePredictionPick("1", "Brazil", "France")).toEqual({
+      shortLabel: "Brazil to win",
+      pickedTeam: "Brazil",
+      side: "home",
+    });
+    expect(resolvePredictionPick("2", "Brazil", "France").shortLabel).toBe("France to win");
+    expect(resolvePredictionPick("X", "Brazil", "France").side).toBe("draw");
   });
 });

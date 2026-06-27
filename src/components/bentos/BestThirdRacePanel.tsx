@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
+import { getThirdPlaceBubbleState } from "../../lib/thirdPlaceLiveStatus";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import type { GroupStanding, MergedMatch, TeamRecord } from "../../types";
@@ -8,6 +9,7 @@ import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { TeamFlag } from "../team/TeamFlag";
+import { StandingThemeRow } from "../team/StandingThemeRow";
 
 function statusLabel(
   rank: number,
@@ -121,9 +123,18 @@ export function BestThirdRacePanel() {
               const status = statusLabel(index + 1, row.teamId, standings, qualContext);
               const isCutLine = index === 7;
               const dimmed = index >= 8;
+              const bubbleState = getThirdPlaceBubbleState(
+                row.teamId,
+                index + 1,
+                ranked,
+                standings,
+                qualContext
+              );
               return (
-                <tr
+                <StandingThemeRow
                   key={row.teamId}
+                  teamId={row.teamId}
+                  accentAnimated={bubbleState === "bubble"}
                   className={`${isCutLine ? "best-third-race-cut" : ""} ${dimmed ? "best-third-race-dim" : ""}`}
                 >
                   <td>{index + 1}</td>
@@ -143,7 +154,7 @@ export function BestThirdRacePanel() {
                   <td>
                     <span className={`best-third-status ${status.className}`}>{status.text}</span>
                   </td>
-                </tr>
+                </StandingThemeRow>
               );
             })}
           </tbody>

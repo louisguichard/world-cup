@@ -113,3 +113,22 @@ export function formatPredictionPick(prediction: string): string {
       return prediction;
   }
 }
+
+export type PredictionPickSide = "home" | "away" | "draw" | "other";
+
+export function resolvePredictionPick(
+  prediction: string,
+  homeTeam: string,
+  awayTeam: string
+): { shortLabel: string; pickedTeam: string | null; side: PredictionPickSide } {
+  switch (prediction.toUpperCase()) {
+    case "1":
+      return { shortLabel: `${homeTeam} to win`, pickedTeam: homeTeam, side: "home" };
+    case "2":
+      return { shortLabel: `${awayTeam} to win`, pickedTeam: awayTeam, side: "away" };
+    case "X":
+      return { shortLabel: `Tie: ${homeTeam} vs ${awayTeam}`, pickedTeam: null, side: "draw" };
+    default:
+      return { shortLabel: formatPredictionPick(prediction), pickedTeam: null, side: "other" };
+  }
+}

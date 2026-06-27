@@ -121,19 +121,6 @@ body {
     min-width: max(4.5rem, 11vw);
     scroll-snap-align: start;
   }
-
-  .bottom-tab-theme {
-    position: sticky;
-    left: 0;
-    z-index: 2;
-    margin-right: 4px;
-    padding-right: 4px;
-    background: linear-gradient(
-      90deg,
-      var(--surface-base) 85%,
-      color-mix(in srgb, var(--surface-base) 40%, transparent)
-    );
-  }
 }
 
 /* Top bar — wrap meta on narrow phones */

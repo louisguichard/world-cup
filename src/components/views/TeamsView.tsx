@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import {
   bucketQualificationTeams,
   buildQualificationContext,
   computeQualificationStatus,
   type QualificationMatchContext
 } from "../../lib/qualification";
+import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import type { GroupLetter } from "../../types";
@@ -13,11 +14,6 @@ import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
 import { TeamFlag } from "../team/TeamFlag";
 import { useStore } from "../../store";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
-
-function teamPrimaryColor(theme: ReturnType<typeof useTeamTheme>): string {
-  const v = theme["--team-primary" as keyof typeof theme];
-  return typeof v === "string" ? v : "#6b7280";
-}
 
 type QualFilter = "all" | "qualified" | "projected" | "at_risk" | "eliminated" | "contention";
 
@@ -37,13 +33,15 @@ function TeamRow({
   rank,
   points,
   gd,
-  qualContext
+  qualContext,
+  accentAnimated = false
 }: {
   teamId: string;
   rank: number | string;
   points: number;
   gd: number;
   qualContext: QualificationMatchContext;
+  accentAnimated?: boolean;
 }) {
   const teams = useStore((s) => s.teams);
   const teamProfiles = useStore((s) => s.teamProfiles);
@@ -60,8 +58,8 @@ function TeamRow({
     <li>
       <button
         type="button"
-        className={`teams-row teams-row--accent ${display.rowClass}`}
-        style={{ borderLeftColor: teamPrimaryColor(theme) }}
+        className={`teams-row teams-row--accent${accentAnimated ? " teams-row--accent-animated" : ""} ${display.rowClass}`}
+        style={theme as CSSProperties}
         onClick={() => openTeamSheet(teamId)}
       >
         <TeamFlag team={team} teamId={teamId} />
@@ -86,6 +84,10 @@ export function TeamsView() {
   const qualContext = useMemo(
     () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
     [liveMatches, teams]
+  );
+  const bubbleTeamIds = useMemo(
+    () => getBestThirdBubbleTeamIds(standings, qualContext),
+    [standings, qualContext]
   );
 
   const buckets = useMemo(
@@ -208,6 +210,7 @@ export function TeamsView() {
                     points={row?.points ?? 0}
                     gd={row?.goalDifference ?? 0}
                     qualContext={qualContext}
+                    accentAnimated={bubbleTeamIds.has(t.id)}
                   />
                 );
               })}

@@ -75,20 +75,22 @@
 .live-qual-row,
 .results-day-grid {
   display: grid;
-  gap: var(--module-gap);
   align-items: stretch;
 }
 
 .schedule-list {
   grid-template-columns: repeat(auto-fill, minmax(var(--module-grid-min), 1fr));
+  gap: calc(var(--module-gap) + var(--fixture-glow-spread, 16px));
 }
 
 .groups-table-grid {
+  gap: var(--module-gap);
   grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--module-grid-min-wide)), 1fr));
   margin-bottom: var(--module-gap-lg);
 }
 
 .live-qual-row {
+  gap: var(--module-gap);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--module-grid-min-qual)), 1fr));
 }
 
@@ -186,6 +188,7 @@
   width: var(--live-secondary-card-width);
   height: var(--live-secondary-card-height);
   min-height: var(--live-secondary-card-height);
+  max-height: var(--live-secondary-card-height);
 }
 
 /* ── Result cards ───────────────────────────────────────────────── */

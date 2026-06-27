@@ -102,8 +102,8 @@ describe("matchThemeToStyle", () => {
     const away = resolveTeamIdentity(makeTeam({ id: "usa", abbreviation: "USA" }))!;
     const live = matchThemeToStyle(home, away, "live");
     const subtle = matchThemeToStyle(home, away, "default");
-    expect(String(live.background)).toContain("33");
-    expect(String(subtle.background)).toContain("14");
+    expect(String(live.background)).toContain("44");
+    expect(String(subtle.background)).toContain("18");
     expect(live["--match-home-primary"]).toBe(home.primary);
     expect(live["--match-away-primary"]).toBe(away.primary);
   });

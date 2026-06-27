@@ -4,9 +4,12 @@ import {
   bubbleStateLabel,
   crossedCutoffForDelta,
   detectCutoffCrossings,
+  getBestThirdBubbleTeamIds,
   getThirdPlaceBubbleState,
+  matchInvolvesBestThirdBubble,
 } from "./thirdPlaceLiveStatus";
 import type { GroupStanding, TeamRecord } from "../types";
+import { rankAliveBestThirds } from "./bestThirds";
 
 const context = { lockedGroupMatchCount: {}, lockedStandingsByGroup: {} };
 
@@ -127,6 +130,26 @@ describe("thirdPlaceLiveStatus", () => {
       expect(bubbleStateLabel("safe")).toBe(APP_COPY.bestThird.safe);
       expect(bubbleStateLabel("bubble")).toBe(APP_COPY.bestThird.bubble);
       expect(bubbleStateLabel("outside")).toBe(APP_COPY.bestThird.outside);
+    });
+  });
+
+  describe("getBestThirdBubbleTeamIds", () => {
+    it("returns only teams in bubble state", () => {
+      const standings = standingsWithThirds();
+      const ids = getBestThirdBubbleTeamIds(standings, context);
+      const ranked = rankAliveBestThirds(standings, context);
+      for (const id of ids) {
+        const rank = ranked.findIndex((r) => r.teamId === id) + 1;
+        expect(getThirdPlaceBubbleState(id, rank, ranked, standings, context)).toBe("bubble");
+      }
+    });
+  });
+
+  describe("matchInvolvesBestThirdBubble", () => {
+    it("detects bubble teams in a fixture", () => {
+      const bubbleIds = new Set(["home-bubble"]);
+      expect(matchInvolvesBestThirdBubble({ homeTeamId: "home-bubble", awayTeamId: "x" }, bubbleIds)).toBe(true);
+      expect(matchInvolvesBestThirdBubble({ homeTeamId: "a", awayTeamId: "b" }, bubbleIds)).toBe(false);
     });
   });
 });

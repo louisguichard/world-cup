@@ -1,8 +1,14 @@
 import type { MergedMatch, Team } from "../../types";
+import { useMemo } from "react";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { APP_COPY } from "../../lib/appCopy";
+import { buildQualificationContext } from "../../lib/qualification";
+import {
+  getBestThirdBubbleTeamIds,
+  matchInvolvesBestThirdBubble,
+} from "../../lib/thirdPlaceLiveStatus";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
@@ -39,6 +45,9 @@ export function MatchScheduleCard({
   showKickoffCountdown,
 }: Props) {
   const matchEvents = useStore((s) => s.matchEvents);
+  const teams = useStore((s) => s.teams);
+  const standings = useStore((s) => s.groupStandings);
+  const liveMatchesMap = useStore((s) => s.liveMatches);
   const events =
     matchEvents[match.id] ??
     matchEvents[match.matchId ?? ""] ??
@@ -50,6 +59,19 @@ export function MatchScheduleCard({
   const isLive = match.status === "live";
   const isDone = match.status === "completed" || match.locked;
   const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId, isLive ? "live" : "default");
+
+  const qualContext = useMemo(
+    () => buildQualificationContext(Object.values(liveMatchesMap), Object.values(teams)),
+    [liveMatchesMap, teams]
+  );
+  const bubbleTeamIds = useMemo(
+    () => getBestThirdBubbleTeamIds(standings, qualContext),
+    [standings, qualContext]
+  );
+  const isBubbleMatch = useMemo(
+    () => !isLive && matchInvolvesBestThirdBubble(match, bubbleTeamIds),
+    [match, bubbleTeamIds, isLive]
+  );
 
   const { isGoalActive, latestGoal, secondsRemaining } = useGoalDetector(match.id);
   const externalPrediction = useFootballPredictionForMatch(match.id);
@@ -77,6 +99,7 @@ export function MatchScheduleCard({
     "fixture-glow-wrap",
     "schedule-card-themed",
     isLive ? "is-live" : "",
+    isBubbleMatch ? "is-bubble-match" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -156,7 +179,12 @@ export function MatchScheduleCard({
       ) : null}
 
       {!isDone && externalPrediction ? (
-        <PredictionBadge prediction={externalPrediction} compact={compact} />
+        <PredictionBadge
+          prediction={externalPrediction}
+          homeTeam={teamDisplayName(home, match.homeTeamId)}
+          awayTeam={teamDisplayName(away, match.awayTeamId)}
+          compact={compact}
+        />
       ) : null}
 
       {!isDone && match ? (
