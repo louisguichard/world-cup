@@ -1,5 +1,6 @@
 /** Live group tables — replay partial scores so standings update as goals go in. */
 import type { GroupLetter, GroupStanding, MergedMatch, Team } from "../types";
+import { matchCountsForStandings } from "./qualification";
 import { replayStandings, type ReplayMatch } from "./replayStandings";
 
 export function buildLiveGroupReplayMatches(
@@ -10,24 +11,17 @@ export function buildLiveGroupReplayMatches(
 
   for (const match of matches) {
     if (match.group !== group) continue;
-    if (match.homeScore === undefined || match.awayScore === undefined) continue;
+    if (!matchCountsForStandings(match)) continue;
 
     const isCompleted = Boolean(match.locked || match.status === "completed");
-    const isLive = match.status === "live";
-
-    if (!isCompleted && !isLive) continue;
-
-    if (isLive && !isCompleted && match.homeScore === 0 && match.awayScore === 0) {
-      continue;
-    }
 
     replays.push({
       matchId: match.id,
       homeTeamId: match.homeTeamId,
       awayTeamId: match.awayTeamId,
       group,
-      homeScore: match.homeScore,
-      awayScore: match.awayScore,
+      homeScore: match.homeScore!,
+      awayScore: match.awayScore!,
       isCompleted,
     });
   }

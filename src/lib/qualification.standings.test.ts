@@ -64,4 +64,47 @@ describe("deriveStandingsIfScored", () => {
     expect(standings?.[0]?.group).toBe("A");
     expect(standings?.[0]?.rows).toHaveLength(2);
   });
+
+  it("ignores in-progress 0-0 live matches", () => {
+    const matches: Match[] = [
+      {
+        id: "live-00",
+        group: "A",
+        date: "2026-06-11T19:00:00Z",
+        homeTeamId: "a",
+        awayTeamId: "b",
+        status: "live",
+        homeScore: 0,
+        awayScore: 0,
+        homeConduct: 0,
+        awayConduct: 0,
+        locked: false,
+        source: "espn",
+      },
+    ];
+
+    expect(deriveStandingsIfScored(matches, teams)).toBeNull();
+  });
+
+  it("counts completed 0-0 draws", () => {
+    const matches: Match[] = [
+      {
+        id: "done-00",
+        group: "A",
+        date: "2026-06-11T19:00:00Z",
+        homeTeamId: "a",
+        awayTeamId: "b",
+        status: "completed",
+        homeScore: 0,
+        awayScore: 0,
+        homeConduct: 0,
+        awayConduct: 0,
+        locked: true,
+        source: "espn",
+      },
+    ];
+
+    const standings = deriveStandingsIfScored(matches, teams);
+    expect(standings?.[0]?.rows.every((r) => r.played === 1 && r.points === 1)).toBe(true);
+  });
 });

@@ -1,5 +1,6 @@
 /** Re-computes group standings from partial match scores for timeline replay. */
 import type { GroupLetter, GroupStanding, MatchWithScore, Team } from "../types";
+import { matchCountsForStandings } from "./qualification";
 import { computeStandings } from "./tournament";
 
 /** A match frozen at a specific moment in the timeline. */
@@ -14,11 +15,7 @@ export type ReplayMatch = {
 };
 
 function toScoredMatch(replay: ReplayMatch): MatchWithScore | null {
-  if (!replay.isCompleted && replay.homeScore === 0 && replay.awayScore === 0) {
-    return null;
-  }
-
-  return {
+  const match: MatchWithScore = {
     id: replay.matchId,
     group: replay.group,
     date: "",
@@ -32,6 +29,8 @@ function toScoredMatch(replay: ReplayMatch): MatchWithScore | null {
     locked: replay.isCompleted,
     source: "model",
   };
+
+  return matchCountsForStandings(match) ? match : null;
 }
 
 /**

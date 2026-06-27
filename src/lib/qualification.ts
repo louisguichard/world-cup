@@ -80,18 +80,32 @@ export type DeriveStandingsOptions = {
   lockedOnly?: boolean;
 };
 
+/** Whether a match should affect group standings (store + replay). */
+export function matchCountsForStandings(
+  match: Match,
+  opts: DeriveStandingsOptions = {}
+): match is MatchWithScore {
+  if (!match.group) return false;
+  if (match.homeScore === undefined || match.awayScore === undefined) return false;
+  if (opts.lockedOnly && !match.locked) return false;
+
+  const isCompleted = Boolean(match.locked || match.status === "completed");
+  const isLive = match.status === "live";
+  if (!isCompleted && !isLive) return false;
+
+  if (isLive && !isCompleted && match.homeScore === 0 && match.awayScore === 0) {
+    return false;
+  }
+
+  return true;
+}
+
 export function deriveStandingsIfScored(
   matches: Match[],
   teams: Team[],
   opts: DeriveStandingsOptions = {}
 ): GroupStanding[] | null {
-  const scored = matches.filter(
-    (m): m is MatchWithScore =>
-      Boolean(m.group) &&
-      m.homeScore !== undefined &&
-      m.awayScore !== undefined &&
-      (!opts.lockedOnly || m.locked)
-  );
+  const scored = matches.filter((m): m is MatchWithScore => matchCountsForStandings(m, opts));
   if (scored.length === 0) return null;
   return deriveStandings(scored, teams);
 }
