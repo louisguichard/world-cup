@@ -436,15 +436,19 @@ button.team-label:focus-visible,
 }
 
 .live-command-hero .live-hero-card-wrap {
-  margin-inline: calc(var(--fixture-glow-spread, 16px) / 4);
+  margin-inline: 0;
 }
 
-.live-now-strip {
-  gap: calc(var(--module-gap) + var(--fixture-glow-spread, 16px));
+.live-command-hero .live-now-strip {
+  gap: 14px;
 }
 
 .live-now-strip .fixture-glow-wrap {
   margin-inline: calc(var(--fixture-glow-spread, 16px) / 4);
+}
+
+.live-command-hero .live-now-strip .fixture-glow-wrap {
+  margin-inline: 0;
 }
 
 .recent-results-bento,

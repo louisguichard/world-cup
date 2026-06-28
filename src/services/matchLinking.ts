@@ -1,3 +1,4 @@
+import { resolveTeamFromStore } from "../data/wc2026TeamCatalog";
 import type { MergedMatch, Team } from "../types";
 import type { SofaEvent } from "./SofaScoreClient";
 
@@ -28,8 +29,8 @@ export function findEspnMatchForSofaEvent(
     const diff = Math.abs(Date.parse(m.date) - kickoffMs);
     if (diff > KICKOFF_TOLERANCE_MS) return false;
 
-    const home = teams[m.homeTeamId];
-    const away = teams[m.awayTeamId];
+    const home = resolveTeamFromStore(teams, m.homeTeamId);
+    const away = resolveTeamFromStore(teams, m.awayTeamId);
     if (!home || !away) return false;
 
     return teamNameMatches(home, ev.homeTeam.name) && teamNameMatches(away, ev.awayTeam.name);
@@ -71,8 +72,8 @@ export function findStoreMatchForExternalVote(
   const normAway = normalizeTeamName(vote.awayLabel);
 
   const candidates = Object.values(merged).filter((m) => {
-    const home = teams[m.homeTeamId];
-    const away = teams[m.awayTeamId];
+    const home = resolveTeamFromStore(teams, m.homeTeamId);
+    const away = resolveTeamFromStore(teams, m.awayTeamId);
     if (!home || !away) {
       const homeMatch =
         normalizeTeamName(m.homeTeamId) === normHome && normalizeTeamName(m.awayTeamId) === normAway;

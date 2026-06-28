@@ -59,4 +59,11 @@ describe("mergeLiveMatchRecords", () => {
     const { changed } = mergeLiveMatchRecords(existing, incoming);
     expect(changed).toBe(true);
   });
+
+  it("returns changed=true when schedule link or kickoff updates without score change", () => {
+    const existing = { m1: baseMatch({ matchId: undefined, date: "2026-06-15T19:00:00Z" }) };
+    const incoming = { m1: baseMatch({ matchId: "M12", date: "2026-06-15T18:00:00Z" }) };
+    const { changed } = mergeLiveMatchRecords(existing, incoming);
+    expect(changed).toBe(true);
+  });
 });

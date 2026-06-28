@@ -9,6 +9,7 @@ import {
 } from "../../lib/uiDebug";
 import type { UiDebugIssueKind } from "../../lib/uiDebugScan";
 import type { UiDebugSettings } from "../../lib/uiDebug";
+import { UiDebugDataHealth } from "./UiDebugDataHealth";
 
 type Props = {
   settings: UiDebugSettings;
@@ -90,6 +91,8 @@ export function UiDebugToolbar({
               </span>
             ) : null}
           </div>
+
+          <UiDebugDataHealth />
 
           <div className="ui-debug-panel-section ui-debug-panel-toggles">
             <label className="ui-debug-check">

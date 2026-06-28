@@ -14,11 +14,26 @@ type Props = {
 
 const GOAL_TYPES = new Set<MatchEvent["type"]>(["goal", "own_goal"]);
 const CARD_TYPES = new Set<MatchEvent["type"]>(["yellow_card", "red_card", "yellow_red_card"]);
+const SUB_TYPES = new Set<MatchEvent["type"]>(["substitution"]);
+const OTHER_TYPES = new Set<MatchEvent["type"]>([
+  "var_review",
+  "goal_disallowed",
+  "penalty_missed",
+  "penalty_saved",
+]);
+
+const DISPLAY_TYPES = new Set<MatchEvent["type"]>([
+  ...GOAL_TYPES,
+  ...CARD_TYPES,
+  ...SUB_TYPES,
+  ...OTHER_TYPES,
+]);
 
 function formatGoal(e: MatchEvent) {
   const extra = e.minuteExtra ? `+${e.minuteExtra}` : "";
   const suffix = e.type === "own_goal" ? " (OG)" : "";
-  return `${e.playerName} ${e.minute}${extra}'${suffix}`;
+  const assist = e.assistName ? ` (${e.assistName})` : "";
+  return `${e.playerName}${assist} ${e.minute}${extra}'${suffix}`;
 }
 
 function formatCard(e: MatchEvent) {
@@ -27,19 +42,49 @@ function formatCard(e: MatchEvent) {
   return `${label} ${e.playerName} ${e.minute}${extra}'`;
 }
 
-type ScorerRowProps = {
+function formatSubstitution(e: MatchEvent) {
+  const extra = e.minuteExtra ? `+${e.minuteExtra}` : "";
+  const out = e.assistName ? ` ↓ ${e.assistName}` : "";
+  return `↑ ${e.playerName}${out} ${e.minute}${extra}'`;
+}
+
+function formatOther(e: MatchEvent) {
+  const extra = e.minuteExtra ? `+${e.minuteExtra}` : "";
+  switch (e.type) {
+    case "var_review":
+      return `VAR ${e.playerName} ${e.minute}${extra}'`;
+    case "goal_disallowed":
+      return `No goal ${e.playerName} ${e.minute}${extra}'`;
+    case "penalty_missed":
+      return `Pen. miss ${e.playerName} ${e.minute}${extra}'`;
+    case "penalty_saved":
+      return `Pen. save ${e.playerName} ${e.minute}${extra}'`;
+    default:
+      return `${e.type} ${e.minute}${extra}'`;
+  }
+}
+
+function formatEvent(e: MatchEvent): string {
+  if (GOAL_TYPES.has(e.type)) return formatGoal(e);
+  if (CARD_TYPES.has(e.type)) return formatCard(e);
+  if (SUB_TYPES.has(e.type)) return formatSubstitution(e);
+  return formatOther(e);
+}
+
+type EventRowProps = {
   event: MatchEvent;
   label: string;
   isCard?: boolean;
+  isSub?: boolean;
   isAway?: boolean;
   photoUrl?: string;
   photoSize: PlayerPhotoSize;
 };
 
-function ScorerRow({ event, label, isCard, isAway, photoUrl, photoSize }: ScorerRowProps) {
+function EventRow({ event, label, isCard, isSub, isAway, photoUrl, photoSize }: EventRowProps) {
   return (
     <span
-      className={`match-goal-scorers-item${isCard ? " match-goal-scorers-item--card" : ""}${isAway ? " match-goal-scorers-item--away" : ""}`}
+      className={`match-goal-scorers-item${isCard ? " match-goal-scorers-item--card" : ""}${isSub ? " match-goal-scorers-item--sub" : ""}${isAway ? " match-goal-scorers-item--away" : ""}`}
     >
       <PlayerPhoto name={event.playerName} photoUrl={photoUrl} size={photoSize} />
       <span className="match-goal-scorers-item-text">{label}</span>
@@ -47,7 +92,15 @@ function ScorerRow({ event, label, isCard, isAway, photoUrl, photoSize }: Scorer
   );
 }
 
-/** Compact goal scorers and cards for live cards and result rows. */
+function eventsForSide(
+  events: MatchEvent[],
+  teamId: string,
+  types: Set<MatchEvent["type"]>
+): MatchEvent[] {
+  return events.filter((e) => types.has(e.type) && e.teamId === teamId);
+}
+
+/** Compact goals, cards, subs, and key incidents for live cards and result rows. */
 export function MatchGoalScorers({
   events,
   homeTeamId,
@@ -56,57 +109,49 @@ export function MatchGoalScorers({
   awayTeam,
   photoSize = "sm",
 }: Props) {
-  const photos = useEventPlayerPhotos({ events, homeTeam, awayTeam });
+  const displayEvents = events.filter((e) => DISPLAY_TYPES.has(e.type));
+  const photos = useEventPlayerPhotos({ events: displayEvents, homeTeam, awayTeam });
 
-  const homeGoals = events.filter((e) => GOAL_TYPES.has(e.type) && e.teamId === homeTeamId);
-  const awayGoals = events.filter((e) => GOAL_TYPES.has(e.type) && e.teamId === awayTeamId);
-  const homeCards = events.filter((e) => CARD_TYPES.has(e.type) && e.teamId === homeTeamId);
-  const awayCards = events.filter((e) => CARD_TYPES.has(e.type) && e.teamId === awayTeamId);
+  const homeEvents = [
+    ...eventsForSide(displayEvents, homeTeamId, GOAL_TYPES),
+    ...eventsForSide(displayEvents, homeTeamId, CARD_TYPES),
+    ...eventsForSide(displayEvents, homeTeamId, SUB_TYPES),
+    ...eventsForSide(displayEvents, homeTeamId, OTHER_TYPES),
+  ];
+  const awayEvents = [
+    ...eventsForSide(displayEvents, awayTeamId, GOAL_TYPES),
+    ...eventsForSide(displayEvents, awayTeamId, CARD_TYPES),
+    ...eventsForSide(displayEvents, awayTeamId, SUB_TYPES),
+    ...eventsForSide(displayEvents, awayTeamId, OTHER_TYPES),
+  ];
 
-  if (homeGoals.length === 0 && awayGoals.length === 0 && homeCards.length === 0 && awayCards.length === 0) {
+  if (homeEvents.length === 0 && awayEvents.length === 0) {
     return null;
   }
 
   return (
-    <div className="match-goal-scorers" aria-label="Goals and cards">
+    <div className="match-goal-scorers" aria-label="Match events">
       <div className="match-goal-scorers-col">
-        {homeGoals.map((e) => (
-          <ScorerRow
+        {homeEvents.map((e) => (
+          <EventRow
             key={e.providerId}
             event={e}
-            label={formatGoal(e)}
-            photoUrl={photos[e.providerId]}
-            photoSize={photoSize}
-          />
-        ))}
-        {homeCards.map((e) => (
-          <ScorerRow
-            key={e.providerId}
-            event={e}
-            label={formatCard(e)}
-            isCard
+            label={formatEvent(e)}
+            isCard={CARD_TYPES.has(e.type)}
+            isSub={SUB_TYPES.has(e.type)}
             photoUrl={photos[e.providerId]}
             photoSize={photoSize}
           />
         ))}
       </div>
       <div className="match-goal-scorers-col match-goal-scorers-col--away">
-        {awayGoals.map((e) => (
-          <ScorerRow
+        {awayEvents.map((e) => (
+          <EventRow
             key={e.providerId}
             event={e}
-            label={formatGoal(e)}
-            isAway
-            photoUrl={photos[e.providerId]}
-            photoSize={photoSize}
-          />
-        ))}
-        {awayCards.map((e) => (
-          <ScorerRow
-            key={e.providerId}
-            event={e}
-            label={formatCard(e)}
-            isCard
+            label={formatEvent(e)}
+            isCard={CARD_TYPES.has(e.type)}
+            isSub={SUB_TYPES.has(e.type)}
             isAway
             photoUrl={photos[e.providerId]}
             photoSize={photoSize}
@@ -115,4 +160,8 @@ export function MatchGoalScorers({
       </div>
     </div>
   );
+}
+
+export function hasDisplayableMatchEvents(events: MatchEvent[]): boolean {
+  return events.some((e) => DISPLAY_TYPES.has(e.type));
 }

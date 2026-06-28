@@ -1,4 +1,5 @@
 import type { GroupStanding } from "../types";
+import { mergeStandingsPartials } from "../services/adapters/normalizeStandings";
 import { bootCacheSchemaFields, matchesBootCacheSchema } from "./bootCacheSchema";
 import { BOOT_CACHE_SCHEMA_VERSION, BOOT_CACHE_VERSION } from "./bootCacheVersion";
 
@@ -35,10 +36,11 @@ export function readStandingsCache(): GroupStanding[] | null {
 export function writeStandingsCache(standings: GroupStanding[]): void {
   if (typeof localStorage === "undefined") return;
   try {
+    const merged = mergeStandingsPartials(readStandingsCache() ?? [], standings);
     const store: StandingsCacheStore = {
       ...bootCacheSchemaFields(),
       savedAt: new Date().toISOString(),
-      standings,
+      standings: merged,
     };
     localStorage.setItem(STANDINGS_CACHE_KEY, JSON.stringify(store));
   } catch {

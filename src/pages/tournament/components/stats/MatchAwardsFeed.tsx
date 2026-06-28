@@ -1,3 +1,4 @@
+import { resolveTeamFromStore } from "../../../../data/wc2026TeamCatalog";
 import type { Team } from "../../../../types";
 import { teamDisplayName } from "../../../../lib/teamIdentity";
 import { formatKickoffDate } from "../../../../lib/formatKickoff";
@@ -34,10 +35,10 @@ export function MatchAwardsFeed({ rows, teams, onOpenMatch }: Props) {
       </p>
       <ul className={styles.awardsFeed}>
         {rows.map(({ match, matchId, awards }) => {
-          const home = teams[match.homeTeamId];
-          const away = teams[match.awayTeamId];
-          const homeName = teamDisplayName(home, match.homeTeamId);
-          const awayName = teamDisplayName(away, match.awayTeamId);
+          const home = resolveTeamFromStore(teams, match.homeTeamId);
+          const away = resolveTeamFromStore(teams, match.awayTeamId);
+          const homeName = teamDisplayName(home, match.homeTeamId, teams);
+          const awayName = teamDisplayName(away, match.awayTeamId, teams);
           const score = `${match.homeScore ?? 0}–${match.awayScore ?? 0}`;
 
           return (

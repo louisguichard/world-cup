@@ -23,7 +23,8 @@ export type ApiSourceId =
   | "sportHighlights"
   | "allSportLiveStream"
   | "sportsLiveScores"
-  | "openWeather";
+  | "openWeather"
+  | "yahooWeather";
 
 export type ApiAuditStatus = "pass" | "fail" | "untested";
 
@@ -183,9 +184,16 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
   openWeather: {
     enabled: true,
     splashPath: false,
-    label: "Open Weather 13",
+    label: "Open Weather 13 (backup)",
     lastAudit: "pass",
     lastLatencyMs: 331,
+  },
+  yahooWeather: {
+    enabled: true,
+    splashPath: false,
+    label: "Yahoo Weather 5",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
   },
 };
 

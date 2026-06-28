@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { resetOfficialGroupRosterCache } from "../../lib/officialGroupRoster";
 import { buildQualificationSnapshot } from "../../lib/qualificationView";
 import type { Team } from "../../types";
-import { buildStandingsFromTeamGroups, mergeStandingsPartials, normalizeStandingsTeamIds } from "./normalizeStandings";
+import { buildStandingsFromTeamGroups, finalizeGroupStandings, mergeStandingsPartials, normalizeStandingsTeamIds } from "./normalizeStandings";
 
 function team(id: string, group: Team["group"], fifaRank: number): Team {
   return {
@@ -16,6 +17,10 @@ function team(id: string, group: Team["group"], fifaRank: number): Team {
 }
 
 describe("buildStandingsFromTeamGroups", () => {
+  beforeEach(() => {
+    resetOfficialGroupRosterCache();
+  });
+
   it("seeds zero-point tables so qualification panels can populate", () => {
     const teams = [
       team("mex", "A", 14),
@@ -72,6 +77,63 @@ describe("normalizeStandingsTeamIds", () => {
       teams
     );
     expect(normalized[0]!.rows[0]!.teamId).toBe("mex");
+  });
+
+  it("dedupes catalog and upstream ids for the same nation", () => {
+    const teams: Record<string, Team> = {
+      mex: team("mex", "A", 14),
+      "203": {
+        id: "203",
+        name: "Mexico",
+        shortName: "MEX",
+        abbreviation: "MEX",
+        group: "A",
+        rating: 1500,
+        fifaRank: 14,
+      },
+    };
+    const finalized = finalizeGroupStandings(
+      [
+        {
+          group: "A",
+          rows: [
+            {
+              teamId: "mex",
+              group: "A",
+              played: 0,
+              wins: 0,
+              draws: 0,
+              losses: 0,
+              goalsFor: 0,
+              goalsAgainst: 0,
+              goalDifference: 0,
+              points: 0,
+              conduct: 0,
+              rating: 1500,
+            },
+            {
+              teamId: "203",
+              group: "A",
+              played: 2,
+              wins: 2,
+              draws: 0,
+              losses: 0,
+              goalsFor: 5,
+              goalsAgainst: 1,
+              goalDifference: 4,
+              points: 6,
+              conduct: 0,
+              rating: 1500,
+            },
+          ],
+        },
+      ],
+      teams
+    );
+    expect(finalized[0]!.rows.filter((row) => row.teamId === "mex")).toHaveLength(1);
+    const mex = finalized[0]!.rows.find((row) => row.teamId === "mex");
+    expect(mex?.points).toBe(6);
+    expect(finalized[0]!.rows).toHaveLength(4);
   });
 });
 

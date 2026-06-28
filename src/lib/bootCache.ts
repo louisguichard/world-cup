@@ -1,4 +1,5 @@
 import type { GroupStanding, MergedMatch, Team } from "../types";
+import { mergeStandingsPartials } from "../services/adapters/normalizeStandings";
 import {
   BOOT_CACHE_SCHEMA_VERSION,
   bootCacheSchemaFields,
@@ -107,6 +108,7 @@ export function persistBootCache(
     writeLiveMatchCache(matches);
   }
   if (standings.length > 0) {
-    writeStandingsCache(standings);
+    const merged = mergeStandingsPartials(readStandingsCache() ?? [], standings);
+    writeStandingsCache(merged);
   }
 }

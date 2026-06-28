@@ -35,8 +35,8 @@ export type BuildEliminationStoryInput = {
 
 function formatDecidingLabel(snapshot: RankingSnapshot, teams: Team[]): string {
   const teamsById: Record<string, Team> = Object.fromEntries(teams.map((t) => [t.id, t]));
-  const home = teamDisplayName(teamsById[snapshot.homeTeamId], snapshot.homeTeamId);
-  const away = teamDisplayName(teamsById[snapshot.awayTeamId], snapshot.awayTeamId);
+  const home = teamDisplayName(undefined, snapshot.homeTeamId, teamsById);
+  const away = teamDisplayName(undefined, snapshot.awayTeamId, teamsById);
   return `${snapshot.label || `${home} ${snapshot.homeScore}–${snapshot.awayScore} ${away}`}`;
 }
 

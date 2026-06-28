@@ -1,3 +1,4 @@
+import { resolveTeamFromStore } from "../data/wc2026TeamCatalog";
 import type { MatchEvent, MergedMatch, Team, TournamentPlayerStat } from "../types";
 import { normalizePlayerName, playerNamesMatch } from "../services/playerProfile/normalizePlayerName";
 import { resolveEventsForMatch } from "./resolveMatchEvents";
@@ -108,6 +109,6 @@ export function aggregateTournamentStats(input: {
 }
 
 export function teamLabel(teamId: string, teams: Record<string, Team>): string {
-  const team = teams[teamId];
+  const team = resolveTeamFromStore(teams, teamId);
   return team?.name ?? team?.shortName ?? teamId;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { resolveTeamFromStore, uniqueCanonicalTeamIds } from "../data/wc2026TeamCatalog";
 import { buildQualificationContext, computeQualificationStatus } from "../lib/qualification";
 import { logger } from "../services/Logger";
 import { useStore } from "../store";
@@ -15,7 +16,7 @@ export function useQualificationChangeLogger(): void {
   );
 
   useEffect(() => {
-    for (const teamId of Object.keys(teams)) {
+    for (const teamId of uniqueCanonicalTeamIds(teams)) {
       const current = computeQualificationStatus(teamId, groupStandings, qualContext);
       const previous = previousStatuses.current[teamId];
 
@@ -25,7 +26,7 @@ export function useQualificationChangeLogger(): void {
         ).length;
         logger.info("Qualification status changed", "QualificationChangeLogger", {
           teamId,
-          teamName: teams[teamId]?.shortName ?? teamId,
+          teamName: resolveTeamFromStore(teams, teamId)?.shortName ?? teamId,
           from: previous.status,
           to: current.status,
           liveMatchCount: liveGroup

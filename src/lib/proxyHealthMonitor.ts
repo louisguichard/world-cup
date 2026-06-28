@@ -15,13 +15,13 @@ export type ProxyHealthState = {
 const PROXY_LABELS: Record<ProxyId, string> = {
   sportapi7: "SportAPI7",
   wc2026: "WC 2026 Teams",
-  weather: "Open Weather",
+  weather: "Yahoo Weather",
 };
 
-const PROXY_API_FLAG: Record<ProxyId, "sportApi7" | "wc2026Teams" | "openWeather"> = {
+const PROXY_API_FLAG: Record<ProxyId, "sportApi7" | "wc2026Teams" | "yahooWeather"> = {
   sportapi7: "sportApi7",
   wc2026: "wc2026Teams",
-  weather: "openWeather",
+  weather: "yahooWeather",
 };
 
 type Listener = () => void;

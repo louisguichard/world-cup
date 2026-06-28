@@ -1,3 +1,4 @@
+import { resolveTeamFromStore } from "../../../../data/wc2026TeamCatalog";
 import type { MergedMatch } from "../../../../types";
 import { formatKickoffTime } from "../../../../lib/formatKickoff";
 import { formatLiveClock } from "../../../../lib/formatMatchClock";
@@ -17,10 +18,10 @@ export function TournamentMatchCard({ match }: Props) {
   const tournamentSubTab = useStore((s) => s.tournamentSubTab);
   const selectedDateKey = useStore((s) => s.selectedDateKey);
 
-  const home = teams[match.homeTeamId];
-  const away = teams[match.awayTeamId];
-  const homeTeamName = teamDisplayName(home, match.homeTeamId);
-  const awayTeamName = teamDisplayName(away, match.awayTeamId);
+  const home = resolveTeamFromStore(teams, match.homeTeamId);
+  const away = resolveTeamFromStore(teams, match.awayTeamId);
+  const homeTeamName = teamDisplayName(home, match.homeTeamId, teams);
+  const awayTeamName = teamDisplayName(away, match.awayTeamId, teams);
 
   const isLive = match.status === "live";
   const isDone = match.status === "completed";

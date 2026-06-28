@@ -1,8 +1,9 @@
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import type { MergedMatch } from "../../types";
 import { useMemo } from "react";
 import { useStore } from "../../store";
 import { BroadcastBar } from "../match/BroadcastBar";
-import { MatchGoalScorers } from "../match/MatchGoalScorers";
+import { hasDisplayableMatchEvents, MatchGoalScorers } from "../match/MatchGoalScorers";
 import { WeatherBadge } from "../match/WeatherBadge";
 import { GoalCelebrationOverlay } from "../match/GoalCelebrationOverlay";
 import goalStyles from "../match/GoalCelebrationOverlay.module.css";
@@ -15,6 +16,8 @@ import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
 import { teamLiveCardName } from "../../lib/teamIdentity";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
+import { VenueLabel } from "../venue/VenueLabel";
+import { resolveEventsForMatch } from "../../lib/resolveMatchEvents";
 
 type Props = {
   match: MergedMatch;
@@ -24,8 +27,8 @@ type Props = {
 export function LiveMatchBento({ match, variant }: Props) {
   const teams = useStore((s) => s.teams);
   const matchEvents = useStore((s) => s.matchEvents);
-  const home = teams[match.homeTeamId];
-  const away = teams[match.awayTeamId];
+  const home = resolveTeamFromStore(teams, match.homeTeamId);
+  const away = resolveTeamFromStore(teams, match.awayTeamId);
   const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId);
 
   const isLive = match.status === "live";
@@ -33,15 +36,15 @@ export function LiveMatchBento({ match, variant }: Props) {
   const periodLabel = isLive ? formatPeriodLabel(match.period, match.status) : null;
   const broadcast =
     (match.matchId ? getBroadcast(match.matchId) : undefined) ?? getBroadcastByKickoff(match.date);
-  const events =
-    matchEvents[match.id] ??
-    matchEvents[match.matchId ?? ""] ??
-    matchEvents[match.espnEventId ?? ""] ??
-    [];
+  const events = useMemo(
+    () => resolveEventsForMatch(match, matchEvents, teams),
+    [match, matchEvents, teams]
+  );
+  const hasEvents = hasDisplayableMatchEvents(events);
 
   const { isGoalActive, latestGoal, secondsRemaining } = useGoalDetector(match.id);
-  const homeName = teamLiveCardName(home, match.homeTeamId);
-  const awayName = teamLiveCardName(away, match.awayTeamId);
+  const homeName = teamLiveCardName(home, match.homeTeamId, teams);
+  const awayName = teamLiveCardName(away, match.awayTeamId, teams);
   const isCompact = true;
 
   const scorerEvents = useMemo(
@@ -55,10 +58,12 @@ export function LiveMatchBento({ match, variant }: Props) {
 
   return (
     <div
-      className={`fixture-glow-wrap live-hero-themed${isLive ? " is-live" : ""} live-hero-card-wrap live-hero-card-wrap--${variant}${isGoalActive ? ` ${goalStyles.cardGoalActive}` : ""}`}
+      className={`fixture-glow-wrap live-hero-themed${isLive ? " is-live" : ""} live-hero-card-wrap live-hero-card-wrap--${variant}`}
       style={matchTheme}
     >
-      <article className={`live-hero-card live-hero-card--${variant}`}>
+      <article
+        className={`live-hero-card live-hero-card--${variant}${isGoalActive ? ` ${goalStyles.cardGoalActive}` : ""}`}
+      >
         <GoalCelebrationOverlay
           isActive={isGoalActive}
           latestGoal={latestGoal}
@@ -67,7 +72,9 @@ export function LiveMatchBento({ match, variant }: Props) {
           awayTeamName={awayName}
           scorerPhotoUrl={scorerPhotoUrl}
         />
-        <div className={`live-hero-card-body ${goalStyles.cardContentLayer}`}>
+        <div
+          className={`live-hero-card-body ${goalStyles.cardContentLayer}${isGoalActive ? ` ${goalStyles.cardContentGoalActive}` : ""}`}
+        >
       <div className="team-accent-bar" aria-hidden />
       <div className="live-hero-header">
         {isLive ? (
@@ -79,14 +86,22 @@ export function LiveMatchBento({ match, variant }: Props) {
         {isLive && clockLabel ? (
           <span className="live-hero-clock">{clockLabel}</span>
         ) : null}
-        {periodLabel && variant === "primary" ? (
+        {periodLabel ? (
           <span className="live-hero-period">{periodLabel}</span>
         ) : null}
         {match.group ? <span className="match-source espn">Group {match.group}</span> : null}
-        {variant === "primary" && broadcast?.venue.city ? (
-          <WeatherBadge city={broadcast.venue.city} />
-        ) : null}
+        <WeatherBadge
+          matchId={match.matchId}
+          venueString={match.venue}
+          cityHint={broadcast?.venue.city}
+        />
       </div>
+
+      {match.matchId || match.venue ? (
+        <div className="live-hero-meta">
+          <VenueLabel matchId={match.matchId} venueString={match.venue} inline compact />
+        </div>
+      ) : null}
 
       <div className="score-line live-hero-scoreline">
         {home ? (
@@ -104,22 +119,30 @@ export function LiveMatchBento({ match, variant }: Props) {
         )}
       </div>
 
-      <div className="match-goal-scorers-slot" aria-hidden={events.filter((e) => e.type === "goal" || e.type === "own_goal").length === 0}>
-        <MatchGoalScorers
-          events={events}
-          homeTeamId={match.homeTeamId}
-          awayTeamId={match.awayTeamId}
-          homeTeam={home}
-          awayTeam={away}
-          photoSize={variant === "secondary" ? "xs" : "sm"}
-        />
+      <div
+        className="match-goal-scorers-slot"
+        aria-hidden={!hasEvents}
+        data-empty={hasEvents ? undefined : "true"}
+      >
+        {hasEvents ? (
+          <MatchGoalScorers
+            events={events}
+            homeTeamId={match.homeTeamId}
+            awayTeamId={match.awayTeamId}
+            homeTeam={home}
+            awayTeam={away}
+            photoSize="sm"
+          />
+        ) : isLive ? (
+          <p className="live-hero-events-placeholder">Goals, cards, and subs appear here as they happen.</p>
+        ) : null}
       </div>
 
       <div className="broadcast-bar-slot">
         <BroadcastBar
           matchId={match.matchId}
           kickoffUtc={match.date}
-          variant={variant === "primary" ? "hero" : "default"}
+          variant="hero"
         />
       </div>
       </div>

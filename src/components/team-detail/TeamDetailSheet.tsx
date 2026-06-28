@@ -1,3 +1,4 @@
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { formatKickoffDate, formatKickoffTime } from "../../lib/formatKickoff";
@@ -54,8 +55,8 @@ export function TeamDetailSheet() {
   const [elo, setElo] = useState<number | null>(null);
   const [recentForm, setRecentForm] = useState<ZafronixMatch[]>([]);
 
-  const team = teamId ? teams[teamId] : null;
-  const teamDisplay = team ? teamDisplayName(team, team.id) : "";
+  const team = teamId ? resolveTeamFromStore(teams, teamId) : null;
+  const teamDisplay = team ? teamDisplayName(team, team.id, teams) : "";
   const highlightlyTeam = useHighlightlyTeamData(teamDisplay, Boolean(team));
   const { profile: sofaProfile, loading: sofaLoading } = useTeamProfile(team?.abbreviation);
   const { players: wcSquad, loading: wcSquadLoading } = useWc2026TeamSquad(team);
@@ -268,7 +269,7 @@ export function TeamDetailSheet() {
                   {allFixtures.map((match) => {
                     const isHome = match.homeTeamId === teamId;
                     const opponentId = isHome ? match.awayTeamId : match.homeTeamId;
-                    const opponent = teams[opponentId];
+                    const opponent = resolveTeamFromStore(teams, opponentId);
                     const teamScore = isHome ? (match.homeScore ?? 0) : (match.awayScore ?? 0);
                     const oppScore = isHome ? (match.awayScore ?? 0) : (match.homeScore ?? 0);
                     return (
@@ -288,7 +289,7 @@ export function TeamDetailSheet() {
                           <span>
                             <TeamFlag team={opponent} teamId={opponentId} />{" "}
                             <span className="team-name-text">
-                              {teamDisplayName(opponent, opponentId)}
+                              {teamDisplayName(opponent, opponentId, teams)}
                             </span>
                           </span>
                           <span>

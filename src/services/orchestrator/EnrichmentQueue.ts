@@ -11,8 +11,9 @@ import type {
 import { isApiEnabled } from "../../config/apiFlags";
 import { fetchTeamForm } from "../ZafronixClient";
 import { getBestLines } from "../OddsIntelligenceClient";
-import { getWeatherByCity } from "../WeatherClient";
+import { getWeatherForLocation } from "../WeatherClient";
 import { fetchMatchBundle } from "../matchDetail/fetchMatchBundle";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { materializeFullSchedule } from "../../lib/materializeFullSchedule";
 import { logger } from "../Logger";
 import { useStore } from "../../store";
@@ -55,17 +56,21 @@ function toCommentaryEntry(
   }));
 }
 
-function toWeatherSnapshot(data: Awaited<ReturnType<typeof getWeatherByCity>>): WeatherSnapshot | undefined {
+function toWeatherSnapshot(
+  data: Awaited<ReturnType<typeof getWeatherForLocation>>
+): WeatherSnapshot | undefined {
   if (!data) return undefined;
   return {
     city: data.city,
     tempC: data.tempC,
     tempF: data.tempF,
-    condition: data.description,
+    condition: data.condition,
+    iconKind: data.iconKind,
     icon: data.icon,
     humidity: data.humidity,
     windKph: Math.round(data.windMph * 1.609),
     fetchedAt: Date.now(),
+    source: data.source,
   };
 }
 
@@ -111,8 +116,8 @@ async function runEnrichment(
 ): Promise<EnrichmentResult> {
   const result: EnrichmentResult = { matchId: match.id, sources: {} };
   const teams = useStore.getState().teams;
-  const home = teams[match.homeTeamId];
-  const away = teams[match.awayTeamId];
+  const home = resolveTeamFromStore(teams, match.homeTeamId);
+  const away = resolveTeamFromStore(teams, match.awayTeamId);
 
   const wants = new Set(jobSources);
   const tasks: Promise<void>[] = [];
@@ -144,19 +149,19 @@ async function runEnrichment(
     );
   }
 
-  if (wants.has("weather") && match.venue) {
-    const city = match.venue.split(",")[0]?.trim();
-    if (city) {
-      tasks.push(
-        getWeatherByCity(city).then((wx) => {
-          const snap = toWeatherSnapshot(wx);
-          if (snap) {
-            result.weather = snap;
-            result.sources.weather = "wclive";
-          }
-        })
-      );
-    }
+  if (wants.has("weather") && (match.venue || match.matchId)) {
+    tasks.push(
+      getWeatherForLocation({
+        matchId: match.matchId,
+        venueString: match.venue,
+      }).then((wx) => {
+        const snap = toWeatherSnapshot(wx);
+        if (snap) {
+          result.weather = snap;
+          result.sources.weather = "wclive";
+        }
+      })
+    );
   }
 
   if (wants.has("odds") && match.espnEventId && isApiEnabled("oddsIntelligence")) {

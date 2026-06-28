@@ -1,38 +1,31 @@
 import { useEffect, useState } from "react";
 import type { WeatherSnapshot } from "../types";
-import { getVenueCoords } from "../data/venueCoordinates";
+import type { WeatherLocationInput } from "../lib/weather/resolveHostCityWeather";
+import { resolveHostCityWeather } from "../lib/weather/resolveHostCityWeather";
 import { getWeather } from "../services/WeatherCache";
 
-function parseVenueName(venueString: string | undefined): string | undefined {
-  if (!venueString) return undefined;
-  const trimmed = venueString.trim();
-  if (!trimmed) return undefined;
-  const byComma = trimmed.split(",")[0]?.trim();
-  return byComma || trimmed;
-}
-
-/** Fetches weather for a match venue string with cache. */
-export function useStadiumWeather(venueString: string | undefined): {
+/** Fetches weather for a WC 2026 host city with cache (Yahoo primary, OpenWeather backup). */
+export function useStadiumWeather(input: WeatherLocationInput): {
   weather: WeatherSnapshot | null;
   loading: boolean;
 } {
   const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const entry = resolveHostCityWeather(input);
+  const lookupKey = entry?.id ?? input.cityHint ?? input.venueString ?? input.matchId ?? "";
+
   useEffect(() => {
-    const venueName = parseVenueName(venueString);
-    if (!venueName) {
+    if (!entry) {
       setWeather(null);
+      setLoading(false);
       return;
     }
-
-    const coords = getVenueCoords(venueName);
-    const city = coords?.city ?? venueName;
 
     let cancelled = false;
     setLoading(true);
 
-    void getWeather(city).then((data) => {
+    void getWeather(input).then((data) => {
       if (cancelled) return;
       setLoading(false);
       if (!data) {
@@ -43,18 +36,20 @@ export function useStadiumWeather(venueString: string | undefined): {
         city: data.city,
         tempC: data.tempC,
         tempF: data.tempF,
-        condition: data.description,
+        condition: data.condition,
+        iconKind: data.iconKind,
         icon: data.icon,
         humidity: data.humidity,
         windKph: Math.round(data.windMph * 1.609),
         fetchedAt: Date.now(),
+        source: data.source,
       });
     });
 
     return () => {
       cancelled = true;
     };
-  }, [venueString]);
+  }, [lookupKey, entry]);
 
   return { weather, loading };
 }

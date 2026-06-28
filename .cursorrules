@@ -1,0 +1,66 @@
+# WC2026 Qualification Prediction Engine — Cursor Rules
+
+TypeScript monorepo for a cloud-native, event-sourced FIFA World Cup 2026 qualification and prediction platform.
+
+## Architecture
+
+- **Three bounded contexts (hard boundaries):**
+  - BC1: Data Intake & Reconciliation (`workers/intake`, `workers/reconciliation`, `packages/identity`)
+  - BC2: Official Qualification Engine (`packages/qualification`, `workers/qualification`) — deterministic only
+  - BC3: Prediction & Scenario Engine (`packages/prediction`, `workers/prediction`) — probabilistic only
+- BC2 and BC3 never share mutable state. Prediction reads qualification snapshots; it never writes them.
+- All canonical types live in `packages/canonical`. Never redefine entity shapes locally.
+- All domain events live in `packages/events` with Zod schemas. Validate at every boundary.
+- Architectural changes require an ADR in `docs/adr/`.
+
+## Package & Import Rules
+
+- Import canonical types from `@wc2026/canonical`, events from `@wc2026/events`.
+- Qualification math: `@wc2026/qualification` only (pure functions, zero I/O).
+- Prediction math: `@wc2026/prediction` only.
+- Provider payloads: validate with `@wc2026/zod-schemas` before any business logic.
+- No provider-native IDs outside adapter/reconciliation layers — resolve via IdentityService first.
+- No inline imports. All imports at top of file.
+
+## Event Sourcing
+
+- Raw provider payloads: append-only `raw_event_log`. Never update or delete.
+- Corrections: append-only `CorrectionEvent`. Replay on top of provider state.
+- Qualification/prediction snapshots: immutable insert-only rows.
+- Fuzzy identity matches below threshold → quarantine queue. Never auto-write to canonical graph.
+
+## Testing
+
+- Add regression tests for every identity, qualification, or reconciliation bug fix.
+- Qualification and prediction packages: pure function tests, CI-blocking.
+- Property-based or snapshot tests for tie-breaking and calibration edge cases.
+- MSW fixtures for provider HTTP in CI — no live API calls.
+
+## Prohibited Patterns
+
+```typescript
+// BAD: prediction logic in qualification package
+import { buildMatchPrediction } from "@wc2026/prediction"; // in packages/qualification
+
+// BAD: provider ID in UI without resolution
+const teamId = espnResponse.team.id; // use IdentityService.resolveToCanonical()
+
+// BAD: destructive overwrite of raw provider data
+await db.rawEvent.update({ where: { id }, data: payload });
+
+// BAD: fuzzy auto-resolve
+if (fuzzyScore > 0.5) await writeCanonical(id); // must quarantine below threshold
+```
+
+## Code Review Checklist
+
+- [ ] Official vs prediction logic in correct bounded context?
+- [ ] Canonical types imported from `@wc2026/canonical`?
+- [ ] Events validated with Zod at wire boundary?
+- [ ] Identity resolved before canonical write?
+- [ ] CorrectionEvents append-only with audit trail?
+- [ ] Tests added for changed domain logic?
+- [ ] ADR if architecture changed?
+- [ ] Version bump (`npm run version:build`) if source changed?
+
+See also: `.cursor/rules/architecture.mdc`, `bounded-contexts.mdc`, `testing.mdc`.

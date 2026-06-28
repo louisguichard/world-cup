@@ -1,4 +1,5 @@
-import { getAllScheduleEntries } from "./BroadcastLookup";
+import { getAllScheduleEntries, getBroadcast } from "./BroadcastLookup";
+import { resolveTeamFromStore } from "../data/wc2026TeamCatalog";
 import { matchCompositeKey, normalizeKickoffUtc, pairKey } from "../lib/normalize";
 import type { MatchScheduleEntry, MergedMatch, Team } from "../types";
 
@@ -33,8 +34,8 @@ export function linkMatchToSchedule(
   match: Partial<MergedMatch>,
   teams: Record<string, Team>
 ): string | undefined {
-  const homeName = teams[match.homeTeamId ?? ""]?.name;
-  const awayName = teams[match.awayTeamId ?? ""]?.name;
+  const homeName = resolveTeamFromStore(teams, match.homeTeamId ?? "")?.name;
+  const awayName = resolveTeamFromStore(teams, match.awayTeamId ?? "")?.name;
 
   if (homeName && awayName) {
     const byPair = scheduleLinkIndices.pair[pairKey(homeName, awayName)];
@@ -65,8 +66,8 @@ export function enrichMatchWithScheduleId(
     compositeKey:
       match.compositeKey ??
       matchCompositeKey(
-        teams[match.homeTeamId]?.name ?? "",
-        teams[match.awayTeamId]?.name ?? "",
+        resolveTeamFromStore(teams, match.homeTeamId)?.name ?? "",
+        resolveTeamFromStore(teams, match.awayTeamId)?.name ?? "",
         match.date
       )
   };
@@ -78,12 +79,20 @@ export function formatKickoffLocal(kickoffUtc: string): string {
   );
 }
 
-/** Display string for match kickoff — always sourced from the live feed (`match.date`). */
+/** Display string for match kickoff — prefers official schedule when linked. */
 export function formatKickoffLabel(kickoffUtc: string): string {
   return `${KICKOFF_LABEL} · ${formatKickoffLocal(kickoffUtc)}`;
 }
 
-/** Prefer ESPN/SofaScore kickoff from the live feed when linked by official match id (e.g. M4). */
+export function resolveOfficialMatchKickoff(match: Pick<MergedMatch, "matchId" | "date">): string {
+  if (match.matchId) {
+    const official = getBroadcast(match.matchId)?.kickoffUTC;
+    if (official) return official;
+  }
+  return match.date;
+}
+
+/** @deprecated Use resolveOfficialMatchKickoff */
 export function resolveKickoffByMatchId(
   officialMatchId: string,
   fallbackUtc: string,

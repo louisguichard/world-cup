@@ -1,3 +1,4 @@
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useMemo, useState } from "react";
 import { materializeFullSchedule } from "../../lib/materializeFullSchedule";
 import { resolveVenueBySlug } from "../../lib/venue/resolveVenue";
@@ -118,8 +119,8 @@ export function VenueHubView() {
                 {slice.recent ? (
                   <VenueMatchRow
                     match={slice.recent}
-                    home={teams[slice.recent.homeTeamId]}
-                    away={teams[slice.recent.awayTeamId]}
+                    home={resolveTeamFromStore(teams, slice.recent.homeTeamId)}
+                    away={resolveTeamFromStore(teams, slice.recent.awayTeamId)}
                     onSelect={() => handleSelectMatch(slice.recent!.matchId ?? slice.recent!.id)}
                   />
                 ) : (
@@ -132,8 +133,8 @@ export function VenueHubView() {
                 {slice.upcoming ? (
                   <VenueMatchRow
                     match={slice.upcoming}
-                    home={teams[slice.upcoming.homeTeamId]}
-                    away={teams[slice.upcoming.awayTeamId]}
+                    home={resolveTeamFromStore(teams, slice.upcoming.homeTeamId)}
+                    away={resolveTeamFromStore(teams, slice.upcoming.awayTeamId)}
                     onSelect={() => handleSelectMatch(slice.upcoming!.matchId ?? slice.upcoming!.id)}
                   />
                 ) : (
@@ -161,8 +162,8 @@ export function VenueHubView() {
                     <VenueMatchRow
                       key={m.matchId ?? m.id}
                       match={m}
-                      home={teams[m.homeTeamId]}
-                      away={teams[m.awayTeamId]}
+                      home={resolveTeamFromStore(teams, m.homeTeamId)}
+                      away={resolveTeamFromStore(teams, m.awayTeamId)}
                       onSelect={() => handleSelectMatch(m.matchId ?? m.id)}
                     />
                   ))}
@@ -182,8 +183,8 @@ export function VenueHubView() {
                     <VenueMatchRow
                       key={m.matchId ?? m.id}
                       match={m}
-                      home={teams[m.homeTeamId]}
-                      away={teams[m.awayTeamId]}
+                      home={resolveTeamFromStore(teams, m.homeTeamId)}
+                      away={resolveTeamFromStore(teams, m.awayTeamId)}
                       onSelect={() => handleSelectMatch(m.matchId ?? m.id)}
                     />
                   ))}

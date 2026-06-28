@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import type { MergedMatch } from "../../types";
 import { useMatchEnrichment } from "../../hooks/useMatchEnrichment";
 import { teamDisplayName } from "../../lib/teamIdentity";
@@ -18,8 +19,10 @@ export function MatchDetailPanel({ match, wcMatchId, onClose }: Props) {
   const { commentary, lineups, statistics, loading } = useMatchEnrichment(match.id);
   const teams = useStore((s) => s.teams);
 
-  const homeTeam = teamDisplayName(teams[match.homeTeamId], match.homeTeamId);
-  const awayTeam = teamDisplayName(teams[match.awayTeamId], match.awayTeamId);
+  const homeTeam = teamDisplayName(undefined, match.homeTeamId, teams);
+  const awayTeam = teamDisplayName(undefined, match.awayTeamId, teams);
+  const home = resolveTeamFromStore(teams, match.homeTeamId);
+  const away = resolveTeamFromStore(teams, match.awayTeamId);
 
   return (
     <div className="match-detail-backdrop" role="presentation" onClick={onClose}>
@@ -32,12 +35,12 @@ export function MatchDetailPanel({ match, wcMatchId, onClose }: Props) {
         <header className="match-detail-header">
           <h2 className="match-detail-title">
             <span className="match-detail-team" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <TeamFlag team={teams[match.homeTeamId]} teamId={match.homeTeamId} size="sm" compact />
+              <TeamFlag team={home} teamId={match.homeTeamId} size="sm" compact />
               {homeTeam}
             </span>{" "}
             {match.homeScore ?? "–"} : {match.awayScore ?? "–"}{" "}
             <span className="match-detail-team" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <TeamFlag team={teams[match.awayTeamId]} teamId={match.awayTeamId} size="sm" compact />
+              <TeamFlag team={away} teamId={match.awayTeamId} size="sm" compact />
               {awayTeam}
             </span>
           </h2>

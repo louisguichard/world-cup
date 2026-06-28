@@ -203,6 +203,29 @@
   color: #ecff43;
 }
 
+.ui-debug-data-health-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.75rem;
+  font-size: 0.78rem;
+  margin-bottom: 0.5rem;
+}
+
+.ui-debug-data-health-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.ui-debug-data-health-list--error {
+  color: #fecaca;
+}
+
+.ui-debug-data-health-list--warn {
+  color: #fde68a;
+}
+
 /* Boundary outlines */
 [data-ui-debug-boundaries="true"] .wc-chrome *:not(.ui-debug-issue-marker):not(.ui-debug-issue-marker *) {
   outline: 1px dashed rgba(48, 79, 255, 0.28);
@@ -350,9 +373,12 @@
 }
 
 [data-ui-viewport-sim="mobile"] .live-command-row,
-[data-ui-viewport-sim="mobile"] .live-qual-row,
-[data-ui-viewport-sim="mobile"] .live-now-strip {
+[data-ui-viewport-sim="mobile"] .live-qual-row {
   grid-template-columns: 1fr;
+}
+
+[data-ui-viewport-sim="mobile"] .live-command-hero .live-now-strip {
+  grid-template-columns: none;
 }
 
 [data-ui-viewport-sim="mobile"] .bracket-view .bracket-toggle {
@@ -400,17 +426,17 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-[data-ui-viewport-sim="desktop"] .live-now-strip {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  grid-auto-rows: var(--live-secondary-card-height);
+[data-ui-viewport-sim="desktop"] .live-command-hero .live-now-strip {
+  display: flex;
+  flex-direction: column;
   overflow: visible;
 }
 
-[data-ui-viewport-sim="desktop"] .live-now-strip-item {
+[data-ui-viewport-sim="desktop"] .live-command-hero .live-now-strip-item {
   flex: none;
-  width: auto;
-  height: var(--live-secondary-card-height);
+  width: 100%;
+  height: auto;
+  min-height: var(--card-height-featured);
 }
 
 [data-ui-viewport-sim="desktop"] .schedule-list {

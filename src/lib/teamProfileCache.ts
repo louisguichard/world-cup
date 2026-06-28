@@ -91,7 +91,18 @@ export function readTournamentProfile(): TournamentProfileBundle | null {
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
     if (!isRecord(parsed) || typeof parsed.fetchedAt !== "string") return null;
-    return parsed as TournamentProfileBundle;
+    return {
+      fetchedAt: parsed.fetchedAt,
+      uniqueTournamentId: typeof parsed.uniqueTournamentId === "number" ? parsed.uniqueTournamentId : 16,
+      name: typeof parsed.name === "string" ? parsed.name : undefined,
+      slug: typeof parsed.slug === "string" ? parsed.slug : undefined,
+      imagePath: typeof parsed.imagePath === "string" ? parsed.imagePath : undefined,
+      seasons: Array.isArray(parsed.seasons) ? parsed.seasons as TournamentProfileBundle["seasons"] : [],
+      standingsGroups: Array.isArray(parsed.standingsGroups) ? parsed.standingsGroups as TournamentProfileBundle["standingsGroups"] : [],
+      topPlayers: Array.isArray(parsed.topPlayers) ? parsed.topPlayers as TournamentProfileBundle["topPlayers"] : [],
+      topTeams: Array.isArray(parsed.topTeams) ? parsed.topTeams as TournamentProfileBundle["topTeams"] : [],
+      cupTreeNames: Array.isArray(parsed.cupTreeNames) ? parsed.cupTreeNames as string[] : [],
+    };
   } catch {
     return null;
   }

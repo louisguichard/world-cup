@@ -2,44 +2,36 @@
 @keyframes fwcImpactFlash {
   0% {
     border-color: #6b1a1a;
-    border-width: 2px;
     box-shadow: none;
   }
   10% {
     border-color: #e00000;
-    border-width: 6px;
     box-shadow:
       0 0 24px 6px #e00000,
       inset 0 0 20px 2px rgba(255, 255, 255, 0.15);
   }
   20% {
     border-color: #5b0ea6;
-    border-width: 4px;
     box-shadow: 0 0 20px 4px #5b0ea6;
   }
   30% {
     border-color: #1e3eef;
-    border-width: 6px;
     box-shadow: 0 0 28px 8px #1e3eef;
   }
   45% {
     border-color: #ff4500;
-    border-width: 5px;
     box-shadow: 0 0 32px 10px #ff4500;
   }
   60% {
     border-color: #d4af37;
-    border-width: 4px;
     box-shadow: 0 0 20px 6px #d4af37;
   }
   80% {
     border-color: #00d26a;
-    border-width: 3px;
     box-shadow: 0 0 16px 4px #00d26a;
   }
   100% {
     border-color: #d4af37;
-    border-width: 2px;
     box-shadow: 0 0 12px 3px rgba(212, 175, 55, 0.4);
   }
 }
@@ -142,7 +134,8 @@
   position: relative;
   overflow: hidden;
   border: 2px solid transparent;
-  border-radius: var(--r-lg, 12px);
+  border-radius: inherit;
+  --goal-banner-height: 2.25rem;
   animation:
     fwcImpactFlash 2s ease-out forwards,
     fwcSustainedGlow 4s ease-in-out 2s infinite;
@@ -167,7 +160,21 @@
 
 .cardContentLayer {
   position: relative;
-  z-index: 3;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.cardContentGoalActive {
+  padding-top: var(--goal-banner-height, 2.25rem);
+  transition: padding-top 0.28s ease;
+}
+
+.cardGoalActive .team-accent-bar {
+  display: none;
 }
 
 .amplifyBurst {
@@ -177,7 +184,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(0deg);
-  z-index: 1;
+  z-index: 0;
   pointer-events: none;
   border-radius: 50%;
   will-change: transform, opacity;
@@ -190,12 +197,14 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 2;
+  z-index: 4;
   pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  min-height: var(--goal-banner-height, 2.25rem);
+  box-sizing: border-box;
   padding: 6px 12px;
   background: linear-gradient(
     90deg,
@@ -214,6 +223,7 @@
   font-weight: 900;
   letter-spacing: 0.12em;
   color: #d4af37;
+  flex-shrink: 0;
   text-shadow:
     0 0 8px rgba(212, 175, 55, 0.8),
     0 0 20px rgba(212, 175, 55, 0.4);
@@ -256,6 +266,7 @@
   color: rgba(255, 255, 255, 0.45);
   font-variant-numeric: tabular-nums;
   min-width: 28px;
+  flex-shrink: 0;
   text-align: right;
   animation: fwcCountdownPulse 1s linear infinite;
 }

@@ -1,3 +1,4 @@
+import { resolveTeamFromStore } from "../data/wc2026TeamCatalog";
 import type { MergedMatch, Team } from "../types";
 import type { FootballPredictionMatch } from "../services/FootballPredictionClient";
 
@@ -50,8 +51,8 @@ export function linkPredictionToMatch(
   match: MergedMatch,
   teams: Record<string, Team>
 ): boolean {
-  const home = teams[match.homeTeamId];
-  const away = teams[match.awayTeamId];
+  const home = resolveTeamFromStore(teams, match.homeTeamId);
+  const away = resolveTeamFromStore(teams, match.awayTeamId);
   if (!home || !away) return false;
 
   const homeOk = predictionTeamMatchesTeam(prediction.homeTeam, home);

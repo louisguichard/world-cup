@@ -1,0 +1,266 @@
+// WC2026 Production Architecture — Prisma Schema
+// Covers: CanonicalStore, IdentityGraph, RawEventLog,
+//         QualificationSnapshots, CorrectionEventLog, PredictionStore
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// IDENTITY GRAPH
+// ─────────────────────────────────────────────
+
+model IdentityAlias {
+  id                  String   @id @default(cuid())
+  canonicalId         String
+  entityType          String   // "team" | "player" | "match" | "venue" | ...
+  providerId          String
+  externalId          String
+  externalDisplayName String?
+  confidence          Float    @default(1.0)
+  method              String   @default("EXACT") // EXACT | FUZZY | MANUAL
+  quarantined         Boolean  @default(false)
+  quarantineReason    String?
+  verifiedAt          DateTime?
+  verifiedBy          String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([providerId, externalId, entityType])
+  @@index([canonicalId])
+  @@index([quarantined])
+}
+
+model IdentityQuarantine {
+  id             String   @id @default(cuid())
+  externalId     String
+  entityType     String
+  providerId     String
+  rawPayload     Json
+  candidateIds   Json     // string[] of possible canonical IDs
+  topScore       Float
+  reason         String
+  resolvedAt     DateTime?
+  resolvedBy     String?
+  resolution     String?  // "APPROVED" | "REJECTED" | "NEW_ENTITY"
+  createdAt      DateTime @default(now())
+
+  @@index([entityType, resolvedAt])
+}
+
+model IdentityAuditLog {
+  id          String   @id @default(cuid())
+  canonicalId String
+  entityType  String
+  action      String   // "RESOLVED" | "QUARANTINED" | "ALIAS_ADDED" | "ALIAS_REMOVED"
+  providerId  String?
+  externalId  String?
+  metadata    Json?
+  performedBy String   @default("system")
+  createdAt   DateTime @default(now())
+
+  @@index([canonicalId])
+}
+
+// ─────────────────────────────────────────────
+// RAW EVENT LOG (append-only)
+// ─────────────────────────────────────────────
+
+model RawProviderEvent {
+  id            String   @id @default(cuid())
+  providerId    String
+  entityType    String
+  externalId    String?
+  payload       Json
+  schemaVersion String   @default("1")
+  ingestedAt    DateTime @default(now())
+
+  @@index([providerId, ingestedAt])
+  @@index([entityType, ingestedAt])
+}
+
+// ─────────────────────────────────────────────
+// CANONICAL STORE
+// ─────────────────────────────────────────────
+
+model CanonicalTeam {
+  id              String   @id @default(cuid())
+  version         Int      @default(1)
+  displayName     String
+  shortCode       String   @db.VarChar(3)
+  countryCode     String   @db.VarChar(3)
+  groupId         String?
+  fifaRanking     Int?
+  eloRating       Float?
+  recentForm      Json?    // string[] e.g. ["W","D","L"]
+  crestUrl        String?
+  primaryColor    String?
+  secondaryColor  String?
+  sourceTrace     Json?    // SourceTrace[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([shortCode])
+  @@index([groupId])
+}
+
+model CanonicalPlayer {
+  id          String   @id @default(cuid())
+  version     Int      @default(1)
+  displayName String
+  nationality String
+  dateOfBirth DateTime?
+  position    String?
+  teamId      String?
+  jerseyNumber Int?
+  isActive    Boolean  @default(true)
+  sourceTrace Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([teamId])
+}
+
+model CanonicalMatch {
+  id           String   @id @default(cuid())
+  version      Int      @default(1)
+  homeTeamId   String
+  awayTeamId   String
+  kickoffUtc   DateTime
+  status       String   @default("SCHEDULED") // SCHEDULED | LIVE | COMPLETED | POSTPONED
+  homeScore    Int?
+  awayScore    Int?
+  period       String?
+  minutePlayed Int?
+  groupId      String?
+  knockoutRound String?
+  matchday     Int?
+  venueId      String?
+  resultLocked Boolean  @default(false)
+  odds         Json?
+  sourceTrace  Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([groupId, kickoffUtc])
+  @@index([status])
+  @@index([resultLocked])
+}
+
+model CanonicalVenue {
+  id             String   @id @default(cuid())
+  version        Int      @default(1)
+  name           String
+  city           String
+  country        String
+  capacitySeated Int?
+  latitude       Float?
+  longitude      Float?
+  altitude       Float?
+  surfaceType    String?
+  hostCityId     String?
+  sourceTrace    Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// QUALIFICATION SNAPSHOTS (immutable)
+// ─────────────────────────────────────────────
+
+model QualificationSnapshot {
+  id               String   @id @default(cuid())
+  groupId          String
+  teamId           String
+  tier             String   // "CHAMPION" | "RUNNER_UP" | "THIRD" | "ELIMINATED" | ...
+  certainty        String   // "CONFIRMED" | "LIKELY" | "POSSIBLE" | "UNCERTAIN"
+  lifeState        String   // "ALIVE" | "ELIMINATED"
+  projectionScore  Float?
+  reasons          Json?    // string[] explaining how this tier was reached
+  engineVersion    String
+  inputHash        String
+  baseSnapshotId   String?
+  isScenario       Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([groupId, createdAt])
+  @@index([teamId, createdAt])
+  @@index([isScenario])
+}
+
+// ─────────────────────────────────────────────
+// CORRECTION EVENT LOG (append-only)
+// ─────────────────────────────────────────────
+
+model CorrectionEvent {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  field      String
+  oldValue   Json?
+  newValue   Json
+  analystId  String
+  reason     String?
+  appliedAt  DateTime @default(now())
+  revertedAt DateTime?
+  revertedBy String?
+
+  @@index([entityType, entityId])
+  @@index([appliedAt])
+}
+
+// ─────────────────────────────────────────────
+// PREDICTION STORE (immutable rows)
+// ─────────────────────────────────────────────
+
+model PredictionSnapshot {
+  id                 String   @id @default(cuid())
+  matchId            String
+  homeWinP           Float
+  drawP              Float
+  awayWinP           Float
+  modelVersion       String
+  factorContributions Json
+  calibrationId      String?
+  isScenario         Boolean  @default(false)
+  scenarioId         String?
+  createdAt          DateTime @default(now())
+
+  @@index([matchId, createdAt])
+  @@index([scenarioId])
+}
+
+model AdvancementProbability {
+  id           String   @id @default(cuid())
+  teamId       String
+  stage        String   // "ROUND_OF_32" | "ROUND_OF_16" | "QF" | "SF" | "FINAL" | "CHAMPION"
+  probability  Float
+  modelVersion String
+  isScenario   Boolean  @default(false)
+  scenarioId   String?
+  createdAt    DateTime @default(now())
+
+  @@index([teamId, stage, createdAt])
+  @@index([scenarioId])
+}
+
+// ─────────────────────────────────────────────
+// PROVIDER HEALTH
+// ─────────────────────────────────────────────
+
+model ProviderHealth {
+  id                 String   @id @default(cuid())
+  providerId         String   @unique
+  status             String   @default("healthy") // healthy | degraded | down
+  lastSuccessfulPoll DateTime?
+  lastErrorMessage   String?
+  consecutiveErrors  Int      @default(0)
+  circuitState       String   @default("CLOSED") // CLOSED | OPEN | HALF_OPEN
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}

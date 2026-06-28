@@ -17,6 +17,7 @@ import styles from "./ScheduleView.module.css";
 import { FootballPredictionInsightsPanel } from "../predictions/FootballPredictionInsightsPanel";
 import { VenueLabel } from "../venue/VenueLabel";
 import { TeamFlag } from "../team/TeamFlag";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_BRAND } from "../../config/appMeta";
 import { APP_COPY } from "../../lib/appCopy";
@@ -280,8 +281,8 @@ function ScheduleMatchTable({ matches, teams, onOpenMatch }: ScheduleMatchTableP
         </thead>
         <tbody>
           {matches.map((m) => {
-            const home = teams[m.homeTeamId];
-            const away = teams[m.awayTeamId];
+            const home = resolveTeamFromStore(teams, m.homeTeamId);
+            const away = resolveTeamFromStore(teams, m.awayTeamId);
             return (
               <tr
                 key={m.id}
@@ -292,7 +293,7 @@ function ScheduleMatchTable({ matches, teams, onOpenMatch }: ScheduleMatchTableP
                 <td className={`${styles.teamCell} ${styles["teamCell--home"]}`}>
                   <span className={styles.teamCellInner}>
                     <TeamFlag team={home} teamId={m.homeTeamId} size="sm" compact />
-                    <span className="team-name-text">{teamDisplayName(home, m.homeTeamId)}</span>
+                    <span className="team-name-text">{teamDisplayName(home, m.homeTeamId, teams)}</span>
                   </span>
                 </td>
                 <td className={styles.scoreCell}>
@@ -309,7 +310,7 @@ function ScheduleMatchTable({ matches, teams, onOpenMatch }: ScheduleMatchTableP
                 <td className={styles.teamCell}>
                   <span className={styles.teamCellInner}>
                     <TeamFlag team={away} teamId={m.awayTeamId} size="sm" compact />
-                    <span className="team-name-text">{teamDisplayName(away, m.awayTeamId)}</span>
+                    <span className="team-name-text">{teamDisplayName(away, m.awayTeamId, teams)}</span>
                   </span>
                 </td>
                 <td className={styles.venueCell} onClick={(e) => e.stopPropagation()}>

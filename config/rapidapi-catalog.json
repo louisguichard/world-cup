@@ -384,11 +384,28 @@
     ]
   },
   {
+    "id": "yahooWeather",
+    "label": "Yahoo Weather 5",
+    "host": "yahoo-weather5.p.rapidapi.com",
+    "marketplaceSlug": "yahoo-weather5",
+    "client": "YahooWeatherClient.ts",
+    "devProxyPrefix": "/api/yahoo-weather",
+    "testPath": "/weather?location=atlanta&format=json&u=f",
+    "endpoints": [
+      {
+        "id": "getYahooWeatherByLocation",
+        "fn": "getYahooWeatherByLocation",
+        "path": "/weather?location=atlanta&format=json&u=f",
+        "acceptStatuses": [200]
+      }
+    ]
+  },
+  {
     "id": "openWeather",
     "label": "Open Weather 13",
     "host": "open-weather13.p.rapidapi.com",
     "marketplaceSlug": "open-weather13",
-    "client": "WeatherClient.ts",
+    "client": "OpenWeatherClient.ts",
     "devProxyPrefix": "/api/weather",
     "testPath": "/city?city=New%20York&lang=EN",
     "endpoints": [

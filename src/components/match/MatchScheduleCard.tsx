@@ -1,6 +1,7 @@
 import type { MergedMatch, Team } from "../../types";
 import { useMemo } from "react";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
+import { resolveOfficialMatchKickoff } from "../../services/ScheduleLinker";
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { APP_COPY } from "../../lib/appCopy";
@@ -23,6 +24,7 @@ import { useStore } from "../../store";
 import { useGoalDetector } from "../../hooks/useGoalDetector";
 import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
 import { GoalCelebrationOverlay } from "./GoalCelebrationOverlay";
+import { ScenarioBranchButton } from "../analyst/ScenarioBranchButton";
 import goalStyles from "./GoalCelebrationOverlay.module.css";
 
 type Props = {
@@ -54,7 +56,7 @@ export function MatchScheduleCard({
     [];
   const broadcast =
     (match.matchId ? getBroadcast(match.matchId) : undefined) ?? getBroadcastByKickoff(match.date);
-  const kickoffUtc = match.date;
+  const kickoffUtc = resolveOfficialMatchKickoff(match);
   const isLive = match.status === "live";
   const isDone = match.status === "completed" || match.locked;
   const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId, isLive ? "live" : "default");
@@ -81,13 +83,13 @@ export function MatchScheduleCard({
   const scorerPhotoUrl = latestGoal?.scorerEvent
     ? scorerPhotos[latestGoal.scorerEvent.providerId]
     : undefined;
-  const homeDisplayName = teamDisplayName(home, match.homeTeamId);
-  const awayDisplayName = teamDisplayName(away, match.awayTeamId);
+  const homeDisplayName = teamDisplayName(home, match.homeTeamId, teams);
+  const awayDisplayName = teamDisplayName(away, match.awayTeamId, teams);
   const homeName = isLive
-    ? teamLiveCardName(home, match.homeTeamId)
+    ? teamLiveCardName(home, match.homeTeamId, teams)
     : homeDisplayName;
   const awayName = isLive
-    ? teamLiveCardName(away, match.awayTeamId)
+    ? teamLiveCardName(away, match.awayTeamId, teams)
     : awayDisplayName;
 
   const metaTimeDisplay = isDone
@@ -130,7 +132,14 @@ export function MatchScheduleCard({
   const body = (
     <>
       {celebrationOverlay}
-      <div className={isLive ? goalStyles.cardContentLayer : undefined}>
+      <div
+        className={[
+          isLive ? goalStyles.cardContentLayer : undefined,
+          isGoalActive ? goalStyles.cardContentGoalActive : undefined,
+        ]
+          .filter(Boolean)
+          .join(" ") || undefined}
+      >
       {isLive ? <div className="team-accent-bar" aria-hidden /> : null}
       {showKickoffCountdown && !isLive && !isDone ? (
         <div className="schedule-card-countdown-row">
@@ -152,8 +161,12 @@ export function MatchScheduleCard({
               <VenueLabel matchId={match.matchId} venueString={match.venue} inline compact />
             </>
           ) : null}
-          {!isDone && broadcast?.venue.city ? (
-            <WeatherBadge city={broadcast.venue.city} />
+          {!isDone && (broadcast?.venue.city || match.venue || match.matchId) ? (
+            <WeatherBadge
+              matchId={match.matchId}
+              venueString={match.venue}
+              cityHint={broadcast?.venue.city}
+            />
           ) : null}
         </span>
         {match.group ? <span className="match-source espn">Group {match.group}</span> : null}
@@ -170,7 +183,7 @@ export function MatchScheduleCard({
         ) : (
           <TeamLabelById
             teamId={match.homeTeamId}
-            displayName={isLive ? homeName : undefined}
+            displayName={homeDisplayName}
             flagCompact={isLive}
             nested={Boolean(onSelect)}
           />
@@ -194,7 +207,7 @@ export function MatchScheduleCard({
           <TeamLabelById
             teamId={match.awayTeamId}
             align="right"
-            displayName={isLive ? awayName : undefined}
+            displayName={awayDisplayName}
             flagCompact={isLive}
             nested={Boolean(onSelect)}
           />
@@ -222,6 +235,12 @@ export function MatchScheduleCard({
           homeTeam={homeDisplayName}
           awayTeam={awayDisplayName}
         />
+      ) : null}
+
+      {match.group ? (
+        <div className="match-card-scenario-branch">
+          <ScenarioBranchButton groupId={match.group} matchId={match.id} />
+        </div>
       ) : null}
 
       <BroadcastBar matchId={match.matchId} kickoffUtc={kickoffUtc} />

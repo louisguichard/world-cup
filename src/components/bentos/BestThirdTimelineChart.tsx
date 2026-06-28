@@ -1,6 +1,7 @@
 /** SVG ranking chart for the best-third timeline slider. */
 import { useMemo, useRef, useState, useEffect } from "react";
 import type { RankingSnapshot } from "../../lib/buildRankingTimeline";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import type { Team } from "../../types";
 import {
@@ -162,7 +163,7 @@ export function BestThirdTimelineChart({
                     fontSize={11}
                     opacity={dimmed ? 0.35 : 0.95}
                   >
-                    {teamDisplayName(teams[teamId], teamId)}
+                    {teamDisplayName(undefined, teamId, teams)}
                   </text>
                   <text
                     x={width - padRight + 6}

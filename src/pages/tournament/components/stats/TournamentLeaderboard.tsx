@@ -1,3 +1,4 @@
+import { resolveTeamFromStore } from "../../../../data/wc2026TeamCatalog";
 import type { Team, TournamentPlayerStat } from "../../../../types";
 import { teamLabel } from "../../../../lib/aggregateTournamentStats";
 import { TeamFlag } from "../../../../components/team/TeamFlag";
@@ -27,7 +28,7 @@ export function TournamentLeaderboard({ title, stats, teams, unit = "G" }: Props
       <h3 className={styles.statsSectionTitle}>{title}</h3>
       <ol className={styles.leaderboardList}>
         {stats.slice(0, 15).map((stat, i) => {
-          const team = teams[stat.teamId];
+          const team = resolveTeamFromStore(teams, stat.teamId);
           return (
             <li key={`${stat.player.id}-${stat.teamId}`} className={styles.leaderboardRow}>
               <span className={styles.leaderboardRank}>{i + 1}</span>

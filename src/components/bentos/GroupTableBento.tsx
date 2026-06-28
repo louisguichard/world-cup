@@ -5,6 +5,7 @@ import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useStore } from "../../store";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
 import { StandingThemeRow } from "../team/StandingThemeRow";
@@ -53,7 +54,7 @@ export function GroupTableBento({ standing }: GroupTableBentoProps) {
           </thead>
           <tbody>
             {standing.rows.map((row, index) => {
-              const team = teams[row.teamId];
+              const team = resolveTeamFromStore(teams, row.teamId);
               const qual = computeQualificationStatus(row.teamId, standings, qualContext);
               const display = resolveQualificationDisplay(qual);
               return (
@@ -72,7 +73,7 @@ export function GroupTableBento({ standing }: GroupTableBentoProps) {
                   <td className="group-table-team">
                     <TeamClickTarget teamId={row.teamId} className="group-table-team-btn">
                       <TeamFlag team={team} teamId={row.teamId} />
-                      <span className="team-name-text">{teamDisplayName(team, row.teamId)}</span>
+                      <span className="team-name-text">{teamDisplayName(team, row.teamId, teams)}</span>
                     </TeamClickTarget>
                   </td>
                   <td>{row.played}</td>

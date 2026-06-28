@@ -1,3 +1,4 @@
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import type { MergedMatch } from "../../types";
 import { formatKickoffDate } from "../../lib/formatKickoff";
 import { teamDisplayName } from "../../lib/teamIdentity";
@@ -22,12 +23,12 @@ export function ResultMatchCard({ match }: ResultMatchCardProps) {
     matchEvents[match.espnEventId ?? ""] ??
     [];
 
-  const home = teams[match.homeTeamId];
-  const away = teams[match.awayTeamId];
+  const home = resolveTeamFromStore(teams, match.homeTeamId);
+  const away = resolveTeamFromStore(teams, match.awayTeamId);
   const homeScore = match.homeScore ?? 0;
   const awayScore = match.awayScore ?? 0;
-  const homeName = teamDisplayName(home, match.homeTeamId);
-  const awayName = teamDisplayName(away, match.awayTeamId);
+  const homeName = teamDisplayName(home, match.homeTeamId, teams);
+  const awayName = teamDisplayName(away, match.awayTeamId, teams);
   const kickoffDate = formatKickoffDate(match.date);
 
   return (

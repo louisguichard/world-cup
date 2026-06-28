@@ -23,11 +23,11 @@
 
   /* Normalized card heights */
   --card-height-compact: clamp(168px, 24vw, 192px);
-  --card-height-standard: clamp(188px, 26vw, 220px);
+  --card-height-standard: clamp(200px, 28vw, 240px);
   --card-height-schedule: clamp(152px, 22vw, 180px);
   --card-height-result: clamp(88px, 12vw, 108px);
   --card-height-qual: clamp(160px, 24vw, 200px);
-  --card-height-featured: clamp(240px, 34vw, 320px);
+  --card-height-featured: clamp(260px, 38vw, 360px);
 
   /* Live strip uses standard height */
   --live-secondary-card-width: var(--module-grid-min);
@@ -87,11 +87,6 @@
   overflow: visible;
 }
 
-.dashboard-section:has(.schedule-list) {
-  overflow: visible;
-  box-sizing: border-box;
-}
-
 .groups-table-grid {
   gap: var(--module-gap);
   grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--module-grid-min-wide)), 1fr));
@@ -112,10 +107,16 @@
 
 .dashboard-section {
   margin-bottom: var(--module-gap-lg);
-  overflow: visible;
+  overflow-x: clip;
+  overflow-y: visible;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
+}
+
+.dashboard-section:has(.live-command-row),
+.dashboard-section:has(.schedule-list) {
+  overflow: visible;
 }
 
 .dashboard-section > * {
@@ -313,10 +314,10 @@
 }
 
 .live-hero-card--secondary {
-  min-height: var(--live-secondary-card-height);
-  max-height: var(--live-secondary-card-height);
-  height: 100%;
-  padding: var(--module-padding-compact);
+  min-height: var(--card-height-featured);
+  max-height: none;
+  height: auto;
+  padding: var(--module-padding);
 }
 
 .live-now-strip {
@@ -324,11 +325,16 @@
 }
 
 .live-now-strip-item {
-  flex: 0 0 var(--live-secondary-card-width);
-  width: var(--live-secondary-card-width);
-  height: var(--live-secondary-card-height);
-  min-height: var(--live-secondary-card-height);
-  max-height: var(--live-secondary-card-height);
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--card-height-featured);
+  height: auto;
+  box-sizing: border-box;
+}
+
+.live-command-hero .live-now-strip-item {
+  flex: none;
 }
 
 /* ── Result cards ───────────────────────────────────────────────── */
@@ -419,23 +425,6 @@
 
   .live-qual-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 721px) {
-  .live-now-strip {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    grid-auto-rows: var(--live-secondary-card-height);
-    overflow: visible;
-    padding-block: calc(var(--fixture-glow-bleed) / 2 + 4px);
-    margin-block: calc(var(--fixture-glow-bleed) / -2);
-  }
-
-  .live-now-strip-item {
-    flex: none;
-    width: auto;
-    height: var(--live-secondary-card-height);
   }
 }
 

@@ -31,6 +31,66 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## [4.0.0] build 20 — 2026-06-28 (build)
+- 3 file(s) in api, build-manifest.json, server — 3 files changed, 16 insertions(+), 15 deletions(-)
+
+## [4.0.0] build 19 — 2026-06-28 (build)
+- 254 file(s) in .cursor, .cursorrules, .env.example, CHANGELOG.md, VERSION_LOG.md, api — 254 files changed, 16735 insertions(+), 1121 deletions(-)
+
+## [4.0.0] build 18 — 2026-06-28 (build)
+- Live cards, weather, events, glow layout, and operational API routes
+
+## [4.0.0] build 17 — 2026-06-28 (build)
+- Phase 2/3 UX blueprint + monorepo packages, analyst frontend, admin console, cursor prompt pack, council synthesis
+
+## [4.0.0] build 16 — 2026-06-28 (build)
+- WC2026 Production Architecture: BC1/BC2/BC3 services, Prisma schema, BullMQ queues, SSE push, QueryAPI endpoints, OTel observability, React PWA SSE hook
+
+## [4.0.0] build 15 — 2026-06-28 (build)
+- fix groups tab crash: add error boundaries, harden tournament profile cache reader, fix TS errors
+
+## [4.0.0] build 14 — 2026-06-28 (build)
+- Give live hero glow room via bleed padding and visible overflow
+
+## [4.0.0] build 13 — 2026-06-28 (build)
+- Fix goal celebration banner overlap and layout shift on live cards
+
+## [4.0.0] build 12 — 2026-06-28 (build)
+- Yahoo Weather primary with canonical 16 host cities and icon badges
+
+## [4.0.0] build 11 — 2026-06-28 (build)
+- Fix live card events: remap ESPN team ids, show cards and subs
+
+## [4.0.0] build 10 — 2026-06-28 (build)
+- Unify live secondary cards with primary size and full match details
+
+## [4.0.0] build 9 — 2026-06-28 (build)
+- Skip SVG graphics false positives in UI debug scan
+
+## [4.0.0] build 8 — 2026-06-28 (build)
+- Allow live hero cards to grow; clip glow horizontally only
+
+## [4.0.0] build 7 — 2026-06-28 (build)
+- Fix Live view layout overflow and glow bleed collisions
+
+## [4.0.0] build 6 — 2026-06-28 (build)
+- Stack live secondary cards under hero at matching column width
+
 ## [4.0.0] build 5 — 2026-06-27 (build)
 - Fix UI debug sweep scan bridge timing; archive sweep runs under .cursor/ui-debug-runs
 

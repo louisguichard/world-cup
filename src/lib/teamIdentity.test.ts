@@ -9,6 +9,7 @@ import {
 } from "./teamIdentity";
 import { pickOnPrimary } from "../utils/colorContrast";
 import type { Team } from "../types";
+import { mergeTeamsWithCatalog } from "../data/wc2026TeamCatalog";
 
 function makeTeam(overrides: Partial<Team> = {}): Team {
   return {
@@ -35,6 +36,20 @@ describe("teamDisplayName", () => {
   it("resolves catalog name from team id hint", () => {
     expect(teamDisplayName(undefined, "bra")).toBe("Brazil");
     expect(teamDisplayName(undefined, "BRA")).toBe("Brazil");
+  });
+
+  it("resolves ESPN numeric id via teams map", () => {
+    const teams = mergeTeamsWithCatalog({
+      "205": {
+        id: "205",
+        name: "Mexico",
+        shortName: "MEX",
+        abbreviation: "MEX",
+        group: "A",
+        rating: 1500,
+      },
+    });
+    expect(teamDisplayName(undefined, "205", teams)).toBe("Mexico");
   });
 });
 

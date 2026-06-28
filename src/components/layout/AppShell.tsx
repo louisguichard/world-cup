@@ -5,6 +5,7 @@ import { SplashScreen } from "./SplashScreen";
 import { InstallAppBanner } from "./InstallAppBanner";
 import { DebugPanel } from "../shared/DebugPanel";
 import { UiDebugHost } from "../debug/UiDebugHost";
+import { BentoErrorBoundary } from "../shared/ErrorBoundary";
 import { ApiSetupBanner } from "../shared/ApiSetupBanner";
 import { DataFreshnessBanner } from "../shared/DataFreshnessBanner";
 import { useColorScheme } from "../../hooks/useColorScheme";
@@ -111,22 +112,38 @@ export function AppShell() {
       >
         {splashPhase === "done" && !activeMatchId && !activeVenueSlug ? <InstallAppBanner /> : null}
         {activeTab === "live" ? (
-          <Suspense fallback={null}>
-            <LiveView />
-          </Suspense>
+          <BentoErrorBoundary bento="LiveView">
+            <Suspense fallback={null}>
+              <LiveView />
+            </Suspense>
+          </BentoErrorBoundary>
         ) : null}
         <Suspense fallback={null}>
-          {activeTab === "results" ? <ResultsView /> : null}
-          {activeTab === "bracket" ? <BracketView /> : null}
-          {activeTab === "groups" ? <GroupsView /> : null}
-          {activeTab === "simulator" ? (
-            <div className="wc-main-simulator">
-              <SimulatorView />
-            </div>
+          {activeTab === "results" ? (
+            <BentoErrorBoundary bento="ResultsView"><ResultsView /></BentoErrorBoundary>
           ) : null}
-          {activeTab === "teams" ? <TeamsView /> : null}
-          {activeTab === "schedule" ? <ScheduleView /> : null}
-          {activeTab === "tournament" ? <TournamentView /> : null}
+          {activeTab === "bracket" ? (
+            <BentoErrorBoundary bento="BracketView"><BracketView /></BentoErrorBoundary>
+          ) : null}
+          {activeTab === "groups" ? (
+            <BentoErrorBoundary bento="GroupsView"><GroupsView /></BentoErrorBoundary>
+          ) : null}
+          {activeTab === "simulator" ? (
+            <BentoErrorBoundary bento="SimulatorView">
+              <div className="wc-main-simulator">
+                <SimulatorView />
+              </div>
+            </BentoErrorBoundary>
+          ) : null}
+          {activeTab === "teams" ? (
+            <BentoErrorBoundary bento="TeamsView"><TeamsView /></BentoErrorBoundary>
+          ) : null}
+          {activeTab === "schedule" ? (
+            <BentoErrorBoundary bento="ScheduleView"><ScheduleView /></BentoErrorBoundary>
+          ) : null}
+          {activeTab === "tournament" ? (
+            <BentoErrorBoundary bento="TournamentView"><TournamentView /></BentoErrorBoundary>
+          ) : null}
         </Suspense>
       </main>
       <BottomTabBar />

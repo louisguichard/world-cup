@@ -1,5 +1,6 @@
 import type { MergedMatch } from "../types";
 import { isLightPoll, pollIntervalMs, POLL_LIVE_MS } from "../lib/pollPolicy";
+import { shouldRunPollFallback } from "../config/liveDataFlags";
 import { getLockedSet } from "../store/slices/matchSlice";
 import { useStore } from "../store";
 import { DataOrchestrator } from "./orchestrator/DataOrchestrator";
@@ -97,6 +98,11 @@ class PollingEngine {
 
   private async poll(): Promise<void> {
     if (!this.running) return;
+
+    if (!shouldRunPollFallback()) {
+      this.scheduleNext();
+      return;
+    }
 
     const store = useStore.getState();
     let consecutiveErrors = store.consecutiveErrors;

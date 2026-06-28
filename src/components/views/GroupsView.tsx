@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
@@ -25,6 +26,7 @@ import {
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
+import { GroupOfficialQualificationSection } from "../analyst/GroupOfficialQualificationSection";
 import { TournamentInsightsPanel } from "../tournament/TournamentInsightsPanel";
 
 export function GroupsView() {
@@ -54,7 +56,7 @@ export function GroupsView() {
       ids.add(m.awayTeamId);
     }
     return [...ids]
-      .map((id) => teams[id])
+      .map((id) => resolveTeamFromStore(teams, id))
       .filter((t): t is NonNullable<typeof t> => Boolean(t))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [completed, teams]);
@@ -80,7 +82,9 @@ export function GroupsView() {
         <p>{copy.heroLead}</p>
       </section>
 
-      <TournamentInsightsPanel />
+      <BentoErrorBoundary bento="TournamentInsightsPanel">
+        <TournamentInsightsPanel />
+      </BentoErrorBoundary>
 
       <div className="groups-view-toggle" role="group" aria-label="Standings view mode">
         <button
@@ -142,7 +146,7 @@ export function GroupsView() {
                       <h2>Group {g.group}</h2>
                       <div className="mini-qualifiers" aria-hidden>
                         {g.rows.slice(0, 2).map((row) => {
-                          const t = teams[row.teamId];
+                          const t = resolveTeamFromStore(teams, row.teamId);
                           return t ? (
                             <TeamFlag key={row.teamId} team={t} teamId={row.teamId} size="sm" />
                           ) : null;
@@ -162,7 +166,7 @@ export function GroupsView() {
                     </thead>
                     <tbody>
                       {g.rows.map((row, i) => {
-                        const team = teams[row.teamId];
+                        const team = resolveTeamFromStore(teams, row.teamId);
                         const qual = computeQualificationStatus(row.teamId, standings, qualContext);
                         const display = resolveQualificationDisplay(qual);
                         return (
@@ -177,7 +181,7 @@ export function GroupsView() {
                               <QualificationStatusBadge qual={qual} size="xs" />
                               <TeamFlag team={team} teamId={row.teamId} size="sm" />
                               <TeamClickTarget teamId={row.teamId} className="group-standing-team-btn">
-                                <strong className="team-name-text">{teamDisplayName(team, row.teamId)}</strong>
+                                <strong className="team-name-text">{teamDisplayName(team, row.teamId, teams)}</strong>
                               </TeamClickTarget>
                             </td>
                             <td>{row.played}</td>
@@ -194,6 +198,7 @@ export function GroupsView() {
                     </tbody>
                   </table>
                   </div>
+                  <GroupOfficialQualificationSection groupId={g.group} />
                 </article>
               ))}
             </div>
@@ -253,8 +258,8 @@ export function GroupsView() {
             <MatchScheduleCard
               key={m.id}
               match={m}
-              home={teams[m.homeTeamId]}
-              away={teams[m.awayTeamId]}
+              home={resolveTeamFromStore(teams, m.homeTeamId)}
+              away={resolveTeamFromStore(teams, m.awayTeamId)}
               compact
             />
           ))}
@@ -276,8 +281,8 @@ export function GroupsView() {
             <MatchScheduleCard
               key={m.id}
               match={m}
-              home={teams[m.homeTeamId]}
-              away={teams[m.awayTeamId]}
+              home={resolveTeamFromStore(teams, m.homeTeamId)}
+              away={resolveTeamFromStore(teams, m.awayTeamId)}
             />
           ))}
         </div>

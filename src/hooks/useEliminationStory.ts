@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { resolveTeamFromStore } from "../data/wc2026TeamCatalog";
 import { buildEliminationStory } from "../lib/eliminationStory";
 import {
   buildQualificationContext,
@@ -24,7 +25,7 @@ export function useEliminationStory(teamId: string | null) {
 
   const story = useMemo(() => {
     if (!teamId) return null;
-    const team = teams[teamId];
+    const team = resolveTeamFromStore(teams, teamId);
     if (!team) return null;
     if (qual?.canQualify && qual.lifeState !== "eliminated") return null;
 

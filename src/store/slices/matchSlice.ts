@@ -1,5 +1,7 @@
-import type { MatchEvent, MergedMatch } from "../../types";
+import type { MatchEvent, MergedMatch, Team } from "../../types";
 import { mergeLiveMatchRecords } from "../../lib/dataFreshness";
+import { normalizeLiveMatchStore } from "../../lib/normalizeLiveMatches";
+import type { AppStore } from "../index";
 
 export type LockedMatchIds = Record<string, true>;
 
@@ -31,7 +33,7 @@ export function getLockedSet(state: Pick<MatchSliceState, "lockedMatchIds">): Se
 
 export const createMatchSlice = (
   set: (fn: (state: MatchSliceState) => Partial<MatchSliceState>) => void,
-  get: () => MatchSliceState
+  get: () => MatchSliceState & Pick<AppStore, "teams">
 ): MatchSliceState => ({
   liveMatches: {},
   lockedMatchIds: {},
@@ -41,7 +43,10 @@ export const createMatchSlice = (
   lastGoalTimestamp: null,
   lastGoalAnnouncement: null,
 
-  setLiveMatches: (matches) => set(() => ({ liveMatches: matches })),
+  setLiveMatches: (matches) =>
+    set(() => ({
+      liveMatches: normalizeLiveMatchStore(matches, get().teams),
+    })),
 
   addLockedMatchId: (id) =>
     set((state) =>
@@ -52,7 +57,8 @@ export const createMatchSlice = (
 
   batchPollUpdate: (payload) =>
     set((state) => {
-      const { merged, changed } = mergeLiveMatchRecords(state.liveMatches, payload.matches);
+      const normalized = normalizeLiveMatchStore(payload.matches, get().teams);
+      const { merged, changed } = mergeLiveMatchRecords(state.liveMatches, normalized);
       if (!changed) return {};
 
       return {

@@ -63,6 +63,30 @@ function usesEllipsisClip(el: HTMLElement): boolean {
   );
 }
 
+/** SVG groups use transform space; DOM rects are not layout boxes. */
+function isSvgGraphicsNode(el: HTMLElement, parent: HTMLElement): boolean {
+  return parent.tagName === "svg" || (Boolean(el.closest("svg")) && parent.closest("svg") === el.closest("svg"));
+}
+
+/** Live command column — glow wrappers sit inside padded, clipped containers. */
+function isLiveCommandGlowChild(el: HTMLElement, parent: HTMLElement): boolean {
+  return (
+    parent.classList.contains("live-command-hero") &&
+    el.classList.contains("fixture-glow-wrap")
+  );
+}
+
+/** Live section reserves glow bleed via padding; row/strip stay in bounds. */
+function isLiveCommandSectionChild(el: HTMLElement, parent: HTMLElement): boolean {
+  return (
+    parent.classList.contains("dashboard-section") &&
+    Boolean(el.closest(".live-command-row")) &&
+    (el.classList.contains("live-command-row") ||
+      el.classList.contains("live-now-strip") ||
+      el.classList.contains("live-command-hero"))
+  );
+}
+
 /** Fixture glow wrappers intentionally bleed outside their box. */
 function isIntentionalGlowBleed(el: HTMLElement): boolean {
   return el.classList.contains("fixture-glow-wrap");
@@ -154,6 +178,7 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
       vDelta > 2 &&
       (style.overflowY === "hidden" || style.overflowY === "clip") &&
       !isContentVisibilityPlaceholder(el) &&
+      !isIntentionalGlowBleed(el) &&
       !el.classList.contains("team-flag-inner") &&
       !isCompactScorersSlot(el) &&
       !el.classList.contains("group-table-scroll")
@@ -184,6 +209,9 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
         const skipCollision =
           (el.classList.contains("accent") && parent.tagName === "H1") ||
           parent.classList.contains("fixture-glow-wrap") ||
+          isSvgGraphicsNode(el, parent) ||
+          isLiveCommandGlowChild(el, parent) ||
+          isLiveCommandSectionChild(el, parent) ||
           Boolean(el.closest(".wc-main-simulator")) ||
           (parent.classList.contains("schedule-day-group") &&
             el.classList.contains("fixture-glow-wrap")) ||

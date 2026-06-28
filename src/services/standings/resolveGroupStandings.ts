@@ -4,8 +4,8 @@ import { deriveStandingsIfScored } from "../../lib/qualification";
 import { readStandingsCache } from "../../lib/standingsCache";
 import {
   buildStandingsFromTeamGroups,
+  finalizeGroupStandings,
   mergeStandingsPartials,
-  normalizeStandingsTeamIds,
   normalizeWCLiveStandings,
   normalizeWC2026Groups,
   normalizeZafronixBracket,
@@ -97,5 +97,5 @@ export async function resolveGroupStandings(
     return [];
   }
 
-  return normalizeStandingsTeamIds(merged, teamsById);
+  return finalizeGroupStandings(merged, teamsById);
 }

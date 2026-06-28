@@ -13,6 +13,10 @@ export type MatchLiveSnapshot = Pick<
   | "period"
   | "lastUpdatedAt"
   | "locked"
+  | "matchId"
+  | "date"
+  | "homeTeamId"
+  | "awayTeamId"
 >;
 
 export function matchLiveSnapshot(m: MergedMatch): MatchLiveSnapshot {
@@ -27,6 +31,10 @@ export function matchLiveSnapshot(m: MergedMatch): MatchLiveSnapshot {
     period: m.period,
     lastUpdatedAt: m.lastUpdatedAt,
     locked: m.locked,
+    matchId: m.matchId,
+    date: m.date,
+    homeTeamId: m.homeTeamId,
+    awayTeamId: m.awayTeamId,
   };
 }
 
@@ -41,7 +49,11 @@ function snapshotEqual(a: MatchLiveSnapshot, b: MatchLiveSnapshot): boolean {
     a.displayClock === b.displayClock &&
     a.period === b.period &&
     a.lastUpdatedAt === b.lastUpdatedAt &&
-    a.locked === b.locked
+    a.locked === b.locked &&
+    a.matchId === b.matchId &&
+    a.date === b.date &&
+    a.homeTeamId === b.homeTeamId &&
+    a.awayTeamId === b.awayTeamId
   );
 }
 

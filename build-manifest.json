@@ -1,6 +1,126 @@
 {
-  "updatedAt": "2026-06-27T07:54:32.584Z",
+  "updatedAt": "2026-06-28T04:45:23.685Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 20,
+      "kind": "build",
+      "message": "3 file(s) in api, build-manifest.json, server — 3 files changed, 16 insertions(+), 15 deletions(-)",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T04:45:23.257Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 19,
+      "kind": "build",
+      "message": "254 file(s) in .cursor, .cursorrules, .env.example, CHANGELOG.md, VERSION_LOG.md, api — 254 files changed, 16735 insertions(+), 1121 deletions(-)",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T04:45:06.305Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 18,
+      "kind": "build",
+      "message": "Live cards, weather, events, glow layout, and operational API routes",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T04:44:56.776Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 17,
+      "kind": "build",
+      "message": "Phase 2/3 UX blueprint + monorepo packages, analyst frontend, admin console, cursor prompt pack, council synthesis",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T04:02:57.416Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 16,
+      "kind": "build",
+      "message": "WC2026 Production Architecture: BC1/BC2/BC3 services, Prisma schema, BullMQ queues, SSE push, QueryAPI endpoints, OTel observability, React PWA SSE hook",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T03:39:08.337Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 15,
+      "kind": "build",
+      "message": "fix groups tab crash: add error boundaries, harden tournament profile cache reader, fix TS errors",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T03:24:45.765Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 14,
+      "kind": "build",
+      "message": "Give live hero glow room via bleed padding and visible overflow",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T02:53:19.829Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 13,
+      "kind": "build",
+      "message": "Fix goal celebration banner overlap and layout shift on live cards",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T02:52:06.072Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 12,
+      "kind": "build",
+      "message": "Yahoo Weather primary with canonical 16 host cities and icon badges",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T02:50:59.335Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 11,
+      "kind": "build",
+      "message": "Fix live card events: remap ESPN team ids, show cards and subs",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T02:43:25.579Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 10,
+      "kind": "build",
+      "message": "Unify live secondary cards with primary size and full match details",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T02:37:32.001Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 9,
+      "kind": "build",
+      "message": "Skip SVG graphics false positives in UI debug scan",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T02:32:20.284Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 8,
+      "kind": "build",
+      "message": "Allow live hero cards to grow; clip glow horizontally only",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T02:23:35.195Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 7,
+      "kind": "build",
+      "message": "Fix Live view layout overflow and glow bleed collisions",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T02:16:43.218Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 6,
+      "kind": "build",
+      "message": "Stack live secondary cards under hero at matching column width",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T02:07:37.941Z"
+    },
     {
       "version": "4.0.0",
       "build": 5,
@@ -123,6 +243,30 @@
     }
   ],
   "commits": [
+    {
+      "hash": "8945ec0db81d5597f4bcebb151638246981af00e",
+      "shortHash": "8945ec0",
+      "message": "Ship live card parity, Yahoo weather, match events, and glow layout fixes.",
+      "version": "4.0.0",
+      "build": 20,
+      "timestamp": "2026-06-28T04:45:23.684Z"
+    },
+    {
+      "hash": "b0218398cb154a5c44ab21dd9e8a5d025b94ef05",
+      "shortHash": "b021839",
+      "message": "Ship live card parity, Yahoo weather, match events, and glow layout fixes.",
+      "version": "4.0.0",
+      "build": 19,
+      "timestamp": "2026-06-28T04:45:06.697Z"
+    },
+    {
+      "hash": "6a7b81c4de2d5e41265cef1ef213b0039e3b8002",
+      "shortHash": "6a7b81c",
+      "message": "Sync build-manifest commit record for aa7e77d.",
+      "version": "4.0.0",
+      "build": 5,
+      "timestamp": "2026-06-27T07:54:46.963Z"
+    },
     {
       "hash": "aa7e77d590ee1c7c7dad95d2632ed28352ffd164",
       "shortHash": "aa7e77d",
@@ -338,30 +482,6 @@
       "version": "3.0.0",
       "build": 17,
       "timestamp": "2026-06-27T06:51:26.426Z"
-    },
-    {
-      "hash": "098eab2aef3c17d4220b80c8f9ac97f9e34b2bb1",
-      "shortHash": "098eab2",
-      "message": "Polish team click targets in groups and tournament stats; add SLS normalize helpers.",
-      "version": "3.0.0",
-      "build": 16,
-      "timestamp": "2026-06-27T06:48:34.812Z"
-    },
-    {
-      "hash": "d470c93009219c16dc187d5f93855fbf253c809f",
-      "shortHash": "d470c93",
-      "message": "Record production deploy for v3.0.0 build 15.",
-      "version": "3.0.0",
-      "build": 15,
-      "timestamp": "2026-06-27T06:44:26.836Z"
-    },
-    {
-      "hash": "4af133f2908447719e3c0277a7a9c129e092af00",
-      "shortHash": "4af133f",
-      "message": "Fix third-place bubble teams showing as projected out in live qualification layout.",
-      "version": "3.0.0",
-      "build": 14,
-      "timestamp": "2026-06-27T06:39:25.660Z"
     }
   ],
   "deploys": [

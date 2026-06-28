@@ -61,8 +61,8 @@ describe("deriveStandingsIfScored", () => {
 
     const standings = deriveStandingsIfScored(scored, teams);
     expect(standings).not.toBeNull();
-    expect(standings?.[0]?.group).toBe("A");
-    expect(standings?.[0]?.rows).toHaveLength(2);
+    const groupA = standings?.find((standing) => standing.group === "A");
+    expect(groupA?.rows.filter((row) => row.teamId === "a" || row.teamId === "b")).toHaveLength(2);
   });
 
   it("ignores in-progress 0-0 live matches", () => {
@@ -105,6 +105,7 @@ describe("deriveStandingsIfScored", () => {
     ];
 
     const standings = deriveStandingsIfScored(matches, teams);
-    expect(standings?.[0]?.rows.every((r) => r.played === 1 && r.points === 1)).toBe(true);
+    const groupA = standings?.find((standing) => standing.group === "A");
+    expect(groupA?.rows.filter((row) => row.teamId === "a" || row.teamId === "b").every((r) => r.played === 1 && r.points === 1)).toBe(true);
   });
 });

@@ -1,5 +1,10 @@
 import { AppShell } from "./components/layout/AppShell";
+import { SSEProvider } from "./components/providers/SSEProvider";
 
 export default function App() {
-  return <AppShell />;
+  return (
+    <SSEProvider>
+      <AppShell />
+    </SSEProvider>
+  );
 }

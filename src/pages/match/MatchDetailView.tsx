@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useScrollHeader } from "../../hooks/useScrollHeader";
 import { usePullToRefresh } from "../../hooks/usePullToRefresh";
 import { teamDisplayName } from "../../lib/teamIdentity";
@@ -112,8 +113,8 @@ export function MatchDetailView() {
     }
   }, [activeMatchTab]);
 
-  const homeTeam = match ? teams[match.homeTeamId] : undefined;
-  const awayTeam = match ? teams[match.awayTeamId] : undefined;
+  const homeTeam = match ? resolveTeamFromStore(teams, match.homeTeamId) : undefined;
+  const awayTeam = match ? resolveTeamFromStore(teams, match.awayTeamId) : undefined;
 
   const { profiles: scorerProfiles, loading: scorersLoading } = useGoalScorerProfiles({
     events,
@@ -184,8 +185,8 @@ export function MatchDetailView() {
 
   if (!activeMatchId) return null;
 
-  const homeTeamName = teamDisplayName(homeTeam, match?.homeTeamId ?? "Home");
-  const awayTeamName = teamDisplayName(awayTeam, match?.awayTeamId ?? "Away");
+  const homeTeamName = teamDisplayName(homeTeam, match?.homeTeamId ?? "Home", teams);
+  const awayTeamName = teamDisplayName(awayTeam, match?.awayTeamId ?? "Away", teams);
 
   const isLive = match?.status === "live";
   const isDone = match?.status === "completed";
@@ -321,10 +322,14 @@ export function MatchDetailView() {
               />
             </>
           ) : null}
-          {broadcast?.venue.city && !isDone ? (
+          {broadcast?.venue.city || match?.venue || match?.matchId ? (
             <>
               <span className={styles.contextSep}>·</span>
-              <WeatherBadge city={broadcast.venue.city} />
+              <WeatherBadge
+                matchId={match?.matchId}
+                venueString={match?.venue}
+                cityHint={broadcast?.venue.city}
+              />
             </>
           ) : null}
         </div>

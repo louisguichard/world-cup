@@ -531,15 +531,31 @@ export type MatchStats = {
   redCards?: { home: number; away: number };
 };
 
+export type WeatherIconKind =
+  | "clear-day"
+  | "clear-night"
+  | "partly-cloudy-day"
+  | "partly-cloudy-night"
+  | "cloudy"
+  | "rain"
+  | "showers"
+  | "thunderstorm"
+  | "snow"
+  | "fog"
+  | "wind"
+  | "unknown";
+
 export type WeatherSnapshot = {
   city: string;
   tempC: number;
   tempF: number;
   condition: string;
+  iconKind: WeatherIconKind;
   icon: string;
   humidity?: number;
   windKph?: number;
   fetchedAt: number;
+  source?: "yahoo" | "openweather";
 };
 
 export type OddsSnapshot = {

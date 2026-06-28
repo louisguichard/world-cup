@@ -38,7 +38,8 @@
   /* Room for fixture glow pseudo-elements + feathered card shadows at column edges */
   --surface-shadow-bleed: clamp(20px, 2.8vw, 40px);
   --fixture-glow-spread: 16px;
-  --fixture-glow-bleed: calc(var(--fixture-glow-spread, 16px) + 32px);
+  /* spread + max live blur extension (inset + filter) */
+  --fixture-glow-bleed: calc(var(--fixture-glow-spread, 16px) + 56px);
   --touch-target-min: 44px;
   --content-readable: min(100%, 72ch);
   --chrome-bottom-nav: calc(56px + var(--safe-bottom));

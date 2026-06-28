@@ -11,6 +11,7 @@ import type {
   Team,
   TeamRecord
 } from "../types";
+import { resolveCanonicalTeamId } from "../data/wc2026TeamCatalog";
 import {
   isKnockoutEliminated,
   rankAliveBestThirds,
@@ -234,9 +235,12 @@ export function computeQualificationStatus(
   standings: GroupStanding[],
   context: QualificationMatchContext = { lockedGroupMatchCount: {}, lockedStandingsByGroup: {} }
 ): QualificationStatus {
+  const canonicalId = resolveCanonicalTeamId(teamId);
   for (const group of standings) {
-    const idx = group.rows.findIndex((r) => r.teamId === teamId);
+    const idx = group.rows.findIndex((r) => r.teamId === teamId || r.teamId === canonicalId);
     if (idx < 0) continue;
+
+    const effectiveTeamId = group.rows[idx]!.teamId;
 
     const rank = idx + 1;
     const row = group.rows[idx]!;
@@ -258,7 +262,7 @@ export function computeQualificationStatus(
       lockedRows
     };
 
-    const eliminated = isKnockoutEliminated(teamId, standings, context);
+    const eliminated = isKnockoutEliminated(effectiveTeamId, standings, context);
 
     if (rank <= 2) {
       const confirmed = isConfirmedTopTwo(row, rows, confirmOpts);
@@ -347,7 +351,7 @@ export function computeQualificationStatus(
 
   return finalizeStatus("pending", "projected_weak", 0, "Group standings not available yet.", {
     canQualify: false,
-    lifeState: "alive"
+    lifeState: "eliminated"
   });
 }
 

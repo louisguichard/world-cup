@@ -2,6 +2,7 @@ import type { Team } from "../../types";
 import {
   resolveTeamAbbrevFromHint,
   resolveTeamForDisplay,
+  resolveTeamFromStore,
 } from "../../data/wc2026TeamCatalog";
 import {
   resolveTeamLogo,
@@ -37,7 +38,8 @@ const innerSizeClass: Record<NonNullable<Props["size"]>, string> = {
 };
 
 export function TeamFlag({ team, teamId, size = "sm", compact, dim, className }: Props) {
-  const storeTeam = useStore((s) => s.teams[teamId]);
+  const teams = useStore((s) => s.teams);
+  const storeTeam = teams[teamId] ?? resolveTeamFromStore(teams, teamId);
   const effectiveTeam = resolveTeamForDisplay(teamId, team ?? storeTeam);
   const id = effectiveTeam?.id ?? teamId;
   const abbrev =

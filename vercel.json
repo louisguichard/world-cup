@@ -1,5 +1,136 @@
 {
+  "functions": {
+    "api/events.ts": { "maxDuration": 300 },
+    "api/qualification/[groupId].ts": { "maxDuration": 10 },
+    "api/predictions/[matchId].ts": { "maxDuration": 10 },
+    "api/scenarios/index.ts": { "maxDuration": 30 },
+    "api/scenarios/[id].ts": { "maxDuration": 60 },
+    "api/identity/quarantine.ts": { "maxDuration": 10 },
+    "api/corrections/index.ts": { "maxDuration": 10 },
+    "api/health.ts": { "maxDuration": 10 },
+    "api/teams/[teamId]/advancement.ts": { "maxDuration": 10 }
+  },
   "rewrites": [
+    {
+      "source": "/api/wc-live/:path*",
+      "destination": "/api/rapid?service=wc-live"
+    },
+    {
+      "source": "/api/wc2026/:path*",
+      "destination": "/api/rapid?service=wc2026"
+    },
+    {
+      "source": "/api/footballdata/:path*",
+      "destination": "/api/rapid?service=footballdata"
+    },
+    {
+      "source": "/api/sportapi/:path*",
+      "destination": "/api/rapid?service=sportapi"
+    },
+    {
+      "source": "/api/sofascore6/:path*",
+      "destination": "/api/rapid?service=sofascore6"
+    },
+    {
+      "source": "/api/sofascore-rapid/:path*",
+      "destination": "/api/rapid?service=sofascore-rapid"
+    },
+    {
+      "source": "/api/weather/:path*",
+      "destination": "/api/rapid?service=weather"
+    },
+    {
+      "source": "/api/yahoo-weather/:path*",
+      "destination": "/api/yahoo-weather/:path*"
+    },
+    {
+      "source": "/api/odds/:path*",
+      "destination": "/api/rapid?service=odds"
+    },
+    {
+      "source": "/api/football-prediction/:path*",
+      "destination": "/api/rapid?service=football-prediction"
+    },
+    {
+      "source": "/api/world-cup-history/:path*",
+      "destination": "/api/rapid?service=world-cup-history"
+    },
+    {
+      "source": "/api/sport-highlights/:path*",
+      "destination": "/api/rapid?service=sport-highlights"
+    },
+    {
+      "source": "/api/sports-live-scores/:path*",
+      "destination": "/api/rapid?service=sports-live-scores"
+    },
+    {
+      "source": "/api/all-sport-live-stream/:path*",
+      "destination": "/api/rapid?service=all-sport-live-stream"
+    },
+    {
+      "source": "/api/free-daily-xtream-iptv/:path*",
+      "destination": "/api/rapid?service=free-daily-xtream-iptv"
+    },
+    {
+      "source": "/api/cloud-api-hub-iptv/:path*",
+      "destination": "/api/rapid?service=cloud-api-hub-iptv"
+    },
+    {
+      "source": "/api/tvview/:path*",
+      "destination": "/api/rapid?service=tvview"
+    },
+    {
+      "source": "/api/flashlive/:path*",
+      "destination": "/api/rapid?service=flashlive"
+    },
+    {
+      "source": "/api/today-football-prediction/:path*",
+      "destination": "/api/rapid?service=today-football-prediction"
+    },
+    {
+      "source": "/api/footapi7/:path*",
+      "destination": "/api/rapid?service=footapi7"
+    },
+    {
+      "source": "/api/pldata/:path*",
+      "destination": "/api/rapid?service=pldata"
+    },
+    {
+      "source": "/api/getty-images/:path*",
+      "destination": "/api/rapid?service=getty-images"
+    },
+    {
+      "source": "/api/fifa-football-data/:path*",
+      "destination": "/api/rapid?service=fifa-football-data"
+    },
+    {
+      "source": "/api/ai-sports-highlights/:path*",
+      "destination": "/api/rapid?service=ai-sports-highlights"
+    },
+    {
+      "source": "/api/allsportsapi2/:path*",
+      "destination": "/api/rapid?service=allsportsapi2"
+    },
+    {
+      "source": "/api/tvpro-api/:path*",
+      "destination": "/api/rapid?service=tvpro-api"
+    },
+    {
+      "source": "/api/google-api31/:path*",
+      "destination": "/api/rapid?service=google-api31"
+    },
+    {
+      "source": "/api/social-scraper/:path*",
+      "destination": "/api/rapid?service=social-scraper"
+    },
+    {
+      "source": "/api/zafronix/:path*",
+      "destination": "/api/rapid?service=zafronix"
+    },
+    {
+      "source": "/api/espn-web/:path*",
+      "destination": "/api/proxy"
+    },
     {
       "source": "/espn/:path*",
       "destination": "https://site.api.espn.com/:path*"
@@ -21,10 +152,6 @@
       "destination": "https://inside.fifa.com/:path*"
     },
     {
-      "source": "/api/sofascore6/:path*",
-      "destination": "/api/sofascore6/:path*"
-    },
-    {
       "source": "/api/sofascore/:path*",
       "destination": "/api/sofascore?path=:path*"
     },
@@ -39,11 +166,38 @@
   ],
   "headers": [
     {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; connect-src 'self' https://site.api.espn.com https://site.web.api.espn.com https://gamma-api.polymarket.com https://api.fifa.com https://www.fifa.com https://api.sofascore.com https://sofascore6.p.rapidapi.com http://api.clubelo.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'"
+          "value": "default-src 'self'; connect-src 'self' https://site.api.espn.com https://site.web.api.espn.com https://gamma-api.polymarket.com https://api.fifa.com https://www.fifa.com https://api.sofascore.com https://sofascore6.p.rapidapi.com http://api.clubelo.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; worker-src 'self'"
         }
       ]
     }

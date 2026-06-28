@@ -1,4 +1,6 @@
 import { knockoutSchedule } from "../data/knockoutSchedule";
+import { OFFICIAL_GROUP_ASSIGNMENTS } from "../data/officialGroupAssignments";
+import { resolveCanonicalTeamId, resolveTeamForDisplay } from "../data/wc2026TeamCatalog";
 import type {
   BracketGhostCandidate,
   BracketMatch,
@@ -25,6 +27,28 @@ type TeamsById = Record<string, Team>;
 const FORM_LOGIT_SCALE = 180;
 const PROJECTED_FORM_K = 8;
 const PROJECTED_FORM_CAP = 36;
+
+function isOnOfficialRoster(teamId: string): boolean {
+  return groupLetters.some((group) => OFFICIAL_GROUP_ASSIGNMENTS[group].includes(teamId));
+}
+
+function buildTeamsByGroup(teamsById: TeamsById): Partial<Record<GroupLetter, Team[]>> {
+  return groupLetters.reduce<Partial<Record<GroupLetter, Team[]>>>((accumulator, group) => {
+    const rosterTeams = OFFICIAL_GROUP_ASSIGNMENTS[group]
+      .map((teamId) => teamsById[teamId] ?? resolveTeamForDisplay(teamId))
+      .filter((team): team is Team => Boolean(team));
+
+    const supplemental = Object.values(teamsById).filter(
+      (team) =>
+        team.group === group &&
+        !isOnOfficialRoster(team.id) &&
+        !rosterTeams.some((entry) => entry.id === team.id)
+    );
+
+    accumulator[group] = [...rosterTeams, ...supplemental];
+    return accumulator;
+  }, {});
+}
 
 const nextRoundDefinitions: Record<Exclude<Stage, "R32">, Array<[string, string, string]>> = {
   R16: [
@@ -203,7 +227,14 @@ function rankGroupRecords(records: TeamRecord[], groupMatches: MatchWithScore[])
 }
 
 export function toTeamsById(teams: Team[]): TeamsById {
-  return Object.fromEntries(teams.map((team) => [team.id, team]));
+  const byId: TeamsById = {};
+  for (const team of teams) {
+    const canonicalId = resolveCanonicalTeamId(team.id, team);
+    const canonical = canonicalId === team.id ? team : { ...team, id: canonicalId };
+    byId[canonical.id] = canonical;
+    byId[team.id] = canonical;
+  }
+  return byId;
 }
 
 export function materializeMatches(
@@ -278,15 +309,24 @@ function applyProjectedGroupForm(teams: Team[], scoredMatches: MatchWithScore[])
 }
 
 export function computeStandings(scoredMatches: MatchWithScore[], teams: Team[]): GroupStanding[] {
-  const teamsByGroup = teams.reduce<Partial<Record<GroupLetter, Team[]>>>((accumulator, team) => {
-    const bucket = accumulator[team.group] ?? [];
-    bucket.push(team);
-    accumulator[team.group] = bucket;
-    return accumulator;
-  }, {});
+  const teamsById: TeamsById = Object.fromEntries(
+    teams.map((team) => {
+      const canonicalId = resolveCanonicalTeamId(team.id, team);
+      return [canonicalId, { ...team, id: canonicalId }];
+    })
+  );
+
+  const teamsByGroup = buildTeamsByGroup(teamsById);
 
   return groupLetters.map((group) => {
-    const groupMatches = scoredMatches.filter((match) => match.group === group);
+    const groupMatches = scoredMatches.filter((match) => {
+      const homeId = resolveCanonicalTeamId(match.homeTeamId, teamsById[match.homeTeamId]);
+      const awayId = resolveCanonicalTeamId(match.awayTeamId, teamsById[match.awayTeamId]);
+      const roster = OFFICIAL_GROUP_ASSIGNMENTS[group];
+      if (roster.includes(homeId) && roster.includes(awayId)) return true;
+      return match.group === group;
+    });
+
     const rows = (teamsByGroup[group] ?? []).map<TeamRecord>((team) => {
       const record: TeamRecord = {
         teamId: team.id,
@@ -305,8 +345,10 @@ export function computeStandings(scoredMatches: MatchWithScore[], teams: Team[])
       };
 
       for (const match of groupMatches) {
-        const isHome = match.homeTeamId === team.id;
-        const isAway = match.awayTeamId === team.id;
+        const homeId = resolveCanonicalTeamId(match.homeTeamId, teamsById[match.homeTeamId]);
+        const awayId = resolveCanonicalTeamId(match.awayTeamId, teamsById[match.awayTeamId]);
+        const isHome = homeId === team.id;
+        const isAway = awayId === team.id;
 
         if (!isHome && !isAway) {
           continue;
@@ -869,9 +911,13 @@ export function simulateTournamentOutcomes(
   iterations = 3000,
   seed = 4242
 ): TournamentSimulationResult {
+  const canonicalTeams = teams.map((team) => ({
+    ...team,
+    id: resolveCanonicalTeamId(team.id, team),
+  }));
   const teamsById = toTeamsById(teams);
   const stateByTeam = Object.fromEntries(
-    teams.map((team) => [
+    canonicalTeams.map((team) => [
       team.id,
       {
         stageCounts: emptyStageCounts(),
@@ -883,12 +929,21 @@ export function simulateTournamentOutcomes(
 
   for (let iteration = 0; iteration < iterations; iteration += 1) {
     const scoredMatches = materializeMatches(matches, teamsById, {}, random);
-    const standings = computeStandings(scoredMatches, teams);
-    const bracketTeamsById = toTeamsById(applyProjectedGroupForm(teams, scoredMatches));
+    const standings = computeStandings(scoredMatches, canonicalTeams);
+    const bracketTeamsById = toTeamsById(applyProjectedGroupForm(canonicalTeams, scoredMatches));
     const bracket = buildBracketFromStandings(standings, bracketTeamsById, knockoutMarkets, random);
 
     for (const match of bracket) {
       if (!match.homeTeamId || !match.awayTeamId) continue;
+
+      for (const teamId of [match.homeTeamId, match.awayTeamId]) {
+        if (!stateByTeam[teamId]) {
+          stateByTeam[teamId] = {
+            stageCounts: emptyStageCounts(),
+            opponentCounts: emptyOpponentCounts(),
+          };
+        }
+      }
 
       addConditionalOpponent(stateByTeam[match.homeTeamId], match.stage, match.awayTeamId);
       addConditionalOpponent(stateByTeam[match.awayTeamId], match.stage, match.homeTeamId);
@@ -900,14 +955,14 @@ export function simulateTournamentOutcomes(
   }
 
   const teamSummaries = Object.fromEntries(
-    teams.map((team) => [
+    canonicalTeams.map((team) => [
       team.id,
       summarizeTeamSimulation(team.id, iterations, stateByTeam[team.id].stageCounts, stateByTeam[team.id].opponentCounts)
     ])
   );
 
   return {
-    championOdds: teams
+    championOdds: canonicalTeams
       .map((team) => ({
         teamId: team.id,
         probability: stateByTeam[team.id].stageCounts.Champion / iterations

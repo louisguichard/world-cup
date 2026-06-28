@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { liveCardNameForAbbrev } from "../data/teamLiveCardNames";
 import { TEAM_IDENTITY_OVERRIDES } from "../data/teamIdentityOverrides";
-import { resolveCatalogTeamName, resolveTeamLogoByAbbrev } from "../data/wc2026TeamCatalog";
+import { resolveCatalogTeamName, resolveTeamForDisplay, resolveTeamFromStore, resolveTeamLogoByAbbrev } from "../data/wc2026TeamCatalog";
 import type { CrestProfile } from "../data/teamCrestDisplay";
 import type { Team } from "../types";
 import { crestDisplayToCssVars, resolveCrestDisplay } from "./resolveCrestDisplay";
@@ -70,7 +70,7 @@ export function resolveTeamIdentityById(
   teams: Record<string, Team>,
   primaryOverride?: string
 ): TeamIdentity | null {
-  return resolveTeamIdentity(teams[teamId], primaryOverride);
+  return resolveTeamIdentity(resolveTeamFromStore(teams, teamId), primaryOverride);
 }
 
 export function teamIdentityToCssVars(identity: TeamIdentity): Record<string, string> {
@@ -120,11 +120,13 @@ export function resolveTeamIdentityFromAbbrev(abbrev: string): TeamIdentity | nu
 /** User-visible team label — always prefer full country name. */
 export function teamDisplayName(
   team?: Pick<Team, "name" | "shortName"> | null,
-  fallback = "TBD"
+  fallback = "TBD",
+  teams?: Record<string, Team>
 ): string {
-  const name = team?.name?.trim();
+  const effective = team ?? (teams ? resolveTeamFromStore(teams, fallback) : resolveTeamForDisplay(fallback));
+  const name = effective?.name?.trim();
   if (name) return name;
-  const short = team?.shortName?.trim();
+  const short = effective?.shortName?.trim();
   if (short) return short;
   const fromCatalog = resolveCatalogTeamName(fallback);
   if (fromCatalog) return fromCatalog;
@@ -134,11 +136,13 @@ export function teamDisplayName(
 /** Compact label for live hero/schedule cards — ESPN short name or FIFA abbrev when shorter. */
 export function teamLiveCardName(
   team?: Pick<Team, "name" | "shortName" | "abbreviation"> | null,
-  fallback = "TBD"
+  fallback = "TBD",
+  teams?: Record<string, Team>
 ): string {
-  const name = team?.name?.trim();
-  const short = team?.shortName?.trim();
-  const abbrev = team?.abbreviation?.trim()?.toUpperCase();
+  const effective = team ?? (teams ? resolveTeamFromStore(teams, fallback) : resolveTeamForDisplay(fallback));
+  const name = effective?.name?.trim();
+  const short = effective?.shortName?.trim();
+  const abbrev = effective?.abbreviation?.trim()?.toUpperCase();
 
   if (
     short &&

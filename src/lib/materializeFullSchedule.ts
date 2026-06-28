@@ -1,3 +1,4 @@
+import { resolveTeamFromStore } from "../data/wc2026TeamCatalog";
 import { getAllScheduleEntries } from "../services/BroadcastLookup";
 import { pairKey } from "./normalize";
 import type { MergedMatch, Team, GroupLetter } from "../types";
@@ -34,8 +35,8 @@ export function materializeFullSchedule(
   const liveByPair: Record<string, MergedMatch> = {};
   for (const m of Object.values(liveMatches)) {
     if (m.matchId) liveByMatchId[m.matchId] = m;
-    const home = teams[m.homeTeamId];
-    const away = teams[m.awayTeamId];
+    const home = resolveTeamFromStore(teams, m.homeTeamId);
+    const away = resolveTeamFromStore(teams, m.awayTeamId);
     if (home && away) {
       liveByPair[pairKey(home.name, away.name)] = m;
     }

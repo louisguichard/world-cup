@@ -67,8 +67,8 @@ export function useMatchDetailBundle(
   useEffect(() => {
     if (!match) return;
 
-    const homeName = teamDisplayName(teams[match.homeTeamId], match.homeTeamId);
-    const awayName = teamDisplayName(teams[match.awayTeamId], match.awayTeamId);
+    const homeName = teamDisplayName(undefined, match.homeTeamId, teams);
+    const awayName = teamDisplayName(undefined, match.awayTeamId, teams);
 
     let cancelled = false;
     setDirectLoading(true);

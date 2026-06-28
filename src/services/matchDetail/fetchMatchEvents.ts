@@ -5,6 +5,7 @@ import { fetchIncidents } from "../SofaScore6Client";
 import { fetchCommentary, isWc2026LiveDisabled, type WcCommentaryEntry } from "../WorldCup2026LiveClient";
 import { logger } from "../Logger";
 import { useStore } from "../../store";
+import { normalizeEventsForMatch } from "../../lib/resolveMatchEvents";
 import { mapCommentaryToEvents } from "./mapCommentaryToEvents";
 import { mapEspnPlayByPlayToEvents } from "./mapEspnToEvents";
 import { mapIncidentsToEvents } from "./mapIncidentsToEvents";
@@ -93,8 +94,10 @@ export async function fetchMatchEvents(
 /** Writes events to all known store keys for a match. */
 export function publishMatchEvents(match: MergedMatch, events: MatchEvent[]): void {
   if (events.length === 0) return;
+  const teams = useStore.getState().teams;
+  const normalized = normalizeEventsForMatch(events, match, teams);
   const { mergeMatchEvents } = useStore.getState();
-  mergeMatchEvents(match.id, events);
-  if (match.matchId && match.matchId !== match.id) mergeMatchEvents(match.matchId, events);
-  if (match.espnEventId) mergeMatchEvents(match.espnEventId, events);
+  mergeMatchEvents(match.id, normalized);
+  if (match.matchId && match.matchId !== match.id) mergeMatchEvents(match.matchId, normalized);
+  if (match.espnEventId) mergeMatchEvents(match.espnEventId, normalized);
 }

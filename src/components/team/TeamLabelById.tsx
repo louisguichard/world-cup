@@ -3,6 +3,7 @@ import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
 import { teamDisplayName } from "../../lib/teamIdentity";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useOpenTeam } from "../../hooks/useOpenTeam";
 import { TeamFlag } from "./TeamFlag";
 
@@ -28,11 +29,12 @@ export function TeamLabelById({
   nested = false,
   onTeamClick,
 }: Props) {
+  const teams = useStore((s) => s.teams);
+  const team = resolveTeamFromStore(teams, teamId);
   const theme = useTeamTheme(teamId);
-  const team = useStore((s) => s.teams[teamId]);
   const { openTeam } = useOpenTeam();
 
-  const label = displayName ?? teamDisplayName(team, teamId);
+  const label = displayName ?? teamDisplayName(team, teamId, teams);
   const baseClass = `team-label team-label-themed ${align === "right" ? "right" : ""} ${clickable ? "team-label--clickable" : ""} ${className}`.trim();
 
   const handleActivate = (e: MouseEvent | KeyboardEvent) => {

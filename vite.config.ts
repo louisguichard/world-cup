@@ -80,6 +80,7 @@ const rapidApiProxies = {
   "/rapidapi-sportapi": rapidApiProxy("https://sportapi7.p.rapidapi.com", "/rapidapi-sportapi"),
   "/rapidapi-wc2026": rapidApiProxy("https://world-cup-2026.p.rapidapi.com", "/rapidapi-wc2026"),
   "/rapidapi-wc-live": rapidApiProxy("https://world-cup-2026-live-api.p.rapidapi.com", "/rapidapi-wc-live"),
+  "/rapidapi-yahoo-weather": rapidApiProxy("https://yahoo-weather5.p.rapidapi.com", "/rapidapi-yahoo-weather"),
   "/rapidapi-weather": rapidApiProxy("https://open-weather13.p.rapidapi.com", "/rapidapi-weather"),
   "/rapidapi-odds": rapidApiProxy("https://sports-odds-intelligence-api.p.rapidapi.com", "/rapidapi-odds"),
   "/rapidapi": rapidApiProxy("https://free-api-live-football-data.p.rapidapi.com", "/rapidapi"),
@@ -89,6 +90,7 @@ const rapidApiProxies = {
   "/api/sofascore-rapid": rapidApiProxy("https://sofascore.p.rapidapi.com", "/api/sofascore-rapid"),
   "/api/wc2026": rapidApiProxy("https://world-cup-2026.p.rapidapi.com", "/api/wc2026"),
   "/api/wc-live": rapidApiProxy("https://world-cup-2026-live-api.p.rapidapi.com", "/api/wc-live"),
+  "/api/yahoo-weather": rapidApiProxy("https://yahoo-weather5.p.rapidapi.com", "/api/yahoo-weather"),
   "/api/weather": rapidApiProxy("https://open-weather13.p.rapidapi.com", "/api/weather"),
   "/api/odds": rapidApiProxy("https://sports-odds-intelligence-api.p.rapidapi.com", "/api/odds"),
   "/api/football-prediction": rapidApiProxy(

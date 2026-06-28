@@ -1,156 +1,13 @@
+import { applyOfficialGroupsToTeams } from "../lib/officialGroupRoster";
 import type { GroupLetter, Team } from "../types";
 import { TEAM_LOGO_OVERRIDES } from "./teamLogoOverrides";
+import {
+  WC2026_TEAM_NAMES,
+  resolveCatalogTeamIdByName,
+  resolveTeamAbbrevFromHint,
+} from "./teamNameMap";
 
-/** FIFA abbrev → display name for all 48 WC 2026 nations. */
-export const WC2026_TEAM_NAMES: Record<string, string> = {
-  ALG: "Algeria",
-  ARG: "Argentina",
-  AUS: "Australia",
-  AUT: "Austria",
-  BEL: "Belgium",
-  BIH: "Bosnia and Herzegovina",
-  BRA: "Brazil",
-  CAN: "Canada",
-  CIV: "Ivory Coast",
-  COD: "Congo DR",
-  COL: "Colombia",
-  CPV: "Cape Verde",
-  CRO: "Croatia",
-  CUW: "Curaçao",
-  CZE: "Czechia",
-  ECU: "Ecuador",
-  EGY: "Egypt",
-  ENG: "England",
-  ESP: "Spain",
-  FRA: "France",
-  GER: "Germany",
-  GHA: "Ghana",
-  HAI: "Haiti",
-  IRN: "Iran",
-  IRQ: "Iraq",
-  JOR: "Jordan",
-  JPN: "Japan",
-  KOR: "South Korea",
-  KSA: "Saudi Arabia",
-  MAR: "Morocco",
-  MEX: "Mexico",
-  NED: "Netherlands",
-  NOR: "Norway",
-  NZL: "New Zealand",
-  PAN: "Panama",
-  PAR: "Paraguay",
-  POR: "Portugal",
-  QAT: "Qatar",
-  RSA: "South Africa",
-  SCO: "Scotland",
-  SEN: "Senegal",
-  SUI: "Switzerland",
-  SWE: "Sweden",
-  TUN: "Tunisia",
-  TUR: "Türkiye",
-  URU: "Uruguay",
-  USA: "United States",
-  UZB: "Uzbekistan",
-};
-
-/** Normalized name / alias → FIFA abbrev. */
-export const TEAM_NAME_TO_ABBREV: Record<string, string> = {
-  algeria: "ALG",
-  argentina: "ARG",
-  australia: "AUS",
-  austria: "AUT",
-  belgium: "BEL",
-  bosnia: "BIH",
-  "bosnia and herzegovina": "BIH",
-  brazil: "BRA",
-  canada: "CAN",
-  "ivory coast": "CIV",
-  "cote d ivoire": "CIV",
-  "congo dr": "COD",
-  "dr congo": "COD",
-  "democratic republic of congo": "COD",
-  colombia: "COL",
-  "cape verde": "CPV",
-  "cabo verde": "CPV",
-  croatia: "CRO",
-  curacao: "CUW",
-  curaçao: "CUW",
-  czechia: "CZE",
-  "czech republic": "CZE",
-  ecuador: "ECU",
-  egypt: "EGY",
-  england: "ENG",
-  spain: "ESP",
-  france: "FRA",
-  germany: "GER",
-  ghana: "GHA",
-  haiti: "HAI",
-  iran: "IRN",
-  iraq: "IRQ",
-  jordan: "JOR",
-  japan: "JPN",
-  "south korea": "KOR",
-  "korea republic": "KOR",
-  "saudi arabia": "KSA",
-  morocco: "MAR",
-  mexico: "MEX",
-  mex: "MEX",
-  netherlands: "NED",
-  holland: "NED",
-  norway: "NOR",
-  "new zealand": "NZL",
-  panama: "PAN",
-  paraguay: "PAR",
-  portugal: "POR",
-  qatar: "QAT",
-  "south africa": "RSA",
-  scotland: "SCO",
-  senegal: "SEN",
-  switzerland: "SUI",
-  sweden: "SWE",
-  tunisia: "TUN",
-  turkiye: "TUR",
-  turkey: "TUR",
-  türkiye: "TUR",
-  uruguay: "URU",
-  "united states": "USA",
-  usa: "USA",
-  usmnt: "USA",
-  uzbekistan: "UZB",
-};
-
-function normalizeHint(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .replace(/[^a-z0-9\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-/** Resolve FIFA abbrev from team id, abbrev, or country name. */
-export function resolveTeamAbbrevFromHint(hint: string | undefined | null): string | undefined {
-  if (!hint) return undefined;
-  const raw = hint.trim();
-  if (!raw) return undefined;
-
-  const upper = raw.toUpperCase();
-  if (WC2026_TEAM_NAMES[upper]) return upper;
-  if (TEAM_LOGO_OVERRIDES[upper]) return upper;
-
-  const normalized = normalizeHint(raw);
-  if (TEAM_NAME_TO_ABBREV[normalized]) return TEAM_NAME_TO_ABBREV[normalized];
-
-  for (const [name, abbrev] of Object.entries(TEAM_NAME_TO_ABBREV)) {
-    if (normalized.includes(name) || name.includes(normalized)) {
-      return abbrev;
-    }
-  }
-
-  return undefined;
-}
+export { WC2026_TEAM_NAMES, TEAM_NAME_TO_ABBREV, resolveCatalogTeamIdByName, resolveTeamAbbrevFromHint } from "./teamNameMap";
 
 export function resolveTeamLogoByAbbrev(abbrev: string | undefined | null): string | undefined {
   if (!abbrev) return undefined;
@@ -200,8 +57,13 @@ export function buildWc2026TeamCatalog(): Record<string, Team> {
   return catalog;
 }
 
+const mergedTeamCache = new WeakMap<Team, Team>();
+
 /** Merge API team onto catalog — keeps upstream id but fixes abbrev + crest. */
 export function mergeTeamWithCatalog(team: Team): Team {
+  const cached = mergedTeamCache.get(team);
+  if (cached) return cached;
+
   const abbrev =
     resolveTeamAbbrevFromHint(team.abbreviation) ??
     resolveTeamAbbrevFromHint(team.name) ??
@@ -213,18 +75,15 @@ export function mergeTeamWithCatalog(team: Team): Team {
   const catalog = buildCatalogTeam(abbrev, team.group);
   const logo = TEAM_LOGO_OVERRIDES[abbrev] ?? team.logo;
 
-  return {
+  const merged: Team = {
     ...team,
     abbreviation: abbrev,
     name: team.name || catalog.name,
     shortName: team.shortName || catalog.shortName,
     logo: logo ?? team.logo ?? "",
   };
-}
-
-export function resolveCatalogTeamIdByName(name: string): string | undefined {
-  const abbrev = resolveTeamAbbrevFromHint(name);
-  return abbrev ? abbrev.toLowerCase() : undefined;
+  mergedTeamCache.set(team, merged);
+  return merged;
 }
 
 /** Map any upstream team id (ESPN numeric, abbrev, name) to the catalog id (e.g. bra). */
@@ -250,6 +109,21 @@ export function uniqueCanonicalTeamIds(teams: Record<string, Team>): string[] {
   return [...ids].sort((a, b) => a.localeCompare(b));
 }
 
+/** Lookup team by catalog id, ESPN numeric alias, or name hint. */
+export function resolveTeamFromStore(
+  teams: Record<string, Team>,
+  teamId: string
+): Team | undefined {
+  const direct = teams[teamId];
+  if (direct) return mergeTeamWithCatalog(direct);
+
+  const canonical = resolveCanonicalTeamId(teamId);
+  const byCanonical = teams[canonical];
+  if (byCanonical) return byCanonical;
+
+  return resolveTeamForDisplay(teamId);
+}
+
 export function mergeTeamsWithCatalog(teams: Record<string, Team>): Record<string, Team> {
   const catalog = buildWc2026TeamCatalog();
   const merged: Record<string, Team> = { ...catalog };
@@ -259,10 +133,14 @@ export function mergeTeamsWithCatalog(teams: Record<string, Team>): Record<strin
     const abbrev = patched.abbreviation?.toUpperCase();
     if (!abbrev) continue;
     const catalogId = abbrev.toLowerCase();
-    if (merged[catalogId]) {
-      merged[catalogId] = { ...merged[catalogId], ...patched, id: catalogId };
+    const canonical = merged[catalogId]
+      ? { ...merged[catalogId], ...patched, id: catalogId }
+      : { ...patched, id: catalogId };
+    merged[catalogId] = canonical;
+    if (team.id && team.id !== catalogId) {
+      merged[team.id] = canonical;
     }
   }
 
-  return merged;
+  return applyOfficialGroupsToTeams(merged);
 }

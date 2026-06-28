@@ -1,4 +1,5 @@
-import { resolveCanonicalTeamId, resolveCatalogTeamIdByName } from "../../data/wc2026TeamCatalog";
+import { buildOfficialGroupRoster } from "../../lib/officialGroupRoster";
+import { resolveCanonicalTeamId, resolveCatalogTeamIdByName, resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import type { GroupLetter, GroupStanding, Team, TeamRecord } from "../../types";
 import { groupLetters } from "../../types";
 import type { WcStanding } from "../WorldCup2026LiveClient";
@@ -183,20 +184,104 @@ export function buildStandingsFromTeamGroups(teams: Team[]): GroupStanding[] {
   return result;
 }
 
+function rowStatScore(row: TeamRecord): number {
+  return row.played * 1000 + row.points * 10 + Math.abs(row.goalDifference);
+}
+
+/** Higher = richer standings payload (used to reject API downgrades). */
+export function standingsStatScore(standings: GroupStanding[]): number {
+  return standings.reduce((sum, group) => sum + group.rows.reduce((s, row) => s + rowStatScore(row), 0), 0);
+}
+
+export function standingsHasLiveStats(standings: GroupStanding[]): boolean {
+  return standings.some((group) => group.rows.some((row) => row.played > 0));
+}
+
+function sortStandingRows(rows: TeamRecord[]): TeamRecord[] {
+  return [...rows].sort(
+    (a, b) =>
+      b.points - a.points ||
+      b.goalDifference - a.goalDifference ||
+      b.goalsFor - a.goalsFor ||
+      (a.fifaRank ?? 999) - (b.fifaRank ?? 999)
+  );
+}
+
 /** Collapse ESPN / API ids onto catalog ids (bra, mex, …) for qualification bucketing. */
 export function normalizeStandingsTeamIds(
   standings: GroupStanding[],
   teams: Record<string, Team>
 ): GroupStanding[] {
-  return standings.map((standing) => ({
-    group: standing.group,
-    rows: standing.rows
-      .map((row) => {
-        const canonicalId = resolveCanonicalTeamId(row.teamId, teams[row.teamId]);
-        return canonicalId === row.teamId ? row : { ...row, teamId: canonicalId };
-      })
-      .sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference),
-  }));
+  return standings.map((standing) => {
+    const teamMap = new Map<string, TeamRecord>();
+
+    for (const row of standing.rows) {
+      const canonicalId = resolveCanonicalTeamId(
+        row.teamId,
+        teams[row.teamId] ?? resolveTeamFromStore(teams, row.teamId)
+      );
+      const normalized = canonicalId === row.teamId ? row : { ...row, teamId: canonicalId };
+      const existing = teamMap.get(canonicalId);
+      if (!existing || rowStatScore(normalized) > rowStatScore(existing)) {
+        teamMap.set(canonicalId, normalized);
+      }
+    }
+
+    return {
+      group: standing.group,
+      rows: sortStandingRows([...teamMap.values()]),
+    };
+  });
+}
+
+/** One row per catalog team per group — drops duplicate upstream ids and stray extras. */
+export function alignStandingsToCatalogGroups(
+  standings: GroupStanding[],
+  teams: Record<string, Team>
+): GroupStanding[] {
+  const rowsByGroup = new Map<GroupLetter, Map<string, TeamRecord>>(
+    standings.map((standing) => [standing.group, new Map(standing.rows.map((row) => [row.teamId, row]))])
+  );
+
+  const result: GroupStanding[] = [];
+
+  for (const group of groupLetters) {
+    const catalogIds = buildOfficialGroupRoster()[group] ?? [];
+    if (catalogIds.length === 0) continue;
+
+    const rowMap = rowsByGroup.get(group) ?? new Map<string, TeamRecord>();
+    const rows = catalogIds.map((teamId) => {
+      const existing = rowMap.get(teamId);
+      if (existing) return existing;
+      const team = resolveTeamFromStore(teams, teamId);
+      return {
+        teamId,
+        group,
+        played: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0,
+        points: 0,
+        conduct: 0,
+        rating: team?.rating ?? 0,
+        fifaRank: team?.fifaRank,
+      } satisfies TeamRecord;
+    });
+
+    result.push({ group, rows: sortStandingRows(rows) });
+  }
+
+  return result;
+}
+
+export function finalizeGroupStandings(
+  standings: GroupStanding[],
+  teams: Record<string, Team>
+): GroupStanding[] {
+  return alignStandingsToCatalogGroups(normalizeStandingsTeamIds(standings, teams), teams);
 }
 
 /** Merges standings from multiple sources — higher-played rows win per group/team. */
@@ -210,9 +295,7 @@ export function mergeStandingsPartials(...sources: GroupStanding[][]): GroupStan
 
       for (const row of g.rows) {
         const existing = teamMap.get(row.teamId);
-        const rowScore = row.played * 100 + row.points;
-        const existingScore = existing ? existing.played * 100 + existing.points : -1;
-        if (!existing || rowScore > existingScore) {
+        if (!existing || rowStatScore(row) > rowStatScore(existing)) {
           teamMap.set(row.teamId, row);
         }
       }
@@ -223,6 +306,12 @@ export function mergeStandingsPartials(...sources: GroupStanding[][]): GroupStan
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([group, teamMap]) => ({
       group,
-      rows: [...teamMap.values()].sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference),
+      rows: [...teamMap.values()].sort(
+        (a, b) =>
+          b.points - a.points ||
+          b.goalDifference - a.goalDifference ||
+          b.goalsFor - a.goalsFor ||
+          (a.fifaRank ?? 999) - (b.fifaRank ?? 999)
+      ),
     }));
 }

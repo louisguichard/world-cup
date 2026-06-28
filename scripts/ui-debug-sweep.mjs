@@ -60,6 +60,13 @@ async function waitForApp(page) {
   );
   await waitForLoadingOverlay(page);
   await page.waitForTimeout(1500);
+  await waitForScanBridge(page);
+}
+
+async function waitForScanBridge(page) {
+  await page
+    .waitForFunction(() => typeof window.__wcUiDebugScan === "function", { timeout: 15_000 })
+    .catch(() => {});
 }
 
 async function scanRoute(page, route) {
@@ -81,6 +88,8 @@ async function scanRoute(page, route) {
     await page.waitForTimeout(500);
   }
 
+  await waitForScanBridge(page);
+
   return page.evaluate(() => {
     const scan = window.__wcUiDebugScan;
     if (typeof scan !== "function") {
@@ -95,19 +104,28 @@ async function scanRoute(page, route) {
 }
 
 async function scanRouteWithRetry(page, route) {
-  let lastError;
+  let lastIssues;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
     try {
-      return await scanRoute(page, route);
+      const issues = await scanRoute(page, route);
+      const scanMissing = issues.some((issue) => issue.label === "scan-missing");
+      if (!scanMissing) return issues;
+      lastIssues = issues;
+      if (attempt < MAX_RETRIES) {
+        log(`[SWEEP RETRY] ${route.name} attempt ${attempt + 1} (scan bridge missing)`);
+        await page.waitForTimeout(1500);
+        await waitForScanBridge(page);
+      }
     } catch (err) {
-      lastError = err;
       if (attempt < MAX_RETRIES) {
         log(`[SWEEP RETRY] ${route.name} attempt ${attempt + 1}`);
         await page.waitForTimeout(1000);
+      } else {
+        throw err;
       }
     }
   }
-  throw lastError;
+  return lastIssues ?? [{ kind: "error", label: "scan-missing", detail: "__wcUiDebugScan not found" }];
 }
 
 async function main() {
@@ -165,8 +183,18 @@ async function main() {
   fs.mkdirSync(path.dirname(gapPath), { recursive: true });
   fs.writeFileSync(gapPath, JSON.stringify(payload, null, 2));
   fs.writeFileSync(logPath, logs.join("\n"));
+
+  const runsDir = path.join(ROOT, ".cursor/ui-debug-runs");
+  fs.mkdirSync(runsDir, { recursive: true });
+  const runStamp = payload.scannedAt.replace(/[:.]/g, "-");
+  const archiveLogPath = path.join(runsDir, `${runStamp}.log`);
+  const archiveGapPath = path.join(runsDir, `${runStamp}.json`);
+  fs.writeFileSync(archiveLogPath, logs.join("\n"));
+  fs.writeFileSync(archiveGapPath, JSON.stringify(payload, null, 2));
+
   log(`Wrote ${gapPath}`);
   log(`Wrote ${logPath}`);
+  log(`Archived ${archiveLogPath}`);
 
   syncUiDebugCanvas({ logs: logs.join("\n") });
   log("\nCanvas snapshot updated — reopen ui-debug-dashboard.canvas.tsx if it is already open.");

@@ -124,10 +124,10 @@ describe("computeQualificationStatus — group complete", () => {
 describe("locked-only confirmation", () => {
   it("does not confirm when display standings include unlocked simulated scores", () => {
     const teams = [
-      { id: "usa", name: "USA", shortName: "USA", abbreviation: "USA", group: "A" as const, rating: 1500 },
-      { id: "mex", name: "MEX", shortName: "MEX", abbreviation: "MEX", group: "A" as const, rating: 1500 },
-      { id: "can", name: "CAN", shortName: "CAN", abbreviation: "CAN", group: "A" as const, rating: 1500 },
-      { id: "jpn", name: "JPN", shortName: "JPN", abbreviation: "JPN", group: "A" as const, rating: 1500 }
+      { id: "mex", name: "Mexico", shortName: "MEX", abbreviation: "MEX", group: "A" as const, rating: 1500 },
+      { id: "kor", name: "South Korea", shortName: "KOR", abbreviation: "KOR", group: "A" as const, rating: 1500 },
+      { id: "cze", name: "Czechia", shortName: "CZE", abbreviation: "CZE", group: "A" as const, rating: 1500 },
+      { id: "rsa", name: "South Africa", shortName: "RSA", abbreviation: "RSA", group: "A" as const, rating: 1500 }
     ];
     const baseMatch = {
       group: "A" as const,
@@ -138,27 +138,27 @@ describe("locked-only confirmation", () => {
       source: "espn" as const
     };
     const matches = [
-      { ...baseMatch, id: "m1", homeTeamId: "usa", awayTeamId: "mex", homeScore: 2, awayScore: 0, locked: true },
-      { ...baseMatch, id: "m2", homeTeamId: "usa", awayTeamId: "can", homeScore: 2, awayScore: 0, locked: true },
-      { ...baseMatch, id: "m3", homeTeamId: "usa", awayTeamId: "jpn", homeScore: 3, awayScore: 0, locked: false },
-      { ...baseMatch, id: "m4", homeTeamId: "mex", awayTeamId: "can", homeScore: 1, awayScore: 1, locked: true },
-      { ...baseMatch, id: "m5", homeTeamId: "mex", awayTeamId: "jpn", homeScore: 2, awayScore: 0, locked: true },
-      { ...baseMatch, id: "m6", homeTeamId: "can", awayTeamId: "jpn", homeScore: 1, awayScore: 0, locked: true }
+      { ...baseMatch, id: "m1", homeTeamId: "mex", awayTeamId: "kor", homeScore: 2, awayScore: 0, locked: true },
+      { ...baseMatch, id: "m2", homeTeamId: "mex", awayTeamId: "cze", homeScore: 2, awayScore: 0, locked: true },
+      { ...baseMatch, id: "m3", homeTeamId: "mex", awayTeamId: "rsa", homeScore: 3, awayScore: 0, locked: false },
+      { ...baseMatch, id: "m4", homeTeamId: "kor", awayTeamId: "cze", homeScore: 1, awayScore: 1, locked: true },
+      { ...baseMatch, id: "m5", homeTeamId: "kor", awayTeamId: "rsa", homeScore: 2, awayScore: 0, locked: true },
+      { ...baseMatch, id: "m6", homeTeamId: "cze", awayTeamId: "rsa", homeScore: 1, awayScore: 0, locked: true }
     ];
     const displayStandings = deriveStandingsIfScored(matches, teams)!;
     const context = buildQualificationContext(matches, teams);
-    const usa = computeQualificationStatus("usa", displayStandings, context);
-    expect(displayStandings[0]!.rows[0]!.played).toBe(3);
-    expect(context.lockedStandingsByGroup.A?.find((r) => r.teamId === "usa")?.played).toBe(2);
-    expect(usa.certainty).not.toBe("confirmed");
+    const mex = computeQualificationStatus("mex", displayStandings, context);
+    expect(displayStandings.find((standing) => standing.group === "A")?.rows.find((row) => row.teamId === "mex")?.played).toBe(3);
+    expect(context.lockedStandingsByGroup.A?.find((r) => r.teamId === "mex")?.played).toBe(2);
+    expect(mex.certainty).not.toBe("confirmed");
   });
 
   it("does not confirm when all scores are unlocked even if display shows played 3", () => {
     const teams = [
-      { id: "usa", name: "USA", shortName: "USA", abbreviation: "USA", group: "A" as const, rating: 1500 },
-      { id: "mex", name: "MEX", shortName: "MEX", abbreviation: "MEX", group: "A" as const, rating: 1500 },
-      { id: "can", name: "CAN", shortName: "CAN", abbreviation: "CAN", group: "A" as const, rating: 1500 },
-      { id: "jpn", name: "JPN", shortName: "JPN", abbreviation: "JPN", group: "A" as const, rating: 1500 }
+      { id: "mex", name: "Mexico", shortName: "MEX", abbreviation: "MEX", group: "A" as const, rating: 1500 },
+      { id: "kor", name: "South Korea", shortName: "KOR", abbreviation: "KOR", group: "A" as const, rating: 1500 },
+      { id: "cze", name: "Czechia", shortName: "CZE", abbreviation: "CZE", group: "A" as const, rating: 1500 },
+      { id: "rsa", name: "South Africa", shortName: "RSA", abbreviation: "RSA", group: "A" as const, rating: 1500 }
     ];
     const baseMatch = {
       group: "A" as const,
@@ -170,18 +170,18 @@ describe("locked-only confirmation", () => {
       locked: false
     };
     const matches = [
-      { ...baseMatch, id: "m1", homeTeamId: "usa", awayTeamId: "mex", homeScore: 2, awayScore: 0 },
-      { ...baseMatch, id: "m2", homeTeamId: "usa", awayTeamId: "can", homeScore: 2, awayScore: 0 },
-      { ...baseMatch, id: "m3", homeTeamId: "usa", awayTeamId: "jpn", homeScore: 3, awayScore: 0 },
-      { ...baseMatch, id: "m4", homeTeamId: "mex", awayTeamId: "can", homeScore: 1, awayScore: 1 },
-      { ...baseMatch, id: "m5", homeTeamId: "mex", awayTeamId: "jpn", homeScore: 2, awayScore: 0 },
-      { ...baseMatch, id: "m6", homeTeamId: "can", awayTeamId: "jpn", homeScore: 1, awayScore: 0 }
+      { ...baseMatch, id: "m1", homeTeamId: "mex", awayTeamId: "kor", homeScore: 2, awayScore: 0 },
+      { ...baseMatch, id: "m2", homeTeamId: "mex", awayTeamId: "cze", homeScore: 2, awayScore: 0 },
+      { ...baseMatch, id: "m3", homeTeamId: "mex", awayTeamId: "rsa", homeScore: 3, awayScore: 0 },
+      { ...baseMatch, id: "m4", homeTeamId: "kor", awayTeamId: "cze", homeScore: 1, awayScore: 1 },
+      { ...baseMatch, id: "m5", homeTeamId: "kor", awayTeamId: "rsa", homeScore: 2, awayScore: 0 },
+      { ...baseMatch, id: "m6", homeTeamId: "cze", awayTeamId: "rsa", homeScore: 1, awayScore: 0 }
     ];
     const displayStandings = deriveStandingsIfScored(matches, teams)!;
     const context = buildQualificationContext(matches, teams);
-    expect(context.lockedStandingsByGroup.A?.find((r) => r.teamId === "usa")?.played).toBe(0);
-    const usa = computeQualificationStatus("usa", displayStandings, context);
-    expect(usa.certainty).not.toBe("confirmed");
+    expect(context.lockedStandingsByGroup.A?.find((r) => r.teamId === "mex")?.played).toBe(0);
+    const mex = computeQualificationStatus("mex", displayStandings, context);
+    expect(mex.certainty).not.toBe("confirmed");
   });
 });
 

@@ -8,6 +8,7 @@ import { groupMatchesByDay } from "../../lib/groupMatchesByDay";
 import { getNextKickoffMs, isNextKickoffFixture } from "../../lib/kickoffCountdown";
 import { APP_COPY } from "../../lib/appCopy";
 import { MODULE_IDS } from "../../lib/moduleIds";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useStore } from "../../store";
 import { ModuleSectionActions } from "../shared/ModuleSectionActions";
 
@@ -95,6 +96,29 @@ export function LiveView() {
               <BentoErrorBoundary bento="LiveMatchBento">
                 {primary ? <LiveMatchBento match={primary} variant="primary" /> : null}
               </BentoErrorBoundary>
+              {secondary.length > 0 ? (
+                <div className="live-now-strip" role="list">
+                  {secondary.map((m) => (
+                    <div key={m.id} className="live-now-strip-item" role="listitem">
+                      <button
+                        type="button"
+                        className="live-secondary-tap"
+                        onClick={() => setPrimary(m.id)}
+                        aria-label={copy.promoteMatch}
+                      >
+                        <LiveMatchBento match={m} variant="secondary" />
+                      </button>
+                      {m.group && m.group !== primary?.group ? (
+                        <LiveGroupStandingsPanel
+                          group={m.group}
+                          variant="mini"
+                          highlightTeamIds={[m.homeTeamId, m.awayTeamId]}
+                        />
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
             <div className="live-command-aside">
               {primary?.group ? (
@@ -111,30 +135,6 @@ export function LiveView() {
               </Suspense>
             </div>
           </div>
-
-          {secondary.length > 0 ? (
-            <div className="live-now-strip" role="list">
-              {secondary.map((m) => (
-                <div key={m.id} className="live-now-strip-item" role="listitem">
-                  <button
-                    type="button"
-                    className="live-secondary-tap"
-                    onClick={() => setPrimary(m.id)}
-                    aria-label={copy.promoteMatch}
-                  >
-                    <LiveMatchBento match={m} variant="secondary" />
-                  </button>
-                  {m.group && m.group !== primary?.group ? (
-                    <LiveGroupStandingsPanel
-                      group={m.group}
-                      variant="mini"
-                      highlightTeamIds={[m.homeTeamId, m.awayTeamId]}
-                    />
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          ) : null}
         </section>
       ) : (
         <section className="dashboard-section">
@@ -178,8 +178,8 @@ export function LiveView() {
                 <MatchScheduleCard
                   key={m.id}
                   match={m}
-                  home={teams[m.homeTeamId]}
-                  away={teams[m.awayTeamId]}
+                  home={resolveTeamFromStore(teams, m.homeTeamId)}
+                  away={resolveTeamFromStore(teams, m.awayTeamId)}
                   showKickoffCountdown={isNextKickoffFixture(m, nextKickoffMs)}
                 />
               ))}

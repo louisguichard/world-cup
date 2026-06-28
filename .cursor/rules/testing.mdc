@@ -1,0 +1,14 @@
+---
+description: Testing requirements for identity, qualification, reconciliation, and API layers
+alwaysApply: true
+---
+
+# Testing Rules
+
+- **CI block:** qualification pure functions, prediction pure functions, identity resolution, reconciliation field policy, Zod schema contracts.
+- **CI warn:** scenario workspace integration, Playwright UI smoke.
+- Use Vitest for unit/integration; MSW for provider HTTP mocks.
+- Identical qualification inputs must produce identical `inputHash` (regression test required).
+- Identity tests must cover: exact match, fuzzy-quarantine, manual confirm, duplicate alias idempotency.
+- Reconciliation tests must cover: primary wins, backup fallback, correction replay, schema violation quarantine.
+- Exhaustive switch on discriminated unions with `never` in default case.

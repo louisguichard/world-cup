@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
 import { getThirdPlaceBubbleState } from "../../lib/thirdPlaceLiveStatus";
@@ -62,8 +63,8 @@ export function BestThirdRacePanel() {
       const nearCut =
         (homeRank >= 5 && homeRank <= 10) || (awayRank >= 5 && awayRank <= 10);
 
-      const home = teamDisplayName(teams[match.homeTeamId], match.homeTeamId);
-      const away = teamDisplayName(teams[match.awayTeamId], match.awayTeamId);
+      const home = teamDisplayName(undefined, match.homeTeamId, teams);
+      const away = teamDisplayName(undefined, match.awayTeamId, teams);
       const score = `${match.homeScore ?? 0}–${match.awayScore ?? 0}`;
       const clock = formatLiveClock(match);
 
@@ -119,7 +120,7 @@ export function BestThirdRacePanel() {
           </thead>
           <tbody>
             {ranked.map((row: TeamRecord, index) => {
-              const team = teams[row.teamId];
+              const team = resolveTeamFromStore(teams, row.teamId);
               const status = statusLabel(index + 1, row.teamId, standings, qualContext);
               const isCutLine = index === 7;
               const dimmed = index >= 8;
@@ -140,7 +141,7 @@ export function BestThirdRacePanel() {
                   <td>{index + 1}</td>
                   <td className="group-table-team">
                     <TeamFlag team={team} teamId={row.teamId} />
-                    <span className="team-name-text qual-team-name">{teamDisplayName(team, row.teamId)}</span>
+                    <span className="team-name-text qual-team-name">{teamDisplayName(team, row.teamId, teams)}</span>
                   </td>
                   <td>
                     <strong>{row.points}</strong>

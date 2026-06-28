@@ -1,0 +1,25 @@
+---
+description: Hard boundaries between BC1 intake, BC2 qualification, and BC3 prediction
+alwaysApply: true
+---
+
+# Bounded Context Rules
+
+## BC1 — Intake & Reconciliation
+- IntakeWorkers fetch and validate; ReconciliationEngine materializes canonical entities.
+- IdentityService resolves external IDs; fuzzy-below-threshold → quarantine only.
+- CorrectionPipeline replays analyst overrides with ANALYST_OVERRIDE authority.
+
+## BC2 — Official Qualification
+- Triggered only by `MatchResultLockedEvent` (never live scores).
+- Output: immutable `QualificationSnapshot` with `engineVersion` and `inputHash`.
+- Promoted from `src/lib/qualification.ts` — logic unchanged, context moved to server.
+
+## BC3 — Prediction & Scenario
+- Dixon-Coles + factor attribution; scenario workspaces are ephemeral (Redis TTL 24h).
+- `simulateTournament` must be seeded and deterministic for bookmarking.
+- Factor weights configurable via DB; attribution is post-hoc wrapper on core model.
+
+## Cross-context
+- Never import BC3 from BC2 or BC1 business paths.
+- UI must render official status (BC2) and prediction status (BC3) in separate visual regions.

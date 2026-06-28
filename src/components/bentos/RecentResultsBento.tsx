@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { localDateKey, formatTimeAgo, yesterdayDateKey } from "../../lib/localDate";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import type { MergedMatch, Team } from "../../types";
@@ -14,8 +15,9 @@ type ResultRowProps = {
 };
 
 function ResultRow({ match, home, away, onSelect }: ResultRowProps) {
-  const homeName = teamDisplayName(home, match.homeTeamId);
-  const awayName = teamDisplayName(away, match.awayTeamId);
+  const teams = useStore((s) => s.teams);
+  const homeName = teamDisplayName(home, match.homeTeamId, teams);
+  const awayName = teamDisplayName(away, match.awayTeamId, teams);
   const ago = formatTimeAgo(match.date);
 
   return (
@@ -103,8 +105,8 @@ export function RecentResultsBento() {
               <ResultRow
                 key={match.id}
                 match={match}
-                home={teams[match.homeTeamId]}
-                away={teams[match.awayTeamId]}
+                home={resolveTeamFromStore(teams, match.homeTeamId)}
+                away={resolveTeamFromStore(teams, match.awayTeamId)}
                 onSelect={openTeamSheet}
               />
             ))}

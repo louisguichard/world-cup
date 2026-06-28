@@ -1,4 +1,5 @@
 import { useMemo, useState, type CSSProperties } from "react";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { buildQualificationContext } from "../../lib/qualification";
 import { useQualificationSnapshot, useTeamQualificationView } from "../../store/selectors/qualificationSelectors";
 import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
@@ -39,7 +40,7 @@ function TeamRow({
   const teams = useStore((s) => s.teams);
   const teamProfiles = useStore((s) => s.teamProfiles);
   const openTeamSheet = useStore((s) => s.openTeamSheet);
-  const team = teams[teamId];
+  const team = resolveTeamFromStore(teams, teamId);
   const theme = useTeamTheme(teamId);
   const view = useTeamQualificationView(teamId);
   const abbrev = team?.abbreviation?.toUpperCase() ?? "";
@@ -56,7 +57,7 @@ function TeamRow({
         onClick={() => openTeamSheet(teamId)}
       >
         <TeamFlag team={team} teamId={teamId} />
-        <span className="teams-row-name team-name-text">{teamDisplayName(team, teamId)}</span>
+        <span className="teams-row-name team-name-text">{teamDisplayName(team, teamId, teams)}</span>
         <QualificationStatusBadge qual={view.status} size="xs" />
         <span className="teams-stats">
           {APP_COPY.teams.rankLabel(rank, points, gd)}

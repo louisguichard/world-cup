@@ -1,8 +1,15 @@
+import type { DataLoadResult, GroupStanding, MergedMatch, PolymarketMatchMarket, ScoreOverride, Team } from "../../types";
 import { GROUP_STAGE_MATCH_COUNT } from "../../types";
 import { deriveStandingsIfScored, standingsEqual } from "../../lib/qualification";
 import { applyTeamLogoOverrides } from "../../lib/resolveTeamLogo";
-import { mergeStandingsPartials, normalizeStandingsTeamIds } from "../../services/adapters/normalizeStandings";
-import type { DataLoadResult, GroupStanding, MergedMatch, PolymarketMatchMarket, ScoreOverride, Team } from "../../types";
+import { mergeTeamsWithCatalog } from "../../data/wc2026TeamCatalog";
+import { mergeStandingsPartials, finalizeGroupStandings, standingsStatScore, standingsHasLiveStats } from "../../services/adapters/normalizeStandings";
+
+const MAX_DATA_WARNINGS = 12;
+
+function appendDataWarning(existing: string[], message: string): string[] {
+  return [...existing, message].slice(-MAX_DATA_WARNINGS);
+}
 
 export type TournamentSliceState = {
   teams: Record<string, Team>;
@@ -12,6 +19,7 @@ export type TournamentSliceState = {
   bracketPicks: Record<string, string>;
   sources: DataLoadResult["sources"];
   warnings: string[];
+  dataWarnings: string[];
   loadedAt: string | null;
   hydrateFromBootstrap: (data: DataLoadResult) => void;
   setTeams: (teams: Record<string, Team>) => void;
@@ -37,35 +45,55 @@ export const createTournamentSlice = (
     fifaRankings: false
   },
   warnings: [],
+  dataWarnings: [],
   loadedAt: null,
 
-  hydrateFromBootstrap: (data) =>
-    set((state) => {
-      const derived = deriveStandingsIfScored(data.matches, data.teams);
-      const groupStandings = mergeStandingsPartials(state.groupStandings, derived ?? []);
-      const teams = applyTeamLogoOverrides(
-        Object.fromEntries(data.teams.map((t) => [t.id, t]))
-      );
-      return {
-        teams,
-        groupStandings: groupStandings.length > 0 ? groupStandings : state.groupStandings,
-        knockoutMarkets: data.knockoutMarkets,
-        sources: data.sources,
-        warnings: data.warnings,
-        loadedAt: data.loadedAt
-      };
-    }),
+  hydrateFromBootstrap: (data) => {
+    const state = get();
+    const incomingTeams = applyTeamLogoOverrides(
+      Object.fromEntries(data.teams.map((t) => [t.id, t]))
+    );
+    const teams = mergeTeamsWithCatalog({ ...state.teams, ...incomingTeams });
+    const derived = deriveStandingsIfScored(data.matches, Object.values(teams));
+    const mergedStandings = mergeStandingsPartials(state.groupStandings, derived ?? []);
 
-  setTeams: (teams) => set(() => ({ teams })),
+    set(() => ({
+      teams,
+      knockoutMarkets: data.knockoutMarkets,
+      sources: data.sources,
+      warnings: data.warnings,
+      loadedAt: data.loadedAt,
+    }));
+
+    if (mergedStandings.length > 0) {
+      get().setGroupStandings(mergedStandings);
+    }
+  },
+
+  setTeams: (teams) => set(() => ({ teams: mergeTeamsWithCatalog(teams) })),
 
   setScoreOverrides: (overrides) => set(() => ({ scoreOverrides: overrides })),
   setBracketPicks: (picks) => set(() => ({ bracketPicks: picks })),
   setGroupStandings: (standings) =>
     set((state) => {
-      const normalized = normalizeStandingsTeamIds(standings, state.teams);
-      return standingsEqual(normalized, state.groupStandings)
+      const finalized = finalizeGroupStandings(standings, state.teams);
+      const previousScore = standingsStatScore(state.groupStandings);
+      const nextScore = standingsStatScore(finalized);
+      if (
+        state.groupStandings.length > 0 &&
+        (nextScore < previousScore ||
+          (standingsHasLiveStats(state.groupStandings) && !standingsHasLiveStats(finalized)))
+      ) {
+        return {
+          dataWarnings: appendDataWarning(
+            state.dataWarnings,
+            `Blocked standings downgrade (${previousScore} → ${nextScore} stat score).`
+          ),
+        };
+      }
+      return standingsEqual(finalized, state.groupStandings)
         ? {}
-        : { groupStandings: normalized };
+        : { groupStandings: finalized };
     }),
 
   groupStageComplete: () => {

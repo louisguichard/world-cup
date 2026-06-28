@@ -203,7 +203,7 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
 
   if (!options?.light) {
     await Promise.allSettled(
-      liveMatches.slice(0, 6).map(async (m) => {
+      liveMatches.map(async (m) => {
         const events = await fetchMatchEvents(m, m.matchId ?? m.id);
         publishMatchEvents(m, events);
       })

@@ -45,6 +45,7 @@ import { TeamFlag } from "../team/TeamFlag";
 import { TeamLabel } from "../team/TeamLabel";
 import { VenueLabel } from "../venue/VenueLabel";
 import { BracketTeamButton } from "../team/BracketTeamButton";
+import { ScenarioWorkspace } from "../analyst/ScenarioWorkspace";
 
 const STORAGE_KEY = "world-cup-2026-score-overrides";
 const PICKS_KEY = "world-cup-2026-bracket-picks";
@@ -204,6 +205,7 @@ function sourceClass(match: MatchWithScore): string {
 export function SimulatorView() {
   const simulatorMode = useStore((s) => s.simulatorMode);
   const setSimulatorMode = useStore((s) => s.setSimulatorMode);
+  const activeScenarioId = useStore((s) => s.activeScenarioId);
   const storeLiveMatches = useStore((s) => s.liveMatches);
   const storeKnockoutMarkets = useStore((s) => s.knockoutMarkets);
   const [data, setData] = useState<DataLoadResult | null>(null);
@@ -450,6 +452,7 @@ export function SimulatorView() {
 
   return (
     <main className="app-shell">
+      {activeScenarioId ? <ScenarioWorkspace /> : null}
       <header className="topbar">
         <button className="brand" onClick={() => setSimulatorMode("tournament")} aria-label="Home">
           <span className="brand-mark brand-mark--logo" aria-hidden="true">

@@ -38,8 +38,8 @@ export function ResultsView() {
     const q = search.trim().toLowerCase();
     if (!q) return base;
     return base.filter((m) => {
-      const home = teamDisplayName(teams[m.homeTeamId], m.homeTeamId);
-      const away = teamDisplayName(teams[m.awayTeamId], m.awayTeamId);
+      const home = teamDisplayName(undefined, m.homeTeamId, teams);
+      const away = teamDisplayName(undefined, m.awayTeamId, teams);
       return home.toLowerCase().includes(q) || away.toLowerCase().includes(q);
     });
   }, [liveMatchesMap, sort, stage, group, search, teams]);

@@ -4,7 +4,7 @@ import { buildQualificationContext, computeQualificationStatus, type Qualificati
 import { projectTournament } from "../../lib/tournament";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
-import { formatKickoffLabel, resolveKickoffByMatchId } from "../../services/ScheduleLinker";
+import { formatKickoffLabel, resolveOfficialMatchKickoff } from "../../services/ScheduleLinker";
 import type {
   BracketGhostCandidate,
   BracketMatch,
@@ -268,7 +268,7 @@ function BracketCardReadonly({
   const away = match.awayTeamId ? teamsById[match.awayTeamId] : undefined;
   const info = knockoutSchedule[match.id];
   const kickoffUtc = info
-    ? resolveKickoffByMatchId(match.id, info.date, Object.values(liveMatches))
+    ? resolveOfficialMatchKickoff({ matchId: match.id, date: info.date })
     : undefined;
   const { homeConfirmed, awayConfirmed } = isSlotConfirmed(match, mode, standings, liveMatches, qualContext);
 

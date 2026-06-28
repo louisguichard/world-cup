@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { TEAM_LOGO_OVERRIDES } from "./teamLogoOverrides";
+import { resetOfficialGroupRosterCache } from "../lib/officialGroupRoster";
 import {
   buildWc2026TeamCatalog,
   mergeTeamsWithCatalog,
@@ -10,6 +11,10 @@ import {
 } from "./wc2026TeamCatalog";
 
 describe("wc2026TeamCatalog", () => {
+  beforeEach(() => {
+    resetOfficialGroupRosterCache();
+  });
+
   it("includes all 48 nations with logos", () => {
     const catalog = buildWc2026TeamCatalog();
     expect(Object.keys(catalog)).toHaveLength(48);
@@ -43,11 +48,13 @@ describe("wc2026TeamCatalog", () => {
         rating: 1500
       }
     });
-    expect(Object.keys(merged)).toHaveLength(48);
+    expect(Object.keys(merged).length).toBeGreaterThanOrEqual(48);
     expect(merged.bra?.name).toBe("Brazil");
     expect(merged.bra?.id).toBe("bra");
+    expect(merged.bra?.group).toBe("C");
+    expect(merged["229"]).toEqual(merged.bra);
     expect(merged.fra?.name).toBe("France");
-    expect(merged["229"]).toBeUndefined();
+    expect(merged["445"]).toEqual(merged.fra);
   });
 
   it("resolveCanonicalTeamId maps ESPN numeric ids via team metadata", () => {

@@ -1,7 +1,7 @@
 import type { MergedMatch, Team } from "../types";
-import { resolveCanonicalTeamId } from "../data/wc2026TeamCatalog";
+import { resolveCanonicalTeamId, resolveTeamFromStore } from "../data/wc2026TeamCatalog";
 import { applyLiveScore } from "./DataMerger";
-import { enrichMatchWithScheduleId } from "./ScheduleLinker";
+import { enrichMatchWithScheduleId, resolveOfficialMatchKickoff } from "./ScheduleLinker";
 import { logger } from "./Logger";
 
 export type EspnMergeMode = "id" | "fuzzy" | "new";
@@ -26,10 +26,10 @@ function sameFixture(
   b: MergedMatch,
   teams: Record<string, Team>
 ): boolean {
-  const aHome = teams[a.homeTeamId];
-  const aAway = teams[a.awayTeamId];
-  const bHome = teams[b.homeTeamId];
-  const bAway = teams[b.awayTeamId];
+  const aHome = resolveTeamFromStore(teams, a.homeTeamId);
+  const aAway = resolveTeamFromStore(teams, a.awayTeamId);
+  const bHome = resolveTeamFromStore(teams, b.homeTeamId);
+  const bAway = resolveTeamFromStore(teams, b.awayTeamId);
   if (!aHome || !aAway || !bHome || !bAway) {
     return a.homeTeamId === b.homeTeamId && a.awayTeamId === b.awayTeamId;
   }
@@ -41,8 +41,8 @@ export function canonicalizeMatchTeamIds(
   match: MergedMatch,
   teams: Record<string, Team>
 ): MergedMatch {
-  const homeTeam = teams[match.homeTeamId];
-  const awayTeam = teams[match.awayTeamId];
+  const homeTeam = resolveTeamFromStore(teams, match.homeTeamId);
+  const awayTeam = resolveTeamFromStore(teams, match.awayTeamId);
   return {
     ...match,
     homeTeamId: resolveCanonicalTeamId(match.homeTeamId, homeTeam),
@@ -116,7 +116,11 @@ export function mergeEspnMatchIntoStore(
     espnEventId: incoming.id
   }, "espn");
 
-  merged[storeKey] = enrichMatchWithScheduleId(applied, teams);
+  const linked = enrichMatchWithScheduleId(applied, teams);
+  merged[storeKey] = {
+    ...linked,
+    date: resolveOfficialMatchKickoff(linked),
+  };
 
   return mode;
 }

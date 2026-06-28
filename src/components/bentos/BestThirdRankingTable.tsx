@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import type { RankingSnapshot } from "../../lib/buildRankingTimeline";
 import {
   bubbleStateLabel,
@@ -76,7 +77,7 @@ function RankTableRow({
         <TeamClickTarget teamId={row.teamId} className={styles.teamCellBtn} options={{ tab: "context" }}>
           <div className={styles.teamCell}>
             <TeamFlag team={team} teamId={row.teamId} size="sm" />
-            <span className="team-name-text">{teamDisplayName(team, row.teamId)}</span>
+            <span className="team-name-text">{teamDisplayName(team, row.teamId, teams)}</span>
           </div>
         </TeamClickTarget>
         <div
@@ -156,7 +157,7 @@ export function BestThirdRankingTable({
         </thead>
         <tbody>
           {rows.map((row, index) => {
-            const team = teams[row.teamId];
+            const team = resolveTeamFromStore(teams, row.teamId);
             const delta = deltaByTeam.get(row.teamId);
             const positionChange = delta
               ? deltaLabel(delta.positionBefore, delta.positionAfter)

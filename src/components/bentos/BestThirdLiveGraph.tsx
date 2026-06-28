@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useBestThirdLiveGraphState } from "../../hooks/useBestThirdLiveGraphState";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
@@ -65,9 +66,9 @@ function LadderRow({
   const rowInner = (
     <>
       <span className={styles.ladderRank}>{rank}</span>
-      <TeamFlag team={teams[row.teamId]} teamId={row.teamId} size="sm" compact />
+      <TeamFlag team={resolveTeamFromStore(teams, row.teamId)} teamId={row.teamId} size="sm" compact />
       <span className={`${styles.ladderName} team-name-text`}>
-        {teamDisplayName(teams[row.teamId], row.teamId)}
+        {teamDisplayName(undefined, row.teamId, teams)}
       </span>
       <span className={styles.ladderPts}>
         {row.points} {tbl.points.toLowerCase()}
@@ -135,7 +136,7 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
     if (cutoffCrossings.length === 0) return null;
     return cutoffCrossings
       .map((c) => {
-        const name = teamDisplayName(teams[c.teamId], c.teamId);
+        const name = teamDisplayName(undefined, c.teamId, teams);
         return c.direction === "in" ? bt.cutoffBannerIn(name) : bt.cutoffBannerOut(name);
       })
       .join(" · ");
@@ -163,7 +164,7 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
       {focusRows.length > 0 ? (
         <div className={styles.focusStrip}>
           {focusRows.map((row) => {
-            const team = teams[row.teamId];
+            const team = resolveTeamFromStore(teams, row.teamId);
             return (
               <TeamClickTarget
                 key={row.teamId}

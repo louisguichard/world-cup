@@ -1,0 +1,14 @@
+---
+description: WC2026 monorepo architecture conventions and package boundaries
+alwaysApply: true
+---
+
+# Architecture Conventions
+
+- Monorepo layout: `apps/` (web, api, admin), `packages/` (canonical, events, qualification, prediction, identity, zod-schemas, db), `workers/`, `docs/adr/`.
+- BC2 (`packages/qualification`) is pure deterministic — no odds, no probabilities, no I/O.
+- BC3 (`packages/prediction`) reads BC2 output as input; never mutates qualification state.
+- BC1 owns canonical materialized state, identity graph, and raw event log.
+- Source-of-truth policy is enforced in ReconciliationEngine, not ad hoc in UI or workers.
+- Workers receive dependencies via injection; no global singletons in worker modules.
+- SSE push for client updates; polling is fallback only during M0–M5 migration.
