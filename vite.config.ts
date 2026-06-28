@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { readFileSync } from "node:fs";
 import type { Server } from "http-proxy";
+import { viteDevApiPlugin } from "./scripts/vite-dev-api-plugin";
 
 const versionMeta = JSON.parse(readFileSync("./version.json", "utf8")) as {
   version: string;
@@ -182,7 +183,7 @@ const proxy = {
 };
 
 export default defineConfig({
-  plugins: [react],
+  plugins: [react(), viteDevApiPlugin()],
   server: {
     host: "127.0.0.1",
     port: 5173,

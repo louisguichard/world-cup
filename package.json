@@ -17,6 +17,7 @@
     "test:all": "vitest run --config vitest.workspace.ts",
     "test:packages": "vitest run --config vitest.workspace.ts packages",
     "smoke:pipeline": "npx tsx scripts/smoke-pipeline.ts",
+    "smoke:db": "node scripts/smoke-db.mjs",
     "verify:db": "node scripts/verify-db.mjs",
     "db:seed": "node scripts/seed-identity.mjs --write",
     "worker:dev": "node --experimental-vm-modules --loader ts-node/esm server/src/index.ts",

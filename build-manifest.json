@@ -1,6 +1,30 @@
 {
-  "updatedAt": "2026-06-28T05:05:57.191Z",
+  "updatedAt": "2026-06-28T05:09:16.956Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 55,
+      "kind": "build",
+      "message": "17 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, docs, package.json — 17 files changed, 595 insertions(+), 31 deletions(-)",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T05:09:16.956Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 54,
+      "kind": "build",
+      "message": "Fix smoke-db and verify-db Prisma import graceful handling",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T05:09:07.498Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 53,
+      "kind": "build",
+      "message": "Restore BC API routes, Vite dev API middleware, catalog qual fallback",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T05:08:33.182Z"
+    },
     {
       "version": "4.0.0",
       "build": 52,
@@ -296,33 +320,17 @@
       "message": "Add quota governor and multi-source verification gates",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T16:47:07.332Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 15,
-      "kind": "build",
-      "message": "11 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 11 files changed, 197 insertions(+), 160 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T16:39:20.929Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 14,
-      "kind": "build",
-      "message": "Unify standings and simulation on canonical dataset",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T16:38:56.815Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 13,
-      "kind": "build",
-      "message": "15 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 15 files changed, 570 insertions(+), 143 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T14:55:22.001Z"
     }
   ],
   "commits": [
+    {
+      "hash": "0e778fac355bc7fbce6591d0ca6f775382a61183",
+      "shortHash": "0e778fa",
+      "message": "Complete operational readiness follow-through: status contract, BC3 UI, smoke.",
+      "version": "4.0.0",
+      "build": 52,
+      "timestamp": "2026-06-28T05:05:57.563Z"
+    },
     {
       "hash": "b48c9d4072b597fdee2cd193fa46a1d84fe36522",
       "shortHash": "b48c9d4",
@@ -554,14 +562,6 @@
       "version": "3.0.0",
       "build": 22,
       "timestamp": "2026-06-27T07:20:36.161Z"
-    },
-    {
-      "hash": "0b893218733d27eeb79a48e1cfb082142369ff7b",
-      "shortHash": "0b89321",
-      "message": "Sync build-manifest commit record for e388e5e.",
-      "version": "3.0.0",
-      "build": 22,
-      "timestamp": "2026-06-27T07:20:31.839Z"
     }
   ],
   "deploys": [

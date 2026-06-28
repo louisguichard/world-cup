@@ -78,6 +78,18 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+
+## [4.0.0] build 55 — 2026-06-28 (build)
+- 17 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, docs, package.json — 17 files changed, 595 insertions(+), 31 deletions(-)
+
+## [4.0.0] build 54 — 2026-06-28 (build)
+- Fix smoke-db and verify-db Prisma import graceful handling
+
+## [4.0.0] build 53 — 2026-06-28 (build)
+- Restore BC API routes, Vite dev API middleware, catalog qual fallback
+
 ## [4.0.0] build 52 — 2026-06-28 (build)
 - 17 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, package.json, packages — 17 files changed, 451 insertions(+), 25 deletions(-)
 

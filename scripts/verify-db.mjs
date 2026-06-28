@@ -4,13 +4,25 @@
  * Exit 0 when unset (local unit-test only); exit 1 on connection failure.
  */
 
-import { PrismaClient } from "@prisma/client";
-
 const url = process.env.DATABASE_URL;
 
 if (!url) {
   console.log("verify:db — DATABASE_URL unset, skipping");
   process.exit(0);
+}
+
+let PrismaClient;
+try {
+  const pkg = await import("@prisma/client");
+  PrismaClient = pkg.PrismaClient ?? pkg.default?.PrismaClient;
+} catch {
+  console.error("verify:db FAILED — run npm run db:generate");
+  process.exit(1);
+}
+
+if (!PrismaClient) {
+  console.error("verify:db FAILED — run npm run db:generate");
+  process.exit(1);
 }
 
 const prisma = new PrismaClient();

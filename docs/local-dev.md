@@ -20,10 +20,12 @@ npm run db:seed          # optional — identity aliases
 npm run verify:db
 
 # 4. App processes (separate terminals)
-npm run web:dev          # Vite PWA — http://127.0.0.1:5173
-npm run server:dev       # Hono + BullMQ workers
+npm run web:dev          # Vite PWA — http://127.0.0.1:5173 (includes dev /api/qualification + /api/events)
+npm run server:dev       # Hono + BullMQ workers (requires Redis)
 npm run admin:dev        # Admin console — http://127.0.0.1:5174
 ```
+
+Vite dev serves `/api/qualification/:groupId`, `/api/events` (SSE heartbeat), and `/api/health` via middleware — no `vercel dev` required for analyst panels.
 
 ## Admin writes
 
@@ -44,6 +46,7 @@ Correction and quarantine **PUT** routes require the token.
 ```bash
 npm run test:all         # client + packages + server
 npm run smoke:pipeline   # identity + qual (no Docker)
+npm run smoke:db         # Postgres when DATABASE_URL set
 npm run verify:db        # Postgres when DATABASE_URL set
 ```
 
