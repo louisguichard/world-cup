@@ -538,7 +538,7 @@ export async function loadWorldCupData(): Promise<DataLoadResult> {
   const matches = addPredictions(parsed.matches, teams, matchMarkets);
   const polymarketPredictions = Object.keys(matchMarkets).length;
 
-  if (polymarketPredictions === 0) {
+  if (polymarketPredictions === 0 && polymarketMarkets.length === 0) {
     warnings.push("No usable Polymarket per-match market; predictions rely on the FIFA-adjusted strength model only.");
   }
 
