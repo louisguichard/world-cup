@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { FuturesOdds, MatchStatus, OddsSnapshot } from "../types";
 import { getOdds } from "../services/OddsCache";
 import { getLiveOdds } from "../services/OddsIntelligenceClient";
+import { usePollingGov } from "./usePollingGov";
 
 const FUTURES_TTL_MS = 30 * 60 * 1000;
+const WARM_POLL_MS = 30_000;
 
 let futuresCache: { data: FuturesOdds | null; fetchedAt: number } = {
   data: null,
@@ -30,50 +32,65 @@ export function useLiveOdds(
   const [futures, setFutures] = useState<FuturesOdds | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const warmEnabled = Boolean(matchId && espnEventId && shouldFetchOdds(matchStatus));
+
+  const fetchMatchOdds = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!matchId || !espnEventId || !shouldFetchOdds(matchStatus)) return;
+
+      setLoading(true);
+      try {
+        const eventOdds = await getOdds(
+          espnEventId,
+          homeTeam && awayTeam ? { home: homeTeam, away: awayTeam } : undefined
+        );
+        if (signal?.aborted) return;
+
+        if (!eventOdds?.bestHome || !eventOdds.bestDraw || !eventOdds.bestAway) {
+          setOdds(null);
+          return;
+        }
+
+        setOdds({
+          matchId,
+          homeWin: eventOdds.bestHome,
+          draw: eventOdds.bestDraw,
+          awayWin: eventOdds.bestAway,
+          fetchedAt: Date.now(),
+        });
+      } finally {
+        if (!signal?.aborted) setLoading(false);
+      }
+    },
+    [matchId, espnEventId, matchStatus, homeTeam, awayTeam]
+  );
+
   useEffect(() => {
-    if (!matchId || !espnEventId || !shouldFetchOdds(matchStatus)) {
+    if (!warmEnabled) {
       setOdds(null);
       setLoading(false);
       return;
     }
 
-    let cancelled = false;
-    setLoading(true);
+    const ac = new AbortController();
+    void fetchMatchOdds(ac.signal);
+    return () => ac.abort();
+  }, [warmEnabled, fetchMatchOdds]);
 
-    void getOdds(
-      espnEventId,
-      homeTeam && awayTeam ? { home: homeTeam, away: awayTeam } : undefined
-    ).then((eventOdds) => {
-      if (cancelled) return;
-      setLoading(false);
-      if (!eventOdds?.bestHome || !eventOdds.bestDraw || !eventOdds.bestAway) {
-        setOdds(null);
-        return;
-      }
-      setOdds({
-        matchId,
-        homeWin: eventOdds.bestHome,
-        draw: eventOdds.bestDraw,
-        awayWin: eventOdds.bestAway,
-        fetchedAt: Date.now(),
-      });
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [matchId, espnEventId, matchStatus, homeTeam, awayTeam]);
+  usePollingGov(() => {
+    void fetchMatchOdds();
+  }, WARM_POLL_MS, warmEnabled);
 
   useEffect(() => {
+    const ac = new AbortController();
     const stale = Date.now() - futuresCache.fetchedAt > FUTURES_TTL_MS;
     if (!stale && futuresCache.data) {
       setFutures(futuresCache.data);
-      return;
+      return () => ac.abort();
     }
 
-    let cancelled = false;
     void getLiveOdds().then((lines) => {
-      if (cancelled) return;
+      if (ac.signal.aborted) return;
       const mapped: FuturesOdds = {
         teams: lines.map((l) => ({
           teamId: l.eventId,
@@ -86,9 +103,7 @@ export function useLiveOdds(
       setFutures(mapped);
     });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => ac.abort();
   }, []);
 
   return { odds, futures, loading };

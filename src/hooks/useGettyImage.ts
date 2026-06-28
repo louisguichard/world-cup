@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { GettyImageRef } from "../types/gettyImages";
 import { lookupGettyEditorialImage } from "../services/GettyImagesClient";
 
+/** Cold tier — fetch editorial image once per phrase. */
 export function useGettyImage(phrase: string | null | undefined): {
   image: GettyImageRef | null;
   loading: boolean;
@@ -17,19 +18,16 @@ export function useGettyImage(phrase: string | null | undefined): {
       return;
     }
 
-    let cancelled = false;
+    const ac = new AbortController();
     setLoading(true);
 
     void lookupGettyEditorialImage(query).then((result) => {
-      if (!cancelled) {
-        setImage(result);
-        setLoading(false);
-      }
+      if (ac.signal.aborted) return;
+      setImage(result);
+      setLoading(false);
     });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => ac.abort();
   }, [phrase]);
 
   return { image, loading };

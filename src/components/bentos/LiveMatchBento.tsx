@@ -5,6 +5,7 @@ import { useStore } from "../../store";
 import { BroadcastBar } from "../match/BroadcastBar";
 import { hasDisplayableMatchEvents, MatchGoalScorers } from "../match/MatchGoalScorers";
 import { WeatherBadge } from "../match/WeatherBadge";
+import { PanelErrorBoundary } from "../ErrorBoundary";
 import { GoalCelebrationOverlay } from "../match/GoalCelebrationOverlay";
 import goalStyles from "../match/GoalCelebrationOverlay.module.css";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
@@ -90,11 +91,13 @@ export function LiveMatchBento({ match, variant }: Props) {
           <span className="live-hero-period">{periodLabel}</span>
         ) : null}
         {match.group ? <span className="match-source espn">Group {match.group}</span> : null}
-        <WeatherBadge
-          matchId={match.matchId}
-          venueString={match.venue}
-          cityHint={broadcast?.venue.city}
-        />
+        <PanelErrorBoundary name="Weather">
+          <WeatherBadge
+            matchId={match.matchId}
+            venueString={match.venue}
+            cityHint={broadcast?.venue.city}
+          />
+        </PanelErrorBoundary>
       </div>
 
       {match.matchId || match.venue ? (

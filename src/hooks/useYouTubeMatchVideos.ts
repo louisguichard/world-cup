@@ -11,6 +11,7 @@ type Input = {
   awayTeamName: string;
 };
 
+/** Cold tier — resolve YouTube clips once when match context is set. */
 export function useYouTubeMatchVideos(input: Input): {
   videos: YouTubeMatchVideo[];
   loading: boolean;
@@ -25,7 +26,7 @@ export function useYouTubeMatchVideos(input: Input): {
       return;
     }
 
-    let cancelled = false;
+    const ac = new AbortController();
     setLoading(true);
 
     void resolveYouTubeMatchVideos({
@@ -36,15 +37,13 @@ export function useYouTubeMatchVideos(input: Input): {
       awayTeamName: input.awayTeamName,
     })
       .then((result) => {
-        if (!cancelled) setVideos(result);
+        if (!ac.signal.aborted) setVideos(result);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!ac.signal.aborted) setLoading(false);
       });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => ac.abort();
   }, [
     input.match?.id,
     input.match?.matchId,
@@ -56,4 +55,3 @@ export function useYouTubeMatchVideos(input: Input): {
 
   return { videos, loading };
 }
-

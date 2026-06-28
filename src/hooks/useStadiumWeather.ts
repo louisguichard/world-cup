@@ -4,7 +4,7 @@ import type { WeatherLocationInput } from "../lib/weather/resolveHostCityWeather
 import { resolveHostCityWeather } from "../lib/weather/resolveHostCityWeather";
 import { getWeather } from "../services/WeatherCache";
 
-/** Fetches weather for a WC 2026 host city with cache (Yahoo primary, OpenWeather backup). */
+/** Fetches weather once per venue — cold tier, no polling. */
 export function useStadiumWeather(input: WeatherLocationInput): {
   weather: WeatherSnapshot | null;
   loading: boolean;
@@ -22,11 +22,11 @@ export function useStadiumWeather(input: WeatherLocationInput): {
       return;
     }
 
-    let cancelled = false;
+    const ac = new AbortController();
     setLoading(true);
 
     void getWeather(input).then((data) => {
-      if (cancelled) return;
+      if (ac.signal.aborted) return;
       setLoading(false);
       if (!data) {
         setWeather(null);
@@ -46,9 +46,7 @@ export function useStadiumWeather(input: WeatherLocationInput): {
       });
     });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => ac.abort();
   }, [lookupKey, entry]);
 
   return { weather, loading };

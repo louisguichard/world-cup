@@ -19,6 +19,15 @@
   color: var(--muted);
 }
 
+.panel-error {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 210, 125, 0.08);
+  border: 1px solid rgba(255, 210, 125, 0.2);
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .bento-retry-btn {
   min-height: 44px;
   margin-top: 0.75rem;

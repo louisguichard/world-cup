@@ -78,8 +78,21 @@ class PollingEngine {
     }
   }
 
+  /** Pause scheduling while the tab is hidden — no API calls in background. */
+  pauseForHiddenTab(): void {
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = null;
+  }
+
+  /** Resume polling when the tab becomes visible again. */
+  resumeFromHiddenTab(): void {
+    if (!this.running || typeof document === "undefined" || document.hidden) return;
+    void this.poll();
+  }
+
   private scheduleNext(): void {
     if (!this.running) return;
+    if (typeof document !== "undefined" && document.hidden) return;
     if (this.timer) clearTimeout(this.timer);
 
     const isLive = hasAnyLive(useStore.getState().liveMatches);
@@ -99,6 +112,7 @@ class PollingEngine {
 
   private async poll(): Promise<void> {
     if (!this.running) return;
+    if (typeof document !== "undefined" && document.hidden) return;
 
     if (!shouldRunPollFallback()) {
       this.scheduleNext();

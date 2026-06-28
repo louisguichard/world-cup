@@ -5,6 +5,7 @@ import { buildMatchOddsSummary } from "../../lib/oddsDisplay";
 import { resolvePredictionPick } from "../../lib/matchFootballPredictions";
 import { useFootballPredictionForMatch } from "../../hooks/useFootballPredictionIndex";
 import { OddsRow } from "./OddsRow";
+import { PanelErrorBoundary } from "../ErrorBoundary";
 import { PredictionBadge } from "../predictions/PredictionBadge";
 import type { MergedMatch } from "../../types";
 
@@ -82,14 +83,16 @@ export function FixtureBettingSection({ match, homeTeam, awayTeam }: Props) {
             compact={false}
           />
         ) : null}
-        <OddsRow
-          match={match}
-          homeTeam={homeTeam}
-          awayTeam={awayTeam}
-          compact={false}
-          externalOdds={odds}
-          externalLoading={loading}
-        />
+        <PanelErrorBoundary name="Odds">
+          <OddsRow
+            match={match}
+            homeTeam={homeTeam}
+            awayTeam={awayTeam}
+            compact={false}
+            externalOdds={odds}
+            externalLoading={loading}
+          />
+        </PanelErrorBoundary>
       </div>
     </details>
   );

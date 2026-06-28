@@ -15,6 +15,7 @@ export type HighlightlyTeamBundle = {
   loading: boolean;
 };
 
+/** Cold tier — team highlight bundle once when enabled. */
 export function useHighlightlyTeamData(teamName: string, enabled: boolean): HighlightlyTeamBundle {
   const [teamId, setTeamId] = useState<number | null>(null);
   const [highlights, setHighlights] = useState<HighlightlyHighlight[]>([]);
@@ -31,12 +32,12 @@ export function useHighlightlyTeamData(teamName: string, enabled: boolean): High
       return;
     }
 
-    let cancelled = false;
+    const ac = new AbortController();
     setLoading(true);
 
     void (async () => {
       const id = await resolveHighlightlyTeamId(teamName);
-      if (cancelled) return;
+      if (ac.signal.aborted) return;
       setTeamId(id);
 
       if (!id) {
@@ -54,17 +55,14 @@ export function useHighlightlyTeamData(teamName: string, enabled: boolean): High
         fetchHighlightlyTeamStatistics(id, fromDate),
       ]);
 
-      if (!cancelled) {
-        setHighlights(hl);
-        setLastFive(form);
-        setSeasonStats(stats);
-        setLoading(false);
-      }
+      if (ac.signal.aborted) return;
+      setHighlights(hl);
+      setLastFive(form);
+      setSeasonStats(stats);
+      setLoading(false);
     })();
 
-    return () => {
-      cancelled = true;
-    };
+    return () => ac.abort();
   }, [teamName, enabled]);
 
   return { teamId, highlights, lastFive, seasonStats, loading };

@@ -3,6 +3,7 @@ import type { HighlightlyHighlight } from "../types/sportHighlights";
 import { fetchFifaSingleMatchVideo } from "../services/FifaFootballDataClient";
 import { mapFifaClipsToHighlights } from "../services/fifaFootballData/mapFifaClipsToHighlights";
 
+/** Cold tier — FIFA clips once per stage/match id. */
 export function useFifaMatchVideos(
   stageId?: string | number,
   matchId?: string | number
@@ -17,18 +18,16 @@ export function useFifaMatchVideos(
       return;
     }
 
-    let cancelled = false;
+    const ac = new AbortController();
     setLoading(true);
 
     void fetchFifaSingleMatchVideo(stageId, matchId).then((clips) => {
-      if (cancelled) return;
+      if (ac.signal.aborted) return;
       setHighlights(mapFifaClipsToHighlights(clips));
       setLoading(false);
     });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => ac.abort();
   }, [stageId, matchId]);
 
   return { highlights, loading };

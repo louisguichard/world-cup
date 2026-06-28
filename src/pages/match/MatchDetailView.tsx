@@ -11,6 +11,7 @@ import { useStore } from "../../store";
 import { useMatchDetailBundle } from "../../hooks/useMatchDetailBundle";
 import { usePageVisibilityPolling } from "../../hooks/usePageVisibilityPolling";
 import { useLiveClock } from "../../hooks/useLiveClock";
+import { PanelErrorBoundary } from "../../components/ErrorBoundary";
 import { navigateHome } from "../../lib/navigateToTab";
 import { buildTournamentHash, buildVenueHash } from "../../hooks/useHashSync";
 import { resolveMatchIds } from "../../services/matchDetail/resolveMatchIds";
@@ -97,8 +98,8 @@ export function MatchDetailView() {
     wcMatchId
   );
 
-  // 2-minute visibility poller when match is live
-  usePageVisibilityPolling(refetch, match?.status === "live");
+  // Live match detail refresh — warm tier, visibility-gated
+  usePageVisibilityPolling(refetch, match?.status === "live", 15_000);
 
   // Pull-to-refresh on the scroll area
   usePullToRefresh(scrollRef, refetch);
@@ -334,14 +335,18 @@ export function MatchDetailView() {
           {broadcast?.venue.city && !isDone ? (
             <>
               <span className={styles.contextSep}>·</span>
-              <WeatherBadge cityHint={broadcast.venue.city} />
+              <PanelErrorBoundary name="Weather">
+                <WeatherBadge cityHint={broadcast.venue.city} />
+              </PanelErrorBoundary>
             </>
           ) : null}
         </div>
 
         {match && !isDone ? (
           <div className={styles.oddsStrip}>
-            <OddsRow match={match} homeTeam={homeTeamName} awayTeam={awayTeamName} />
+            <PanelErrorBoundary name="Odds">
+              <OddsRow match={match} homeTeam={homeTeamName} awayTeam={awayTeamName} />
+            </PanelErrorBoundary>
           </div>
         ) : null}
 
@@ -436,23 +441,27 @@ export function MatchDetailView() {
         ) : null}
 
         {activeMatchTab === "watch" ? (
-          <MatchWatchTab
-            bundle={liveStream}
-            homeTeamName={homeTeamName}
-            awayTeamName={awayTeamName}
-          />
+          <PanelErrorBoundary name="Watch">
+            <MatchWatchTab
+              bundle={liveStream}
+              homeTeamName={homeTeamName}
+              awayTeamName={awayTeamName}
+            />
+          </PanelErrorBoundary>
         ) : null}
 
         {activeMatchTab === "highlights" ? (
-          <MatchHighlightsTab
-            highlights={highlightly.highlights}
-            loading={highlightly.loading}
-            homeTeamName={homeTeamName}
-            awayTeamName={awayTeamName}
-            introHighlight={highlightly.intro?.introHighlight}
-            attribution={highlightly.attribution}
-            quotaLabel={highlightQuotaLabel}
-          />
+          <PanelErrorBoundary name="Highlights">
+            <MatchHighlightsTab
+              highlights={highlightly.highlights}
+              loading={highlightly.loading}
+              homeTeamName={homeTeamName}
+              awayTeamName={awayTeamName}
+              introHighlight={highlightly.intro?.introHighlight}
+              attribution={highlightly.attribution}
+              quotaLabel={highlightQuotaLabel}
+            />
+          </PanelErrorBoundary>
         ) : null}
 
         {activeMatchTab === "statistics" ? (

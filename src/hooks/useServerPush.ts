@@ -1,20 +1,10 @@
 /**
  * useServerPush — SSE subscription to /api/events.
- * Supplements the existing polling with server-push for real-time updates.
- *
- * On receiving QualificationChangedEvent or PredictionUpdatedEvent, triggers
- * a store refresh for the affected entities rather than replacing store state
- * directly (safe incremental integration — existing orchestrator continues to
- * work as fallback while the backend matures).
- *
- * Connection lifecycle:
- * - Opens EventSource on mount (or when `enabled` becomes true)
- * - Reconnects automatically (browser EventSource API handles this)
- * - Pauses when document is hidden (to avoid idle connections)
- * - Closes cleanly on unmount
+ * Closes on error (no infinite EventSource retry) and on unmount.
  */
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
+import { setSseConnectionState } from "../config/liveDataFlags";
 
 export type ServerPushEvent =
   | { type: "EntityUpdatedEvent"; payload: { entityType: string; entityId: string; changedFields: string[] } }
@@ -30,15 +20,10 @@ export type ServerPushHandler = (event: ServerPushEvent) => void;
 const SSE_URL = "/api/events";
 
 export interface UseServerPushOptions {
-  /** If false, the SSE connection will not be opened. Default: true */
   enabled?: boolean;
-  /** Comma-separated event types to subscribe to. Default: all */
   filter?: string;
-  /** Called for each push event received */
   onEvent?: ServerPushHandler;
-  /** Called when the connection is opened */
   onConnect?: () => void;
-  /** Called when the connection encounters an error */
   onError?: (err: Event) => void;
 }
 
@@ -54,31 +39,41 @@ export function useServerPush({
 } {
   const esRef = useRef<EventSource | null>(null);
   const isConnectedRef = useRef(false);
+  const enabledRef = useRef(enabled);
+  const filterRef = useRef(filter);
   const onEventRef = useRef(onEvent);
   const onConnectRef = useRef(onConnect);
   const onErrorRef = useRef(onError);
 
+  enabledRef.current = enabled;
+  filterRef.current = filter;
   onEventRef.current = onEvent;
   onConnectRef.current = onConnect;
   onErrorRef.current = onError;
 
-  const close = useCallback(() => {
+  const close = () => {
     if (esRef.current) {
       esRef.current.close();
       esRef.current = null;
-      isConnectedRef.current = false;
     }
-  }, []);
+    isConnectedRef.current = false;
+    setSseConnectionState(false);
+  };
 
-  const open = useCallback(() => {
+  const open = () => {
+    if (!enabledRef.current || document.hidden) return;
+
     close();
 
-    const url = filter ? `${SSE_URL}?filter=${encodeURIComponent(filter)}` : SSE_URL;
+    const url = filterRef.current
+      ? `${SSE_URL}?filter=${encodeURIComponent(filterRef.current)}`
+      : SSE_URL;
     const es = new EventSource(url);
     esRef.current = es;
 
     es.onopen = () => {
       isConnectedRef.current = true;
+      setSseConnectionState(true);
       onConnectRef.current?.();
     };
 
@@ -93,14 +88,12 @@ export function useServerPush({
 
     es.onerror = (e: Event) => {
       isConnectedRef.current = false;
+      setSseConnectionState(false);
       onErrorRef.current?.(e);
-      // EventSource auto-reconnects on error; no manual retry needed
+      es.close();
+      esRef.current = null;
     };
-  }, [close, filter]);
-
-  const reconnect = useCallback(() => {
-    if (enabled) open();
-  }, [enabled, open]);
+  };
 
   useEffect(() => {
     if (!enabled) {
@@ -110,7 +103,6 @@ export function useServerPush({
 
     open();
 
-    // Pause on page hide, resume on show
     function onVisibilityChange() {
       if (document.hidden) {
         close();
@@ -125,7 +117,12 @@ export function useServerPush({
       document.removeEventListener("visibilitychange", onVisibilityChange);
       close();
     };
-  }, [enabled, open, close]);
+    // Open once per mount; options read via refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]);
 
-  return { isConnected: isConnectedRef.current, reconnect };
+  return {
+    isConnected: isConnectedRef.current,
+    reconnect: open,
+  };
 }

@@ -16,6 +16,7 @@ const EMPTY: HighlightlyMatchBundle = {
   fetchedAt: 0,
 };
 
+/** Cold tier — Highlightly bundle once per match open (no interval polling). */
 export function useHighlightlyMatchData(
   match: MergedMatch | null,
   homeTeam?: Team,
@@ -30,19 +31,16 @@ export function useHighlightlyMatchData(
       return;
     }
 
-    let cancelled = false;
+    const ac = new AbortController();
     setLoading(true);
 
     void fetchHighlightlyMatchBundle({ match, homeTeam, awayTeam, detailView: true }).then((result) => {
-      if (!cancelled) {
-        setBundle(result);
-        setLoading(false);
-      }
+      if (ac.signal.aborted) return;
+      setBundle(result);
+      setLoading(false);
     });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => ac.abort();
   }, [match?.id, match?.date, match?.status, homeTeam?.id, awayTeam?.id, match?.homeScore, match?.awayScore]);
 
   return { ...bundle, loading };

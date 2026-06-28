@@ -22,6 +22,7 @@ const EMPTY: AiMatchHighlightsIntro = {
   status: "pending",
 };
 
+/** Cold tier — AI recap fetch once after final whistle. */
 export function useAiMatchHighlights(
   match: MergedMatch | null,
   homeTeam?: Team,
@@ -53,19 +54,16 @@ export function useAiMatchHighlights(
       return;
     }
 
-    let cancelled = false;
+    const ac = new AbortController();
     setLoading(true);
 
     void fetchAiMatchHighlights({ match, homeTeam, awayTeam, events }).then((result) => {
-      if (!cancelled) {
-        setIntro(result);
-        setLoading(false);
-      }
+      if (ac.signal.aborted) return;
+      setIntro(result);
+      setLoading(false);
     });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => ac.abort();
   }, [match?.id, match?.status, match?.homeScore, match?.awayScore, homeTeam?.id, awayTeam?.id, events]);
 
   return { ...intro, loading };

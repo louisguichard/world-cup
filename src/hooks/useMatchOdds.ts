@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MergedMatch, MatchStatus, OddsSnapshot } from "../types";
 import { snapshotFromProbabilities } from "../lib/oddsFormat";
 import { resolvePolymarketOdds } from "../lib/polymarketMatchOdds";
@@ -8,6 +8,9 @@ import { normalizeSLSOdds } from "../lib/normalizeSLSOdds";
 import { isApiEnabled } from "../config/apiFlags";
 import { FEATURE_FLAGS } from "../config/featureFlags";
 import { useStore } from "../store";
+import { usePollingGov } from "./usePollingGov";
+
+const WARM_POLL_MS = 30_000;
 
 function shouldFetchSportsbookOdds(status: MatchStatus | undefined): boolean {
   return status === "live" || status === "scheduled" || status === undefined;
@@ -40,63 +43,70 @@ export function useMatchOdds(
     return { ...snapshot, twoWay: lookup.twoWay };
   }, [match, teams, knockoutMarkets]);
 
-  useEffect(() => {
-    if (!match || polymarket) {
-      setSportsbook(null);
-      setLoading(false);
-      return;
-    }
-    if (!isApiEnabled("oddsIntelligence") || !shouldFetchSportsbookOdds(match.status)) {
-      setSportsbook(null);
-      setLoading(false);
-      return;
-    }
+  const fetchSportsbook = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!match || polymarket) return;
+      if (!isApiEnabled("oddsIntelligence") || !shouldFetchSportsbookOdds(match.status)) return;
 
-    const lookupKey = match.espnEventId ?? match.id;
+      const lookupKey = match.espnEventId ?? match.id;
+      setLoading(true);
 
-    let cancelled = false;
-    setLoading(true);
+      try {
+        const eventOdds = await getOdds(lookupKey, { home: homeTeamName, away: awayTeamName });
+        if (signal?.aborted) return;
 
-    void getOdds(lookupKey, { home: homeTeamName, away: awayTeamName }).then(async (eventOdds) => {
-      if (cancelled) return;
-      if (eventOdds?.bestHome && eventOdds.bestDraw && eventOdds.bestAway) {
-        setLoading(false);
-        setSportsbook({
-          matchId: match.id,
-          homeWin: eventOdds.bestHome,
-          draw: eventOdds.bestDraw,
-          awayWin: eventOdds.bestAway,
-          fetchedAt: Date.now(),
-          source: "sportsbook",
-        });
-        return;
-      }
+        if (eventOdds?.bestHome && eventOdds.bestDraw && eventOdds.bestAway) {
+          setSportsbook({
+            matchId: match.id,
+            homeWin: eventOdds.bestHome,
+            draw: eventOdds.bestDraw,
+            awayWin: eventOdds.bestAway,
+            fetchedAt: Date.now(),
+            source: "sportsbook",
+          });
+          return;
+        }
 
-      if (FEATURE_FLAGS.sls_odds_enabled && isApiEnabled("sportsLiveScores")) {
-        try {
+        if (FEATURE_FLAGS.sls_odds_enabled && isApiEnabled("sportsLiveScores")) {
           const slsId = match.sofaEventId ?? match.espnEventId ?? match.id;
           const slsRaw = await fetchSportsLiveScoresOdds(slsId);
+          if (signal?.aborted) return;
           const normalized = slsRaw ? normalizeSLSOdds(match.id, slsRaw) : null;
-          if (!cancelled) {
-            setLoading(false);
-            setSportsbook(normalized);
-          }
+          setSportsbook(normalized);
           return;
-        } catch {
-          // SLS odds unavailable — continue with null
         }
-      }
 
-      if (!cancelled) {
-        setLoading(false);
         setSportsbook(null);
+      } catch {
+        if (!signal?.aborted) setSportsbook(null);
+      } finally {
+        if (!signal?.aborted) setLoading(false);
       }
-    });
+    },
+    [match, polymarket, homeTeamName, awayTeamName]
+  );
 
-    return () => {
-      cancelled = true;
-    };
-  }, [match, polymarket, homeTeamName, awayTeamName]);
+  const warmEnabled =
+    Boolean(match) &&
+    !polymarket &&
+    isApiEnabled("oddsIntelligence") &&
+    shouldFetchSportsbookOdds(match?.status);
+
+  useEffect(() => {
+    if (!warmEnabled) {
+      setSportsbook(null);
+      setLoading(false);
+      return;
+    }
+
+    const ac = new AbortController();
+    void fetchSportsbook(ac.signal);
+    return () => ac.abort();
+  }, [warmEnabled, fetchSportsbook]);
+
+  usePollingGov(() => {
+    void fetchSportsbook();
+  }, WARM_POLL_MS, warmEnabled);
 
   return {
     odds: polymarket ?? sportsbook,

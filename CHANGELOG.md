@@ -8,6 +8,9 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 73** (2026-06-28): 30 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, src, version.json — 30 files changed, 881 insertions(+), 404 deletions(-)
+- **4.0.0 build 72** (2026-06-28): Phase 1 frontend perf + Phase 2 performance architecture doc
+- **4.0.0 build 71** (2026-06-28): Frontend perf: polling governor, SSE cleanup, panel error boundaries
 - **4.0.0 build 70** (2026-06-28): 69 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, package.json, packages — 69 files changed, 5149 insertions(+), 63 deletions(-)
 - **4.0.0 build 69** (2026-06-28): Fix Vercel deploy: @vercel/node, nodejs runtime, BC2 bridge types
 - **4.0.0 build 68** (2026-06-28): 75 file(s) in .env.example, .gitignore, .npmrc, CHANGELOG.md, VERSION_LOG.md, api — 75 files changed, 8189 insertions(+), 7827 deletions(-)

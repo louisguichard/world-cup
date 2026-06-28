@@ -7,9 +7,25 @@ import { syncWcLiveDrawIfNeeded } from "../services/WorldCup2026LiveClient";
 import { startHighlightlyPostMatchSync } from "../services/highlights/HighlightlyPostMatchSync";
 
 let stopHighlightlySync: (() => void) | null = null;
+let visibilityBound = false;
+
+function bindPollingVisibility(): void {
+  if (visibilityBound || typeof document === "undefined") return;
+  visibilityBound = true;
+
+  document.addEventListener("visibilitychange", () => {
+    const engine = PollingEngine.getInstance();
+    if (document.hidden) {
+      engine.pauseForHiddenTab();
+    } else {
+      engine.resumeFromHiddenTab();
+    }
+  });
+}
 
 /** Start background services after a successful bootstrap (idempotent). */
 export function startAppServices(): void {
+  bindPollingVisibility();
   PollingEngine.getInstance().start();
 
   const store = useStore.getState();

@@ -17,6 +17,7 @@ export async function syncPostMatchHighlightIntros(
 ): Promise<number> {
   if (isSportHighlightsDisabled()) return 0;
   if (!canSpendHighlightlyRequests(2)) return 0;
+  if (typeof document !== "undefined" && document.hidden) return 0;
 
   const now = Date.now();
   if (now - lastSyncAt < SYNC_COOLDOWN_MS) return 0;
@@ -46,15 +47,47 @@ export function startHighlightlyPostMatchSync(getState: () => {
   liveMatches: Record<string, MergedMatch>;
   teams: Record<string, Team>;
 }): () => void {
+  let intervalId: ReturnType<typeof setInterval> | null = null;
+
   const tick = () => {
+    if (typeof document !== "undefined" && document.hidden) return;
     const { liveMatches, teams } = getState();
     const schedule = materializeFullSchedule(teams, liveMatches);
     void syncPostMatchHighlightIntros(schedule, teams);
   };
 
-  tick();
-  const id = window.setInterval(tick, SYNC_COOLDOWN_MS);
-  return () => window.clearInterval(id);
+  const startInterval = () => {
+    if (intervalId) clearInterval(intervalId);
+    intervalId = setInterval(tick, SYNC_COOLDOWN_MS);
+  };
+
+  const stopInterval = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
+
+  const onVisibility = () => {
+    if (document.hidden) {
+      stopInterval();
+    } else {
+      tick();
+      startInterval();
+    }
+  };
+
+  if (!document.hidden) {
+    tick();
+    startInterval();
+  }
+
+  document.addEventListener("visibilitychange", onVisibility);
+
+  return () => {
+    document.removeEventListener("visibilitychange", onVisibility);
+    stopInterval();
+  };
 }
 
 /** Test-only reset */

@@ -1,6 +1,30 @@
 {
-  "updatedAt": "2026-06-28T06:39:53.538Z",
+  "updatedAt": "2026-06-28T20:11:25.728Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 73,
+      "kind": "build",
+      "message": "30 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, src, version.json — 30 files changed, 881 insertions(+), 404 deletions(-)",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T20:11:25.728Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 72,
+      "kind": "build",
+      "message": "Phase 1 frontend perf + Phase 2 performance architecture doc",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T20:11:19.274Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 71,
+      "kind": "build",
+      "message": "Frontend perf: polling governor, SSE cleanup, panel error boundaries",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T06:51:59.304Z"
+    },
     {
       "version": "4.0.0",
       "build": 70,
@@ -296,33 +320,17 @@
       "message": "7 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, vercel.json, version.json — 7 files changed, 76 insertions(+), 46 deletions(-)",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T19:25:59.221Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 33,
-      "kind": "build",
-      "message": "Route RapidAPI rewrites through query params on api/rapid",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T19:25:59.167Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 32,
-      "kind": "build",
-      "message": "6 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, version.json — 6 files changed, 60 insertions(+), 40 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T19:23:13.112Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 31,
-      "kind": "build",
-      "message": "Flatten rapid and proxy to top-level Vercel API files",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T19:23:04.187Z"
     }
   ],
   "commits": [
+    {
+      "hash": "5693a6f1ab245395d34e47eed8afac85c811b8ed",
+      "shortHash": "5693a6f",
+      "message": "Record v4.0.0 build 70 production deploy on Vercel.",
+      "version": "4.0.0",
+      "build": 70,
+      "timestamp": "2026-06-28T06:40:00.733Z"
+    },
     {
       "hash": "90962db099843a488de43fe89e7cdcc17a03285f",
       "shortHash": "90962db",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 1,
       "timestamp": "2026-06-27T07:22:31.650Z"
-    },
-    {
-      "hash": "f89a221c711d20b7180a67030b78ce8ffeb0ae98",
-      "shortHash": "f89a221",
-      "message": "Release v4.0.0: major version bump for team identity and live qualification.",
-      "version": "4.0.0",
-      "build": 1,
-      "timestamp": "2026-06-27T07:22:22.026Z"
     }
   ],
   "deploys": [

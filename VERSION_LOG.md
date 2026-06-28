@@ -96,6 +96,18 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+
+## [4.0.0] build 73 — 2026-06-28 (build)
+- 30 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, src, version.json — 30 files changed, 881 insertions(+), 404 deletions(-)
+
+## [4.0.0] build 72 — 2026-06-28 (build)
+- Phase 1 frontend perf + Phase 2 performance architecture doc
+
+## [4.0.0] build 71 — 2026-06-28 (build)
+- Frontend perf: polling governor, SSE cleanup, panel error boundaries
+
 ## [4.0.0] build 70 — 2026-06-28 (build)
 - 69 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, package.json, packages — 69 files changed, 5149 insertions(+), 63 deletions(-)
 

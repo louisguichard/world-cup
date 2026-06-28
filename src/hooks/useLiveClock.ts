@@ -64,8 +64,10 @@ export function useLiveClock(
   // more than once per minute even under perfect conditions).
   useEffect(() => {
     if (!running) return;
+    if (typeof document !== "undefined" && document.hidden) return;
 
     const id = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
       localMinRef.current += 1;
       setDisplay(computeDisplay(period, localMinRef.current, extra));
     }, 60_000);
