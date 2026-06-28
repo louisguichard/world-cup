@@ -15,6 +15,7 @@ import {
   type IdentityRepository,
 } from "@wc2026/identity";
 import { prisma } from "../infra/prisma.js";
+import type { Prisma } from "../../../generated/prisma/client.js";
 
 function toAlias(row: {
   id: string;
@@ -150,7 +151,7 @@ export class PrismaIdentityRepository implements IdentityRepository {
         action: entry.action,
         providerId: entry.providerId,
         externalId: entry.externalId,
-        metadata: entry.metadata ?? {},
+        metadata: (entry.metadata ?? {}) as Prisma.InputJsonValue,
       },
     });
   }

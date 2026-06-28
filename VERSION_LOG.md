@@ -94,6 +94,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 70 — 2026-06-28 (build)
+- 69 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, package.json, packages — 69 files changed, 5149 insertions(+), 63 deletions(-)
+
+## [4.0.0] build 69 — 2026-06-28 (build)
+- Fix Vercel deploy: @vercel/node, nodejs runtime, BC2 bridge types
+
 ## [4.0.0] build 68 — 2026-06-28 (build)
 - 75 file(s) in .env.example, .gitignore, .npmrc, CHANGELOG.md, VERSION_LOG.md, api — 75 files changed, 8189 insertions(+), 7827 deletions(-)
 

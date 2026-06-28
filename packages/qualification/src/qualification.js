@@ -1,0 +1,355 @@
+import { resolveCanonicalTeamId } from "./teamId.js";
+import { isKnockoutEliminated, rankAliveBestThirds, thirdPlaceRankAmongAlive } from "./thirdPlaceQualification.js";
+import { computeStandings } from "./standings.js";
+const GROUP_MATCHES_PER_TEAM = 3;
+const DEFAULT_GROUP_SIZE = 4;
+export function expectedMatchesPerTeam(groupSize) {
+    return Math.max(1, groupSize - 1);
+}
+export function matchesInGroup(groupSize) {
+    return (groupSize * (groupSize - 1)) / 2;
+}
+export function buildQualificationContext(matches, teams = []) {
+    const lockedGroupMatchCount = {};
+    for (const match of matches) {
+        if (match.group && match.locked) {
+            lockedGroupMatchCount[match.group] = (lockedGroupMatchCount[match.group] ?? 0) + 1;
+        }
+    }
+    const lockedStandingsByGroup = {};
+    if (teams.length > 0) {
+        const lockedScored = matches.filter((m) => Boolean(m.group) &&
+            m.locked &&
+            m.homeScore !== undefined &&
+            m.awayScore !== undefined);
+        const lockedStandings = computeStandings(lockedScored, teams);
+        for (const standing of lockedStandings) {
+            if (standing.rows.length > 0) {
+                lockedStandingsByGroup[standing.group] = standing.rows;
+            }
+        }
+    }
+    return { lockedGroupMatchCount, lockedStandingsByGroup };
+}
+export function deriveStandings(matches, teams, _overrides = {}) {
+    return computeStandings(matches, teams);
+}
+/** Whether a match should affect group standings (store + replay). */
+export function matchCountsForStandings(match, opts = {}) {
+    if (!match.group)
+        return false;
+    if (match.homeScore === undefined || match.awayScore === undefined)
+        return false;
+    if (opts.lockedOnly && !match.locked)
+        return false;
+    const isCompleted = Boolean(match.locked || match.status === "completed");
+    const isLive = match.status === "live";
+    if (!isCompleted && !isLive)
+        return false;
+    if (isLive && !isCompleted && match.homeScore === 0 && match.awayScore === 0) {
+        return false;
+    }
+    return true;
+}
+export function deriveStandingsIfScored(matches, teams, opts = {}) {
+    const scored = matches.filter((m) => matchCountsForStandings(m, opts));
+    if (scored.length === 0)
+        return null;
+    return deriveStandings(scored, teams);
+}
+export function maxPoints(record, expectedPlayed = GROUP_MATCHES_PER_TEAM) {
+    const remaining = Math.max(0, expectedPlayed - record.played);
+    return record.points + remaining * 3;
+}
+/**
+ * A team is CONFIRMED top-two only when:
+ * 1. They have played all group stage matches
+ * 2. Every other team in their group has also played all matches
+ *    (group stage fully complete — no results can change the table)
+ * 3. Their final rank in the sorted standings is 1st or 2nd
+ *
+ * If any team in the group has remaining matches, no team
+ * in that group can be confirmed — only projected.
+ */
+export function isConfirmedTopTwo(row, rows, opts = {}) {
+    const groupSize = opts.groupSize ?? (rows.length || DEFAULT_GROUP_SIZE);
+    const expectedPlayed = expectedMatchesPerTeam(groupSize);
+    const requiredLockedMatches = matchesInGroup(groupSize);
+    const confirmRows = opts.lockedRows !== undefined ? opts.lockedRows : rows;
+    if (confirmRows.length === 0)
+        return false;
+    const confirmRow = confirmRows.find((r) => r.teamId === row.teamId);
+    if (!confirmRow || confirmRow.played < expectedPlayed)
+        return false;
+    const groupComplete = confirmRows.length > 0 && confirmRows.every((r) => r.played >= expectedPlayed);
+    if (!groupComplete)
+        return false;
+    if (opts.lockedRows !== undefined
+        ? (opts.lockedGroupMatchCount ?? 0) < requiredLockedMatches
+        : opts.lockedGroupMatchCount !== undefined &&
+            opts.lockedGroupMatchCount < requiredLockedMatches) {
+        return false;
+    }
+    const finalRank = confirmRows.findIndex((r) => r.teamId === row.teamId);
+    return finalRank >= 0 && finalRank < 2;
+}
+function projectedCertaintyTier(row, rows, expectedPlayed) {
+    const remaining = Math.max(0, expectedPlayed - row.played);
+    const third = rows[2];
+    const gapToThird = row.points - (third?.points ?? 0);
+    if (remaining <= 1 && gapToThird > 4)
+        return "projected_strong";
+    return "projected_weak";
+}
+function projectionScoreForTopTwo(row, rows, expectedPlayed, confirmed) {
+    if (confirmed)
+        return 100;
+    const remaining = Math.max(0, expectedPlayed - row.played);
+    const third = rows[2];
+    const gapToThird = row.points - (third?.points ?? 0);
+    if (gapToThird > remaining * 3)
+        return 92;
+    if (remaining <= 1 && gapToThird > 3)
+        return 82;
+    if (remaining <= 1 && gapToThird > 1)
+        return 68;
+    return 55;
+}
+function projectionScoreForThird(aliveRank, inTopEight, groupComplete, eliminated) {
+    if (eliminated || aliveRank < 0)
+        return 0;
+    if (groupComplete && inTopEight)
+        return 88;
+    if (inTopEight)
+        return Math.max(45, 90 - aliveRank * 5);
+    return Math.max(8, 28 - Math.max(0, aliveRank - 7) * 4);
+}
+function finalizeStatus(status, certainty, projectionScore, reason, opts = {}) {
+    const canQualify = opts.canQualify ?? projectionScore > 0;
+    const lifeState = opts.lifeState ?? (canQualify ? (status === "qualified" ? "projected" : "alive") : "eliminated");
+    return {
+        status,
+        certainty,
+        lifeState,
+        canQualify,
+        projectionScore: canQualify ? projectionScore : 0,
+        reason,
+        eliminationReason: opts.eliminationReason,
+        pointsNeeded: opts.pointsNeeded
+    };
+}
+/** @deprecated Rule-based confidence replaced sigmoid; returns 0–1 for legacy callers only. */
+export function computeEliminationProbability(pointsGap, matchesRemaining) {
+    const x = -0.35 * pointsGap - 0.15 * matchesRemaining;
+    return 1 / (1 + Math.exp(-x));
+}
+export function computeQualificationStatus(teamId, standings, context = { lockedGroupMatchCount: {}, lockedStandingsByGroup: {} }) {
+    const canonicalId = resolveCanonicalTeamId(teamId);
+    for (const group of standings) {
+        const idx = group.rows.findIndex((r) => r.teamId === teamId || r.teamId === canonicalId);
+        if (idx < 0)
+            continue;
+        const effectiveTeamId = group.rows[idx].teamId;
+        const rank = idx + 1;
+        const row = group.rows[idx];
+        const rows = group.rows;
+        const lockedRows = context.lockedStandingsByGroup[group.group];
+        const progressRows = lockedRows !== undefined ? lockedRows : rows;
+        const progressRow = progressRows.find((r) => r.teamId === teamId) ?? row;
+        const groupSize = rows.length || DEFAULT_GROUP_SIZE;
+        const expectedPlayed = expectedMatchesPerTeam(groupSize);
+        const groupComplete = progressRows.length > 0 && progressRows.every((r) => r.played >= expectedPlayed);
+        const second = group.rows[1];
+        const third = group.rows[2];
+        const remaining = Math.max(0, expectedPlayed - progressRow.played);
+        const teamMax = maxPoints(progressRow, expectedPlayed);
+        const confirmOpts = {
+            groupSize,
+            lockedGroupMatchCount: context.lockedGroupMatchCount[group.group],
+            lockedRows
+        };
+        const eliminated = isKnockoutEliminated(effectiveTeamId, standings, context);
+        if (rank <= 2) {
+            const confirmed = isConfirmedTopTwo(row, rows, confirmOpts);
+            const score = projectionScoreForTopTwo(row, rows, expectedPlayed, confirmed);
+            return finalizeStatus("qualified", confirmed ? "confirmed" : projectedCertaintyTier(row, rows, expectedPlayed), score, confirmed
+                ? "Mathematically locked into the top two — will advance regardless of remaining results."
+                : "Currently in the top two, but other teams can still overtake them.", { canQualify: true, lifeState: confirmed ? "projected" : "alive" });
+        }
+        if (eliminated) {
+            const eliminationReason = rank === 4 && groupComplete
+                ? "Finished fourth in the group — eliminated."
+                : rank === 3 && groupComplete
+                    ? "Finished third — did not rank among the best eight third-placed teams."
+                    : rank === 4 && third && teamMax < third.points
+                        ? "Cannot reach third place even with maximum points — no knockout path remains."
+                        : rank === 4 && second && teamMax < second.points
+                            ? "Cannot reach the top two even with maximum points."
+                            : "No remaining path to the knockout round.";
+            return finalizeStatus("eliminated", "confirmed", 0, eliminationReason, {
+                canQualify: false,
+                lifeState: "eliminated",
+                eliminationReason
+            });
+        }
+        if (rank === 3) {
+            const aliveRank = thirdPlaceRankAmongAlive(teamId, standings, context);
+            const inTopEight = aliveRank >= 0 && aliveRank < 8;
+            const score = projectionScoreForThird(aliveRank, inTopEight, groupComplete, false);
+            const gapToSecond = (second?.points ?? 0) - row.points;
+            if (groupComplete) {
+                return finalizeStatus("at_risk", "confirmed", score, "Confirmed third — awaiting best-third cut after all groups finish.", {
+                    canQualify: true,
+                    lifeState: "projected",
+                    pointsNeeded: gapToSecond > 0 ? gapToSecond : undefined
+                });
+            }
+            if (inTopEight) {
+                return finalizeStatus("at_risk", "projected_weak", score, "Third place — currently in the best-eight third-placed projection, but not guaranteed until all groups finish.", { canQualify: true, lifeState: "alive", pointsNeeded: gapToSecond > 0 ? gapToSecond : undefined });
+            }
+            return finalizeStatus("at_risk", "projected_weak", score, "Third place — must improve points or goal difference to reach the best-eight third-placed cut.", { canQualify: true, lifeState: "alive", pointsNeeded: gapToSecond > 0 ? gapToSecond : undefined });
+        }
+        if (rank === 4) {
+            return finalizeStatus("projected_out", "projected_weak", 22, "Fourth place — must win out and need other results; projected to be eliminated unless the table shifts.", { canQualify: true, lifeState: "alive" });
+        }
+        return finalizeStatus("pending", "projected_weak", 30, "Still fighting for position — outcome depends on remaining matches.", { canQualify: true, lifeState: "alive" });
+    }
+    return finalizeStatus("pending", "projected_weak", 0, "Group standings not available yet.", {
+        canQualify: false,
+        lifeState: "eliminated"
+    });
+}
+export { rankAliveBestThirds } from "./thirdPlaceQualification";
+/** Audit helper: eliminated teams must never show as projected-through. */
+export function auditProjectionViolations(teamIds, standings, context = { lockedGroupMatchCount: {}, lockedStandingsByGroup: {} }) {
+    const violations = [];
+    const aliveBest = rankAliveBestThirds(standings, context);
+    const topEightIds = new Set(aliveBest.slice(0, 8).map((r) => r.teamId));
+    for (const teamId of teamIds) {
+        const q = computeQualificationStatus(teamId, standings, context);
+        if (!q.canQualify && (q.lifeState === "projected" || q.status === "qualified")) {
+            violations.push({ teamId, issue: "eliminated_shown_as_projected", status: q });
+        }
+        if (!q.canQualify && q.projectionScore > 0) {
+            violations.push({ teamId, issue: "positive_score_when_eliminated", status: q });
+        }
+        if (topEightIds.has(teamId) && q.status === "projected_out") {
+            violations.push({ teamId, issue: "top_eight_shown_projected_out", status: q });
+        }
+        if (q.canQualify && q.status === "eliminated") {
+            violations.push({ teamId, issue: "alive_shown_eliminated", status: q });
+        }
+    }
+    return violations;
+}
+function isProjectedThroughCertainty(certainty) {
+    return certainty === "projected" || certainty === "projected_strong" || certainty === "projected_weak";
+}
+export function bucketQualificationTeams(teamIds, standings, context = { lockedGroupMatchCount: {}, lockedStandingsByGroup: {} }) {
+    const buckets = {
+        confirmedThrough: [],
+        projectedStrongThrough: [],
+        projectedWeakThrough: [],
+        projectedThrough: [],
+        confirmedOut: [],
+        projectedOut: [],
+        inContention: []
+    };
+    for (const teamId of teamIds) {
+        const q = computeQualificationStatus(teamId, standings, context);
+        switch (q.status) {
+            case "qualified":
+                if (q.certainty === "confirmed")
+                    buckets.confirmedThrough.push(teamId);
+                else if (q.certainty === "projected_strong") {
+                    buckets.projectedStrongThrough.push(teamId);
+                    buckets.projectedThrough.push(teamId);
+                }
+                else if (isProjectedThroughCertainty(q.certainty)) {
+                    buckets.projectedWeakThrough.push(teamId);
+                    buckets.projectedThrough.push(teamId);
+                }
+                break;
+            case "eliminated":
+                buckets.confirmedOut.push(teamId);
+                break;
+            case "at_risk":
+            case "pending":
+                buckets.inContention.push(teamId);
+                break;
+            case "projected_out":
+                if (q.canQualify)
+                    buckets.inContention.push(teamId);
+                else
+                    buckets.confirmedOut.push(teamId);
+                break;
+            default: {
+                const _exhaustive = q.status;
+                return _exhaustive;
+            }
+        }
+    }
+    return buckets;
+}
+export function assertBucketMutualExclusion(buckets) {
+    const through = new Set([...buckets.confirmedThrough, ...buckets.projectedThrough]);
+    const out = new Set([...buckets.confirmedOut, ...buckets.projectedOut]);
+    for (const teamId of buckets.inContention) {
+        if (through.has(teamId)) {
+            throw new Error(`Bucket mutual-exclusion violated: ${teamId} is both through and in contention`);
+        }
+        if (out.has(teamId)) {
+            throw new Error(`Bucket mutual-exclusion violated: ${teamId} is both out and in contention`);
+        }
+    }
+    for (const teamId of through) {
+        if (out.has(teamId)) {
+            throw new Error(`Bucket mutual-exclusion violated: ${teamId} is both through and out`);
+        }
+    }
+}
+export function useQualificationTierFromStatus(status) {
+    return status.status;
+}
+export function auditFalseConfirmations(standings, context) {
+    const falsePositives = [];
+    for (const group of standings) {
+        for (let i = 0; i < Math.min(2, group.rows.length); i++) {
+            const row = group.rows[i];
+            const qual = computeQualificationStatus(row.teamId, standings, context);
+            if (qual.certainty !== "confirmed")
+                continue;
+            const lockedRows = context.lockedStandingsByGroup[group.group];
+            const lockedRow = lockedRows?.find((r) => r.teamId === row.teamId);
+            const expectedPlayed = expectedMatchesPerTeam(group.rows.length || DEFAULT_GROUP_SIZE);
+            const groupComplete = lockedRows !== undefined &&
+                lockedRows.length > 0 &&
+                lockedRows.every((r) => r.played >= expectedPlayed);
+            const lockedCount = context.lockedGroupMatchCount[group.group];
+            const required = matchesInGroup(group.rows.length || DEFAULT_GROUP_SIZE);
+            if (!groupComplete ||
+                (lockedRow?.played ?? 0) < expectedPlayed ||
+                (lockedCount ?? 0) < required) {
+                falsePositives.push({
+                    teamId: row.teamId,
+                    group: group.group,
+                    displayPlayed: row.played,
+                    lockedPlayed: lockedRow?.played ?? 0,
+                    lockedMatchCount: lockedCount
+                });
+            }
+        }
+    }
+    return falsePositives;
+}
+export function groupStageComplete(matches) {
+    const groupMatches = matches.filter((m) => m.group);
+    const completed = groupMatches.filter((m) => m.status === "completed");
+    return completed.length >= 72;
+}
+export function standingsEqual(a, b) {
+    if (a.length !== b.length)
+        return false;
+    return JSON.stringify(a) === JSON.stringify(b);
+}
+//# sourceMappingURL=qualification.js.map

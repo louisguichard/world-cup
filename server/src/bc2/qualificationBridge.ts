@@ -57,23 +57,27 @@ function toClientMatch(m: WorkerMatch) {
 }
 
 function standingsToGroupStanding(groupId: string, standings: WorkerStanding[]) {
+  const group = groupId as GroupLetter;
   const sorted = [...standings].sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
     if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
     return b.goalsFor - a.goalsFor;
   });
   return {
-    group: groupId as GroupLetter,
+    group,
     rows: sorted.map((s) => ({
       teamId: s.teamId,
+      group,
       played: s.played,
-      won: s.won,
-      drawn: s.drawn,
-      lost: s.lost,
+      wins: s.won,
+      draws: s.drawn,
+      losses: s.lost,
       goalsFor: s.goalsFor,
       goalsAgainst: s.goalsAgainst,
       goalDifference: s.goalDifference,
       points: s.points,
+      conduct: 0,
+      rating: 0,
     })),
   };
 }

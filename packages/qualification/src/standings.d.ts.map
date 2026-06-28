@@ -1,0 +1,1 @@
+{"version":3,"file":"standings.d.ts","sourceRoot":"","sources":["standings.ts"],"names":[],"mappings":"AACA,OAAO,EAGL,KAAK,aAAa,EAClB,KAAK,cAAc,EACnB,KAAK,IAAI,EACT,KAAK,UAAU,EAChB,MAAM,kBAAkB,CAAC;AAgJ1B,wBAAgB,gBAAgB,CAAC,aAAa,EAAE,cAAc,EAAE,EAAE,KAAK,EAAE,IAAI,EAAE,GAAG,aAAa,EAAE,CAiEhG;AAED,wBAAgB,cAAc,CAAC,SAAS,EAAE,aAAa,EAAE,GAAG,UAAU,EAAE,CAKvE"}

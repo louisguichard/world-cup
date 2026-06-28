@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-28T06:34:13.661Z",
+  "updatedAt": "2026-06-28T06:37:24.283Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 70,
+      "kind": "build",
+      "message": "69 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, package.json, packages — 69 files changed, 5149 insertions(+), 63 deletions(-)",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T06:37:24.283Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 69,
+      "kind": "build",
+      "message": "Fix Vercel deploy: @vercel/node, nodejs runtime, BC2 bridge types",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T06:37:20.984Z"
+    },
     {
       "version": "4.0.0",
       "build": 68,
@@ -304,25 +320,17 @@
       "message": "Flatten rapid and proxy to top-level Vercel API files",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T19:23:04.187Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 30,
-      "kind": "build",
-      "message": "6 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, version.json — 6 files changed, 15 insertions(+), 2 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T19:17:00.974Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 29,
-      "kind": "build",
-      "message": "Fix Vercel rapid proxy catch-all route naming",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T19:15:28.924Z"
     }
   ],
   "commits": [
+    {
+      "hash": "ee62ba5603d11b37fbfd8d64d6a2545279c433e1",
+      "shortHash": "ee62ba5",
+      "message": "Fix knockout schedule placeholders and complete pnpm monorepo stack.",
+      "version": "4.0.0",
+      "build": 68,
+      "timestamp": "2026-06-28T06:34:15.601Z"
+    },
     {
       "hash": "9fc09095a5b0003835e10738c9f401bee1b97990",
       "shortHash": "9fc0909",
@@ -554,14 +562,6 @@
       "version": "3.0.0",
       "build": 22,
       "timestamp": "2026-06-27T07:20:55.142Z"
-    },
-    {
-      "hash": "2f674bdb93b6ba7a8959522f87760af8ce014c14",
-      "shortHash": "2f674bd",
-      "message": "Sync build-manifest commit record for 3b40c10.",
-      "version": "3.0.0",
-      "build": 22,
-      "timestamp": "2026-06-27T07:20:43.593Z"
     }
   ],
   "deploys": [
