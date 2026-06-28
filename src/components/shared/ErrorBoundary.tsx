@@ -1,6 +1,9 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { APP_COPY } from "../../lib/appCopy";
 import { logger } from "../../services/Logger";
 import { BentoErrorCard } from "./BentoErrorCard";
+
+const errors = APP_COPY.errors;
 
 type Props = {
   children: ReactNode;
@@ -45,7 +48,7 @@ export class BentoErrorBoundary extends Component<Props, State> {
     if (this.state.error) {
       return (
         <BentoErrorCard
-          title="Section unavailable"
+          title={errors.sectionUnavailable}
           message={this.state.error.message}
           onRetry={this.handleRetry}
         />

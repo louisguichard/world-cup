@@ -87,6 +87,7 @@ const rapidApiProxies = {
   "/api/footballdata": rapidApiProxy("https://free-api-live-football-data.p.rapidapi.com", "/api/footballdata"),
   "/api/sportapi": rapidApiProxy("https://sportapi7.p.rapidapi.com", "/api/sportapi"),
   "/api/sofascore6": rapidApiProxy("https://sofascore6.p.rapidapi.com", "/api/sofascore6"),
+  "/api/footapi7": rapidApiProxy("https://footapi7.p.rapidapi.com", "/api/footapi7"),
   "/api/sofascore-rapid": rapidApiProxy("https://sofascore.p.rapidapi.com", "/api/sofascore-rapid"),
   "/api/wc2026": rapidApiProxy("https://world-cup-2026.p.rapidapi.com", "/api/wc2026"),
   "/api/wc-live": rapidApiProxy("https://world-cup-2026-live-api.p.rapidapi.com", "/api/wc-live"),
@@ -94,15 +95,19 @@ const rapidApiProxies = {
   "/api/weather": rapidApiProxy("https://open-weather13.p.rapidapi.com", "/api/weather"),
   "/api/odds": rapidApiProxy("https://sports-odds-intelligence-api.p.rapidapi.com", "/api/odds"),
   "/api/football-prediction": rapidApiProxy(
-    "https://today-football-prediction.p.rapidapi.com",
+    "https://football-prediction-api.p.rapidapi.com",
     "/api/football-prediction"
+  ),
+  "/api/today-football-prediction": rapidApiProxy(
+    "https://today-football-prediction.p.rapidapi.com",
+    "/api/today-football-prediction"
   ),
   "/api/world-cup-history": rapidApiProxy(
     "https://world-cup1.p.rapidapi.com",
     "/api/world-cup-history"
   ),
   "/api/sport-highlights": rapidApiProxy(
-    "https://sport-highlights-api.p.rapidapi.com",
+    "https://football-highlights-api.p.rapidapi.com",
     "/api/sport-highlights"
   ),
   "/api/all-sport-live-stream": rapidApiProxy(
@@ -112,6 +117,36 @@ const rapidApiProxies = {
   "/api/sports-live-scores": rapidApiProxy(
     "https://sports-live-scores.p.rapidapi.com",
     "/api/sports-live-scores"
+  ),
+  "/api/free-daily-xtream-iptv": rapidApiProxy(
+    "https://free-daily-xtream-iptv-servers.p.rapidapi.com",
+    "/api/free-daily-xtream-iptv"
+  ),
+  "/api/cloud-api-hub-iptv": rapidApiProxy(
+    "https://cloud-api-hub-iptv-auto-subscriber.p.rapidapi.com",
+    "/api/cloud-api-hub-iptv"
+  ),
+  "/api/tvview": rapidApiProxy("https://tvview.p.rapidapi.com", "/api/tvview"),
+  "/api/flashlive": rapidApiProxy("https://flashlive-sports.p.rapidapi.com", "/api/flashlive"),
+  "/api/pldata": rapidApiProxy("https://pldata.p.rapidapi.com", "/api/pldata"),
+  "/api/getty-images": rapidApiProxy(
+    "https://gettyimagesraygorodskijv1.p.rapidapi.com",
+    "/api/getty-images"
+  ),
+  "/api/fifa-football-data": rapidApiProxy(
+    "https://fifa-football-player-team-stats-records-matches-api-data.p.rapidapi.com",
+    "/api/fifa-football-data"
+  ),
+  "/api/ai-sports-highlights": rapidApiProxy(
+    "https://ai-sports-highlights-api-football-basketball-tennis.p.rapidapi.com",
+    "/api/ai-sports-highlights"
+  ),
+  "/api/allsportsapi2": rapidApiProxy("https://allsportsapi2.p.rapidapi.com", "/api/allsportsapi2"),
+  "/api/tvpro-api": rapidApiProxy("https://tvpro-api.p.rapidapi.com", "/api/tvpro-api"),
+  "/api/google-api31": rapidApiProxy("https://google-api31.p.rapidapi.com", "/api/google-api31"),
+  "/api/social-scraper": rapidApiProxy(
+    "https://website-social-scraper-api.p.rapidapi.com",
+    "/api/social-scraper"
   ),
   "/api/espn-web": {
     target: "https://site.web.api.espn.com",

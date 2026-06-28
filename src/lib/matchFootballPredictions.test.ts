@@ -4,6 +4,7 @@ import {
   linkPredictionToMatch,
   predictionTeamMatchesTeam,
   resolvePredictionPick,
+  buildPredictionIndex,
 } from "./matchFootballPredictions";
 import type { MergedMatch, Team } from "../types";
 
@@ -72,5 +73,34 @@ describe("matchFootballPredictions", () => {
     });
     expect(resolvePredictionPick("2", "Brazil", "France").shortLabel).toBe("France to win");
     expect(resolvePredictionPick("X", "Brazil", "France").side).toBe("draw");
+  });
+
+  it("indexes predictions by matchId and espn id", () => {
+    const match: MergedMatch = {
+      id: "760001",
+      matchId: "M12",
+      espnEventId: "760001",
+      date: "2026-06-27T18:00:00.000Z",
+      homeTeamId: "bra",
+      awayTeamId: "fra",
+      status: "scheduled",
+      homeConduct: 0,
+      awayConduct: 0,
+      locked: false,
+      source: "espn",
+    };
+    const prediction = {
+      id: "p1",
+      homeTeam: "Brazil",
+      awayTeam: "France",
+      date: "2026-06-27",
+      leagueId: "World Cup",
+      prediction: "1",
+      isFinished: false,
+      competitionName: "World Cup",
+    };
+    const index = buildPredictionIndex([prediction], [match], { bra: brazil, fra: france });
+    expect(index.M12?.prediction).toBe("1");
+    expect(index["760001"]?.prediction).toBe("1");
   });
 });

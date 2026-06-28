@@ -100,12 +100,22 @@ async function fetchJson(url, apiKey, host, timeoutMs) {
 }
 
 /** Build resolver context (dynamic ids from prior API responses). */
-export async function buildResolverContext(apiKey, catalog, timeoutMs = DEFAULT_TIMEOUT_MS) {
+export async function buildResolverContext(
+  apiKey,
+  catalog,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  options = {}
+) {
+  const { conservative = false } = options;
   const ctx = {
     todayYyyymmdd: todayYyyymmdd(),
     todayIso: todayIso(),
     sampleMatchId: "M65",
   };
+
+  if (conservative) {
+    return ctx;
+  }
 
   const football = catalog.find((p) => p.id === "footballData");
   if (football) {
@@ -288,8 +298,14 @@ export async function probeEndpoint({
 }
 
 export async function runSmokeProbes(apiKey, catalog, options = {}) {
-  const { mode = "direct", proxyBase = DEFAULT_PROXY_BASE, timeoutMs = DEFAULT_TIMEOUT_MS, zafronixKey = "" } = options;
-  const ctx = await buildResolverContext(apiKey, catalog, timeoutMs);
+  const {
+    mode = "direct",
+    proxyBase = DEFAULT_PROXY_BASE,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    zafronixKey = "",
+    conservativeResolver = true,
+  } = options;
+  const ctx = await buildResolverContext(apiKey, catalog, timeoutMs, { conservative: conservativeResolver });
   const results = [];
 
   for (const provider of catalog) {
@@ -307,18 +323,30 @@ export async function runSmokeProbes(apiKey, catalog, options = {}) {
 }
 
 export async function runFullProbes(apiKey, catalog, options = {}) {
-  const { mode = "direct", proxyBase = DEFAULT_PROXY_BASE, timeoutMs = DEFAULT_TIMEOUT_MS, zafronixKey = "" } = options;
-  const ctx = await buildResolverContext(apiKey, catalog, timeoutMs);
+  const {
+    mode = "direct",
+    proxyBase = DEFAULT_PROXY_BASE,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    zafronixKey = "",
+    maxCalls = Number.POSITIVE_INFINITY,
+    conservativeResolver = true,
+  } = options;
+  const ctx = await buildResolverContext(apiKey, catalog, timeoutMs, { conservative: conservativeResolver });
   const results = [];
+  let calls = 0;
 
   for (const provider of catalog) {
     for (const endpoint of provider.endpoints ?? []) {
+      if (calls >= maxCalls) {
+        return { results, ctx, truncated: true };
+      }
       const r = await probeEndpoint({ provider, endpoint, apiKey, zafronixKey, ctx, mode, proxyBase, timeoutMs });
       results.push(r);
+      calls += 1;
       await new Promise((resolve) => setTimeout(resolve, 300));
     }
   }
-  return { results, ctx };
+  return { results, ctx, truncated: false };
 }
 
 export function printSummary(results, title) {

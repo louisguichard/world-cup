@@ -200,6 +200,7 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
       isVisible(parent) &&
       !isScrollContainer(parent) &&
       !isIntentionalGlowBleed(parent) &&
+      !el.closest("svg") &&
       style.position !== "absolute" &&
       style.position !== "fixed" &&
       childrenOverflowParent(parent, el)

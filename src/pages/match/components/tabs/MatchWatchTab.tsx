@@ -18,7 +18,7 @@ export function MatchWatchTab({
   awayTeamName,
   onOpenStream,
 }: Props) {
-  const { loading, scheduleMatch, play, scheduleError, streamMatchId } = bundle;
+  const { loading, scheduleMatch, play, scheduleError, streamMatchId, iptv } = bundle;
 
   if (loading && !play && !scheduleMatch) {
     return (
@@ -48,6 +48,11 @@ export function MatchWatchTab({
           {homeTeamName} vs {awayTeamName} is not in today&apos;s football stream schedule, or the
           match has not started yet. Streams usually appear closer to kickoff.
         </p>
+        {iptv?.available ? (
+          <IptvFallbackSection iptv={iptv} onOpenStream={onOpenStream} />
+        ) : iptv?.error ? (
+          <p className={styles.muted}>IPTV fallback: {iptv.error}</p>
+        ) : null}
       </div>
     );
   }
@@ -127,8 +132,50 @@ export function MatchWatchTab({
               dangerouslySetInnerHTML={{ __html: play.iframeHtml }}
             />
           ) : null}
+
+          {iptv?.available && !play?.available ? (
+            <IptvFallbackSection iptv={iptv} onOpenStream={onOpenStream} />
+          ) : null}
         </>
       )}
+    </div>
+  );
+}
+
+type IptvProps = {
+  iptv: NonNullable<LiveStreamMatchBundle["iptv"]>;
+  onOpenStream?: (url: string) => void;
+};
+
+function IptvFallbackSection({ iptv, onOpenStream }: IptvProps) {
+  return (
+    <div className={styles.iptvSection}>
+      <p className={styles.iptvTitle}>IPTV options</p>
+      <p className={styles.muted}>
+        Supplemental streams from Xtream / M3U providers ({iptv.sources.join(", ")}). Open in VLC,
+        IPTV Smarters, or another player.
+      </p>
+      <ul className={styles.serverList}>
+        {iptv.servers.map((server, i) => (
+          <li key={`${server.url}-${i}`}>
+            <a
+              href={server.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.serverLink}
+              onClick={(e) => {
+                if (onOpenStream) {
+                  e.preventDefault();
+                  onOpenStream(server.url);
+                }
+              }}
+            >
+              {server.name ?? `IPTV source ${i + 1}`}
+              {server.type ? ` · ${server.type}` : ""}
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

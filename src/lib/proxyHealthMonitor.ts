@@ -1,9 +1,10 @@
 import { isApiEnabled } from "../config/apiFlags";
+import { isFootApi7Disabled } from "../services/FootApi7Client";
 import { isSportAPI7Disabled } from "../services/SportAPI7Client";
 import { isWeatherDisabled } from "../services/WeatherClient";
 import { isWorldCup2026Disabled } from "../services/WorldCup2026Client";
 
-export type ProxyId = "sportapi7" | "wc2026" | "weather";
+export type ProxyId = "sportapi7" | "footapi7" | "wc2026" | "weather";
 
 export type ProxyHealthState = {
   id: ProxyId;
@@ -14,14 +15,16 @@ export type ProxyHealthState = {
 
 const PROXY_LABELS: Record<ProxyId, string> = {
   sportapi7: "SportAPI7",
+  footapi7: "FootAPI7",
   wc2026: "WC 2026 Teams",
-  weather: "Yahoo Weather",
+  weather: "Open Weather",
 };
 
-const PROXY_API_FLAG: Record<ProxyId, "sportApi7" | "wc2026Teams" | "yahooWeather"> = {
+const PROXY_API_FLAG: Record<ProxyId, "sportApi7" | "footApi7" | "wc2026Teams" | "openWeather"> = {
   sportapi7: "sportApi7",
+  footapi7: "footApi7",
   wc2026: "wc2026Teams",
-  weather: "yahooWeather",
+  weather: "openWeather",
 };
 
 type Listener = () => void;
@@ -34,6 +37,8 @@ function isRuntimeDisabled(id: ProxyId): boolean {
   switch (id) {
     case "sportapi7":
       return isSportAPI7Disabled();
+    case "footapi7":
+      return isFootApi7Disabled();
     case "wc2026":
       return isWorldCup2026Disabled();
     case "weather":
@@ -73,7 +78,7 @@ export function subscribeProxyHealth(listener: Listener): () => void {
 }
 
 export function listProxyHealth(): ProxyHealthState[] {
-  const ids: ProxyId[] = ["sportapi7", "wc2026", "weather"];
+  const ids: ProxyId[] = ["sportapi7", "footapi7", "wc2026", "weather"];
 
   return ids
     .filter((id) => isApiEnabled(PROXY_API_FLAG[id]))

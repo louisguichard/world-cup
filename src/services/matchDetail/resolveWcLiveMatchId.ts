@@ -1,7 +1,6 @@
 import { getAllScheduleEntries } from "../BroadcastLookup";
 import type { MergedMatch, Team } from "../../types";
-import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
 import { getCachedDrawFixtures } from "../../lib/wcLiveDrawCache";
 import { fetchDraw, type WcDrawFixture } from "../WorldCup2026LiveClient";
 
@@ -86,8 +85,8 @@ export async function resolveWcLiveApiMatchId(
   if (hintId && isApiMatchId(hintId)) return hintId;
 
   const fixtures = await ensureDrawFixtures();
-  const homeLabel = teamDisplayName(undefined, match.homeTeamId, teams);
-  const awayLabel = teamDisplayName(undefined, match.awayTeamId, teams);
+  const homeLabel = teamDisplayNameFromId(match.homeTeamId, teams);
+  const awayLabel = teamDisplayNameFromId(match.awayTeamId, teams);
   const targetKickoff = kickoffMs(match.date);
 
   const byTeams = findInDraw(fixtures, homeLabel, awayLabel, targetKickoff);

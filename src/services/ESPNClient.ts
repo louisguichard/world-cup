@@ -1,5 +1,7 @@
 import type { GroupLetter, Match, MatchEvent, MatchPeriod, Team } from "../types";
 import { isApiEnabled } from "../config/apiFlags";
+import type { ApiRequestIntent } from "../config/apiQuotaPolicy";
+import { acquireApiQuota, logApiQuotaBlock } from "./ApiQuotaGovernor";
 import { mapEspnDetailsToEvents } from "./matchDetail/mapEspnToEvents";
 import { logger } from "./Logger";
 
@@ -232,7 +234,7 @@ export function parseEspnScoreboard(scoreboard: unknown): {
 
 const ESPN_FETCH_TIMEOUT_MS = 10_000;
 
-export async function fetchScoreboard(): Promise<{
+export async function fetchScoreboard(options?: { intent?: ApiRequestIntent }): Promise<{
   teams: Team[];
   matches: Match[];
   eventsByMatchId: Record<string, MatchEvent[]>;
@@ -242,7 +244,14 @@ export async function fetchScoreboard(): Promise<{
   }
   const url = proxied(SCOREBOARD_PATH);
   const direct = `https://site.api.espn.com${SCOREBOARD_PATH}`;
+  const intent =
+    options?.intent ?? (typeof window === "undefined" ? "background" : "live");
   for (const target of [url, direct]) {
+    const quota = acquireApiQuota("espnScoreboard", intent);
+    if (!quota.allowed) {
+      logApiQuotaBlock("espnScoreboard", intent, quota);
+      throw new Error("ESPN scoreboard request blocked by quota governor");
+    }
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), ESPN_FETCH_TIMEOUT_MS);
     try {
@@ -265,6 +274,12 @@ export async function fetchScoreboard(): Promise<{
 export async function fetchMatchPlayByPlay(espnEventId: string): Promise<unknown> {
   if (!isApiEnabled("espnPlayByPlay")) {
     throw new Error("ESPN play-by-play disabled in apiFlags");
+  }
+  const intent = typeof window === "undefined" ? "background" : "live";
+  const quota = acquireApiQuota("espnPlayByPlay", intent);
+  if (!quota.allowed) {
+    logApiQuotaBlock("espnPlayByPlay", intent, quota);
+    throw new Error("ESPN play-by-play request blocked by quota governor");
   }
   const path = `/apis/site/v2/sports/soccer/fifa.world/playbyplay?event=${espnEventId}`;
   const url =

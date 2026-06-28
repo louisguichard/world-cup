@@ -1,5 +1,5 @@
 import type { GoalScorerProfile, Team } from "../../types";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
 import { GoalScorerCard } from "./GoalScorerCard";
 import styles from "./GoalScorersPanel.module.css";
 
@@ -15,7 +15,10 @@ export function GoalScorersPanel({ profiles, homeTeam, awayTeam, loading }: Prop
 
   const teamName = (teamId: string) => {
     const team = teamId === homeTeam?.id ? homeTeam : awayTeam;
-    return teamDisplayName(team, teamId);
+    return teamDisplayNameFromId(teamId, {
+      ...(homeTeam ? { [homeTeam.id]: homeTeam } : {}),
+      ...(awayTeam ? { [awayTeam.id]: awayTeam } : {}),
+    });
   };
 
   return (

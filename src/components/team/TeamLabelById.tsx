@@ -3,12 +3,14 @@ import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
 import { teamDisplayName } from "../../lib/teamIdentity";
-import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
+import { resolveTeamFromStore } from "../../lib/matchTeamDisplay";
 import { useOpenTeam } from "../../hooks/useOpenTeam";
 import { TeamFlag } from "./TeamFlag";
 
 type Props = {
   teamId: string;
+  /** Schedule / bracket placeholder when teamId is not yet known. */
+  nameHint?: string;
   align?: "left" | "right";
   className?: string;
   displayName?: string;
@@ -21,6 +23,7 @@ type Props = {
 /** Themed team label when only an id is available (no Team object in store). */
 export function TeamLabelById({
   teamId,
+  nameHint,
   align = "left",
   className = "",
   displayName,
@@ -29,12 +32,12 @@ export function TeamLabelById({
   nested = false,
   onTeamClick,
 }: Props) {
+  const theme = useTeamTheme(teamId);
   const teams = useStore((s) => s.teams);
   const team = resolveTeamFromStore(teams, teamId);
-  const theme = useTeamTheme(teamId);
   const { openTeam } = useOpenTeam();
 
-  const label = displayName ?? teamDisplayName(team, teamId, teams);
+  const label = displayName ?? teamDisplayName(team, teamId || nameHint || "TBD", nameHint);
   const baseClass = `team-label team-label-themed ${align === "right" ? "right" : ""} ${clickable ? "team-label--clickable" : ""} ${className}`.trim();
 
   const handleActivate = (e: MouseEvent | KeyboardEvent) => {
@@ -57,7 +60,7 @@ export function TeamLabelById({
 
   const content = (
     <>
-      <TeamFlag team={team} teamId={teamId} compact={flagCompact} />
+      <TeamFlag team={team} teamId={teamId} nameHint={nameHint} compact={flagCompact} />
       <span className="team-name-text">{label}</span>
     </>
   );

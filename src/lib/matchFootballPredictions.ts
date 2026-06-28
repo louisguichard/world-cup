@@ -1,4 +1,10 @@
-import { resolveTeamFromStore } from "../data/wc2026TeamCatalog";
+import {
+  mergeTeamWithCatalog,
+  resolveCanonicalTeamId,
+  resolveTeamForDisplay,
+  resolveTeamFromStore,
+} from "../data/wc2026TeamCatalog";
+import { materializeFullSchedule } from "./materializeFullSchedule";
 import type { MergedMatch, Team } from "../types";
 import type { FootballPredictionMatch } from "../services/FootballPredictionClient";
 
@@ -68,16 +74,33 @@ export function linkPredictionToMatch(
   return true;
 }
 
+function matchIndexKeys(match: MergedMatch): string[] {
+  return [match.matchId, match.id, match.espnEventId].filter(
+    (key): key is string => Boolean(key?.trim())
+  );
+}
+
 export function buildPredictionIndex(
   predictions: FootballPredictionMatch[],
   matches: MergedMatch[],
-  teams: Record<string, Team>
+  teams: Record<string, Team>,
+  opts?: { includeScheduleShells?: boolean }
 ): Record<string, FootballPredictionMatch> {
+  const scheduleMatches =
+    matches.length > 0
+      ? matches
+      : opts?.includeScheduleShells
+        ? materializeFullSchedule(teams, {})
+        : [];
+
   const index: Record<string, FootballPredictionMatch> = {};
 
-  for (const match of matches) {
+  for (const match of scheduleMatches) {
     const found = predictions.find((p) => linkPredictionToMatch(p, match, teams));
-    if (found) index[match.id] = found;
+    if (!found) continue;
+    for (const key of matchIndexKeys(match)) {
+      index[key] = found;
+    }
   }
 
   return index;
@@ -132,4 +155,15 @@ export function resolvePredictionPick(
     default:
       return { shortLabel: formatPredictionPick(prediction), pickedTeam: null, side: "other" };
   }
+}
+
+export function lookupFootballPrediction(
+  index: Record<string, FootballPredictionMatch>,
+  match: Pick<MergedMatch, "id" | "matchId" | "espnEventId">
+): FootballPredictionMatch | null {
+  for (const key of matchIndexKeys(match as MergedMatch)) {
+    const hit = index[key];
+    if (hit) return hit;
+  }
+  return null;
 }

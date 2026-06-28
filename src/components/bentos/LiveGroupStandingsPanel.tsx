@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GroupLetter, TeamRecord } from "../../types";
-import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { APP_COPY } from "../../lib/appCopy";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { useLiveGroupStandings } from "../../hooks/useLiveGroupStandings";
 import { useStore } from "../../store";
 import { TeamFlag } from "../team/TeamFlag";
@@ -127,7 +126,7 @@ export function LiveGroupStandingsPanel({
           </thead>
           <tbody>
             {standing.rows.map((row, index) => {
-              const team = resolveTeamFromStore(teams, row.teamId);
+              const team = teams[row.teamId];
               const rank = index + 1;
               const isLiveTeam = liveTeamIds.has(row.teamId);
               const changed = changedIds.has(row.teamId);
@@ -146,7 +145,7 @@ export function LiveGroupStandingsPanel({
                     >
                       <TeamFlag team={team} teamId={row.teamId} size="sm" compact />
                       <span className="team-name-text">
-                        {teamDisplayName(team, row.teamId, teams)}
+                        {teamDisplayNameFromId(row.teamId, teams)}
                       </span>
                     </button>
                   </td>

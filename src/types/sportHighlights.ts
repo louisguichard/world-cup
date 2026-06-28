@@ -167,6 +167,18 @@ type HighlightlyRecordBlock = {
   goals?: { scored?: number; received?: number };
 };
 
+export type HighlightlyMatchIntro = {
+  matchId: string;
+  highlightlyMatchId: number | null;
+  highlights: HighlightlyHighlight[];
+  introHighlight: HighlightlyHighlight | null;
+  fetchedAt: string;
+  source: "football-highlights-api";
+  requestsUsed: number;
+  attribution: string;
+  status: "available" | "empty" | "quota_exceeded" | "error";
+};
+
 export type HighlightlyMatchBundle = {
   highlightlyMatchId: number | null;
   matchDetail: HighlightlyMatchDetail | null;
@@ -178,4 +190,7 @@ export type HighlightlyMatchBundle = {
   lastFiveAway: HighlightlyMatch[];
   head2Head: HighlightlyMatch[];
   fetchedAt: number;
+  /** Static post-match intro from quota-aware sync. */
+  intro?: HighlightlyMatchIntro | null;
+  attribution?: string;
 };

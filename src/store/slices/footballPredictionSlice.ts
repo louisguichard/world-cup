@@ -13,7 +13,8 @@ export type FootballPredictionSliceState = {
 };
 
 export const createFootballPredictionSlice = (
-  set: (fn: (state: FootballPredictionSliceState) => Partial<FootballPredictionSliceState>) => void
+  set: (fn: (state: FootballPredictionSliceState) => Partial<FootballPredictionSliceState>) => void,
+  get: () => FootballPredictionSliceState & { teams: Record<string, import("../../types").Team> }
 ): FootballPredictionSliceState => ({
   footballPredictionBundle: null,
   footballPredictionSyncRunning: false,
@@ -30,9 +31,10 @@ export const createFootballPredictionSlice = (
 
   startFootballPredictionSync: () => {
     set(() => ({ footballPredictionSyncRunning: true }));
+    const teams = get().teams;
     void syncFootballPredictionsIfNeeded((bundle) => {
       set(() => ({ footballPredictionBundle: bundle }));
-    }).finally(() => {
+    }, teams).finally(() => {
       set(() => ({ footballPredictionSyncRunning: false }));
     });
   },

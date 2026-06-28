@@ -418,6 +418,71 @@
     ]
   },
   {
+    "id": "footApi7",
+    "label": "FootAPI7",
+    "host": "footapi7.p.rapidapi.com",
+    "marketplaceSlug": "fluis.lacasse/api/footapi7",
+    "client": "FootApi7Client.ts",
+    "devProxyPrefix": "/api/footapi7",
+    "testPath": "/api/tournament/17/season/76986/groups",
+    "endpoints": [
+      {
+        "id": "groups",
+        "fn": "fetchFootApi7Groups",
+        "path": "/api/tournament/17/season/76986/groups",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "standings",
+        "fn": "fetchFootApi7Standings",
+        "path": "/api/tournament/17/season/76986/standings",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "teams",
+        "fn": "fetchFootApi7Teams",
+        "path": "/api/tournament/17/season/76986/teams",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "rounds",
+        "fn": "fetchFootApi7Rounds",
+        "path": "/api/tournament/17/season/76986/rounds",
+        "acceptStatuses": [200, 403, 404, 429]
+      },
+      {
+        "id": "knockout",
+        "fn": "fetchFootApi7Knockout",
+        "path": "/api/tournament/17/season/76986/knockout",
+        "acceptStatuses": [200, 403, 404, 429]
+      },
+      {
+        "id": "matchesByDate",
+        "fn": "fetchFootApi7MatchesByDate",
+        "path": "/api/matches/{todayIso}",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "matchesLive",
+        "fn": "fetchFootApi7LiveMatches",
+        "path": "/api/matches/live",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "matchIncidents",
+        "fn": "fetchFootApi7Incidents",
+        "path": "/api/match/1/incidents",
+        "acceptStatuses": [200, 403, 404, 429]
+      },
+      {
+        "id": "leagues",
+        "fn": "fetchFootApi7Leagues",
+        "path": "/api/leagues",
+        "acceptStatuses": [200, 403, 429]
+      }
+    ]
+  },
+  {
     "id": "oddsIntelligence",
     "label": "Sports Odds Intelligence",
     "host": "sports-odds-intelligence-api.p.rapidapi.com",
@@ -459,42 +524,137 @@
   },
   {
     "id": "footballPrediction",
-    "label": "Today Football Prediction",
-    "host": "today-football-prediction.p.rapidapi.com",
-    "marketplaceSlug": "today-football-prediction",
+    "label": "Football Prediction (Boggio v2)",
+    "host": "football-prediction-api.p.rapidapi.com",
+    "marketplaceSlug": "boggio-analytics/api/football-prediction",
     "client": "FootballPredictionClient.ts",
     "devProxyPrefix": "/api/football-prediction",
-    "testPath": "/leagues/",
+    "testPath": "/api/v2/list-federations",
     "endpoints": [
       {
-        "id": "leagues",
-        "fn": "fetchLeagues",
-        "path": "/leagues/",
-        "acceptStatuses": [200]
+        "id": "listFederations",
+        "fn": "fetchFederations",
+        "path": "/api/v2/list-federations",
+        "acceptStatuses": [200, 403]
       },
       {
-        "id": "dailyPredictions",
+        "id": "listMarkets",
+        "fn": "fetchMarkets",
+        "path": "/api/v2/list-markets",
+        "acceptStatuses": [200, 403]
+      },
+      {
+        "id": "listCountries",
+        "fn": "fetchCountries",
+        "path": "/api/v2/list-countries",
+        "acceptStatuses": [200, 403, 404]
+      },
+      {
+        "id": "connectionTest",
+        "fn": "fetchConnectionTest",
+        "path": "/api/v2/test",
+        "acceptStatuses": [200, 403]
+      },
+      {
+        "id": "listLeagues",
+        "fn": "fetchLeagues",
+        "path": "/api/v2/list-leagues?federation=UEFA",
+        "acceptStatuses": [200, 403, 404]
+      },
+      {
+        "id": "predictions",
         "fn": "fetchDailyPredictionsPage",
-        "path": "/predictions/list?page=1",
-        "acceptStatuses": [200]
+        "path": "/api/v2/predictions?market=classic&federation=UEFA",
+        "acceptStatuses": [200, 403, 404]
+      },
+      {
+        "id": "predictionDetails",
+        "fn": "fetchPredictionDetails",
+        "path": "/api/v2/predictions/1",
+        "acceptStatuses": [200, 403, 404]
       },
       {
         "id": "performanceStats",
         "fn": "fetchPerformanceStats",
+        "path": "/api/v2/performance-stats?market=classic",
+        "acceptStatuses": [200, 403]
+      },
+      {
+        "id": "fixtureIds",
+        "fn": "fetchFixtureIds",
+        "path": "/api/v2/get-list-of-fixture-ids?market=classic&federation=CONCACAF",
+        "acceptStatuses": [200, 403, 404]
+      },
+      {
+        "id": "headToHead",
+        "fn": "fetchPredictionDetails",
+        "path": "/api/v2/head-to-head/1",
+        "acceptStatuses": [200, 403, 404]
+      },
+      {
+        "id": "homeLeagueStats",
+        "fn": "fetchPredictionDetails",
+        "path": "/api/v2/home-league-stats/1",
+        "acceptStatuses": [200, 403, 404]
+      },
+      {
+        "id": "awayLeagueStats",
+        "fn": "fetchPredictionDetails",
+        "path": "/api/v2/away-league-stats/1",
+        "acceptStatuses": [200, 403, 404]
+      },
+      {
+        "id": "homeLast10",
+        "fn": "fetchPredictionDetails",
+        "path": "/api/v2/home-last-10/1",
+        "acceptStatuses": [200, 403, 404]
+      },
+      {
+        "id": "awayLast10",
+        "fn": "fetchPredictionDetails",
+        "path": "/api/v2/away-last-10/1",
+        "acceptStatuses": [200, 403, 404]
+      }
+    ]
+  },
+  {
+    "id": "todayFootballPrediction",
+    "label": "Today Football Prediction",
+    "host": "today-football-prediction.p.rapidapi.com",
+    "marketplaceSlug": "casedoweb-sXAtnI-JXY/api/today-football-prediction",
+    "client": "TodayFootballPredictionClient.ts",
+    "devProxyPrefix": "/api/today-football-prediction",
+    "testPath": "/leagues/",
+    "endpoints": [
+      {
+        "id": "leagues",
+        "fn": "fetchTodayLeagues",
+        "path": "/leagues/",
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "performanceStats",
+        "fn": "fetchTodayPerformanceStats",
         "path": "/stats/performance",
-        "acceptStatuses": [200]
+        "acceptStatuses": [200, 403, 429]
+      },
+      {
+        "id": "dailyPredictions",
+        "fn": "fetchTodayDailyPredictionsPage",
+        "path": "/predictions/list?page=1&market=1X2",
+        "acceptStatuses": [200, 403, 429]
       },
       {
         "id": "vipFeatured",
-        "fn": "fetchVipFeatured",
+        "fn": "fetchTodayVipFeatured",
         "path": "/predictions/featured?page=1",
-        "acceptStatuses": [200, 401]
+        "acceptStatuses": [200, 401, 403, 429]
       },
       {
         "id": "vipScores",
-        "fn": "fetchVipScores",
+        "fn": "fetchTodayVipScores",
         "path": "/predictions/scores?page=1",
-        "acceptStatuses": [200, 401]
+        "acceptStatuses": [200, 401, 403, 429]
       }
     ]
   },
@@ -559,32 +719,32 @@
   },
   {
     "id": "sport-highlights",
-    "label": "Sport Highlights API (Highlightly Football)",
-    "host": "sport-highlights-api.p.rapidapi.com",
-    "marketplaceSlug": "sport-highlights-api",
+    "label": "Football Highlights API (Highlightly)",
+    "host": "football-highlights-api.p.rapidapi.com",
+    "marketplaceSlug": "football-highlights-api",
     "client": "SportHighlightsClient.ts",
     "devProxyPrefix": "/api/sport-highlights",
-    "testPath": "/football/leagues?leagueName=World%20Cup",
+    "testPath": "/leagues?leagueName=World%20Cup",
     "endpoints": [
-      { "id": "countries", "fn": "fetchHighlightlyCountries", "path": "/football/countries", "acceptStatuses": [200, 400, 429] },
-      { "id": "country", "fn": "fetchHighlightlyCountry", "path": "/football/countries/US", "acceptStatuses": [200, 404, 429] },
-      { "id": "leagues", "fn": "fetchHighlightlyLeagues", "path": "/football/leagues?leagueName=World%20Cup", "acceptStatuses": [200, 429] },
-      { "id": "league", "fn": "fetchHighlightlyLeague", "path": "/football/leagues/1635", "acceptStatuses": [200, 404, 429] },
-      { "id": "teams", "fn": "fetchHighlightlyTeams", "path": "/football/teams?name=Brazil&limit=3", "acceptStatuses": [200, 429] },
-      { "id": "team", "fn": "fetchHighlightlyTeam", "path": "/football/teams/5890", "acceptStatuses": [200, 404, 429] },
-      { "id": "teamStatistics", "fn": "fetchHighlightlyTeamStatistics", "path": "/football/teams/statistics/5890?fromDate=2026-01-01", "acceptStatuses": [200, 400, 429] },
-      { "id": "matches", "fn": "fetchHighlightlyMatches", "path": "/football/matches?leagueId=1635&season=2026&limit=2", "acceptStatuses": [200, 429] },
-      { "id": "match", "fn": "fetchHighlightlyMatch", "path": "/football/matches/1329761470", "acceptStatuses": [200, 404, 429] },
-      { "id": "highlights", "fn": "fetchHighlightlyHighlights", "path": "/football/highlights?limit=2", "acceptStatuses": [200, 429] },
-      { "id": "highlight", "fn": "fetchHighlightlyHighlight", "path": "/football/highlights/1", "acceptStatuses": [200, 404, 429] },
-      { "id": "bookmakers", "fn": "fetchHighlightlyBookmakers", "path": "/football/bookmakers?limit=3", "acceptStatuses": [200, 429] },
-      { "id": "lastFive", "fn": "fetchHighlightlyLastFiveGames", "path": "/football/last-five-games?teamId=5890", "acceptStatuses": [200, 400, 429] },
-      { "id": "head2Head", "fn": "fetchHighlightlyHead2Head", "path": "/football/head-2-head?teamIdOne=5890&teamIdTwo=2029568", "acceptStatuses": [200, 400, 429] },
-      { "id": "lineups", "fn": "fetchHighlightlyLineups", "path": "/football/lineups/1329761470", "acceptStatuses": [200, 404, 429] },
-      { "id": "statistics", "fn": "fetchHighlightlyStatistics", "path": "/football/statistics/1329761470", "acceptStatuses": [200, 404, 429] },
-      { "id": "liveEvents", "fn": "fetchHighlightlyLiveEvents", "path": "/football/events/1329761470", "acceptStatuses": [200, 404, 429] },
-      { "id": "players", "fn": "fetchHighlightlyPlayers", "path": "/football/players?limit=2", "acceptStatuses": [200, 429] },
-      { "id": "boxScore", "fn": "fetchHighlightlyBoxScore", "path": "/football/box-score/1329761470", "acceptStatuses": [200, 404, 429] }
+      { "id": "countries", "fn": "fetchHighlightlyCountries", "path": "/countries", "acceptStatuses": [200, 400, 429] },
+      { "id": "country", "fn": "fetchHighlightlyCountry", "path": "/countries/US", "acceptStatuses": [200, 404, 429] },
+      { "id": "leagues", "fn": "fetchHighlightlyLeagues", "path": "/leagues?leagueName=World%20Cup", "acceptStatuses": [200, 429] },
+      { "id": "league", "fn": "fetchHighlightlyLeague", "path": "/leagues/1635", "acceptStatuses": [200, 404, 429] },
+      { "id": "teams", "fn": "fetchHighlightlyTeams", "path": "/teams?name=Brazil&limit=3", "acceptStatuses": [200, 429] },
+      { "id": "team", "fn": "fetchHighlightlyTeam", "path": "/teams/5890", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamStatistics", "fn": "fetchHighlightlyTeamStatistics", "path": "/teams/statistics/5890?fromDate=2026-01-01", "acceptStatuses": [200, 400, 429] },
+      { "id": "matches", "fn": "fetchHighlightlyMatches", "path": "/matches?leagueId=1635&season=2026&limit=2", "acceptStatuses": [200, 429] },
+      { "id": "match", "fn": "fetchHighlightlyMatch", "path": "/matches/1329761470", "acceptStatuses": [200, 404, 429] },
+      { "id": "highlights", "fn": "fetchHighlightlyHighlights", "path": "/highlights?limit=2", "acceptStatuses": [200, 429] },
+      { "id": "highlight", "fn": "fetchHighlightlyHighlight", "path": "/highlights/1", "acceptStatuses": [200, 404, 429] },
+      { "id": "bookmakers", "fn": "fetchHighlightlyBookmakers", "path": "/bookmakers?limit=3", "acceptStatuses": [200, 429] },
+      { "id": "lastFive", "fn": "fetchHighlightlyLastFiveGames", "path": "/last-five-games?teamId=5890", "acceptStatuses": [200, 400, 429] },
+      { "id": "head2Head", "fn": "fetchHighlightlyHead2Head", "path": "/head-2-head?teamIdOne=5890&teamIdTwo=2029568", "acceptStatuses": [200, 400, 429] },
+      { "id": "lineups", "fn": "fetchHighlightlyLineups", "path": "/lineups/1329761470", "acceptStatuses": [200, 404, 429] },
+      { "id": "statistics", "fn": "fetchHighlightlyStatistics", "path": "/statistics/1329761470", "acceptStatuses": [200, 404, 429] },
+      { "id": "liveEvents", "fn": "fetchHighlightlyLiveEvents", "path": "/events/1329761470", "acceptStatuses": [200, 404, 429] },
+      { "id": "players", "fn": "fetchHighlightlyPlayers", "path": "/players?limit=2", "acceptStatuses": [200, 429] },
+      { "id": "boxScore", "fn": "fetchHighlightlyBoxScore", "path": "/box-score/1329761470", "acceptStatuses": [200, 404, 429] }
     ]
   },
   {
@@ -617,6 +777,82 @@
       { "id": "footballRankingsFifa", "fn": "fetchSportsLiveScoresFootballRankings", "path": "/football/rankings/fifa", "acceptStatuses": [200, 429] },
       { "id": "footballMatchLineups", "fn": "fetchSportsLiveScoresFootballMatchLineups", "path": "/football/match_lineups/11352563", "acceptStatuses": [200, 429] },
       { "id": "tennisLive", "fn": "fetchSportsLiveScoresSportLive", "path": "/tennis/live", "acceptStatuses": [200, 429, 500] }
+    ]
+  },
+  {
+    "id": "free-daily-xtream-iptv",
+    "label": "Free Daily Xtream IPTV Servers",
+    "host": "free-daily-xtream-iptv-servers.p.rapidapi.com",
+    "marketplaceSlug": "free-daily-xtream-iptv-servers",
+    "client": "IptvStreamClient.ts",
+    "devProxyPrefix": "/api/free-daily-xtream-iptv",
+    "testPath": "/get",
+    "endpoints": [
+      { "id": "dailyXtreamGet", "fn": "fetchDailyXtreamServers", "path": "/get", "acceptStatuses": [200, 403, 429] }
+    ]
+  },
+  {
+    "id": "cloud-api-hub-iptv",
+    "label": "Cloud API Hub IPTV Auto Subscriber",
+    "host": "cloud-api-hub-iptv-auto-subscriber.p.rapidapi.com",
+    "marketplaceSlug": "cloud-api-hub-iptv-auto-subscriber",
+    "client": "IptvStreamClient.ts",
+    "devProxyPrefix": "/api/cloud-api-hub-iptv",
+    "testPath": "/subscribe/1year_no_adults?countryCode=US",
+    "endpoints": [
+      {
+        "id": "subscribeNoAdults",
+        "fn": "fetchIptvSubscription",
+        "path": "/subscribe/1year_no_adults?countryCode=US",
+        "acceptStatuses": [200, 403, 429]
+      }
+    ]
+  },
+  {
+    "id": "tvview",
+    "label": "TVView IPTV",
+    "host": "tvview.p.rapidapi.com",
+    "marketplaceSlug": "tvview",
+    "client": "IptvStreamClient.ts",
+    "devProxyPrefix": "/api/tvview",
+    "testPath": "/getAll",
+    "endpoints": [
+      {
+        "id": "getAll",
+        "fn": "fetchTvViewServers",
+        "path": "/getAll",
+        "acceptStatuses": [200, 403, 429]
+      }
+    ]
+  },
+  {
+    "id": "flashlive",
+    "label": "FlashLive Sports",
+    "host": "flashlive-sports.p.rapidapi.com",
+    "marketplaceSlug": "tipsters/api/flashlive-sports",
+    "client": "FlashLiveClient.ts",
+    "devProxyPrefix": "/api/flashlive",
+    "testPath": "/v1/sports/list",
+    "endpoints": [
+      { "id": "sportsList", "fn": "fetchSportsList", "path": "/v1/sports/list", "acceptStatuses": [200, 429] },
+      { "id": "eventsList", "fn": "fetchEventsList", "path": "/v1/events/list?indent_days=0&locale=en_INT&sport_id=1&timezone=-4", "acceptStatuses": [200, 429] },
+      { "id": "eventsChanges", "fn": "fetchEventsChanges", "path": "/v1/events/changes?sport_id=1&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "multiSearch", "fn": "fetchMultiSearch", "path": "/v1/search/multi-search?query=Brazil&locale=en_INT&sport_id=1", "acceptStatuses": [200, 404, 429] },
+      { "id": "rankingsFifa", "fn": "fetchRankingsFifa", "path": "/v1/rankings/fifa?locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "eventDetails", "fn": "fetchEventDetails", "path": "/v1/events/details?event_id=6ZCocWsb&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "eventStatistics", "fn": "fetchEventStatistics", "path": "/v1/events/statistics?event_id=6ivhWNOG&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "eventLineups", "fn": "fetchEventLineups", "path": "/v1/events/lineups?event_id=6ivhWNOG&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "eventSummaryIncidents", "fn": "fetchEventSummaryIncidents", "path": "/v1/events/summary-incidents?event_id=6ivhWNOG&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "eventLastChange", "fn": "fetchEventLastChange", "path": "/v1/events/last-change?event_id=6ivhWNOG&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "tournamentResults", "fn": "fetchTournamentResults", "path": "/v1/tournaments/results?tournament_stage_id=OEEq9Yvp&page=1&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "tournamentFixtures", "fn": "fetchTournamentFixtures", "path": "/v1/tournaments/fixtures?tournament_stage_id=OEEq9Yvp&page=1&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "tournamentStandings", "fn": "fetchTournamentStandings", "path": "/v1/tournaments/standings?tournament_stage_id=OEEq9Yvp&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamData", "fn": "fetchTeamData", "path": "/v1/teams/data?team_id=Wtn9Stg0&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamSquad", "fn": "fetchTeamSquad", "path": "/v1/teams/squad?team_id=Wtn9Stg0&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamTransfers", "fn": "fetchTeamTransfers", "path": "/v1/teams/transfers?team_id=Wtn9Stg0&page=1&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamLastEvents", "fn": "fetchTeamLastEvents", "path": "/v1/teams/events/last?team_id=Wtn9Stg0&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "teamNextEvents", "fn": "fetchTeamNextEvents", "path": "/v1/teams/events/next?team_id=Wtn9Stg0&locale=en_INT", "acceptStatuses": [200, 404, 429] },
+      { "id": "newsList", "fn": "fetchNewsList", "path": "/v1/news/list?locale=en_INT&page=1", "acceptStatuses": [200, 404, 429] }
     ]
   }
 ]

@@ -29,27 +29,29 @@ describe("bootCache", () => {
     vi.unstubAllGlobals();
   });
 
-  it("exports BOOT_CACHE_VERSION and BOOT_CACHE_SCHEMA_VERSION 3", () => {
-    expect(BOOT_CACHE_VERSION).toBe(3);
-    expect(BOOT_CACHE_SCHEMA_VERSION).toBe(3);
+  it("exports BOOT_CACHE_VERSION and BOOT_CACHE_SCHEMA_VERSION 6", () => {
+    expect(BOOT_CACHE_VERSION).toBe(6);
+    expect(BOOT_CACHE_SCHEMA_VERSION).toBe(6);
   });
 
   it("uses versioned cache keys", () => {
-    expect(BOOT_TEAMS_CACHE_KEY).toBe("wc-boot-teams-v3");
-    expect(LIVE_MATCH_CACHE_KEY).toBe("wc-live-matches-v3");
-    expect(STANDINGS_CACHE_KEY).toBe("wc-standings-v3");
+    expect(BOOT_TEAMS_CACHE_KEY).toBe("wc-boot-teams-v6");
+    expect(LIVE_MATCH_CACHE_KEY).toBe("wc-live-matches-v6");
+    expect(STANDINGS_CACHE_KEY).toBe("wc-standings-v6");
   });
 
-  it("rejects stale v1 team cache and purges legacy keys", () => {
+  it("migrates legacy v1 team cache into current key", () => {
     localStorage.setItem(
       "wc-boot-teams-v1",
-      JSON.stringify({ version: 1, savedAt: "2020-01-01", teams: { bra: { id: "bra" } } })
+      JSON.stringify({ version: 1, savedAt: "2020-01-01", teams: { bra: { id: "bra", name: "Brazil" } } })
     );
 
     const hydration = hydrateBootFromCache();
 
-    expect(hydration.teams).toEqual({});
+    expect(hydration.teams.bra?.name).toBe("Brazil");
+    expect(hydration.hadCache).toBe(true);
     expect(localStorage.getItem("wc-boot-teams-v1")).toBeNull();
+    expect(localStorage.getItem(BOOT_TEAMS_CACHE_KEY)).not.toBeNull();
   });
 
   it("rejects mismatched version in current key", () => {
@@ -76,7 +78,7 @@ describe("bootCache", () => {
     expect(localStorage.getItem(BOOT_TEAMS_CACHE_KEY)).toBeNull();
   });
 
-  it("hydrates v3 team cache with _schemaVersion", () => {
+  it("hydrates v4 team cache with _schemaVersion", () => {
     localStorage.setItem(
       BOOT_TEAMS_CACHE_KEY,
       JSON.stringify({
@@ -93,7 +95,7 @@ describe("bootCache", () => {
     expect(hydration.hadCache).toBe(true);
   });
 
-  it("hydrates v3 team cache with version only (legacy write shape)", () => {
+  it("hydrates v4 team cache with version only (legacy write shape)", () => {
     localStorage.setItem(
       BOOT_TEAMS_CACHE_KEY,
       JSON.stringify({

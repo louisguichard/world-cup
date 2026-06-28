@@ -5,15 +5,16 @@ import { resolvePredictionPick } from "../../lib/matchFootballPredictions";
 import { useStore } from "../../store";
 
 const copy = APP_COPY.odds;
+const pred = APP_COPY.predictions;
 
 function marketLabel(key: string): string {
   switch (key) {
     case "classic":
-      return "Who wins the game?";
+      return pred.marketClassic;
     case "ou25":
-      return "Total goals over or under 2.5";
+      return pred.marketOverUnder;
     case "both":
-      return "Both teams score";
+      return pred.marketBothScore;
     default:
       return key.toUpperCase();
   }
@@ -35,7 +36,7 @@ function PerformanceTable({
       <table className="fp-performance-table">
         <thead>
           <tr>
-            <th>What they guessed</th>
+            <th>{pred.guessColumn}</th>
             <th>{copy.insightsWinRate}</th>
             <th>{copy.insightsProfit}</th>
             <th>{copy.insightsResultColumn}</th>
@@ -51,7 +52,7 @@ function PerformanceTable({
                 {row.profitLoss.toFixed(2)}
               </td>
               <td>
-                {row.countWon} wins · {row.countLost} losses
+                {pred.winsLosses(row.countWon, row.countLost)}
               </td>
             </tr>
           ))}
@@ -71,8 +72,8 @@ export function FootballPredictionInsightsPanel() {
 
   if (!bundle && syncRunning) {
     return (
-      <section className="fp-insights-panel" aria-label="Match tips">
-        <p className="fp-insights-loading">Loading today&apos;s tips…</p>
+      <section className="fp-insights-panel" aria-label={pred.ariaLabel}>
+        <p className="fp-insights-loading">{pred.loading}</p>
       </section>
     );
   }
@@ -88,37 +89,37 @@ export function FootballPredictionInsightsPanel() {
   );
 
   return (
-    <section className="fp-insights-panel" aria-label="Match tips">
+    <section className="fp-insights-panel" aria-label={pred.ariaLabel}>
       <header className="fp-insights-header">
         <h3>{copy.insightsTitle}</h3>
         <p className="fp-insights-meta">{copy.insightsExplain}</p>
         <p className="fp-insights-meta">
-          {indexSize} tips saved · updated {new Date(bundle.fetchedAt).toLocaleDateString()}
+          {indexSize} merged tips · updated {new Date(bundle.fetchedAt).toLocaleDateString()}
         </p>
       </header>
 
       {performance ? (
         <div className="fp-performance-grid">
-          <PerformanceTable title="Featured tips — how they did" bucket={performance.featured} />
-          <PerformanceTable title="All tips — how they did" bucket={performance.all} />
+          <PerformanceTable title={pred.featuredPerformance} bucket={performance.featured} />
+          <PerformanceTable title={pred.allPerformance} bucket={performance.all} />
         </div>
       ) : null}
 
       {wcMatches.length > 0 ? (
         <div className="fp-wc-picks">
-          <h4>World Cup teams playing today</h4>
+          <h4>{pred.wcTeamsToday}</h4>
           <ul className="fp-picks-list">
             {wcMatches.slice(0, 8).map((p) => {
               const resolved = resolvePredictionPick(p.prediction, p.homeTeam, p.awayTeam);
               const confidence =
-                p.predictionProbability != null ? ` · about ${p.predictionProbability}% sure` : "";
+                p.predictionProbability != null ? pred.confidence(p.predictionProbability) : "";
               return (
                 <li key={p.id} className="fp-pick-row">
                   <span className="fp-pick-teams">
                     {p.homeTeam} vs {p.awayTeam}
                   </span>
                   <span className="fp-pick-call">
-                    Tip: <strong>{resolved.shortLabel}</strong>
+                    {pred.tipPrefix} <strong>{resolved.shortLabel}</strong>
                     {confidence}
                   </span>
                 </li>
@@ -128,14 +129,13 @@ export function FootballPredictionInsightsPanel() {
         </div>
       ) : (
         <p className="fp-insights-note">
-          No World Cup team tips in today&apos;s list yet — we track {bundle.leagues.length} leagues. Tips
-          show up here when this team has a game today.
+          {pred.noWcTips(bundle.leagues.length)}
         </p>
       )}
 
       {bundle.vipFeatured.length > 0 ? (
         <div className="fp-vip-block">
-          <h4>Extra featured tips</h4>
+          <h4>{pred.extraFeatured}</h4>
           <ul className="fp-picks-list">
             {bundle.vipFeatured.slice(0, 5).map((p) => {
               const resolved = resolvePredictionPick(p.prediction, p.homeTeam, p.awayTeam);
@@ -149,7 +149,7 @@ export function FootballPredictionInsightsPanel() {
         </div>
       ) : bundle.unavailable.includes("predictions/featured") ? (
         <p className="fp-insights-note fp-insights-note--muted">
-          Extra featured tips need a paid plan on this tips website.
+          {pred.paidPlanNote}
         </p>
       ) : null}
 

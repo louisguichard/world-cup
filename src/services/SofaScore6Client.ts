@@ -9,6 +9,7 @@ import {
 } from "../config/sofascore6Endpoints";
 import { normalizeSportAPI7Match } from "./adapters/normalizeMatch";
 import { normalizeSofaScoreTeam } from "./adapters/normalizeTeam";
+import { acquireApiQuota, logApiQuotaBlock } from "./ApiQuotaGovernor";
 import { logger } from "./Logger";
 
 export type SofaEvent = {
@@ -118,6 +119,12 @@ function eventOnDate(event: SofaEvent, dateIso: string): boolean {
 
 async function fetchJson<T = unknown>(path: string, context: string): Promise<T | null> {
   if (sessionDisabled) return null;
+  const intent = context.includes("live") ? "live" : "background";
+  const quota = acquireApiQuota("sportApi7", intent);
+  if (!quota.allowed) {
+    logApiQuotaBlock("sportApi7", intent, quota);
+    return null;
+  }
 
   try {
     const res = await fetch(`${baseUrl()}${path}`, { headers: rapidHeaders() });

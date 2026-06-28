@@ -41,5 +41,12 @@ export type LiveStreamMatchBundle = {
   scheduleMatch: LiveStreamScheduleMatch | null;
   play: LiveStreamPlayResult | null;
   scheduleError?: string;
+  /** IPTV enrichment when primary stream provider has no playable link */
+  iptv?: {
+    available: boolean;
+    sources: string[];
+    servers: LiveStreamServer[];
+    error?: string;
+  };
   fetchedAt: number;
 };

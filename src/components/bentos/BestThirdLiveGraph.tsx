@@ -1,7 +1,6 @@
 import { useMemo, useRef, useState } from "react";
-import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useBestThirdLiveGraphState } from "../../hooks/useBestThirdLiveGraphState";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { buildThirdPlaceCutoffScenario, CUTOFF_RANK } from "../../lib/thirdPlaceCutoffScenario";
 import { buildQualificationContext } from "../../lib/qualification";
@@ -66,9 +65,9 @@ function LadderRow({
   const rowInner = (
     <>
       <span className={styles.ladderRank}>{rank}</span>
-      <TeamFlag team={resolveTeamFromStore(teams, row.teamId)} teamId={row.teamId} size="sm" compact />
+      <TeamFlag team={teams[row.teamId]} teamId={row.teamId} size="sm" compact />
       <span className={`${styles.ladderName} team-name-text`}>
-        {teamDisplayName(undefined, row.teamId, teams)}
+        {teamDisplayNameFromId(row.teamId, teams)}
       </span>
       <span className={styles.ladderPts}>
         {row.points} {tbl.points.toLowerCase()}
@@ -136,7 +135,7 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
     if (cutoffCrossings.length === 0) return null;
     return cutoffCrossings
       .map((c) => {
-        const name = teamDisplayName(undefined, c.teamId, teams);
+        const name = teamDisplayNameFromId(c.teamId, teams);
         return c.direction === "in" ? bt.cutoffBannerIn(name) : bt.cutoffBannerOut(name);
       })
       .join(" · ");
@@ -164,7 +163,7 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
       {focusRows.length > 0 ? (
         <div className={styles.focusStrip}>
           {focusRows.map((row) => {
-            const team = resolveTeamFromStore(teams, row.teamId);
+            const team = teams[row.teamId];
             return (
               <TeamClickTarget
                 key={row.teamId}
@@ -176,7 +175,7 @@ export function BestThirdLiveGraph({ focusTeamIds }: Props) {
                 <TeamFlag team={team} teamId={row.teamId} size="sm" compact />
                 <div className={styles.focusMeta}>
                   <strong className="team-name-text">
-                    {teamDisplayName(team, row.teamId)}
+                    {teamDisplayNameFromId(row.teamId, teams)}
                   </strong>
                   <span className={styles.focusStats}>
                     {row.record.points} {tbl.points.toLowerCase()} · {tbl.goalDiff}{" "}

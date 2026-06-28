@@ -29,7 +29,7 @@ export function GroupOfficialQualificationSection({ groupId }: Props) {
     const team = resolveTeamFromStore(teams, row.teamId);
     return {
       teamId: row.teamId,
-      teamName: teamDisplayName(team, row.teamId, teams),
+      teamName: teamDisplayName(team, row.teamId),
       status: row.status,
     };
   });

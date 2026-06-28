@@ -54,10 +54,17 @@ export function LiveView() {
     [liveMatchesMap]
   );
 
-  const scheduleMatches = useMemo(
-    () => Object.values(liveMatchesMap).filter((m) => m.status === "scheduled" && !m.locked),
-    [liveMatchesMap]
-  );
+  const scheduleMatches = useMemo(() => {
+    const todayKey = new Date().toISOString().slice(0, 10);
+    return Object.values(liveMatchesMap).filter((m) => {
+      if (m.status === "scheduled" && !m.locked) return true;
+      if (m.status === "completed") {
+        const matchDay = m.date?.slice(0, 10);
+        return matchDay === todayKey;
+      }
+      return false;
+    });
+  }, [liveMatchesMap]);
 
   const [scheduleExpanded, setScheduleExpanded] = useState(false);
 

@@ -1,0 +1,1492 @@
+[
+  {
+    "method": "GET",
+    "name": "getTennisRankings",
+    "route": "/api/tennis/rankings/{segment3}"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamStandingsSeasons",
+    "route": "/api/{sport}/team/{id}/standings/seasons"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamUniqueTournaments",
+    "route": "/api/{sport}/team/{id}/unique-tournaments"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamStageSeasonRaces",
+    "route": "/api/{sport}/team/{id}/stage/season/{seasonId}/races"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerImage",
+    "route": "/api/{sport}/player/{id}/image"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerIdSegment3",
+    "route": "/api/player/{id}/{segment3}"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisPlayerStandingsSeasons",
+    "route": "/api/tennis/player/{id}/standings/seasons"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerIdMatchesNear",
+    "route": "/api/player/{id}/matches/near"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballPlayerTransfers",
+    "route": "/api/basketball/player/{id}/transfers"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerPenaltyHistoryTournamentSeason",
+    "route": "/api/player/{id}/penalty-history/tournament/{tournamentId}/season/{seasonId}"
+  },
+  {
+    "method": "GET",
+    "name": "getReferee",
+    "route": "/api/referee/{id}/{segment3}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballPlayerTournamentSeasonStatisticsRegularseason",
+    "route": "/api/basketball/player/{id}/tournament/{tournamentId}/season/{seasonId}/statistics/regularseason"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaTeamCareerStatistics",
+    "route": "/api/mma/team/{id}/career-statistics"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisVenueImage",
+    "route": "/api/tennis/venue/{id}/image"
+  },
+  {
+    "method": "GET",
+    "name": "getCalendarStages",
+    "route": "/api/{sport}/calendar/{sportSlug}/{date}/{countryId}/stages"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisVenueEvents",
+    "route": "/api/tennis/venue/{id}/events/{sport}/{span}/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getUniqueTournamentSeasonTeamEvents",
+    "route": "/api/{sport}/unique-tournament/{tournamentId}/season/{seasonId}/team-events/{segment7}"
+  },
+  {
+    "method": "GET",
+    "name": "getTableTennisEventStreaksOdds",
+    "route": "/api/table-tennis/event/{id}/streaks/odds"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTournamentTournamentIdScheduledEventsDate",
+    "route": "/api/{sport}/tournament/{tournamentId}/scheduled-events/{date}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballMatchTeamShotmap",
+    "route": "/api/basketball/match/{id}/team/{teamId}/shotmap"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonTeamStatisticsTypes",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/team-statistics/types"
+  },
+  {
+    "method": "GET",
+    "name": "getUniqueTournamentSeasonMatches",
+    "route": "/api/{sport}/unique-tournament/{tournamentId}/season/{seasonId}/matches/{segment7}/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballMatchOddsFeatured",
+    "route": "/api/basketball/match/{id}/odds/{providerId}/featured"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchesOddsFeatured",
+    "route": "/api/matches/odds/featured"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballMatch",
+    "route": "/api/basketball/match/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getEventH2h",
+    "route": "/api/{sport}/event/{customId}/h2h"
+  },
+  {
+    "method": "GET",
+    "name": "getAllSportsData",
+    "route": "/api/{sport}/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getSportMatchId",
+    "route": "/api/{sport}/match/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getEventOddsFeatured",
+    "route": "/api/{sport}/event/{id}/odds/{providerId}/featured"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeason",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/{segment5}"
+  },
+  {
+    "method": "GET",
+    "name": "getIceHockeyMatchStreaksOdds",
+    "route": "/api/ice-hockey/match/{id}/streaks/odds"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentPlayerTransferHistoryAll",
+    "route": "/api/tournament/{tournamentId}/player-transfer-history/all/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonHome",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/{segment5}/home"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchIdGraphSequence",
+    "route": "/api/match/{id}/graph/sequence"
+  },
+  {
+    "method": "GET",
+    "name": "getIceHockeyMatch",
+    "route": "/api/ice-hockey/match/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentTournamentIdSegment3",
+    "route": "/api/tournament/{tournamentId}/{segment3}"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisEvents",
+    "route": "/api/tennis/{segment2}/{id}/events/{segment5}/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getTableTennisTournamentSeasonTeamOfThe",
+    "route": "/api/table-tennis/tournament/{tournamentId}/season/{seasonId}/team-of-the-week/rounds"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentTournamentIdSeasonSeasonIdMatchesSegment6Page",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/matches/{segment6}/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchTeamHeatmap",
+    "route": "/api/match/{id}/team/{teamId}/heatmap"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaUniqueTournamentTournamentIdSchedulesDayMonthYear",
+    "route": "/api/mma/unique-tournament/{tournamentId}/schedules/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getIceHockeyTournamentSeasonBestTeams",
+    "route": "/api/ice-hockey/tournament/{tournamentId}/season/{seasonId}/best-teams/{segment7}"
+  },
+  {
+    "method": "GET",
+    "name": "getSportScheduledTournamentsByDate",
+    "route": "/api/{sport}/scheduled-tournaments/{day}/{month}/{year}/page/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisTournamentSeasonCupTreesOld",
+    "route": "/api/tennis/tournament/{tournamentId}/season/{seasonId}/cup-trees/old"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonPlayerStatisticsTypes",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/player-statistics/types"
+  },
+  {
+    "method": "GET",
+    "name": "getBaseballMatchAtbatPitches",
+    "route": "/api/baseball/match/{id}/atbat/{atBatId}/pitches"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonInfo",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/info"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTournamentSeasonBestPlayersPerGame",
+    "route": "/api/basketball/tournament/{tournamentId}/season/{seasonId}/best-players/per-game/{segment8}"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamTournaments",
+    "route": "/api/{sport}/team/{id}/tournaments"
+  },
+  {
+    "method": "GET",
+    "name": "getAmericanFootballTournamentSeasonBestPlayers",
+    "route": "/api/american-football/tournament/{tournamentId}/season/{seasonId}/best-players/{segment7}"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerStatisticsMatchType",
+    "route": "/api/player/{id}/statistics/match-type/{matchType}"
+  },
+  {
+    "method": "GET",
+    "name": "getSearchSuggestions",
+    "route": "/api/search/suggestions/{entityType}"
+  },
+  {
+    "method": "GET",
+    "name": "getCategoryLiveUniqueTournaments",
+    "route": "/api/{sport}/category/{categoryId}/live-unique-tournaments"
+  },
+  {
+    "method": "GET",
+    "name": "getSportManagerId",
+    "route": "/api/{sport}/manager/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getSportCategoryIdEventsDayMonthYear",
+    "route": "/api/{sport}/category/{id}/events/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getCategoryIdEventsDayMonthYear",
+    "route": "/api/category/{id}/events/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballPlayerMediaVideos",
+    "route": "/api/basketball/player/{id}/media/videos"
+  },
+  {
+    "method": "GET",
+    "name": "getMotorsportCategories",
+    "route": "/api/motorsport/categories"
+  },
+  {
+    "method": "GET",
+    "name": "searchAllEntities",
+    "route": "/api/search/all"
+  },
+  {
+    "method": "GET",
+    "name": "getManagerMatchesPrevious",
+    "route": "/api/{sport}/manager/{id}/matches/previous/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamMedia",
+    "route": "/api/{sport}/team/{id}/media"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamRankings",
+    "route": "/api/{sport}/team/{id}/rankings"
+  },
+  {
+    "method": "GET",
+    "name": "getIceHockeyTeamTournamentSeasonBestPlayers",
+    "route": "/api/ice-hockey/team/{id}/tournament/{tournamentId}/season/{seasonId}/best-players/{segment9}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTeamTournamentSeasonRegularseason",
+    "route": "/api/basketball/team/{id}/tournament/{tournamentId}/season/{seasonId}/{segment8}/regularSeason"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerTournamentSeasonStatisticsPlayoffs",
+    "route": "/api/{sport}/player/{id}/tournament/{tournamentId}/season/{seasonId}/statistics/playoffs"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballPlayerTournamentEventsLast",
+    "route": "/api/basketball/player/{id}/tournament/{tournamentId}/events/last/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getTableTennisTeamStatisticsSeasons",
+    "route": "/api/table-tennis/team/{id}/statistics/seasons"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamTournamentSeasonRanksOverall",
+    "route": "/api/team/{id}/tournament/{tournamentId}/season/{seasonId}/ranks/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamMatchesNext",
+    "route": "/api/{sport}/team/{id}/matches/next/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamTransfers",
+    "route": "/api/{sport}/team/{id}/transfers"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamIdMatchesNear",
+    "route": "/api/team/{id}/matches/near"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamMatchesPrevious",
+    "route": "/api/{sport}/team/{id}/matches/previous/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisPlayerRankings",
+    "route": "/api/tennis/player/{id}/rankings"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamIdUniqueTournamentsAll",
+    "route": "/api/team/{id}/unique-tournaments/all"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerMedia",
+    "route": "/api/{sport}/player/{id}/media"
+  },
+  {
+    "method": "GET",
+    "name": "getHandballTeamUniqueTournamentSeasonTopPlayers",
+    "route": "/api/handball/team/{id}/unique-tournament/{tournamentId}/season/{seasonId}/top-players/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisTeamYearStatistics",
+    "route": "/api/tennis/team/{id}/year-statistics/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballPlayerTournamentSeasonShotActions",
+    "route": "/api/basketball/player/{id}/tournament/{tournamentId}/season/{seasonId}/shot-actions/{segment9}"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamPlayers",
+    "route": "/api/{sport}/team/{id}/players"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamPlayerStatisticsSeasons",
+    "route": "/api/{sport}/team/{id}/player-statistics/seasons"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerMediaVideos",
+    "route": "/api/player/{id}/media/videos"
+  },
+  {
+    "method": "GET",
+    "name": "getSportPlayerIdMatchesNear",
+    "route": "/api/{sport}/player/{id}/matches/near"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerStatistics",
+    "route": "/api/player/{id}/statistics/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamIdSegment3",
+    "route": "/api/team/{id}/{segment3}"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisTeamRecentUniqueTournaments",
+    "route": "/api/tennis/team/{id}/recent-unique-tournaments"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTeamTournamentSeasonPlayoffs",
+    "route": "/api/basketball/team/{id}/tournament/{tournamentId}/season/{seasonId}/{segment8}/playoffs"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamFeaturedEvent",
+    "route": "/api/{sport}/team/{id}/featured-event"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisTeamTournamentSeasonRanksOverall",
+    "route": "/api/tennis/team/{id}/tournament/{tournamentId}/season/{seasonId}/ranks/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamImageSmall",
+    "route": "/api/team/{id}/image/small"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTeamId",
+    "route": "/api/{sport}/team/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getMotorsportTeamOddsProvider",
+    "route": "/api/motorsport/team/{id}/odds/provider/{providerId}"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerStatisticsSeasons",
+    "route": "/api/{sport}/player/{id}/statistics/seasons"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamSeasons",
+    "route": "/api/team/{id}/{segment3}/seasons"
+  },
+  {
+    "method": "GET",
+    "name": "getSportPlayerId",
+    "route": "/api/{sport}/player/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamIdPlayersStatisticsSeasons",
+    "route": "/api/team/{id}/players/statistics/seasons"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerTournamentSeasonStatisticsOverall",
+    "route": "/api/{sport}/player/{id}/tournament/{tournamentId}/season/{seasonId}/statistics/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getSportSearchTerm",
+    "route": "/api/{sport}/search/{term}"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerTournamentSeasonStatisticsRegularseason",
+    "route": "/api/{sport}/player/{id}/tournament/{tournamentId}/season/{seasonId}/statistics/regularSeason"
+  },
+  {
+    "method": "GET",
+    "name": "searchUniqueTournaments",
+    "route": "/api/search/unique-tournaments"
+  },
+  {
+    "method": "GET",
+    "name": "getTableTennisTeamPerformance",
+    "route": "/api/table-tennis/team/{id}/performance"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerMatchesPrevious",
+    "route": "/api/{sport}/player/{id}/matches/previous/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getSearchValue",
+    "route": "/api/search/{value}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballPlayerTournamentSeasonRatingsRegularseason",
+    "route": "/api/basketball/player/{id}/tournament/{tournamentId}/season/{seasonId}/ratings/regularSeason"
+  },
+  {
+    "method": "GET",
+    "name": "getCategoryMatches",
+    "route": "/api/category/{categoryId}/matches/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerStatisticsSeason",
+    "route": "/api/{sport}/player/{id}/statistics/season"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerTrending",
+    "route": "/api/player/trending"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamImage",
+    "route": "/api/{sport}/team/{id}/image"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTeamTournamentSeasonBestPlayersRegularseason",
+    "route": "/api/basketball/team/{id}/tournament/{tournamentId}/season/{seasonId}/best-players/regularseason"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerTournamentEventsLast",
+    "route": "/api/player/{id}/tournament/{tournamentId}/events/last/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getCyclingCategoryImage",
+    "route": "/api/cycling/category/{categoryId}/image"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaTeamEvents",
+    "route": "/api/mma/team/{id}/events/{segment5}/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaCategoryUniqueTournaments",
+    "route": "/api/mma/category/{id}/unique-tournaments"
+  },
+  {
+    "method": "GET",
+    "name": "getCategoryImage",
+    "route": "/api/category/{categoryId}/image"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamTournamentSeason",
+    "route": "/api/team/{id}/tournament/{tournamentId}/season/{seasonId}/{segment7}"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaUniqueTournament",
+    "route": "/api/mma/unique-tournament/{tournamentId}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonRoundTeamOfWeek",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/round/{roundId}/team-of-week"
+  },
+  {
+    "method": "GET",
+    "name": "getHandballUniqueTournament",
+    "route": "/api/handball/unique-tournament/{tournamentId}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentMedia",
+    "route": "/api/{sport}/tournament/{tournamentId}/media"
+  },
+  {
+    "method": "GET",
+    "name": "getHandballUniqueTournamentSeasonPlayerStatisticsTypes",
+    "route": "/api/handball/unique-tournament/{tournamentId}/season/{seasonId}/player-statistics/types"
+  },
+  {
+    "method": "GET",
+    "name": "getHandballUniqueTournamentSeasonTopPlayersOverall",
+    "route": "/api/handball/unique-tournament/{tournamentId}/season/{seasonId}/top-players/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTournamentSeasonBestTeams",
+    "route": "/api/basketball/tournament/{tournamentId}/season/{seasonId}/best-teams/{segment7}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchPlayerJersey",
+    "route": "/api/match/{id}/player/jersey/{segment5}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTournamentSeasonTopRatingsOverall",
+    "route": "/api/basketball/tournament/{tournamentId}/season/{seasonId}/top-ratings/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTournamentSeasonShotActionsAreas",
+    "route": "/api/basketball/tournament/{tournamentId}/season/{seasonId}/shot-actions/areas/{segment8}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTournamentTopPlayerPerformance",
+    "route": "/api/basketball/tournament/{tournamentId}/top-player-performance"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTournamentSeasonShotActionAreasEvent",
+    "route": "/api/basketball/tournament/{tournamentId}/season/{seasonId}/shot-action-areas/event/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getHandballUniqueTournamentSeasonTopTeamsOverall",
+    "route": "/api/handball/unique-tournament/{tournamentId}/season/{seasonId}/top-teams/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getIceHockeyTournamentSeasonBestPlayersPer",
+    "route": "/api/ice-hockey/tournament/{tournamentId}/season/{seasonId}/best-players/per-game/{segment8}"
+  },
+  {
+    "method": "GET",
+    "name": "getCricketTournamentSeasonTopPlayers",
+    "route": "/api/cricket/tournament/{tournamentId}/season/{seasonId}/top-players"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTournamentPlayerNews",
+    "route": "/api/basketball/tournament/{tournamentId}/player-news"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTournamentPlayerTransferHistoryAll",
+    "route": "/api/basketball/tournament/{tournamentId}/player-transfer-history/all/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getHandballUniqueTournamentSeasonTopPlayersPer",
+    "route": "/api/handball/unique-tournament/{tournamentId}/season/{seasonId}/top-players-per-game/all/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonTotal",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/{segment5}/total"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTournamentSeasonTeams",
+    "route": "/api/basketball/tournament/{tournamentId}/season/{seasonId}/teams"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballGroupTournamentSeasonMatches",
+    "route": "/api/basketball/group/tournament/{tournamentId}/season/{seasonId}/matches"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballGroupTournamentSeasonTotal",
+    "route": "/api/basketball/group/tournament/{tournamentId}/season/{seasonId}/{segment7}/total"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentTournamentIdSchedulesDayMonthYear",
+    "route": "/api/tournament/{tournamentId}/schedules/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchIdSegment3",
+    "route": "/api/match/{id}/{segment3}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonStandingsTotal",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/standings/total"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamTournamentSeasonGoalDistributions",
+    "route": "/api/team/{teamId}/tournament/{tournamentId}/season/{seasonId}/goal-distributions"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTeamIdPlayersStatisticsSeasons",
+    "route": "/api/{sport}/team/{id}/players/statistics/seasons"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTeamIdMatchesNear",
+    "route": "/api/{sport}/team/{id}/matches/near"
+  },
+  {
+    "method": "GET",
+    "name": "getAmericanFootballTeamTournamentSeasonBestPlayers",
+    "route": "/api/american-football/team/{id}/tournament/{tournamentId}/season/{seasonId}/best-players/{segment9}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTeamImageSmall",
+    "route": "/api/basketball/team/{id}/image/small"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchesPrevious",
+    "route": "/api/{sport}/{id}/matches/previous/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getSportMatchesLive",
+    "route": "/api/{sport}/matches/live"
+  },
+  {
+    "method": "GET",
+    "name": "getUniqueTournamentSeasonStandings",
+    "route": "/api/{sport}/unique-tournament/{tournamentId}/season/{seasonId}/standings/{segment7}"
+  },
+  {
+    "method": "GET",
+    "name": "getEventsOdds",
+    "route": "/api/{sport}/events/odds/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchesNext",
+    "route": "/api/{sport}/{id}/matches/next/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchOddsAll",
+    "route": "/api/{sport}/match/{id}/odds/{providerId}/all"
+  },
+  {
+    "method": "GET",
+    "name": "getVenue",
+    "route": "/api/venue/{id}/{segment3}"
+  },
+  {
+    "method": "GET",
+    "name": "getRugbyRankingsRugbyUnion",
+    "route": "/api/rugby/rankings/rugby-union"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchesTop",
+    "route": "/api/matches/top/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getBaseballMatch",
+    "route": "/api/baseball/match/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonTeamEventsTotal",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/team-events/total"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentWinners",
+    "route": "/api/{sport}/tournament/{tournamentId}/winners"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchPlayersFeatured",
+    "route": "/api/match/{id}/players/featured"
+  },
+  {
+    "method": "GET",
+    "name": "getEventsLive",
+    "route": "/api/{sport}/events/live"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballMatchesOddsSegment4ProviderId",
+    "route": "/api/basketball/matches/odds/{segment4}/{providerId}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchesDayMonthYear",
+    "route": "/api/matches/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchStreaksOdds",
+    "route": "/api/match/{id}/streaks/odds"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisEventsOddsFeatured",
+    "route": "/api/tennis/events/odds/featured/{providerId}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballMatchesOddsDayMonthYear",
+    "route": "/api/basketball/matches/odds/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getAmericanFootballMatch",
+    "route": "/api/american-football/match/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballMatchPlayerShotmap",
+    "route": "/api/basketball/match/{id}/player/{playerId}/shotmap"
+  },
+  {
+    "method": "GET",
+    "name": "getCricketMatch",
+    "route": "/api/cricket/match/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchesBottom",
+    "route": "/api/matches/bottom/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonGroups",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/groups"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonCupTrees",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/cup-trees"
+  },
+  {
+    "method": "GET",
+    "name": "getTableTennisEventsOdds",
+    "route": "/api/table-tennis/events/odds/{segment4}/{providerId}"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTournamentTournamentIdSeasonSeasonIdMatchesSegment7Page",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/matches/{segment7}/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getEventProviderWinningOdds",
+    "route": "/api/{sport}/event/{id}/provider/{providerId}/winning-odds"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTournamentTournamentIdSchedulesDayMonthYear",
+    "route": "/api/{sport}/tournament/{tournamentId}/schedules/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonRound",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/{segment5}/round/{round}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchCustomIdH2h",
+    "route": "/api/match/{customId}/h2h"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentFeaturedEvents",
+    "route": "/api/{sport}/tournament/{tournamentId}/featured-events"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchPlayer",
+    "route": "/api/match/{id}/player/{playerId}/{segment5}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasons",
+    "route": "/api/{sport}/tournament/{tournamentId}/seasons"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonEvents",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/events/{segment7}/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballMatchProviderWinningOdds",
+    "route": "/api/basketball/match/{id}/provider/{providerId}/winning-odds"
+  },
+  {
+    "method": "GET",
+    "name": "getSportMatchIdGraphSequence",
+    "route": "/api/{sport}/match/{id}/graph/sequence"
+  },
+  {
+    "method": "GET",
+    "name": "getUniqueTournamentImageDark",
+    "route": "/api/{sport}/unique-tournament/{tournamentId}/image/dark"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonStandingsAway",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/standings/away"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTournamentTournamentIdSeasonSeasonIdRounds",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/rounds"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonAway",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/{segment5}/away"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTournamentTournamentIdImageDark",
+    "route": "/api/{sport}/tournament/{tournamentId}/image/dark"
+  },
+  {
+    "method": "GET",
+    "name": "getVolleyballUniqueTournament",
+    "route": "/api/volleyball/unique-tournament/{tournamentId}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisEvent",
+    "route": "/api/tennis/event/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentTournamentIdSeasonSeasonIdSegment5Rounds",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/{segment5}/rounds"
+  },
+  {
+    "method": "GET",
+    "name": "getEventOddsAll",
+    "route": "/api/{sport}/event/{id}/odds/{providerId}/all"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonBestPlayersPerGame",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/best-players/per-game"
+  },
+  {
+    "method": "GET",
+    "name": "getEventGraphSequence",
+    "route": "/api/{sport}/event/{id}/graph/sequence"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTournamentCategories",
+    "route": "/api/{sport}/tournament/categories"
+  },
+  {
+    "method": "GET",
+    "name": "getUniqueTournamentAllCategory",
+    "route": "/api/{sport}/unique-tournament/all/category/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentTournamentIdScheduledEventsDate",
+    "route": "/api/tournament/{tournamentId}/scheduled-events/{date}"
+  },
+  {
+    "method": "GET",
+    "name": "getSportMatchesDayMonthYear",
+    "route": "/api/{sport}/matches/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getRugbyMatch",
+    "route": "/api/rugby/match/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisEventsNear",
+    "route": "/api/tennis/{segment2}/{id}/events/near"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchProviderWinningOdds",
+    "route": "/api/match/{id}/provider/{providerId}/winning-odds"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentTournamentIdImageDark",
+    "route": "/api/tournament/{tournamentId}/image/dark"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisTournamentSeasonVenueEventsAll",
+    "route": "/api/tennis/tournament/{tournamentId}/season/{seasonId}/venue/{venueId}/events/all/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getUniqueTournament",
+    "route": "/api/{sport}/unique-tournament/{tournamentId}"
+  },
+  {
+    "method": "GET",
+    "name": "getFootballScheduledTournamentsByDate",
+    "route": "/api/scheduled-tournaments/{day}/{month}/{year}/page/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchesOdds",
+    "route": "/api/matches/odds/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentAllCategoryId",
+    "route": "/api/tournament/all/category/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getHandballUniqueTournamentSeason",
+    "route": "/api/handball/unique-tournament/{tournamentId}/season/{seasonId}/{segment6}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonStatisticsInfo",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/statistics/info"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentTournamentId",
+    "route": "/api/tournament/{tournamentId}"
+  },
+  {
+    "method": "GET",
+    "name": "getIceHockeyTournamentSeasonBestPlayers",
+    "route": "/api/ice-hockey/tournament/{tournamentId}/season/{seasonId}/best-players/{segment7}"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaUniqueTournamentTournamentIdSchedulesMonthYear",
+    "route": "/api/mma/unique-tournament/{tournamentId}/schedules/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchesLive",
+    "route": "/api/matches/live"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentInfo",
+    "route": "/api/{sport}/tournament/{tournamentId}/info"
+  },
+  {
+    "method": "GET",
+    "name": "getTvCountryChannels",
+    "route": "/api/tv/country/{countryCode}/channels"
+  },
+  {
+    "method": "GET",
+    "name": "getTvChannelSchedule",
+    "route": "/api/tv/channel/{id}/schedule"
+  },
+  {
+    "method": "GET",
+    "name": "getTvChannelEvent",
+    "route": "/api/tv/channel/{channId}/event/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getManagerIdSegment3",
+    "route": "/api/manager/{id}/{segment3}"
+  },
+  {
+    "method": "GET",
+    "name": "getEsportCharacterImage",
+    "route": "/api/esport/character/{characterId}/image"
+  },
+  {
+    "method": "GET",
+    "name": "getEsportMapImage",
+    "route": "/api/esport/map/{mapId}/image"
+  },
+  {
+    "method": "GET",
+    "name": "getManagerImage",
+    "route": "/api/{sport}/manager/{id}/image"
+  },
+  {
+    "method": "GET",
+    "name": "getPlaceholder",
+    "route": "/api/placeholder/{segment2}"
+  },
+  {
+    "method": "GET",
+    "name": "getCountriesAll",
+    "route": "/api/countries/all"
+  },
+  {
+    "method": "GET",
+    "name": "getPlaceholders",
+    "route": "/api/placeholders/{segment2}"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisRankingsLive",
+    "route": "/api/tennis/rankings/{segment3}/live"
+  },
+  {
+    "method": "GET",
+    "name": "getRankingsUefa",
+    "route": "/api/rankings/uefa/{segment3}"
+  },
+  {
+    "method": "GET",
+    "name": "getSportCalendarDayMonthYearCategories",
+    "route": "/api/{sport}/calendar/{day}/{month}/{year}/categories"
+  },
+  {
+    "method": "GET",
+    "name": "getStageOddsProvider",
+    "route": "/api/{sport}/stage/{id}/odds/provider/{providerId}/{segment7}"
+  },
+  {
+    "method": "GET",
+    "name": "getRankingsTeam",
+    "route": "/api/rankings/team/{teamId}"
+  },
+  {
+    "method": "GET",
+    "name": "getMotorsportStageFeatured",
+    "route": "/api/motorsport/stage/featured"
+  },
+  {
+    "method": "GET",
+    "name": "getSportMatchCustomIdH2h",
+    "route": "/api/{sport}/match/{customId}/h2h"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaEvent",
+    "route": "/api/mma/event/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getMotorsportUniqueStage",
+    "route": "/api/motorsport/unique-stage/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonStandingsHome",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/standings/home"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTournamentAllCategoryId",
+    "route": "/api/{sport}/tournament/all/category/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonTeamEventsHome",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/team-events/home"
+  },
+  {
+    "method": "GET",
+    "name": "getMotorsportStageScheduled",
+    "route": "/api/motorsport/stage/scheduled/{date}"
+  },
+  {
+    "method": "GET",
+    "name": "getMotorsportStageStageId",
+    "route": "/api/motorsport/stage/{stageId}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonTeamEventsAway",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/team-events/away"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentCategories",
+    "route": "/api/tournament/categories"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchBestPlayersSummary",
+    "route": "/api/match/{eventId}/best-players/summary"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisTournamentSeasonTopTeamsMaindraw",
+    "route": "/api/tennis/tournament/{tournamentId}/season/{seasonId}/top-teams/mainDraw"
+  },
+  {
+    "method": "GET",
+    "name": "getTableTennisEvent",
+    "route": "/api/table-tennis/event/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getStageSubstages",
+    "route": "/api/{sport}/stage/{stageId}/substages"
+  },
+  {
+    "method": "GET",
+    "name": "getHandballUniqueTournamentSeasonMatchesRoundSlug",
+    "route": "/api/handball/unique-tournament/{tournamentId}/season/{seasonId}/matches/round/{round}/slug/{slug}"
+  },
+  {
+    "method": "GET",
+    "name": "getStageStandings",
+    "route": "/api/{sport}/stage/{id}/standings/{segment5}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentImage",
+    "route": "/api/{sport}/tournament/{tournamentId}/image"
+  },
+  {
+    "method": "GET",
+    "name": "getCyclingStage",
+    "route": "/api/cycling/stage/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaUniqueStageRecentStageIds",
+    "route": "/api/mma/unique-stage/{id}/recent-stage-ids"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaMainEventsExtended",
+    "route": "/api/mma/main-events/{date}/extended"
+  },
+  {
+    "method": "GET",
+    "name": "getEsportGame",
+    "route": "/api/esport/game/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getBasketballTournamentSeasonBestPlayers",
+    "route": "/api/basketball/tournament/{tournamentId}/season/{seasonId}/best-players/{segment7}"
+  },
+  {
+    "method": "GET",
+    "name": "getTvCountryAllEvent",
+    "route": "/api/tv/country/all/event/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getUniqueStageSeason",
+    "route": "/api/{sport}/unique-stage/{uniqueStageId}/season"
+  },
+  {
+    "method": "GET",
+    "name": "getMma",
+    "route": "/api/mma/{segment2}"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaEventH2hEvents",
+    "route": "/api/mma/event/{customId}/h2h/events"
+  },
+  {
+    "method": "GET",
+    "name": "getEsportEvent",
+    "route": "/api/esport/event/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTeamIdUniqueTournamentsAll",
+    "route": "/api/{sport}/team/{id}/unique-tournaments/all"
+  },
+  {
+    "method": "GET",
+    "name": "getMotorsportTeamDriverHistory",
+    "route": "/api/motorsport/team/{id}/driver/history"
+  },
+  {
+    "method": "GET",
+    "name": "getPlayerTournamentSeason",
+    "route": "/api/player/{id}/tournament/{tournamentId}/season/{seasonId}/{segment7}"
+  },
+  {
+    "method": "GET",
+    "name": "getMotorsportStageIdSegment4",
+    "route": "/api/motorsport/stage/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTeamStageSeasons",
+    "route": "/api/{sport}/team/{id}/stage/seasons"
+  },
+  {
+    "method": "GET",
+    "name": "getImgFlag",
+    "route": "/api/img/flag/{flag}"
+  },
+  {
+    "method": "GET",
+    "name": "getHandballPlayerUniqueTournamentSeasonStatisticsOverall",
+    "route": "/api/handball/player/{id}/unique-tournament/{tournamentId}/season/{seasonId}/statistics/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getMotorsportCategoryStagesAll",
+    "route": "/api/motorsport/category/{id}/stages/all"
+  },
+  {
+    "method": "GET",
+    "name": "getCountryFlag",
+    "route": "/api/country/{code}/flag"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisTeamSeasonBestResult",
+    "route": "/api/tennis/team/{id}/season/{seasonId}/best-result"
+  },
+  {
+    "method": "GET",
+    "name": "getSportCalendarMonthYearCategories",
+    "route": "/api/{sport}/calendar/{month}/{year}/categories"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaRankingsUniqueTournamentSummary",
+    "route": "/api/mma/rankings/unique-tournament/{tournamentId}/summary"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaCalendarUniqueTournamentMonthsWithEvents",
+    "route": "/api/mma/calendar/unique-tournament/{id}/{timezoneOffset}/months-with-events"
+  },
+  {
+    "method": "GET",
+    "name": "getCalendarSeasonDaysWithEvents",
+    "route": "/api/calendar/season/{seasonId}/{year}/days-with-events"
+  },
+  {
+    "method": "GET",
+    "name": "getRankingsFifa",
+    "route": "/api/rankings/fifa"
+  },
+  {
+    "method": "GET",
+    "name": "getCalendar",
+    "route": "/api/{sport}/calendar/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisVenue",
+    "route": "/api/tennis/venue/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchPlayerStatistics",
+    "route": "/api/{sport}/match/{id}/player/{playerId}/statistics"
+  },
+  {
+    "method": "GET",
+    "name": "getEvent",
+    "route": "/api/{sport}/event/{id}"
+  },
+  {
+    "method": "GET",
+    "name": "getVenueEvents",
+    "route": "/api/venue/{id}/events/{sport}/{span}/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getEvents",
+    "route": "/api/{sport}/events/{day}/{month}/{year}"
+  },
+  {
+    "method": "GET",
+    "name": "getVolleyballMatch",
+    "route": "/api/volleyball/match/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTableTennisTournamentSeasonPowerRankingsRounds",
+    "route": "/api/table-tennis/tournament/{tournamentId}/season/{seasonId}/power-rankings/rounds"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaUniqueTournamentTournamentMmaEventsAll",
+    "route": "/api/mma/unique-tournament/{uniqueTournamentId}/tournament/{tournamentId}/mma-events/all"
+  },
+  {
+    "method": "GET",
+    "name": "getTableTennisTournamentSeasonPlayerOfThe",
+    "route": "/api/table-tennis/tournament/{tournamentId}/season/{seasonId}/player-of-the-season"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTournamentTournamentId",
+    "route": "/api/{sport}/tournament/{tournamentId}"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchGoalkeeperJersey",
+    "route": "/api/match/{id}/goalkeeper/jersey/{segment5}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonTypes",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/{segment5}/types"
+  },
+  {
+    "method": "GET",
+    "name": "getSportTournamentTournamentIdSeasonSeasonIdMatches",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/matches"
+  },
+  {
+    "method": "GET",
+    "name": "getMatchOdds",
+    "route": "/api/match/{id}/odds/{providerId}/{segment5}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonTopRatingsOverall",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/top-ratings/overall"
+  },
+  {
+    "method": "GET",
+    "name": "getTableTennisTournamentCategoriesAll",
+    "route": "/api/table-tennis/tournament/categories/all"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonMatchesRoundSlug",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/matches/round/{round}/slug/{slug}"
+  },
+  {
+    "method": "GET",
+    "name": "getTennisTournamentsLast",
+    "route": "/api/tennis/{segment2}/{id}/tournaments/last"
+  },
+  {
+    "method": "GET",
+    "name": "getVolleyballUniqueTournamentSeason",
+    "route": "/api/volleyball/unique-tournament/{tournamentId}/season/{seasonId}/{segment6}"
+  },
+  {
+    "method": "GET",
+    "name": "getHandballMatch",
+    "route": "/api/handball/match/{id}/{segment4}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonTeamPerformance",
+    "route": "/api/tournament/{tournamentId}/season/{seasonId}/team/{teamId}/performance"
+  },
+  {
+    "method": "GET",
+    "name": "getMmaUniqueTournamentMainEvents",
+    "route": "/api/mma/unique-tournament/{tournamentId}/main-events/{segment5}/{page}"
+  },
+  {
+    "method": "GET",
+    "name": "getUniqueTournamentSeasonMatchesRound",
+    "route": "/api/{sport}/unique-tournament/{tournamentId}/season/{seasonId}/matches/round/{round}"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonEventsRoundSlug",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/events/round/{round}/slug/{slug}"
+  },
+  {
+    "method": "GET",
+    "name": "getTableTennisTournamentSeasonStatisticsInfo",
+    "route": "/api/table-tennis/tournament/{tournamentId}/season/{seasonId}/statistics/info"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonCuptrees",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/cuptrees"
+  },
+  {
+    "method": "GET",
+    "name": "getTournamentSeasonVenues",
+    "route": "/api/{sport}/tournament/{tournamentId}/season/{seasonId}/venues"
+  }
+]

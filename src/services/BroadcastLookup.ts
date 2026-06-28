@@ -113,6 +113,11 @@ export function buildBroadcastIndex(matches: MatchScheduleEntry[]): Record<strin
 
 const broadcastIndex = buildBroadcastIndex(entries);
 
+const scheduleByMatchId = new Map<string, MatchScheduleEntry>();
+for (const match of entries) {
+  scheduleByMatchId.set(`M${match.matchNumber}`, match);
+}
+
 const kickoffToMatchId: Record<string, string> = {};
 for (const match of entries) {
   kickoffToMatchId[normalizeKickoffUtc(match.kickoff.utc)] = `M${match.matchNumber}`;
@@ -124,6 +129,20 @@ export function getBroadcast(matchId: string): BroadcastChip | undefined {
 
 export function getAllScheduleEntries(): MatchScheduleEntry[] {
   return entries;
+}
+
+export function getScheduleEntry(matchId: string): MatchScheduleEntry | undefined {
+  return scheduleByMatchId.get(matchId);
+}
+
+/** Official schedule label for a fixture side (includes knockout placeholders). */
+export function getScheduleTeamName(
+  matchId: string,
+  side: "home" | "away"
+): string | undefined {
+  const entry = scheduleByMatchId.get(matchId);
+  if (!entry) return undefined;
+  return side === "home" ? entry.homeTeam : entry.awayTeam;
 }
 
 export function getBroadcastByKickoff(kickoffUtc: string): BroadcastChip | undefined {

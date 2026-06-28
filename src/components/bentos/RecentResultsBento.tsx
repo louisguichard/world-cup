@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 import { localDateKey, formatTimeAgo, yesterdayDateKey } from "../../lib/localDate";
-import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import {
+  flagTeamIdForMatch,
+  resolveMatchTeam,
+  scheduleNameHintForMatch,
+  teamDisplayNameForMatch,
+} from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import type { MergedMatch, Team } from "../../types";
 import { useStore } from "../../store";
@@ -16,21 +20,35 @@ type ResultRowProps = {
 
 function ResultRow({ match, home, away, onSelect }: ResultRowProps) {
   const teams = useStore((s) => s.teams);
-  const homeName = teamDisplayName(home, match.homeTeamId, teams);
-  const awayName = teamDisplayName(away, match.awayTeamId, teams);
+  const resolvedHome = home ?? resolveMatchTeam(match, "home", teams);
+  const resolvedAway = away ?? resolveMatchTeam(match, "away", teams);
+  const homeName = teamDisplayNameForMatch(match, "home", teams);
+  const awayName = teamDisplayNameForMatch(match, "away", teams);
   const ago = formatTimeAgo(match.date);
 
   return (
     <button type="button" className="recent-result-row" onClick={() => onSelect(match.homeTeamId)}>
       <span className="recent-result-team recent-result-team--home">
-        <TeamFlag team={home} teamId={match.homeTeamId} size="sm" compact />
+        <TeamFlag
+          team={resolvedHome}
+          teamId={flagTeamIdForMatch(match, "home", teams)}
+          nameHint={scheduleNameHintForMatch(match, "home")}
+          size="sm"
+          compact
+        />
         <span className="team-name-text">{homeName}</span>
       </span>
       <span className="recent-result-score">
         {match.homeScore ?? 0} – {match.awayScore ?? 0}
       </span>
       <span className="recent-result-team recent-result-team--away">
-        <TeamFlag team={away} teamId={match.awayTeamId} size="sm" compact />
+        <TeamFlag
+          team={resolvedAway}
+          teamId={flagTeamIdForMatch(match, "away", teams)}
+          nameHint={scheduleNameHintForMatch(match, "away")}
+          size="sm"
+          compact
+        />
         <span className="team-name-text">{awayName}</span>
       </span>
       <span className="recent-result-meta">
@@ -105,8 +123,8 @@ export function RecentResultsBento() {
               <ResultRow
                 key={match.id}
                 match={match}
-                home={resolveTeamFromStore(teams, match.homeTeamId)}
-                away={resolveTeamFromStore(teams, match.awayTeamId)}
+                home={teams[match.homeTeamId]}
+                away={teams[match.awayTeamId]}
                 onSelect={openTeamSheet}
               />
             ))}

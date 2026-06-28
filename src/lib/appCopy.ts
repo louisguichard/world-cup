@@ -446,10 +446,59 @@ export const APP_COPY = {
     installBodyMobile: "Add to your home screen for a full-screen app with live scores.",
     installBodyDesktop: "Install on your computer for quick access from the dock or taskbar.",
     installButton: "Install app",
+    installButtonWorking: "Opening installer…",
     installIosTitle: "Add to Home Screen",
-    installIosBody: "Tap the Share button, then choose \"Add to Home Screen\".",
+    installIosBody: "Tap Install — we'll show the quick steps to add this app to your home screen.",
     dismiss: "Not now",
     refreshing: "Updating scores…",
+    guide: {
+      close: "Close",
+      done: "Got it",
+      ios: {
+        title: "Add to Home Screen",
+        lead: "Safari does not allow one-tap install. These two steps add the app to your home screen.",
+        steps: [
+          "Tap the Share button at the bottom of Safari (square with an arrow).",
+          "Scroll down and tap Add to Home Screen, then tap Add.",
+        ],
+      },
+      android: {
+        title: "Install the app",
+        lead: "If the installer did not open automatically, use your browser menu:",
+        steps: [
+          "Tap the menu button (⋮) in Chrome.",
+          "Tap Install app or Add to Home screen.",
+          "Confirm Install when asked.",
+        ],
+      },
+      desktopChrome: {
+        title: "Install on your computer",
+        lead: "If the installer did not open, use the install control in your address bar:",
+        steps: [
+          "Look for the install icon in the address bar (monitor with a down arrow, or a plus).",
+          "Click Install or Add to dock.",
+          "Confirm — the app will open from your dock, taskbar, or Start menu.",
+        ],
+      },
+      desktopSafari: {
+        title: "Add to Dock",
+        lead: "Safari on Mac can pin this site as an app in your Dock:",
+        steps: [
+          "Open the File menu in Safari.",
+          "Choose Add to Dock.",
+          "Launch Road to the Final from your Dock like any other app.",
+        ],
+      },
+      desktopOther: {
+        title: "Install the app",
+        lead: "Use your browser's install or shortcut option for this site:",
+        steps: [
+          "Open the browser menu (often ⋮ or ☰).",
+          "Look for Install app, Add to Home screen, or Create shortcut.",
+          "Confirm — you can then open the app from your dock, desktop, or home screen.",
+        ],
+      },
+    },
   },
 
   simulator: {
@@ -475,6 +524,103 @@ export const APP_COPY = {
     hideMarket: "Hide betting odds",
     model: "Our guess",
     market: "Betting",
+  },
+
+  splash: {
+    loadingAria: "Loading",
+    simulationError: "Simulation could not complete",
+    liveDataError: "Could not reach live match data",
+    connectionHint: "Check your connection and try again",
+    retryAria: "Retry loading match data",
+    retryButton: "Try again",
+  },
+
+  errors: {
+    sectionUnavailable: "This section is not available right now",
+    somethingWrong: "Something went wrong",
+    sectionFailed: "This section could not load.",
+    tryAgain: "Try again",
+  },
+
+  certainty: {
+    confirmed: "Locked in",
+    projected: "Best guess",
+    projectedStrong: "Leading",
+    projectedWeak: "On track",
+    simulated: "Simulated",
+    tbd: "TBD",
+  },
+
+  goalScorer: {
+    age: "Age",
+    hometown: "Home town",
+    club: "Club",
+    tournamentGoals: "Goals this World Cup",
+    internationalGoals: "Career goals",
+    internationalCaps: "Career caps",
+    ownGoalBadge: "OG",
+    placeholderNote:
+      "Player photo and career stats will show up when roster data is available.",
+    goalBy: (name: string) => `Goal by ${name}`,
+  },
+
+  dataFreshness: {
+    stale: (time: string) => `Scores may be out of date — last update ${time}`,
+    proxyDeadPrefix: "Data source unavailable",
+  },
+
+  predictions: {
+    ariaLabel: "Match tips",
+    loading: "Loading today's tips…",
+    marketClassic: "Who wins the game?",
+    marketOverUnder: "Total goals over or under 2.5",
+    marketBothScore: "Both teams score",
+    guessColumn: "What they guessed",
+    winsLosses: (won: number, lost: number) => `${won} wins · ${lost} losses`,
+    featuredPerformance: "Featured tips — how they did",
+    allPerformance: "All tips — how they did",
+    wcTeamsToday: "World Cup teams playing today",
+    tipPrefix: "Tip:",
+    confidence: (pct: number) => ` · about ${pct}% sure`,
+    noWcTips: (leagueCount: number) =>
+      `No World Cup team tips in today's list yet — we track ${leagueCount} leagues. Tips show up here when this team has a game today.`,
+    extraFeatured: "Extra featured tips",
+    paidPlanNote: "Extra featured tips need a paid plan on this tips website.",
+  },
+
+  aria: {
+    mainNav: "Main navigation",
+    qualifiedTeams: "Teams moving on",
+    eliminatedTeams: "Teams out of the tournament",
+    contentionTeams: "Teams still in the race",
+    knockoutBracket: "Knockout bracket",
+    bestThirdRankings: "Best third-place rankings",
+    bestThirdTimeline: "Best third ranking positions over time",
+    timelinePosition: "Timeline position",
+    goalScorers: "Goal scorers",
+    goalsAndCards: "Goals and cards",
+    matchDetail: "Match detail",
+    close: "Close",
+    concurrentBroadcast: "Also on another channel",
+    standingsViewMode: "Standings view mode",
+    qualificationFlags: "Qualification flags",
+    groupStandings: "Group standings",
+    groupTables: "Group tables",
+    recentResults: "Recent results",
+    filterResultsByTeam: "Filter results by team",
+    upcomingMatches: "Upcoming matches",
+    liveNow: "Live now",
+    upcomingFixtures: "Upcoming games",
+    qualification: "Who moves on",
+    scheduleFilters: "Schedule filters",
+    viewMode: "View mode",
+    dayNavigation: "Day navigation",
+    selectMatchDate: "Select match date",
+    searchTeams: "Search teams",
+    filterByQualification: "Filter by status",
+    winDrawLoss: "Win, tie, and loss breakdown",
+    colorTheme: "Color theme",
+    footballStreams: "Football live streams",
   },
 } as const;
 

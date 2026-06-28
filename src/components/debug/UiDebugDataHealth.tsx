@@ -6,7 +6,7 @@ export function UiDebugDataHealth() {
   const teams = useStore((s) => s.teams);
   const groupStandings = useStore((s) => s.groupStandings);
   const liveMatches = useStore((s) => s.liveMatches);
-  const dataWarnings = useStore((s) => s.dataWarnings);
+  const dataWarnings = useStore((s) => s.warnings);
 
   const report = useMemo(
     () => buildDataHealthReport({ teams, groupStandings, liveMatches, dataWarnings }),

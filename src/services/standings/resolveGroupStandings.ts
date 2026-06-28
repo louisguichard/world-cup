@@ -21,6 +21,11 @@ import {
   isWc2026LiveDisabled,
 } from "../WorldCup2026LiveClient";
 import { fetchGroups, isWorldCup2026Disabled } from "../WorldCup2026Client";
+import {
+  fetchFootApi7GroupStandings,
+  isFootApi7Disabled,
+} from "../FootApi7Client";
+import { loadCachedFootApi7Bundle } from "../../lib/footApi7Cache";
 import { fetchWithFallback, STANDINGS_SOURCE_PRIORITY } from "../orchestrator/FallbackChain";
 
 export type ResolveGroupStandingsOptions = {
@@ -50,6 +55,13 @@ async function fetchRemoteStandings(): Promise<GroupStanding[]> {
         if (!isApiEnabled("wc2026Live") || isWc2026LiveDisabled()) return null;
         const raw = await fetchWcLiveStandings();
         const normalized = normalizeWCLiveStandings(raw);
+        return normalized.length > 0 ? normalized : null;
+      },
+      footapi7: async () => {
+        if (!isApiEnabled("footApi7") || isFootApi7Disabled()) return null;
+        const cached = loadCachedFootApi7Bundle()?.groupStandings;
+        if (cached && cached.length > 0) return cached;
+        const normalized = await fetchFootApi7GroupStandings();
         return normalized.length > 0 ? normalized : null;
       },
       zafronix: async () => {

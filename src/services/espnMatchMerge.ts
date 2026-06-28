@@ -1,7 +1,7 @@
 import type { MergedMatch, Team } from "../types";
-import { resolveCanonicalTeamId, resolveTeamFromStore } from "../data/wc2026TeamCatalog";
+import { resolveCanonicalTeamId } from "../data/wc2026TeamCatalog";
 import { applyLiveScore } from "./DataMerger";
-import { enrichMatchWithScheduleId, resolveOfficialMatchKickoff } from "./ScheduleLinker";
+import { enrichMatchWithScheduleId } from "./ScheduleLinker";
 import { logger } from "./Logger";
 
 export type EspnMergeMode = "id" | "fuzzy" | "new";
@@ -26,14 +26,19 @@ function sameFixture(
   b: MergedMatch,
   teams: Record<string, Team>
 ): boolean {
-  const aHome = resolveTeamFromStore(teams, a.homeTeamId);
-  const aAway = resolveTeamFromStore(teams, a.awayTeamId);
-  const bHome = resolveTeamFromStore(teams, b.homeTeamId);
-  const bAway = resolveTeamFromStore(teams, b.awayTeamId);
+  const aHome = teams[a.homeTeamId];
+  const aAway = teams[a.awayTeamId];
+  const bHome = teams[b.homeTeamId];
+  const bAway = teams[b.awayTeamId];
   if (!aHome || !aAway || !bHome || !bAway) {
     return a.homeTeamId === b.homeTeamId && a.awayTeamId === b.awayTeamId;
   }
   return teamNameMatches(aHome, bHome.name) && teamNameMatches(aAway, bAway.name);
+}
+
+function lookupTeam(teams: Record<string, Team>, teamId: string): Team | undefined {
+  if (teams[teamId]) return teams[teamId];
+  return Object.values(teams).find((team) => team.id === teamId);
 }
 
 /** Rewrite match team ids to catalog ids (bra, fra, …) so standings stay unified. */
@@ -41,8 +46,8 @@ export function canonicalizeMatchTeamIds(
   match: MergedMatch,
   teams: Record<string, Team>
 ): MergedMatch {
-  const homeTeam = resolveTeamFromStore(teams, match.homeTeamId);
-  const awayTeam = resolveTeamFromStore(teams, match.awayTeamId);
+  const homeTeam = lookupTeam(teams, match.homeTeamId);
+  const awayTeam = lookupTeam(teams, match.awayTeamId);
   return {
     ...match,
     homeTeamId: resolveCanonicalTeamId(match.homeTeamId, homeTeam),
@@ -116,11 +121,7 @@ export function mergeEspnMatchIntoStore(
     espnEventId: incoming.id
   }, "espn");
 
-  const linked = enrichMatchWithScheduleId(applied, teams);
-  merged[storeKey] = {
-    ...linked,
-    date: resolveOfficialMatchKickoff(linked),
-  };
+  merged[storeKey] = enrichMatchWithScheduleId(applied, teams);
 
   return mode;
 }

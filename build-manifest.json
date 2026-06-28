@@ -1,271 +1,439 @@
 {
-  "updatedAt": "2026-06-28T04:45:23.685Z",
+  "updatedAt": "2026-06-28T04:48:43.815Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 45,
+      "kind": "build",
+      "message": "244 file(s) in .cursor, .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api — 244 files changed, 87284 insertions(+), 2461 deletions(-)",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T04:48:43.815Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 44,
+      "kind": "build",
+      "message": "19 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, package.json, scripts — 19 files changed, 71658 insertions(+), 206 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T21:23:18.806Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 43,
+      "kind": "build",
+      "message": "Fix standings/third-place from ESPN; refresh audit snapshot and boot cache v6",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T21:23:10.410Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 42,
+      "kind": "build",
+      "message": "Sync match schedule from ESPN; bump boot cache v5 for fresh standings",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T21:12:45.530Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 41,
+      "kind": "build",
+      "message": "Remove duplicate sofascore6 rewrite; document Getty/YouTube env vars",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T21:00:03.328Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 40,
+      "kind": "build",
+      "message": "Integrate all feature branches via consolidated rapid proxy",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T20:45:03.500Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 39,
+      "kind": "build",
+      "message": "13 file(s) in api, config, package.json, scripts, src, vercel.json — 13 files changed, 784 insertions(+), 2 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T20:27:48.117Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 38,
+      "kind": "build",
+      "message": "7 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, vercel.json, version.json — 7 files changed, 56 insertions(+), 45 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:31:38.935Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 37,
+      "kind": "build",
+      "message": "Use path query param for Vercel rapid rewrites",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:31:38.882Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 36,
+      "kind": "build",
+      "message": "1 file(s) in vercel.json — 1 file changed, 36 insertions(+), 36 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:29:55.564Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 35,
+      "kind": "build",
+      "message": "Fix vercel rewrite syntax for rapid proxy query passthrough",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:29:55.517Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 34,
+      "kind": "build",
+      "message": "7 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, vercel.json, version.json — 7 files changed, 76 insertions(+), 46 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:25:59.221Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 33,
+      "kind": "build",
+      "message": "Route RapidAPI rewrites through query params on api/rapid",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:25:59.167Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 32,
+      "kind": "build",
+      "message": "6 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, version.json — 6 files changed, 60 insertions(+), 40 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:23:13.112Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 31,
+      "kind": "build",
+      "message": "Flatten rapid and proxy to top-level Vercel API files",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:23:04.187Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 30,
+      "kind": "build",
+      "message": "6 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, version.json — 6 files changed, 15 insertions(+), 2 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:17:00.974Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 29,
+      "kind": "build",
+      "message": "Fix Vercel rapid proxy catch-all route naming",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T19:15:28.924Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 28,
+      "kind": "build",
+      "message": "31 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, src, vercel.json — 31 files changed, 509 insertions(+), 1001 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T18:45:32.392Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 27,
+      "kind": "build",
+      "message": "Consolidate RapidAPI proxies, boot ESPN bypass, cache migration, live results",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T18:45:24.025Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 26,
+      "kind": "build",
+      "message": "18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, config, scripts, src — 18 files changed, 399 insertions(+), 49 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T18:42:29.803Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 25,
+      "kind": "build",
+      "message": "Wire Boggio Football Prediction v2 into WC sync and match index",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T18:38:01.703Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 24,
+      "kind": "build",
+      "message": "Always show team names and flags; hide backend ids from UI",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T18:32:31.789Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 23,
+      "kind": "build",
+      "message": "10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, vercel.json — 10 files changed, 59 insertions(+), 13 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T17:27:59.634Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 22,
+      "kind": "build",
+      "message": "Bust client caches (boot v4, SW v5, quota reset) and no-cache shell headers",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T17:27:44.550Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 21,
+      "kind": "build",
+      "message": "14 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 14 files changed, 235 insertions(+), 22 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T17:02:26.938Z"
+    },
     {
       "version": "4.0.0",
       "build": 20,
       "kind": "build",
-      "message": "3 file(s) in api, build-manifest.json, server — 3 files changed, 16 insertions(+), 15 deletions(-)",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T04:45:23.257Z"
+      "message": "Add TVView RapidAPI IPTV source and wire API audit coverage",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T17:02:11.726Z"
     },
     {
       "version": "4.0.0",
       "build": 19,
       "kind": "build",
-      "message": "254 file(s) in .cursor, .cursorrules, .env.example, CHANGELOG.md, VERSION_LOG.md, api — 254 files changed, 16735 insertions(+), 1121 deletions(-)",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T04:45:06.305Z"
+      "message": "19 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 19 files changed, 828 insertions(+), 7 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T16:56:32.979Z"
     },
     {
       "version": "4.0.0",
       "build": 18,
       "kind": "build",
-      "message": "Live cards, weather, events, glow layout, and operational API routes",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T04:44:56.776Z"
+      "message": "Wire IPTV RapidAPI providers as stream fallback on match watch tab",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T16:56:18.797Z"
     },
     {
       "version": "4.0.0",
       "build": 17,
       "kind": "build",
-      "message": "Phase 2/3 UX blueprint + monorepo packages, analyst frontend, admin console, cursor prompt pack, council synthesis",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T04:02:57.416Z"
+      "message": "18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, scripts, src — 18 files changed, 666 insertions(+), 45 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T16:47:20.024Z"
     },
     {
       "version": "4.0.0",
       "build": 16,
       "kind": "build",
-      "message": "WC2026 Production Architecture: BC1/BC2/BC3 services, Prisma schema, BullMQ queues, SSE push, QueryAPI endpoints, OTel observability, React PWA SSE hook",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T03:39:08.337Z"
+      "message": "Add quota governor and multi-source verification gates",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T16:47:07.332Z"
     },
     {
       "version": "4.0.0",
       "build": 15,
       "kind": "build",
-      "message": "fix groups tab crash: add error boundaries, harden tournament profile cache reader, fix TS errors",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T03:24:45.765Z"
+      "message": "11 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 11 files changed, 197 insertions(+), 160 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T16:39:20.929Z"
     },
     {
       "version": "4.0.0",
       "build": 14,
       "kind": "build",
-      "message": "Give live hero glow room via bleed padding and visible overflow",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T02:53:19.829Z"
+      "message": "Unify standings and simulation on canonical dataset",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T16:38:56.815Z"
     },
     {
       "version": "4.0.0",
       "build": 13,
       "kind": "build",
-      "message": "Fix goal celebration banner overlap and layout shift on live cards",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T02:52:06.072Z"
+      "message": "15 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 15 files changed, 570 insertions(+), 143 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:55:22.001Z"
     },
     {
       "version": "4.0.0",
       "build": 12,
       "kind": "build",
-      "message": "Yahoo Weather primary with canonical 16 host cities and icon badges",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T02:50:59.335Z"
+      "message": "Wire Boggio Football Prediction API v2 endpoints for match tips and accuracy stats",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:55:14.021Z"
     },
     {
       "version": "4.0.0",
       "build": 11,
       "kind": "build",
-      "message": "Fix live card events: remap ESPN team ids, show cards and subs",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T02:43:25.579Z"
+      "message": "14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, version.json — 14 files changed, 512 insertions(+), 64 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:50:18.050Z"
     },
     {
       "version": "4.0.0",
       "build": 10,
       "kind": "build",
-      "message": "Unify live secondary cards with primary size and full match details",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T02:37:32.001Z"
+      "message": "Fix PWA install: early SW + beforeinstallprompt capture, one-tap install on desktop/Android",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:50:11.170Z"
     },
     {
       "version": "4.0.0",
       "build": 9,
       "kind": "build",
-      "message": "Skip SVG graphics false positives in UI debug scan",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T02:32:20.284Z"
+      "message": "14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 14 files changed, 186 insertions(+), 61 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:40:01.444Z"
     },
     {
       "version": "4.0.0",
       "build": 8,
       "kind": "build",
-      "message": "Allow live hero cards to grow; clip glow horizontally only",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T02:23:35.195Z"
+      "message": "Full-app copy sweep via appCopy.ts; fix best-third race status labels",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:39:55.092Z"
     },
     {
       "version": "4.0.0",
       "build": 7,
       "kind": "build",
-      "message": "Fix Live view layout overflow and glow bleed collisions",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T02:16:43.218Z"
+      "message": "9 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 9 files changed, 141 insertions(+), 2 deletions(-)",
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T14:27:17.398Z"
     },
     {
       "version": "4.0.0",
       "build": 6,
       "kind": "build",
-      "message": "Stack live secondary cards under hero at matching column width",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T02:07:37.941Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 5,
-      "kind": "build",
-      "message": "Fix UI debug sweep scan bridge timing; archive sweep runs under .cursor/ui-debug-runs",
+      "message": "Add uiDebugBridge for sweep; skip SVG collision false positives; 0-issue uidebug gate",
       "date": "2026-06-27",
-      "timestamp": "2026-06-27T07:53:53.465Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 4,
-      "kind": "build",
-      "message": "16 file(s) in scripts, src — 16 files changed, 374 insertions(+), 205 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T07:52:39.493Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 2,
-      "kind": "build",
-      "message": "4 file(s) in src — 4 files changed, 16 insertions(+), 7 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T07:35:33.868Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 1,
-      "kind": "major",
-      "message": "Major v4 release: universal team identity, live qualification standings seed, Mexico crest fix, hash navigation refactor, and build 22 feature set.",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T07:22:02.260Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 22,
-      "kind": "build",
-      "message": "14 file(s) in build-manifest.json, src — 14 files changed, 436 insertions(+), 191 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T07:20:01.115Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 21,
-      "kind": "build",
-      "message": "2 file(s) in build-manifest.json, src — 2 files changed, 11 insertions(+), 3 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T07:11:17.721Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 20,
-      "kind": "build",
-      "message": "21 file(s) in build-manifest.json, scripts, src — 21 files changed, 348 insertions(+), 56 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T07:05:40.992Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 19,
-      "kind": "build",
-      "message": "8 file(s) in build-manifest.json, src — 8 files changed, 187 insertions(+), 19 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T07:02:14.166Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 18,
-      "kind": "build",
-      "message": "8 file(s) in build-manifest.json, src — 8 files changed, 240 insertions(+), 10 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T06:56:47.980Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 17,
-      "kind": "build",
-      "message": "8 file(s) in src — 8 files changed, 157 insertions(+), 33 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T06:51:25.940Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 16,
-      "kind": "build",
-      "message": "13 file(s) in .cursor, src — 13 files changed, 415 insertions(+), 11 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T06:48:33.340Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 15,
-      "kind": "build",
-      "message": "3 file(s) in build-manifest.json, src — 3 files changed, 24 insertions(+), 4 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T06:40:45.547Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 14,
-      "kind": "build",
-      "message": "6 file(s) in build-manifest.json, src — 6 files changed, 66 insertions(+), 19 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T06:39:24.592Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 13,
-      "kind": "build",
-      "message": "87 file(s) in .cursor, .githooks, build-manifest.json, docs, package.json, public — 87 files changed, 4970 insertions(+), 900 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T06:38:23.108Z"
-    },
-    {
-      "version": "3.0.0",
-      "build": 12,
-      "kind": "build",
-      "message": "Auto version pipeline: git hooks, build-manifest, release dashboard canvas, CHANGELOG [Unreleased] builds, agent rule + version-bump skill",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T06:37:10.267Z"
+      "timestamp": "2026-06-27T14:27:05.516Z"
     }
   ],
   "commits": [
     {
-      "hash": "8945ec0db81d5597f4bcebb151638246981af00e",
-      "shortHash": "8945ec0",
-      "message": "Ship live card parity, Yahoo weather, match events, and glow layout fixes.",
+      "hash": "9b44af8e99e462332d74d6897f257dd1338b1b2c",
+      "shortHash": "9b44af8",
+      "message": "Fix ESPN standings merge and refresh tournament audit data",
       "version": "4.0.0",
-      "build": 20,
-      "timestamp": "2026-06-28T04:45:23.684Z"
+      "build": 44,
+      "timestamp": "2026-06-27T21:23:18.900Z"
     },
     {
-      "hash": "b0218398cb154a5c44ab21dd9e8a5d025b94ef05",
-      "shortHash": "b021839",
-      "message": "Ship live card parity, Yahoo weather, match events, and glow layout fixes.",
+      "hash": "67c1e5f3fb294c657ade98cfc186a020869e23b2",
+      "shortHash": "67c1e5f",
+      "message": "Fix vercel.json rewrite syntax (named upstream param passthrough)",
+      "version": "4.0.0",
+      "build": 36,
+      "timestamp": "2026-06-27T19:29:55.645Z"
+    },
+    {
+      "hash": "8b3c16d9f5d4c7aa67ca826775e7f3ee2b2eac3e",
+      "shortHash": "8b3c16d",
+      "message": "Fix Vercel rewrites: pass service/upstream query params to api/rapid",
+      "version": "4.0.0",
+      "build": 34,
+      "timestamp": "2026-06-27T19:25:59.301Z"
+    },
+    {
+      "hash": "19ec866e94cc70689a34a9dd7a47ef9298309158",
+      "shortHash": "19ec866",
+      "message": "Flatten API proxies to top-level rapid.ts and proxy.ts for Vercel",
+      "version": "4.0.0",
+      "build": 32,
+      "timestamp": "2026-06-27T19:23:13.209Z"
+    },
+    {
+      "hash": "eac83bc9ca7f70163c0c653d69b3c1b6994c13cb",
+      "shortHash": "eac83bc",
+      "message": "Fix Vercel API proxy: use [...path] instead of [[...path]] catch-all",
+      "version": "4.0.0",
+      "build": 30,
+      "timestamp": "2026-06-27T19:17:01.068Z"
+    },
+    {
+      "hash": "499e1a1601142938c63d836edb54fa8ced93585b",
+      "shortHash": "499e1a1",
+      "message": "Merge football prediction integration with team display fixes",
+      "version": "4.0.0",
+      "build": 26,
+      "timestamp": "2026-06-27T18:42:29.882Z"
+    },
+    {
+      "hash": "e8bd51c91d6c3782d449e75500ed1beb66f42f02",
+      "shortHash": "e8bd51c",
+      "message": "Bust client caches and force fresh deploy shell",
+      "version": "4.0.0",
+      "build": 23,
+      "timestamp": "2026-06-27T17:27:59.717Z"
+    },
+    {
+      "hash": "39ef43287811ce7573d1e663f6af2f99d07b6042",
+      "shortHash": "39ef432",
+      "message": "Wire IPTV RapidAPI providers as stream fallback on match watch tab",
       "version": "4.0.0",
       "build": 19,
-      "timestamp": "2026-06-28T04:45:06.697Z"
+      "timestamp": "2026-06-27T16:56:33.074Z"
     },
     {
-      "hash": "6a7b81c4de2d5e41265cef1ef213b0039e3b8002",
-      "shortHash": "6a7b81c",
-      "message": "Sync build-manifest commit record for aa7e77d.",
+      "hash": "fbfaaab412a575a589b4f1e13de01a7361653c85",
+      "shortHash": "fbfaaab",
+      "message": "Unify standings and simulation on canonical dataset",
       "version": "4.0.0",
-      "build": 5,
-      "timestamp": "2026-06-27T07:54:46.963Z"
+      "build": 15,
+      "timestamp": "2026-06-27T16:39:21.010Z"
+    },
+    {
+      "hash": "a7e7a1107b29c70028d04e3d55644314193d4107",
+      "shortHash": "a7e7a11",
+      "message": "Sync build-manifest commit record for c6a26f9.",
+      "version": "4.0.0",
+      "build": 9,
+      "timestamp": "2026-06-27T14:40:33.567Z"
+    },
+    {
+      "hash": "c6a26f9702f9c8086c85a44841117668d7426aa3",
+      "shortHash": "c6a26f9",
+      "message": "Full-app copy sweep via appCopy.ts and fix best-third race labels",
+      "version": "4.0.0",
+      "build": 9,
+      "timestamp": "2026-06-27T14:40:01.531Z"
+    },
+    {
+      "hash": "5393ac0fa19d43fc2bda0e679efe62244ed69eb0",
+      "shortHash": "5393ac0",
+      "message": "Sync build-manifest commit record for cd21e5f.",
+      "version": "4.0.0",
+      "build": 7,
+      "timestamp": "2026-06-27T14:28:25.293Z"
+    },
+    {
+      "hash": "cd21e5f0aa599e5832e794147cc7267a02b4cf29",
+      "shortHash": "cd21e5f",
+      "message": "Sync build-manifest commit record for cb36242.",
+      "version": "4.0.0",
+      "build": 7,
+      "timestamp": "2026-06-27T14:28:01.873Z"
+    },
+    {
+      "hash": "cb362421d091099af32856d8792e701df7cda704",
+      "shortHash": "cb36242",
+      "message": "Fix uiDebugBridge missing module and reach 0-issue uidebug gate",
+      "version": "4.0.0",
+      "build": 7,
+      "timestamp": "2026-06-27T14:27:17.487Z"
     },
     {
       "hash": "aa7e77d590ee1c7c7dad95d2632ed28352ffd164",
@@ -394,94 +562,6 @@
       "version": "3.0.0",
       "build": 21,
       "timestamp": "2026-06-27T07:11:18.149Z"
-    },
-    {
-      "hash": "48e40633606b1ad1561d1659ead27e223726d3bb",
-      "shortHash": "48e4063",
-      "message": "Record deploy metadata for v3.0.0 build 20 production release.",
-      "version": "3.0.0",
-      "build": 20,
-      "timestamp": "2026-06-27T07:09:15.680Z"
-    },
-    {
-      "hash": "eef1b92a632f23b8958cd9ce9bbe2dcd80e16e05",
-      "shortHash": "eef1b92",
-      "message": "Record production deploy for v3.0.0 build 20.",
-      "version": "3.0.0",
-      "build": 20,
-      "timestamp": "2026-06-27T07:07:51.982Z"
-    },
-    {
-      "hash": "42d823db590223ac810747151040774a395d4b61",
-      "shortHash": "42d823d",
-      "message": "Record build-manifest metadata for def1814.",
-      "version": "3.0.0",
-      "build": 20,
-      "timestamp": "2026-06-27T07:06:21.780Z"
-    },
-    {
-      "hash": "def1814ca76f576ecee30396e51b0d038fc25f39",
-      "shortHash": "def1814",
-      "message": "Sync build-manifest commit record for c3b333f.",
-      "version": "3.0.0",
-      "build": 20,
-      "timestamp": "2026-06-27T07:06:12.955Z"
-    },
-    {
-      "hash": "58517e0a23cd9833319c4e9aa256f2d719126949",
-      "shortHash": "58517e0",
-      "message": "Sync build-manifest commit record for c3b333f.",
-      "version": "3.0.0",
-      "build": 20,
-      "timestamp": "2026-06-27T07:06:02.421Z"
-    },
-    {
-      "hash": "c3b333f5f1f956609a889c5821b1e4e9ebcc8f0d",
-      "shortHash": "c3b333f",
-      "message": "Polish team identity, schedule/venue rows, and simulator bracket alignment.",
-      "version": "3.0.0",
-      "build": 20,
-      "timestamp": "2026-06-27T07:05:41.545Z"
-    },
-    {
-      "hash": "a46badc194ca52a508fde81747de52011464d303",
-      "shortHash": "a46badc",
-      "message": "Harden boot cache schema versioning and expand SLS lineup normalizer.",
-      "version": "3.0.0",
-      "build": 19,
-      "timestamp": "2026-06-27T07:02:27.425Z"
-    },
-    {
-      "hash": "a1b8e76563a38f8115bf7424a48cf51e5afe1c6b",
-      "shortHash": "a1b8e76",
-      "message": "Fix qualification display for top-eight thirds and advancement scoring.",
-      "version": "3.0.0",
-      "build": 18,
-      "timestamp": "2026-06-27T06:56:48.921Z"
-    },
-    {
-      "hash": "f4ee7428e633a6eacf6870e5d79576aba2d8b9cf",
-      "shortHash": "f4ee742",
-      "message": "Record production deploy metadata for v3.0.0 build 17.",
-      "version": "3.0.0",
-      "build": 17,
-      "timestamp": "2026-06-27T06:54:00.652Z"
-    },
-    {
-      "hash": "fbef695016d2e0abbe74dd0f21cb69cef8356641",
-      "shortHash": "fbef695",
-      "message": "Record production deploy for v3.0.0 build 16.",
-      "version": "3.0.0",
-      "build": 17,
-      "timestamp": "2026-06-27T06:51:45.796Z"
-    },
-    {
-      "hash": "28b8f16aeb877865813bfd619a9373fc3d9de3bf",
-      "shortHash": "28b8f16",
-      "message": "build(12): fix R32 divergence, qual status, team drawer gaps, player photos, SLS wiring, plan sync",
-      "version": "3.0.0",
-      "build": 17,
-      "timestamp": "2026-06-27T06:51:26.426Z"
     }
   ],
   "deploys": [

@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type RefObject, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { APP_COPY } from "../../lib/appCopy";
 import type { CutoffScenario } from "../../lib/thirdPlaceCutoffScenario";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import type { Team } from "../../types";
 import { TeamFlag } from "../team/TeamFlag";
 import venueStyles from "../venue/VenuePopover.module.css";
@@ -73,8 +72,8 @@ function CutoffPopoverPanel({ scenario, teams, titleId, onClose }: PanelProps) {
               <ul>
                 {scenario.watchTeams.map((w) => (
                   <li key={w.teamId}>
-                    <TeamFlag team={resolveTeamFromStore(teams, w.teamId)} teamId={w.teamId} size="sm" compact />{" "}
-                    {teamDisplayName(undefined, w.teamId, teams)} — #{w.rank}, {w.points} pts
+                    <TeamFlag team={teams[w.teamId]} teamId={w.teamId} size="sm" compact />{" "}
+                    {teamDisplayNameFromId(w.teamId, teams)} — #{w.rank}, {w.points} pts
                   </li>
                 ))}
               </ul>

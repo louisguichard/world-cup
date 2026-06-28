@@ -16,6 +16,7 @@ import {
 
 const args = process.argv.slice(2);
 const useProxy = args.includes("--proxy");
+const aggressive = args.includes("--aggressive");
 const { rapidApiKey, zafronixKey } = loadKeyFromEnvFile();
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY ?? process.env.VITE_RAPIDAPI_KEY ?? rapidApiKey;
 const ZAFRONIX_KEY = process.env.ZAFRONIX_API_KEY ?? process.env.VITE_ZAFRONIX_API_KEY ?? zafronixKey;
@@ -31,11 +32,18 @@ if (useProxy) {
 
 const catalog = loadCatalog();
 const endpointCount = catalog.reduce((n, p) => n + (p.endpoints?.length ?? 0), 0);
-console.log(`Probing ${endpointCount} endpoints across ${catalog.length} RapidAPI hubs (${useProxy ? "proxy" : "direct"})…\n`);
+const maxCalls = aggressive ? Number.POSITIVE_INFINITY : 40;
+const modeLabel = aggressive ? "full" : `conservative cap (${maxCalls} calls)`;
+console.log(`Probing ${endpointCount} endpoints across ${catalog.length} RapidAPI hubs (${useProxy ? "proxy" : "direct"}, ${modeLabel})…\n`);
+if (!aggressive) {
+  console.log("Tip: add --aggressive to force full endpoint matrix when you intentionally want high API usage.\n");
+}
 
-const { results, ctx } = await runFullProbes(RAPIDAPI_KEY, catalog, {
+const { results, ctx, truncated } = await runFullProbes(RAPIDAPI_KEY, catalog, {
   mode: useProxy ? "proxy" : "direct",
   zafronixKey: ZAFRONIX_KEY,
+  maxCalls,
+  conservativeResolver: !aggressive,
 });
 
 for (const r of results) process.stdout.write(r.skipped ? "s" : r.ok ? "." : "F");
@@ -49,6 +57,8 @@ writeFileSync(
       testedAt: new Date().toISOString(),
       mode: useProxy ? "proxy" : "direct",
       resolverContext: ctx,
+      truncated,
+      aggressive,
       summary: {
         total: results.length,
         passed: results.filter((r) => !r.skipped && r.ok).length,

@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { buildQualificationContext } from "../../lib/qualification";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
-import { resolveTeamForDisplay, resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { resolveTeamForDisplay } from "../../data/wc2026TeamCatalog";
+import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { useQualificationSnapshot, useTeamQualificationView } from "../../store/selectors/qualificationSelectors";
 import { useStore } from "../../store";
@@ -31,8 +31,8 @@ function QualTeamChip({
 }) {
   const teams = useStore((s) => s.teams);
   const view = useTeamQualificationView(teamId);
-  const team = resolveTeamFromStore(teams, teamId) ?? resolveTeamForDisplay(teamId);
-  const label = teamDisplayName(team, teamId, teams);
+  const team = teams[teamId] ?? resolveTeamForDisplay(teamId);
+  const label = teamDisplayNameFromId(teamId, teams);
   const rankHint = thirdRankHint(view?.bestThirdRank);
   const title = [view?.status.reason ?? team?.name ?? label, rankHint].filter(Boolean).join(" · ");
 
@@ -89,7 +89,7 @@ export function QualifiedBento() {
   const hasAny = layout.movingOn.confirmed.length > 0 || layout.movingOn.projected.length > 0;
 
   return (
-    <section className="qual-bento qual-bento--qualified" aria-label="Qualified teams">
+    <section className="qual-bento qual-bento--qualified" aria-label={APP_COPY.aria.qualifiedTeams}>
       <h3 className="qual-bento-title">{q.qualifiedTitle}</h3>
       <p className="qual-bento-lead">{q.qualifiedLead}</p>
       {hasAny ? (
@@ -119,7 +119,7 @@ export function EliminatedBento() {
   const hasAny = layout.out.confirmed.length > 0;
 
   return (
-    <section className="qual-bento qual-bento--eliminated" aria-label="Eliminated teams">
+    <section className="qual-bento qual-bento--eliminated" aria-label={APP_COPY.aria.eliminatedTeams}>
       <h3 className="qual-bento-title">{q.eliminatedTitle}</h3>
       <p className="qual-bento-lead">{q.eliminatedLead}</p>
       {hasAny ? (
@@ -144,7 +144,7 @@ export function InContentionBento() {
   const hasAny = alive.length > 0 || projectedOut.length > 0;
 
   return (
-    <section className="qual-bento qual-bento--contention" aria-label="Teams still in contention">
+    <section className="qual-bento qual-bento--contention" aria-label={APP_COPY.aria.contentionTeams}>
       <h3 className="qual-bento-title">{q.contentionTitle}</h3>
       <p className="qual-bento-lead">{q.contentionLead}</p>
       {hasAny ? (

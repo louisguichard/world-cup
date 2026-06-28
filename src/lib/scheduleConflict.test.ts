@@ -7,7 +7,7 @@ describe("scheduleConflict", () => {
     const match: MergedMatch = {
       id: "1",
       matchId: "M4",
-      date: "2026-06-13T01:00Z",
+      date: "2026-06-14T01:00:00Z",
       homeTeamId: "usa",
       awayTeamId: "par",
       status: "scheduled",
@@ -15,7 +15,7 @@ describe("scheduleConflict", () => {
       awayConduct: 0,
       locked: false,
       source: "espn",
-      group: "C"
+      group: "D",
     };
 
     const conflict = detectKickoffConflict(match);

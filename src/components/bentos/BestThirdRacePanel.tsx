@@ -1,12 +1,11 @@
 import { useMemo } from "react";
-import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
 import { getThirdPlaceBubbleState } from "../../lib/thirdPlaceLiveStatus";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import type { GroupStanding, MergedMatch, TeamRecord } from "../../types";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { TeamFlag } from "../team/TeamFlag";
@@ -19,6 +18,14 @@ function statusLabel(
   qualContext: ReturnType<typeof buildQualificationContext>
 ): { text: string; className: string } {
   const race = APP_COPY.bestThirdRace;
+
+  if (rank <= 8) {
+    return {
+      text: rank === 8 ? race.statusCutLine : race.statusMovingOn,
+      className: rank === 8 ? "best-third-status--cut" : "best-third-status--in",
+    };
+  }
+
   const qual = computeQualificationStatus(teamId, standings, qualContext);
   const display = resolveQualificationDisplay(qual);
   if (display.variant === "confirmed-eliminated") {
@@ -26,14 +33,6 @@ function statusLabel(
   }
   if (display.variant === "projected-eliminated") {
     return { text: race.statusLikelyOut, className: "best-third-status--warn" };
-  }
-  if (display.variant === "projected-qualified" || display.variant === "confirmed-qualified") {
-    if (rank <= 8) {
-      return {
-        text: rank === 8 ? race.statusCutLine : race.statusMovingOn,
-        className: rank === 8 ? "best-third-status--cut" : "best-third-status--in",
-      };
-    }
   }
   return { text: race.statusStillIn, className: "best-third-status--warn" };
 }
@@ -63,8 +62,8 @@ export function BestThirdRacePanel() {
       const nearCut =
         (homeRank >= 5 && homeRank <= 10) || (awayRank >= 5 && awayRank <= 10);
 
-      const home = teamDisplayName(undefined, match.homeTeamId, teams);
-      const away = teamDisplayName(undefined, match.awayTeamId, teams);
+      const home = teamDisplayNameFromId(match.homeTeamId, teams);
+      const away = teamDisplayNameFromId(match.awayTeamId, teams);
       const score = `${match.homeScore ?? 0}–${match.awayScore ?? 0}`;
       const clock = formatLiveClock(match);
 
@@ -120,7 +119,7 @@ export function BestThirdRacePanel() {
           </thead>
           <tbody>
             {ranked.map((row: TeamRecord, index) => {
-              const team = resolveTeamFromStore(teams, row.teamId);
+              const team = teams[row.teamId];
               const status = statusLabel(index + 1, row.teamId, standings, qualContext);
               const isCutLine = index === 7;
               const dimmed = index >= 8;
@@ -141,7 +140,7 @@ export function BestThirdRacePanel() {
                   <td>{index + 1}</td>
                   <td className="group-table-team">
                     <TeamFlag team={team} teamId={row.teamId} />
-                    <span className="team-name-text qual-team-name">{teamDisplayName(team, row.teamId, teams)}</span>
+                    <span className="team-name-text qual-team-name">{teamDisplayNameFromId(row.teamId, teams)}</span>
                   </td>
                   <td>
                     <strong>{row.points}</strong>

@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import type { MergedMatch, Team } from "../types";
 import type { LiveStreamMatchBundle } from "../types/liveStream";
-import { teamDisplayName } from "../lib/teamIdentity";
+import { teamDisplayNameForMatch } from "../lib/matchTeamDisplay";
+import { useStore } from "../store";
 import {
   checkLiveStreamAvailability,
   fetchLiveStreamSchedule,
   findLiveStreamScheduleMatch,
 } from "../services/AllSportLiveStreamClient";
+import { resolveIptvStreamsForMatch } from "../services/IptvStreamClient";
 
 const EMPTY: LiveStreamMatchBundle = {
   streamMatchId: null,
@@ -20,6 +22,7 @@ export function useLiveStreamForMatch(
   homeTeam?: Team,
   awayTeam?: Team
 ): LiveStreamMatchBundle & { loading: boolean } {
+  const teams = useStore((s) => s.teams);
   const [bundle, setBundle] = useState<LiveStreamMatchBundle>(EMPTY);
   const [loading, setLoading] = useState(false);
 
@@ -32,8 +35,8 @@ export function useLiveStreamForMatch(
     let cancelled = false;
     setLoading(true);
 
-    const homeName = teamDisplayName(homeTeam, match.homeTeamId);
-    const awayName = teamDisplayName(awayTeam, match.awayTeamId);
+    const homeName = teamDisplayNameForMatch(match, "home", teams);
+    const awayName = teamDisplayNameForMatch(match, "away", teams);
     const scheduleDate = match.date.slice(0, 10);
 
     void (async () => {
@@ -41,11 +44,25 @@ export function useLiveStreamForMatch(
       if (cancelled) return;
 
       if (schedule.upstreamError && schedule.matches.length === 0) {
+        const iptv = await resolveIptvStreamsForMatch(homeName, awayName);
+        if (cancelled) return;
+
         setBundle({
           streamMatchId: null,
           scheduleMatch: null,
-          play: null,
+          play: iptv.available
+            ? {
+                available: true,
+                servers: iptv.servers,
+              }
+            : null,
           scheduleError: schedule.upstreamError,
+          iptv: {
+            available: iptv.available,
+            sources: iptv.sources,
+            servers: iptv.servers,
+            error: iptv.error,
+          },
           fetchedAt: Date.now(),
         });
         setLoading(false);
@@ -58,10 +75,24 @@ export function useLiveStreamForMatch(
         null;
 
       if (!row) {
+        const iptv = await resolveIptvStreamsForMatch(homeName, awayName);
+        if (cancelled) return;
+
         setBundle({
           streamMatchId: null,
           scheduleMatch: null,
-          play: null,
+          play: iptv.available
+            ? {
+                available: true,
+                servers: iptv.servers,
+              }
+            : null,
+          iptv: {
+            available: iptv.available,
+            sources: iptv.sources,
+            servers: iptv.servers,
+            error: iptv.error,
+          },
           fetchedAt: Date.now(),
         });
         setLoading(false);
@@ -71,10 +102,30 @@ export function useLiveStreamForMatch(
       const play = await checkLiveStreamAvailability(row.id);
       if (cancelled) return;
 
+      let iptvBundle: LiveStreamMatchBundle["iptv"];
+      if (!play?.available) {
+        const iptv = await resolveIptvStreamsForMatch(homeName, awayName);
+        if (cancelled) return;
+        iptvBundle = {
+          available: iptv.available,
+          sources: iptv.sources,
+          servers: iptv.servers,
+          error: iptv.error,
+        };
+      }
+
+      const mergedPlay =
+        play?.available
+          ? play
+          : iptvBundle?.available
+            ? { available: true, servers: iptvBundle.servers }
+            : play;
+
       setBundle({
         streamMatchId: row.id,
         scheduleMatch: row,
-        play,
+        play: mergedPlay,
+        iptv: iptvBundle,
         fetchedAt: Date.now(),
       });
       setLoading(false);

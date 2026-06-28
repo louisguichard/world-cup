@@ -26,6 +26,7 @@ import { pollIntervalMs } from "../../lib/pollPolicy";
 
 const MAX_DISAGREEMENTS = 3;
 const disagreementCounts = new Map<string, number>();
+const pendingConsensusCounts = new Map<string, { signature: string; seen: number; lastSeenAt: number }>();
 
 async function collectAllVotes(
   merged: Record<string, MergedMatch>,
@@ -131,6 +132,25 @@ function applyConsensusToMatch(
 
   if (consensus.agreed) {
     disagreementCounts.delete(storeKey);
+    const signature = `${consensus.homeScore}:${consensus.awayScore}`;
+    const uniqueSources = new Set(consensus.sources).size;
+    if (uniqueSources < 3) {
+      const existingPending = pendingConsensusCounts.get(storeKey);
+      const seen =
+        existingPending && existingPending.signature === signature
+          ? existingPending.seen + 1
+          : 1;
+      pendingConsensusCounts.set(storeKey, {
+        signature,
+        seen,
+        lastSeenAt: Date.now(),
+      });
+      // Require two consecutive 2-source confirmations before persisting.
+      if (seen < 2) return;
+    } else {
+      // 3-of-3 agreement can update immediately.
+      pendingConsensusCounts.delete(storeKey);
+    }
     merged[storeKey] = applyLiveScore(existing, {
       homeScore: consensus.homeScore,
       awayScore: consensus.awayScore,
@@ -143,6 +163,7 @@ function applyConsensusToMatch(
 
   const count = (disagreementCounts.get(storeKey) ?? 0) + 1;
   disagreementCounts.set(storeKey, count);
+  pendingConsensusCounts.delete(storeKey);
 
   if (count >= MAX_DISAGREEMENTS) {
     const wclive = votes.find((v) => v.source === "wclive");
@@ -160,7 +181,19 @@ function applyConsensusToMatch(
   }
 }
 
-function refreshStandingsAndSimulation(merged: Record<string, MergedMatch>): void {
+function prunePendingConsensus(): void {
+  const now = Date.now();
+  for (const [matchId, pending] of pendingConsensusCounts) {
+    if (now - pending.lastSeenAt > 180_000) {
+      pendingConsensusCounts.delete(matchId);
+    }
+  }
+}
+
+function refreshStandingsAndSimulation(
+  merged: Record<string, MergedMatch>,
+  options: { scheduleSimulationRun: boolean }
+): void {
   const store = useStore.getState();
   const teamsList = Object.values(store.teams);
   if (teamsList.length === 0) return;
@@ -177,16 +210,19 @@ function refreshStandingsAndSimulation(merged: Record<string, MergedMatch>): voi
     store.setGroupStandings(next);
     writeStandingsCache(next);
   }
-  scheduleSimulation();
+  if (options.scheduleSimulationRun) {
+    scheduleSimulation();
+  }
 }
 
 /** Live poll tick: consensus scores + enrichment cascade (light = ESPN only when idle). */
 export async function runLiveTick(options?: { light?: boolean }): Promise<number> {
+  prunePendingConsensus();
   const store = useStore.getState();
   let merged: Record<string, MergedMatch> = { ...store.liveMatches };
   const teams = store.teams;
 
-  const espn = await fetchScoreboard();
+  const espn = await fetchScoreboard({ intent: "live" });
 
   for (const m of espn.matches) {
     const incoming = applyLiveScore(undefined, { ...m, espnEventId: m.id }, "espn");
@@ -253,10 +289,8 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
     store.setPrimaryMatch(primary);
   }
 
-  if (!options?.light) {
-    refreshStandingsAndSimulation(merged);
-    store.touchModuleFreshness(MODULE_IDS.groupStandings);
-  }
+  refreshStandingsAndSimulation(merged, { scheduleSimulationRun: !options?.light });
+  store.touchModuleFreshness(MODULE_IDS.groupStandings);
 
   const intervalMs = pollIntervalMs(liveCount > 0);
 

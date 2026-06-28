@@ -7,6 +7,6 @@
   "types": "./src/index.ts",
   "exports": { ".": "./src/index.ts" },
   "dependencies": {
-    "@wc2026/canonical": "workspace:*"
+    "@wc2026/canonical": "file:../canonical"
   }
 }

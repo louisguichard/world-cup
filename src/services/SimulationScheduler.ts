@@ -1,4 +1,5 @@
 import { useStore } from "../store";
+import { buildCanonicalTournamentDataset } from "../lib/canonicalTournamentDataset";
 import { simulateTournamentOutcomes } from "../lib/tournament";
 import { logger } from "./Logger";
 import type { Match, PolymarketMatchMarket, Team, TournamentSimulationResult } from "../types";
@@ -77,12 +78,17 @@ export async function runCalibration(options: RunCalibrationOptions = {}): Promi
   store.setSimulationRunning(true);
 
   try {
-    const teams = Object.values(store.teams);
+    const canonical = buildCanonicalTournamentDataset({
+      teams: store.teams,
+      liveMatches: store.liveMatches,
+      knockoutMarkets: store.knockoutMarkets,
+    });
+    const teams = canonical.teams;
     if (teams.length === 0) {
       throw new Error("Simulation requires team data");
     }
 
-    const groupMatches = Object.values(store.liveMatches).filter(
+    const groupMatches = canonical.matches.filter(
       (match): match is Match & { group: NonNullable<Match["group"]> } => Boolean(match.group)
     );
 

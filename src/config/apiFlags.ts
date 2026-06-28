@@ -11,6 +11,7 @@ export type ApiSourceId =
   | "fifaRankings"
   | "footballDataApi"
   | "sportApi7"
+  | "footApi7"
   | "wc2026Teams"
   | "wc2026Live"
   | "sofascore"
@@ -19,12 +20,24 @@ export type ApiSourceId =
   | "zafronix"
   | "oddsIntelligence"
   | "footballPrediction"
+  | "todayFootballPrediction"
   | "worldCupHistory"
   | "sportHighlights"
   | "allSportLiveStream"
+  | "iptvXtreamDaily"
+  | "iptvCloudSubscriber"
+  | "iptvTvView"
   | "sportsLiveScores"
   | "openWeather"
-  | "yahooWeather";
+  | "yahooWeather"
+  | "flashLive"
+  | "plData"
+  | "gettyImages"
+  | "fifaFootballData"
+  | "aiSportsHighlights"
+  | "allSportsApi2"
+  | "tvproApi"
+  | "youtubeMatchVideos";
 
 export type ApiAuditStatus = "pass" | "fail" | "untested";
 
@@ -93,6 +106,14 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     lastAudit: "pass",
     lastLatencyMs: 260,
   },
+  footApi7: {
+    enabled: true,
+    splashPath: false,
+    label: "FootAPI7 (SofaScore backup)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — groups, standings, live matches",
+  },
   wc2026Teams: {
     enabled: true,
     splashPath: false,
@@ -146,9 +167,17 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
   footballPrediction: {
     enabled: true,
     splashPath: false,
-    label: "Today Football Prediction",
+    label: "Football Prediction API (Boggio v2)",
     lastAudit: "pass",
     lastLatencyMs: 200,
+  },
+  todayFootballPrediction: {
+    enabled: true,
+    splashPath: false,
+    label: "Today Football Prediction",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — leagues, VIP featured, daily tips",
   },
   worldCupHistory: {
     enabled: true,
@@ -161,7 +190,7 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
   sportHighlights: {
     enabled: true,
     splashPath: false,
-    label: "Sport Highlights API (Highlightly)",
+    label: "Football Highlights API (Highlightly)",
     lastAudit: "untested",
     lastLatencyMs: 0,
   },
@@ -172,6 +201,30 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     lastAudit: "untested",
     lastLatencyMs: 0,
     failureReason: "Schedule endpoint may return GraphQL PersistedQueryNotFound upstream",
+  },
+  iptvXtreamDaily: {
+    enabled: true,
+    splashPath: false,
+    label: "Free Daily Xtream IPTV Servers",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription; cached 6h after fetch",
+  },
+  iptvCloudSubscriber: {
+    enabled: true,
+    splashPath: false,
+    label: "Cloud API Hub IPTV Auto Subscriber",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription; cached 6h per country",
+  },
+  iptvTvView: {
+    enabled: true,
+    splashPath: false,
+    label: "TVView IPTV Index",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription; fallback-only source",
   },
   sportsLiveScores: {
     enabled: true,
@@ -184,7 +237,7 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
   openWeather: {
     enabled: true,
     splashPath: false,
-    label: "Open Weather 13 (backup)",
+    label: "Open Weather 13",
     lastAudit: "pass",
     lastLatencyMs: 331,
   },
@@ -194,6 +247,70 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     label: "Yahoo Weather 5",
     lastAudit: "untested",
     lastLatencyMs: 0,
+  },
+  flashLive: {
+    enabled: true,
+    splashPath: false,
+    label: "FlashLive Sports",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription; live scores, teams, transfers",
+  },
+  plData: {
+    enabled: true,
+    splashPath: false,
+    label: "PL Data (players, teams, fixtures)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription",
+  },
+  gettyImages: {
+    enabled: true,
+    splashPath: false,
+    label: "Getty Images (raygorodskij V1)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI + Getty API credentials (GETTY_API_KEY)",
+  },
+  fifaFootballData: {
+    enabled: true,
+    splashPath: false,
+    label: "FIFA Football Data API",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — match clips and stats",
+  },
+  aiSportsHighlights: {
+    enabled: true,
+    splashPath: false,
+    label: "AI Sports Highlights",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — AI-generated highlight reels",
+  },
+  allSportsApi2: {
+    enabled: true,
+    splashPath: false,
+    label: "AllSportsAPI2",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — multi-sport live data",
+  },
+  tvproApi: {
+    enabled: true,
+    splashPath: false,
+    label: "TVPro API (broadcast channels)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription",
+  },
+  youtubeMatchVideos: {
+    enabled: true,
+    splashPath: false,
+    label: "YouTube Match Highlights (Google API31)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    failureReason: "Requires RapidAPI subscription — video search verification",
   },
 };
 
@@ -212,3 +329,5 @@ export function isApiEnabled(id: ApiSourceId): boolean {
 export function listDisabledApis(): ApiSourceConfig[] {
   return Object.values(API_SOURCES).filter((s) => !s.enabled);
 }
+
+export { API_QUOTA_POLICY } from "./apiQuotaPolicy";

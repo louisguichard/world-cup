@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
@@ -23,7 +22,7 @@ import {
   useUpcomingGroupMatches,
   type ResultsSortOrder
 } from "../../store/selectors/historySelectors";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { GroupOfficialQualificationSection } from "../analyst/GroupOfficialQualificationSection";
@@ -56,7 +55,7 @@ export function GroupsView() {
       ids.add(m.awayTeamId);
     }
     return [...ids]
-      .map((id) => resolveTeamFromStore(teams, id))
+      .map((id) => teams[id])
       .filter((t): t is NonNullable<typeof t> => Boolean(t))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [completed, teams]);
@@ -82,9 +81,7 @@ export function GroupsView() {
         <p>{copy.heroLead}</p>
       </section>
 
-      <BentoErrorBoundary bento="TournamentInsightsPanel">
-        <TournamentInsightsPanel />
-      </BentoErrorBoundary>
+      <TournamentInsightsPanel />
 
       <div className="groups-view-toggle" role="group" aria-label="Standings view mode">
         <button
@@ -146,7 +143,7 @@ export function GroupsView() {
                       <h2>Group {g.group}</h2>
                       <div className="mini-qualifiers" aria-hidden>
                         {g.rows.slice(0, 2).map((row) => {
-                          const t = resolveTeamFromStore(teams, row.teamId);
+                          const t = teams[row.teamId];
                           return t ? (
                             <TeamFlag key={row.teamId} team={t} teamId={row.teamId} size="sm" />
                           ) : null;
@@ -166,7 +163,7 @@ export function GroupsView() {
                     </thead>
                     <tbody>
                       {g.rows.map((row, i) => {
-                        const team = resolveTeamFromStore(teams, row.teamId);
+                        const team = teams[row.teamId];
                         const qual = computeQualificationStatus(row.teamId, standings, qualContext);
                         const display = resolveQualificationDisplay(qual);
                         return (
@@ -181,7 +178,7 @@ export function GroupsView() {
                               <QualificationStatusBadge qual={qual} size="xs" />
                               <TeamFlag team={team} teamId={row.teamId} size="sm" />
                               <TeamClickTarget teamId={row.teamId} className="group-standing-team-btn">
-                                <strong className="team-name-text">{teamDisplayName(team, row.teamId, teams)}</strong>
+                                <strong className="team-name-text">{teamDisplayNameFromId(row.teamId, teams)}</strong>
                               </TeamClickTarget>
                             </td>
                             <td>{row.played}</td>
@@ -258,8 +255,8 @@ export function GroupsView() {
             <MatchScheduleCard
               key={m.id}
               match={m}
-              home={resolveTeamFromStore(teams, m.homeTeamId)}
-              away={resolveTeamFromStore(teams, m.awayTeamId)}
+              home={teams[m.homeTeamId]}
+              away={teams[m.awayTeamId]}
               compact
             />
           ))}
@@ -281,8 +278,8 @@ export function GroupsView() {
             <MatchScheduleCard
               key={m.id}
               match={m}
-              home={resolveTeamFromStore(teams, m.homeTeamId)}
-              away={resolveTeamFromStore(teams, m.awayTeamId)}
+              home={teams[m.homeTeamId]}
+              away={teams[m.awayTeamId]}
             />
           ))}
         </div>

@@ -477,6 +477,7 @@ export type MatchScheduleEntry = {
       concurrentMatchNote?: string | null;
     };
   };
+  espnEventId?: string;
 };
 
 export type KnockoutScore = {
@@ -497,6 +498,7 @@ export type SourceId =
   | "wclive"
   | "espn"
   | "sportapi7"
+  | "footapi7"
   | "zafronix"
   | "sofascore"
   | "freeapi"

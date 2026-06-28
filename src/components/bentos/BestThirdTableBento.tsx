@@ -1,9 +1,8 @@
 import { useMemo } from "react";
-import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import type { GroupStanding, MergedMatch, TeamRecord } from "../../types";
 import { useStore } from "../../store";
@@ -135,7 +134,7 @@ export function BestThirdTableBento({ standings }: BestThirdTableBentoProps) {
           </thead>
           <tbody>
             {ranked.map((row: TeamRecord, index: number) => {
-              const team = resolveTeamFromStore(teams, row.teamId);
+              const team = teams[row.teamId];
               const h2h = h2hByTeam.get(row.teamId) ?? "N/A";
               const qual = computeQualificationStatus(row.teamId, standings, qualContext);
               const display = resolveQualificationDisplay(qual);
@@ -149,7 +148,7 @@ export function BestThirdTableBento({ standings }: BestThirdTableBentoProps) {
                   </td>
                   <td className="group-table-team">
                     <TeamFlag team={team} teamId={row.teamId} size="sm" />
-                    <span className="team-name-text">{teamDisplayName(team, row.teamId, teams)}</span>
+                    <span className="team-name-text">{teamDisplayNameFromId(row.teamId, teams)}</span>
                   </td>
                   <td>
                     <strong>{row.points}</strong>

@@ -7,6 +7,7 @@ import {
   readWcLiveDrawStore,
   setCachedDrawFixtures,
 } from "../lib/wcLiveDrawCache";
+import { acquireApiQuota, logApiQuotaBlock } from "./ApiQuotaGovernor";
 import { logger } from "./Logger";
 import { normalizeWcCommentaryResponse } from "./matchDetail/normalizeWcCommentary";
 
@@ -152,6 +153,12 @@ function unwrapData<T>(raw: unknown): T | null {
 
 async function fetchJson<T>(path: string): Promise<T | null> {
   if (wc2026LiveSessionDisabled || !isApiEnabled("wc2026Live")) return null;
+  const intent = path.includes("/live") ? "live" : "background";
+  const quota = acquireApiQuota("wc2026Live", intent);
+  if (!quota.allowed) {
+    logApiQuotaBlock("wc2026Live", intent, quota);
+    return null;
+  }
 
   try {
     const res = await fetch(`${baseUrl()}${path}`, { headers: rapidHeaders() });

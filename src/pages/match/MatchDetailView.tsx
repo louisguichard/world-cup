@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
-import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useScrollHeader } from "../../hooks/useScrollHeader";
 import { usePullToRefresh } from "../../hooks/usePullToRefresh";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import {
+  flagTeamIdForMatch,
+  resolveMatchTeam,
+  scheduleNameHintForMatch,
+  teamDisplayNameForMatch,
+} from "../../lib/matchTeamDisplay";
 import { useStore } from "../../store";
 import { useMatchDetailBundle } from "../../hooks/useMatchDetailBundle";
 import { usePageVisibilityPolling } from "../../hooks/usePageVisibilityPolling";
@@ -33,6 +37,7 @@ import { PlayerPhoto } from "../../components/player/PlayerPhoto";
 import { useGoalScorerProfiles } from "../../hooks/useGoalScorerProfiles";
 import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
 import { useHighlightlyMatchData } from "../../hooks/useHighlightlyMatchData";
+import { getHighlightlyQuotaStatus } from "../../lib/highlightlyQuota";
 import { useLiveStreamForMatch } from "../../hooks/useLiveStreamForMatch";
 import { mapHighlightlyStatistics } from "../../services/matchDetail/fetchHighlightlyMatchBundle";
 import styles from "./MatchDetailView.module.css";
@@ -113,8 +118,8 @@ export function MatchDetailView() {
     }
   }, [activeMatchTab]);
 
-  const homeTeam = match ? resolveTeamFromStore(teams, match.homeTeamId) : undefined;
-  const awayTeam = match ? resolveTeamFromStore(teams, match.awayTeamId) : undefined;
+  const homeTeam = match ? resolveMatchTeam(match, "home", teams) : undefined;
+  const awayTeam = match ? resolveMatchTeam(match, "away", teams) : undefined;
 
   const { profiles: scorerProfiles, loading: scorersLoading } = useGoalScorerProfiles({
     events,
@@ -128,6 +133,8 @@ export function MatchDetailView() {
   );
   const eventPhotos = useEventPlayerPhotos({ events: goalEvents, homeTeam, awayTeam });
   const highlightly = useHighlightlyMatchData(match, homeTeam, awayTeam);
+  const highlightQuota = useMemo(() => getHighlightlyQuotaStatus(), [highlightly.fetchedAt]);
+  const highlightQuotaLabel = `${highlightQuota.remaining}/${highlightQuota.limit} API requests left this month`;
   const liveStream = useLiveStreamForMatch(match, homeTeam, awayTeam);
   const mergedStatistics = useMemo(() => {
     if (statistics) return statistics;
@@ -185,8 +192,8 @@ export function MatchDetailView() {
 
   if (!activeMatchId) return null;
 
-  const homeTeamName = teamDisplayName(homeTeam, match?.homeTeamId ?? "Home", teams);
-  const awayTeamName = teamDisplayName(awayTeam, match?.awayTeamId ?? "Away", teams);
+  const homeTeamName = match ? teamDisplayNameForMatch(match, "home", teams) : "Home";
+  const awayTeamName = match ? teamDisplayNameForMatch(match, "away", teams) : "Away";
 
   const isLive = match?.status === "live";
   const isDone = match?.status === "completed";
@@ -215,12 +222,13 @@ export function MatchDetailView() {
             <div className={styles.headerTeam}>
               <TeamFlag
                 team={homeTeam}
-                teamId={match?.homeTeamId ?? "tbd"}
+                teamId={match ? flagTeamIdForMatch(match, "home", teams) : "tbd"}
+                nameHint={match ? scheduleNameHintForMatch(match, "home") : undefined}
                 size="lg"
               />
-              {match?.homeTeamId ? (
+              {homeTeam?.id ? (
                 <TeamClickTarget
-                  teamId={match.homeTeamId}
+                  teamId={homeTeam.id}
                   className={styles.headerTeamNameBtn}
                 >
                   <span className={`${styles.headerTeamName} team-name-text`}>{homeTeamName}</span>
@@ -265,12 +273,13 @@ export function MatchDetailView() {
             <div className={styles.headerTeam}>
               <TeamFlag
                 team={awayTeam}
-                teamId={match?.awayTeamId ?? "tbd"}
+                teamId={match ? flagTeamIdForMatch(match, "away", teams) : "tbd"}
+                nameHint={match ? scheduleNameHintForMatch(match, "away") : undefined}
                 size="lg"
               />
-              {match?.awayTeamId ? (
+              {awayTeam?.id ? (
                 <TeamClickTarget
-                  teamId={match.awayTeamId}
+                  teamId={awayTeam.id}
                   className={styles.headerTeamNameBtn}
                 >
                   <span className={`${styles.headerTeamName} team-name-text`}>{awayTeamName}</span>
@@ -322,14 +331,10 @@ export function MatchDetailView() {
               />
             </>
           ) : null}
-          {broadcast?.venue.city || match?.venue || match?.matchId ? (
+          {broadcast?.venue.city && !isDone ? (
             <>
               <span className={styles.contextSep}>·</span>
-              <WeatherBadge
-                matchId={match?.matchId}
-                venueString={match?.venue}
-                cityHint={broadcast?.venue.city}
-              />
+              <WeatherBadge cityHint={broadcast.venue.city} />
             </>
           ) : null}
         </div>
@@ -444,6 +449,9 @@ export function MatchDetailView() {
             loading={highlightly.loading}
             homeTeamName={homeTeamName}
             awayTeamName={awayTeamName}
+            introHighlight={highlightly.intro?.introHighlight}
+            attribution={highlightly.attribution}
+            quotaLabel={highlightQuotaLabel}
           />
         ) : null}
 

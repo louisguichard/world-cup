@@ -1,3 +1,7 @@
+import { APP_COPY } from "../../lib/appCopy";
+
+const errors = APP_COPY.errors;
+
 type BentoErrorCardProps = {
   title?: string;
   message?: string;
@@ -5,8 +9,8 @@ type BentoErrorCardProps = {
 };
 
 export function BentoErrorCard({
-  title = "Something went wrong",
-  message = "This section failed to load.",
+  title = errors.somethingWrong,
+  message = errors.sectionFailed,
   onRetry
 }: BentoErrorCardProps) {
   return (
@@ -15,7 +19,7 @@ export function BentoErrorCard({
       <p className="bento-error-subtitle">{message}</p>
       {onRetry ? (
         <button type="button" className="bento-retry-btn" onClick={onRetry}>
-          Try again
+          {errors.tryAgain}
         </button>
       ) : null}
     </div>

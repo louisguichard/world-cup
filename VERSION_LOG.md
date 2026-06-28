@@ -46,50 +46,150 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
-## [4.0.0] build 20 — 2026-06-28 (build)
-- 3 file(s) in api, build-manifest.json, server — 3 files changed, 16 insertions(+), 15 deletions(-)
 
-## [4.0.0] build 19 — 2026-06-28 (build)
-- 254 file(s) in .cursor, .cursorrules, .env.example, CHANGELOG.md, VERSION_LOG.md, api — 254 files changed, 16735 insertions(+), 1121 deletions(-)
 
-## [4.0.0] build 18 — 2026-06-28 (build)
-- Live cards, weather, events, glow layout, and operational API routes
 
-## [4.0.0] build 17 — 2026-06-28 (build)
-- Phase 2/3 UX blueprint + monorepo packages, analyst frontend, admin console, cursor prompt pack, council synthesis
 
-## [4.0.0] build 16 — 2026-06-28 (build)
-- WC2026 Production Architecture: BC1/BC2/BC3 services, Prisma schema, BullMQ queues, SSE push, QueryAPI endpoints, OTel observability, React PWA SSE hook
 
-## [4.0.0] build 15 — 2026-06-28 (build)
-- fix groups tab crash: add error boundaries, harden tournament profile cache reader, fix TS errors
 
-## [4.0.0] build 14 — 2026-06-28 (build)
-- Give live hero glow room via bleed padding and visible overflow
 
-## [4.0.0] build 13 — 2026-06-28 (build)
-- Fix goal celebration banner overlap and layout shift on live cards
 
-## [4.0.0] build 12 — 2026-06-28 (build)
-- Yahoo Weather primary with canonical 16 host cities and icon badges
 
-## [4.0.0] build 11 — 2026-06-28 (build)
-- Fix live card events: remap ESPN team ids, show cards and subs
 
-## [4.0.0] build 10 — 2026-06-28 (build)
-- Unify live secondary cards with primary size and full match details
 
-## [4.0.0] build 9 — 2026-06-28 (build)
-- Skip SVG graphics false positives in UI debug scan
 
-## [4.0.0] build 8 — 2026-06-28 (build)
-- Allow live hero cards to grow; clip glow horizontally only
 
-## [4.0.0] build 7 — 2026-06-28 (build)
-- Fix Live view layout overflow and glow bleed collisions
 
-## [4.0.0] build 6 — 2026-06-28 (build)
-- Stack live secondary cards under hero at matching column width
+
+
+
+
+
+
+
+
+
+
+
+## [4.0.0] build 45 — 2026-06-28 (build)
+- 244 file(s) in .cursor, .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api — 244 files changed, 87284 insertions(+), 2461 deletions(-)
+
+## [4.0.0] build 44 — 2026-06-27 (build)
+- 19 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, package.json, scripts — 19 files changed, 71658 insertions(+), 206 deletions(-)
+
+## [4.0.0] build 43 — 2026-06-27 (build)
+- Fix standings/third-place from ESPN; refresh audit snapshot and boot cache v6
+
+## [4.0.0] build 42 — 2026-06-27 (build)
+- Sync match schedule from ESPN; bump boot cache v5 for fresh standings
+
+## [4.0.0] build 41 — 2026-06-27 (build)
+- Remove duplicate sofascore6 rewrite; document Getty/YouTube env vars
+
+## [4.0.0] build 40 — 2026-06-27 (build)
+- Integrate all feature branches via consolidated rapid proxy
+
+## [4.0.0] build 39 — 2026-06-27 (build)
+- 13 file(s) in api, config, package.json, scripts, src, vercel.json — 13 files changed, 784 insertions(+), 2 deletions(-)
+
+## [4.0.0] build 38 — 2026-06-27 (build)
+- 7 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, vercel.json, version.json — 7 files changed, 56 insertions(+), 45 deletions(-)
+
+## [4.0.0] build 37 — 2026-06-27 (build)
+- Use path query param for Vercel rapid rewrites
+
+## [4.0.0] build 36 — 2026-06-27 (build)
+- 1 file(s) in vercel.json — 1 file changed, 36 insertions(+), 36 deletions(-)
+
+## [4.0.0] build 35 — 2026-06-27 (build)
+- Fix vercel rewrite syntax for rapid proxy query passthrough
+
+## [4.0.0] build 34 — 2026-06-27 (build)
+- 7 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, vercel.json, version.json — 7 files changed, 76 insertions(+), 46 deletions(-)
+
+## [4.0.0] build 33 — 2026-06-27 (build)
+- Route RapidAPI rewrites through query params on api/rapid
+
+## [4.0.0] build 32 — 2026-06-27 (build)
+- 6 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, version.json — 6 files changed, 60 insertions(+), 40 deletions(-)
+
+## [4.0.0] build 31 — 2026-06-27 (build)
+- Flatten rapid and proxy to top-level Vercel API files
+
+## [4.0.0] build 30 — 2026-06-27 (build)
+- 6 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, version.json — 6 files changed, 15 insertions(+), 2 deletions(-)
+
+## [4.0.0] build 29 — 2026-06-27 (build)
+- Fix Vercel rapid proxy catch-all route naming
+
+## [4.0.0] build 28 — 2026-06-27 (build)
+- 31 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, src, vercel.json — 31 files changed, 509 insertions(+), 1001 deletions(-)
+
+## [4.0.0] build 27 — 2026-06-27 (build)
+- Consolidate RapidAPI proxies, boot ESPN bypass, cache migration, live results
+
+## [4.0.0] build 26 — 2026-06-27 (build)
+- 18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, config, scripts, src — 18 files changed, 399 insertions(+), 49 deletions(-)
+
+## [4.0.0] build 25 — 2026-06-27 (build)
+- Wire Boggio Football Prediction v2 into WC sync and match index
+
+## [4.0.0] build 24 — 2026-06-27 (build)
+- Always show team names and flags; hide backend ids from UI
+
+## [4.0.0] build 23 — 2026-06-27 (build)
+- 10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, vercel.json — 10 files changed, 59 insertions(+), 13 deletions(-)
+
+## [4.0.0] build 22 — 2026-06-27 (build)
+- Bust client caches (boot v4, SW v5, quota reset) and no-cache shell headers
+
+## [4.0.0] build 21 — 2026-06-27 (build)
+- 14 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 14 files changed, 235 insertions(+), 22 deletions(-)
+
+## [4.0.0] build 20 — 2026-06-27 (build)
+- Add TVView RapidAPI IPTV source and wire API audit coverage
+
+## [4.0.0] build 19 — 2026-06-27 (build)
+- 19 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 19 files changed, 828 insertions(+), 7 deletions(-)
+
+## [4.0.0] build 18 — 2026-06-27 (build)
+- Wire IPTV RapidAPI providers as stream fallback on match watch tab
+
+## [4.0.0] build 17 — 2026-06-27 (build)
+- 18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, scripts, src — 18 files changed, 666 insertions(+), 45 deletions(-)
+
+## [4.0.0] build 16 — 2026-06-27 (build)
+- Add quota governor and multi-source verification gates
+
+## [4.0.0] build 15 — 2026-06-27 (build)
+- 11 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 11 files changed, 197 insertions(+), 160 deletions(-)
+
+## [4.0.0] build 14 — 2026-06-27 (build)
+- Unify standings and simulation on canonical dataset
+
+## [4.0.0] build 13 — 2026-06-27 (build)
+- 15 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 15 files changed, 570 insertions(+), 143 deletions(-)
+
+## [4.0.0] build 12 — 2026-06-27 (build)
+- Wire Boggio Football Prediction API v2 endpoints for match tips and accuracy stats
+
+## [4.0.0] build 11 — 2026-06-27 (build)
+- 14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, version.json — 14 files changed, 512 insertions(+), 64 deletions(-)
+
+## [4.0.0] build 10 — 2026-06-27 (build)
+- Fix PWA install: early SW + beforeinstallprompt capture, one-tap install on desktop/Android
+
+## [4.0.0] build 9 — 2026-06-27 (build)
+- 14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 14 files changed, 186 insertions(+), 61 deletions(-)
+
+## [4.0.0] build 8 — 2026-06-27 (build)
+- Full-app copy sweep via appCopy.ts; fix best-third race status labels
+
+## [4.0.0] build 7 — 2026-06-27 (build)
+- 9 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 9 files changed, 141 insertions(+), 2 deletions(-)
+
+## [4.0.0] build 6 — 2026-06-27 (build)
+- Add uiDebugBridge for sweep; skip SVG collision false positives; 0-issue uidebug gate
 
 ## [4.0.0] build 5 — 2026-06-27 (build)
 - Fix UI debug sweep scan bridge timing; archive sweep runs under .cursor/ui-debug-runs

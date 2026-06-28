@@ -29,6 +29,11 @@ declare global {
           consecutiveErrors: number;
         }
       | undefined;
+    __wcUiDebugScan?: () => Array<{
+      kind: string;
+      label: string;
+      detail: string;
+    }>;
   }
 }
 

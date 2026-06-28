@@ -43,8 +43,8 @@ export function LiveMatchBento({ match, variant }: Props) {
   const hasEvents = hasDisplayableMatchEvents(events);
 
   const { isGoalActive, latestGoal, secondsRemaining } = useGoalDetector(match.id);
-  const homeName = teamLiveCardName(home, match.homeTeamId, teams);
-  const awayName = teamLiveCardName(away, match.awayTeamId, teams);
+  const homeName = teamLiveCardName(home, match.homeTeamId);
+  const awayName = teamLiveCardName(away, match.awayTeamId);
   const isCompact = true;
 
   const scorerEvents = useMemo(

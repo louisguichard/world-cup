@@ -56,7 +56,7 @@ export function TeamDetailSheet() {
   const [recentForm, setRecentForm] = useState<ZafronixMatch[]>([]);
 
   const team = teamId ? resolveTeamFromStore(teams, teamId) : null;
-  const teamDisplay = team ? teamDisplayName(team, team.id, teams) : "";
+  const teamDisplay = team ? teamDisplayName(team, team.id) : "";
   const highlightlyTeam = useHighlightlyTeamData(teamDisplay, Boolean(team));
   const { profile: sofaProfile, loading: sofaLoading } = useTeamProfile(team?.abbreviation);
   const { players: wcSquad, loading: wcSquadLoading } = useWc2026TeamSquad(team);
@@ -289,7 +289,7 @@ export function TeamDetailSheet() {
                           <span>
                             <TeamFlag team={opponent} teamId={opponentId} />{" "}
                             <span className="team-name-text">
-                              {teamDisplayName(opponent, opponentId, teams)}
+                              {teamDisplayName(opponent, opponentId)}
                             </span>
                           </span>
                           <span>
