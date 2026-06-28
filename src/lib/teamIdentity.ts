@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { liveCardNameForAbbrev } from "../data/teamLiveCardNames";
 import { TEAM_IDENTITY_OVERRIDES } from "../data/teamIdentityOverrides";
-import { resolveCatalogTeamName, resolveTeamLogoByAbbrev, resolveTeamForDisplay } from "../data/wc2026TeamCatalog";
+import { resolveCatalogTeamName, resolveTeamLogoByAbbrev, resolveTeamForDisplay, resolveTeamFromStore } from "../data/wc2026TeamCatalog";
 import type { CrestProfile } from "../data/teamCrestDisplay";
 import type { Team } from "../types";
 import { crestDisplayToCssVars, resolveCrestDisplay } from "./resolveCrestDisplay";
@@ -130,8 +130,14 @@ export function resolveTeamIdentityFromAbbrev(abbrev: string): TeamIdentity | nu
 export function teamDisplayName(
   team?: Pick<Team, "name" | "shortName" | "abbreviation" | "id"> | null,
   fallback = "TBD",
-  nameHint?: string
+  nameHintOrTeams?: string | Record<string, Team>
 ): string {
+  if (nameHintOrTeams && typeof nameHintOrTeams === "object") {
+    const resolved = resolveTeamFromStore(nameHintOrTeams, fallback);
+    if (resolved) return teamDisplayName(resolved, fallback);
+  }
+
+  const nameHint = typeof nameHintOrTeams === "string" ? nameHintOrTeams : undefined;
   const name = team?.name?.trim();
   if (name) return name;
 

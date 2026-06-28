@@ -8,6 +8,9 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 48** (2026-06-28): 25 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, package.json, server — 25 files changed, 1197 insertions(+), 47 deletions(-)
+- **4.0.0 build 47** (2026-06-28): Move staging serverless routes out of Vercel deploy path
+- **4.0.0 build 46** (2026-06-28): Execute phases 1-6: local stack, identity unify, qual bridge, UI wiring, admin token gate, smoke pipeline; resolve merge conflicts
 - **4.0.0 build 45** (2026-06-28): 244 file(s) in .cursor, .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api — 244 files changed, 87284 insertions(+), 2461 deletions(-)
 - **4.0.0 build 44** (2026-06-27): 19 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, package.json, scripts — 19 files changed, 71658 insertions(+), 206 deletions(-)
 - **4.0.0 build 43** (2026-06-27): Fix standings/third-place from ESPN; refresh audit snapshot and boot cache v6

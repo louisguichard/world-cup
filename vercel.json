@@ -1,15 +1,4 @@
 {
-  "functions": {
-    "api/events.ts": { "maxDuration": 300 },
-    "api/qualification/[groupId].ts": { "maxDuration": 10 },
-    "api/predictions/[matchId].ts": { "maxDuration": 10 },
-    "api/scenarios/index.ts": { "maxDuration": 30 },
-    "api/scenarios/[id].ts": { "maxDuration": 60 },
-    "api/identity/quarantine.ts": { "maxDuration": 10 },
-    "api/corrections/index.ts": { "maxDuration": 10 },
-    "api/health.ts": { "maxDuration": 10 },
-    "api/teams/[teamId]/advancement.ts": { "maxDuration": 10 }
-  },
   "rewrites": [
     {
       "source": "/api/wc-live/:path*",

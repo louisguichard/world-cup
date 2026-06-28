@@ -71,6 +71,18 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+
+## [4.0.0] build 48 — 2026-06-28 (build)
+- 25 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, package.json, server — 25 files changed, 1197 insertions(+), 47 deletions(-)
+
+## [4.0.0] build 47 — 2026-06-28 (build)
+- Move staging serverless routes out of Vercel deploy path
+
+## [4.0.0] build 46 — 2026-06-28 (build)
+- Execute phases 1-6: local stack, identity unify, qual bridge, UI wiring, admin token gate, smoke pipeline; resolve merge conflicts
+
 ## [4.0.0] build 45 — 2026-06-28 (build)
 - 244 file(s) in .cursor, .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api — 244 files changed, 87284 insertions(+), 2461 deletions(-)
 
