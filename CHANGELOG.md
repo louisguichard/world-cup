@@ -8,6 +8,8 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 52** (2026-06-28): 17 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, package.json, packages — 17 files changed, 451 insertions(+), 25 deletions(-)
+- **4.0.0 build 51** (2026-06-28): Status contract, prediction panel, SSE poll gate, smoke test, local-dev docs
 - **4.0.0 build 50** (2026-06-28): 13 file(s) in .env.example, CHANGELOG.md, VERSION_LOG.md, apps, build-manifest.json, src — 13 files changed, 209 insertions(+), 51 deletions(-)
 - **4.0.0 build 49** (2026-06-28): Fix remaining tests, Meteosource normalize module, admin token client, qual standings test ids
 - **4.0.0 build 48** (2026-06-28): 25 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, package.json, server — 25 files changed, 1197 insertions(+), 47 deletions(-)

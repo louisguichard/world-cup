@@ -26,6 +26,7 @@ import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchT
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { GroupOfficialQualificationSection } from "../analyst/GroupOfficialQualificationSection";
+import { GroupAdvancementProbabilitySection } from "../analyst/GroupAdvancementProbabilitySection";
 import { TournamentInsightsPanel } from "../tournament/TournamentInsightsPanel";
 
 export function GroupsView() {
@@ -196,6 +197,12 @@ export function GroupsView() {
                   </table>
                   </div>
                   <GroupOfficialQualificationSection groupId={g.group} />
+                  <GroupAdvancementProbabilitySection
+                    groupId={g.group}
+                    standing={g}
+                    standings={standings}
+                    qualContext={qualContext}
+                  />
                 </article>
               ))}
             </div>

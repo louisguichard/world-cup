@@ -1,5 +1,13 @@
 import { z } from "zod";
-import type { EntityType } from "@wc2026/canonical";
+import type { EntityType, QualificationEngineStatus } from "@wc2026/canonical";
+
+const qualificationEngineStatusSchema = z.enum([
+  "qualified",
+  "at_risk",
+  "projected_out",
+  "eliminated",
+  "pending",
+]) satisfies z.ZodType<QualificationEngineStatus>;
 
 export const EntityTypeSchema = z.enum([
   "team",
@@ -27,8 +35,8 @@ export const QualificationChangedEventSchema = z.object({
   type: z.literal("QualificationChangedEvent"),
   teamId: z.string(),
   groupId: z.string(),
-  previousTier: z.string().nullable(),
-  newTier: z.string(),
+  previousTier: qualificationEngineStatusSchema.nullable(),
+  newTier: qualificationEngineStatusSchema,
   previousCertainty: z.string().nullable(),
   newCertainty: z.string(),
   decidingMatchId: z.string().optional(),

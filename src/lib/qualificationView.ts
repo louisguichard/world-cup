@@ -11,7 +11,7 @@ import { rankAliveBestThirds } from "./thirdPlaceQualification";
 import { resolveQualificationDisplay, type QualificationDisplay } from "./qualificationDisplay";
 
 /** User-facing precedence tier (display + live columns only — engine status unchanged). */
-export type QualificationTierView = "qualified" | "alive" | "projected_out" | "eliminated";
+export type QualificationTierView = import("@wc2026/canonical").QualificationDisplayTier;
 
 export type QualificationLiveColumn = "moving_on" | "in_contention" | "out";
 

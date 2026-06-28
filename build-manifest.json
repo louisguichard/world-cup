@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-28T05:00:22.288Z",
+  "updatedAt": "2026-06-28T05:05:57.191Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 52,
+      "kind": "build",
+      "message": "17 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, package.json, packages — 17 files changed, 451 insertions(+), 25 deletions(-)",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T05:05:57.191Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 51,
+      "kind": "build",
+      "message": "Status contract, prediction panel, SSE poll gate, smoke test, local-dev docs",
+      "date": "2026-06-28",
+      "timestamp": "2026-06-28T05:05:50.675Z"
+    },
     {
       "version": "4.0.0",
       "build": 50,
@@ -304,25 +320,17 @@
       "message": "15 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, config, scripts — 15 files changed, 570 insertions(+), 143 deletions(-)",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T14:55:22.001Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 12,
-      "kind": "build",
-      "message": "Wire Boggio Football Prediction API v2 endpoints for match tips and accuracy stats",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T14:55:14.021Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 11,
-      "kind": "build",
-      "message": "14 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, public, src, version.json — 14 files changed, 512 insertions(+), 64 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T14:50:18.050Z"
     }
   ],
   "commits": [
+    {
+      "hash": "b48c9d4072b597fdee2cd193fa46a1d84fe36522",
+      "shortHash": "b48c9d4",
+      "message": "Finish operational readiness: green tests, admin token client, Meteosource normalize.",
+      "version": "4.0.0",
+      "build": 50,
+      "timestamp": "2026-06-28T05:00:22.841Z"
+    },
     {
       "hash": "3bb701e0a593c7e019bc786fc704553e9f5a1e74",
       "shortHash": "3bb701e",
@@ -554,14 +562,6 @@
       "version": "3.0.0",
       "build": 22,
       "timestamp": "2026-06-27T07:20:31.839Z"
-    },
-    {
-      "hash": "e388e5ec920479573d7caa4b659fe779d5c15f85",
-      "shortHash": "e388e5e",
-      "message": "Record build-manifest metadata for 0a554fd.",
-      "version": "3.0.0",
-      "build": 22,
-      "timestamp": "2026-06-27T07:20:20.220Z"
     }
   ],
   "deploys": [

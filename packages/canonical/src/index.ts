@@ -91,6 +91,38 @@ export type QualificationTier =
   | "BEST_THIRD"
   | "UNKNOWN";
 
+/** BC2 engine output — deterministic qualification state (not UI labels). */
+export type QualificationEngineStatus =
+  | "qualified"
+  | "at_risk"
+  | "projected_out"
+  | "eliminated"
+  | "pending";
+
+/** UI display tier — mapped from engine status via qualificationView only. */
+export type QualificationDisplayTier =
+  | "qualified"
+  | "alive"
+  | "projected_out"
+  | "eliminated";
+
+export type QualificationEngineCertainty =
+  | "confirmed"
+  | "projected_strong"
+  | "projected_weak"
+  | "projected";
+
+export type QualificationEngineLifeState = "alive" | "projected" | "eliminated";
+
+export interface QualificationEngineStatusRecord {
+  status: QualificationEngineStatus;
+  certainty: QualificationEngineCertainty;
+  lifeState: QualificationEngineLifeState;
+  canQualify: boolean;
+  projectionScore: number;
+  reason?: string;
+}
+
 export type QualificationCertainty =
   | "CONFIRMED"
   | "LIKELY"

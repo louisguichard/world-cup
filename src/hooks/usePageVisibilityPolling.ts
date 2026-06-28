@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { shouldRunPollFallback } from "../config/liveDataFlags";
 
 const POLL_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 const HIDDEN_GRACE_MS = 10 * 1000; // 10 second grace before pausing
@@ -18,7 +19,9 @@ export function usePageVisibilityPolling(onPoll: () => void, enabled = true): vo
   const startInterval = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
-      onPollRef.current();
+      if (shouldRunPollFallback()) {
+        onPollRef.current();
+      }
     }, POLL_INTERVAL_MS);
   }, []);
 
@@ -34,7 +37,9 @@ export function usePageVisibilityPolling(onPoll: () => void, enabled = true): vo
       clearTimeout(graceTimeoutRef.current);
       graceTimeoutRef.current = null;
     }
-    onPollRef.current();
+    if (shouldRunPollFallback()) {
+      onPollRef.current();
+    }
     startInterval();
   }, [startInterval]);
 
