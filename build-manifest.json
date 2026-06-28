@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-28T20:11:25.728Z",
+  "updatedAt": "2026-06-28T20:13:23.754Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "46fc9be49902c80206bf13d8d82aea101959ae00",
+      "shortHash": "46fc9be",
+      "message": "Add Phase 1 polling governor and Phase 2 frontend performance plan.",
+      "version": "4.0.0",
+      "build": 73,
+      "timestamp": "2026-06-28T20:11:26.166Z"
+    },
+    {
       "hash": "5693a6f1ab245395d34e47eed8afac85c811b8ed",
       "shortHash": "5693a6f",
       "message": "Record v4.0.0 build 70 production deploy on Vercel.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 2,
       "timestamp": "2026-06-27T07:35:35.502Z"
-    },
-    {
-      "hash": "a0dfcbb922a062c7a958ed24ae32a5c0db44deb9",
-      "shortHash": "a0dfcbb",
-      "message": "Record build-manifest metadata for v4.0.0 release commit.",
-      "version": "4.0.0",
-      "build": 1,
-      "timestamp": "2026-06-27T07:22:31.650Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "4.0.0",
+      "build": 73,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-28T20:13:23.753Z"
+    },
     {
       "url": "",
       "environment": "production",
