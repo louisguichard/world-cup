@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-28T06:37:24.283Z",
+  "updatedAt": "2026-06-28T06:39:53.538Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "90962db099843a488de43fe89e7cdcc17a03285f",
+      "shortHash": "90962db",
+      "message": "Fix Vercel serverless build for pnpm monorepo deploy.",
+      "version": "4.0.0",
+      "build": 70,
+      "timestamp": "2026-06-28T06:37:25.277Z"
+    },
+    {
       "hash": "ee62ba5603d11b37fbfd8d64d6a2545279c433e1",
       "shortHash": "ee62ba5",
       "message": "Fix knockout schedule placeholders and complete pnpm monorepo stack.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 1,
       "timestamp": "2026-06-27T07:22:22.026Z"
-    },
-    {
-      "hash": "8e35966ff3ac3759294e0bd6b8584721f24b1317",
-      "shortHash": "8e35966",
-      "message": "Sync build-manifest commit record for 2f674bd.",
-      "version": "3.0.0",
-      "build": 22,
-      "timestamp": "2026-06-27T07:20:55.142Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "4.0.0",
+      "build": 70,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-28T06:39:53.537Z"
+    },
     {
       "url": "",
       "environment": "production",
