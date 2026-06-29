@@ -1522,57 +1522,53 @@ h2 {
 .schedule-filters {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 10px;
-  margin: 4px 0 24px;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 22px;
 }
 
 .schedule-filter {
   position: relative;
-  flex: 1 1 220px;
-  display: grid;
-  gap: 6px;
-  min-width: min(220px, 100%);
 }
 
 .schedule-filter.open {
   z-index: 20;
 }
 
-.schedule-filter-label {
-  color: var(--faint);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
+/* Compact, low-key pill triggers rather than full-width form fields. */
 .schedule-filter-trigger {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 16px;
+  display: inline-flex;
   align-items: center;
-  gap: 9px;
-  width: 100%;
-  min-height: 42px;
-  min-width: 0;
-  padding: 0 11px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-sm);
+  gap: 8px;
+  max-width: 230px;
+  height: 34px;
+  padding: 0 10px 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
   color: var(--text);
-  background: var(--surface-2);
-  text-align: left;
+  background: transparent;
   transition: border-color 0.16s ease, background 0.16s ease;
 }
 
 .schedule-filter-trigger:hover,
 .schedule-filter.open .schedule-filter-trigger {
-  border-color: var(--line-strong);
-  background: var(--surface-3);
+  border-color: var(--line-2);
+  background: var(--surface-2);
+}
+
+.schedule-filter-trigger.selected {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
 }
 
 .schedule-filter-trigger svg {
+  flex: 0 0 auto;
   color: var(--faint);
   transition: transform 0.16s ease, color 0.16s ease;
+}
+
+.schedule-filter-trigger svg.flip {
+  transform: rotate(180deg);
 }
 
 .schedule-filter-trigger.selected svg,
@@ -1580,100 +1576,88 @@ h2 {
   color: var(--accent);
 }
 
+.filter-leading {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .filter-flag {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 5px;
   background: var(--inset);
   color: var(--muted);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
 }
 
 .filter-flag.team img {
-  width: 20px;
-  height: 20px;
+  width: 19px;
+  height: 19px;
   object-fit: contain;
 }
 
 .filter-flag.host {
-  font-size: 15px;
-  background: var(--inset);
+  font-size: 13px;
+  background: transparent;
 }
 
 .filter-flag.empty::before {
   content: "";
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 999px;
   background: var(--line-strong);
 }
 
-.filter-copy {
-  display: grid;
-  min-width: 0;
-}
-
-.filter-value,
-.filter-meta {
+.filter-value {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.filter-value {
   color: var(--text);
-  font-size: 13px;
-  font-weight: 650;
-}
-
-.filter-meta {
-  color: var(--faint);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
-}
-
-.schedule-filter-trigger .filter-meta {
-  display: none;
 }
 
 .schedule-filter-menu {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  right: 0;
+  min-width: 210px;
   display: grid;
   gap: 1px;
-  max-height: 286px;
+  max-height: 290px;
   overflow-y: auto;
-  padding: 4px;
+  padding: 5px;
   border: 1px solid var(--line-2);
-  border-radius: var(--r-sm);
+  border-radius: 12px;
   background: var(--surface);
   box-shadow: var(--shadow);
 }
 
 .schedule-filter-option {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 16px;
+  grid-template-columns: 19px minmax(0, 1fr) 14px;
   align-items: center;
   gap: 9px;
   width: 100%;
-  min-height: 42px;
-  padding: 6px 7px;
+  min-height: 34px;
+  padding: 0 8px;
   border-radius: 8px;
   color: var(--muted);
   text-align: left;
   transition: background 0.14s ease, color 0.14s ease;
 }
 
-.schedule-filter-option:hover,
-.schedule-filter-option.active {
+.schedule-filter-option:hover {
   color: var(--text);
   background: var(--surface-3);
 }
@@ -1681,7 +1665,6 @@ h2 {
 .schedule-filter-option.active {
   color: var(--accent);
   background: var(--accent-soft);
-  box-shadow: none;
 }
 
 .schedule-filter-option > svg {
@@ -1690,21 +1673,18 @@ h2 {
 }
 
 .schedule-filter-clear {
-  height: 42px;
-  padding: 0 13px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-sm);
-  color: var(--muted);
-  background: var(--surface-2);
-  font-size: 13px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--faint);
+  background: transparent;
+  font-size: 12.5px;
   font-weight: 700;
-  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+  transition: color 0.16s ease;
 }
 
 .schedule-filter-clear:hover {
   color: var(--text);
-  border-color: var(--line-strong);
-  background: var(--surface-3);
 }
 
 .schedule-day {
@@ -1864,6 +1844,130 @@ button.schedule-stage.link:hover {
   font-size: 12.5px;
 }
 
+.tbd-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The whole tile is the toggle; show it is interactive. */
+.schedule-card.expandable .schedule-card-main {
+  cursor: pointer;
+}
+
+.schedule-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.schedule-card.expanded {
+  border-color: var(--line-2);
+}
+
+/* Center hint that an undecided tile opens to reveal each side's chances. */
+.schedule-odds-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--faint);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.schedule-card.expandable:hover .schedule-odds-hint {
+  color: var(--muted);
+}
+
+.schedule-odds-hint svg {
+  flex: 0 0 auto;
+  transition: transform 0.18s ease;
+}
+
+.schedule-odds-hint svg.flip {
+  transform: rotate(180deg);
+}
+
+/* Inline panel: who can still play each side, kept in two aligned columns. */
+.schedule-card-qualifiers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  animation: rise 0.18s ease both;
+}
+
+.qualifier-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
+}
+
+.qualifier-col.right {
+  align-items: flex-end;
+}
+
+.qualifier-col.right .qualifier {
+  flex-direction: row-reverse;
+}
+
+.qualifier-vs {
+  align-self: center;
+  color: var(--faint);
+  font-size: 11px;
+}
+
+.qualifier {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 4px 9px 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.qualifier-col.right .qualifier {
+  padding: 4px 6px 4px 9px;
+}
+
+.qualifier img {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.qualifier-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.qualifier b {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
 /* Slim, modern odds bar: figures sit above a thin two/three-part track. */
 .odds {
   display: flex;
@@ -1925,33 +2029,6 @@ button.schedule-stage.link:hover {
   align-items: center;
   justify-content: center;
   gap: 6px;
-}
-
-.schedule-bracket-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 0;
-  height: 32px;
-  padding: 0 10px;
-  border: 1px solid var(--accent-line);
-  border-radius: 8px;
-  color: var(--accent);
-  background: var(--accent-soft);
-  font-size: 11.5px;
-  font-weight: 800;
-  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-}
-
-.schedule-bracket-link:hover {
-  color: var(--text);
-  border-color: rgba(54, 232, 160, 0.52);
-  background: rgba(54, 232, 160, 0.18);
-}
-
-.schedule-bracket-link svg {
-  flex: 0 0 auto;
 }
 
 .prob-vs {
@@ -2577,15 +2654,12 @@ button.schedule-stage.link:hover {
     height: 18px;
   }
 
-  .schedule-filters {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
+  .schedule-filter-trigger {
+    max-width: none;
   }
 
-  .schedule-filter,
-  .schedule-filter-clear {
-    width: 100%;
+  .schedule-filter-menu {
+    min-width: 240px;
   }
 
   /* Methodology becomes an icon-only button, pinned next to the brand */

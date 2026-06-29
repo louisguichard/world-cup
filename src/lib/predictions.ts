@@ -105,8 +105,16 @@ function outcomeFromLambdas(lambdaHome: number, lambdaAway: number): OutcomeProb
   return normalizeProbabilities({ homeWin, draw, awayWin });
 }
 
+const lambdaCache = new Map<string, { lambdaHome: number; lambdaAway: number }>();
+
 export function estimateLambdas(probabilities: OutcomeProbabilities): { lambdaHome: number; lambdaAway: number } {
   const target = normalizeProbabilities(probabilities);
+  // The grid search below is a fixed function of the target probabilities, so
+  // memoize it — the same match-ups recur across projections, edits and renders.
+  const key = `${target.homeWin.toFixed(4)}:${target.draw.toFixed(4)}:${target.awayWin.toFixed(4)}`;
+  const cached = lambdaCache.get(key);
+  if (cached) return cached;
+
   let best = { lambdaHome: 1.25, lambdaAway: 1.25, error: Number.POSITIVE_INFINITY };
 
   for (let home = 0.25; home <= 3.55; home += 0.05) {
@@ -123,10 +131,12 @@ export function estimateLambdas(probabilities: OutcomeProbabilities): { lambdaHo
     }
   }
 
-  return {
+  const result = {
     lambdaHome: Number(best.lambdaHome.toFixed(2)),
     lambdaAway: Number(best.lambdaAway.toFixed(2))
   };
+  lambdaCache.set(key, result);
+  return result;
 }
 
 export function mostLikelyScore(

@@ -5,7 +5,6 @@ import {
   BookOpen,
   CalendarDays,
   ChevronDown,
-  ChevronRight,
   Check,
   Database,
   Dices,
@@ -60,12 +59,14 @@ type SimulationWorkerResponse = {
 
 type AppTab = "tournament" | "probabilistic" | "upcoming";
 
-// One contestant of a fixture: either a settled team or still to be decided.
-type ScheduleSide = { kind: "team"; teamId: string } | { kind: "tbd" };
+// One contestant of a fixture: either a settled team or still to be decided
+// (carrying the teams that could still fill the slot, for the hover preview).
+type ScheduleSide = { kind: "team"; teamId: string } | { kind: "tbd"; candidates: string[] };
 
 type ScheduleEntry = {
   id: string;
   date: string;
+  stage?: Stage;
   stageLabel: string;
   city?: string;
   country?: string;
@@ -227,6 +228,19 @@ function countryFlag(country?: string): string {
   return country?.slice(0, 2).toUpperCase() ?? "•";
 }
 
+// Round probabilities (summing to ~1) to whole percentages that still add up to
+// exactly 100 — leftover points go to the largest fractional parts.
+function percentsTo100(values: number[]): number[] {
+  const scaled = values.map((value) => value * 100);
+  const result = scaled.map((value) => Math.floor(value));
+  const leftover = Math.round(100 - result.reduce((sum, value) => sum + value, 0));
+  const order = scaled
+    .map((value, index) => ({ index, frac: value - Math.floor(value) }))
+    .sort((a, b) => b.frac - a.frac);
+  for (let i = 0; i < leftover && i < order.length; i += 1) result[order[i].index] += 1;
+  return result;
+}
+
 // The Upcoming view is driven by exactly the same bracket the Tournament view
 // renders, so the two stay in lock-step. Each knockout side becomes a settled
 // team only when it is confirmed by the real fixture/result feed; projected-only
@@ -304,18 +318,20 @@ function buildUpcomingSchedule(
   const feederId = (ref?: string) => (ref ? `M${ref.replace(/^W/, "")}` : undefined);
   const resolveSide = (matchId: string, picker: "home" | "away"): ScheduleSide => {
     const bracketMatch = bracketById[matchId];
-    if (!bracketMatch) return { kind: "tbd" };
+    if (!bracketMatch) return { kind: "tbd", candidates: [] };
     if (bracketMatch.stage === "R32") {
       const teamId = picker === "home" ? bracketMatch.homeTeamId : bracketMatch.awayTeamId;
       const confirmedFixture =
         bracketMatch.homeTeamId && bracketMatch.awayTeamId
           ? realByPair.get(teamPairKey(bracketMatch.homeTeamId, bracketMatch.awayTeamId))
           : undefined;
-      return teamId && confirmedFixture ? { kind: "team", teamId } : { kind: "tbd" };
+      if (teamId && confirmedFixture) return { kind: "team", teamId };
+      return { kind: "tbd", candidates: teamId ? [teamId] : [] };
     }
     const feeder = feederId(picker === "home" ? bracketMatch.homeSeedLabel : bracketMatch.awaySeedLabel);
     const winner = feeder ? realResult(feeder)?.winnerTeamId : undefined;
-    return winner ? { kind: "team", teamId: winner } : { kind: "tbd" };
+    if (winner) return { kind: "team", teamId: winner };
+    return { kind: "tbd", candidates: feeder ? candidatesFor(feeder) : [] };
   };
 
   // Every team that could still play a given tie: its own confirmed teams for a
@@ -376,6 +392,7 @@ function buildUpcomingSchedule(
     entries.push({
       id: bracketMatch.id,
       date: info.date,
+      stage: bracketMatch.stage,
       stageLabel: stageLabels[bracketMatch.stage],
       city: info.hostCity,
       country: info.country,
@@ -400,8 +417,8 @@ function buildUpcomingSchedule(
       stageLabel: "Third place",
       city: thirdPlaceInfo.hostCity,
       country: thirdPlaceInfo.country,
-      home: homeLoser ? { kind: "team", teamId: homeLoser } : { kind: "tbd" },
-      away: awayLoser ? { kind: "team", teamId: awayLoser } : { kind: "tbd" },
+      home: homeLoser ? { kind: "team", teamId: homeLoser } : { kind: "tbd", candidates: candidatesFor("M101") },
+      away: awayLoser ? { kind: "team", teamId: awayLoser } : { kind: "tbd", candidates: candidatesFor("M102") },
       status: "scheduled",
       teamPool: [...new Set([...candidatesFor("M101"), ...candidatesFor("M102")])],
       kind: "knockout"
@@ -686,6 +703,17 @@ function App() {
     }, 80);
   };
 
+  // Switching the top-level view always returns to the top of the page.
+  const selectTab = (next: AppTab) => {
+    setView("app");
+    setTab(next);
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  };
+  const openMethodology = () => {
+    setView("method");
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  };
+
   if (loading && !data) {
     return (
       <main className="app-shell app-loading">
@@ -735,10 +763,7 @@ function App() {
           <div className="segmented" role="tablist" aria-label="View">
             <button
               className={view === "app" && tab === "tournament" ? "active" : ""}
-              onClick={() => {
-                setView("app");
-                setTab("tournament");
-              }}
+              onClick={() => selectTab("tournament")}
               aria-label="Tournament"
             >
               <Trophy size={16} />
@@ -746,10 +771,7 @@ function App() {
             </button>
             <button
               className={view === "app" && tab === "upcoming" ? "active" : ""}
-              onClick={() => {
-                setView("app");
-                setTab("upcoming");
-              }}
+              onClick={() => selectTab("upcoming")}
               aria-label="Upcoming"
             >
               <CalendarDays size={16} />
@@ -757,10 +779,7 @@ function App() {
             </button>
             <button
               className={view === "app" && tab === "probabilistic" ? "active" : ""}
-              onClick={() => {
-                setView("app");
-                setTab("probabilistic");
-              }}
+              onClick={() => selectTab("probabilistic")}
               aria-label="Probabilities"
             >
               <BarChart3 size={16} />
@@ -769,7 +788,7 @@ function App() {
           </div>
           <button
             className={`method-link ${view === "method" ? "active" : ""}`}
-            onClick={() => setView("method")}
+            onClick={openMethodology}
           >
             <BookOpen size={16} />
             <span>Methodology</span>
@@ -858,6 +877,7 @@ function App() {
             <UpcomingView
               entries={upcomingSchedule}
               teamsById={teamsById}
+              teamReach={simulations?.teamSummaries}
               onNavigateToGroup={navigateToGroup}
               onNavigateToBracket={navigateToBracketMatch}
             />
@@ -1548,11 +1568,13 @@ function ProbabilityView({
 function UpcomingView({
   entries,
   teamsById,
+  teamReach,
   onNavigateToGroup,
   onNavigateToBracket
 }: {
   entries: ScheduleEntry[];
   teamsById: Record<string, Team>;
+  teamReach?: Record<string, TeamSimulationSummary>;
   onNavigateToGroup: (group: GroupLetter) => void;
   onNavigateToBracket: (matchId: string) => void;
 }) {
@@ -1571,7 +1593,6 @@ function UpcomingView({
       .map((team): FilterOption => ({
         value: team.id,
         label: team.name,
-        meta: `Group ${team.group}`,
         icon: (
           <span className="filter-flag team" aria-hidden="true">
             {team.logo ? <img src={team.logo} alt="" /> : team.abbreviation.slice(0, 2)}
@@ -1581,23 +1602,23 @@ function UpcomingView({
   }, [entries, teamsById]);
 
   const cityOptions = useMemo(() => {
-    const byCity = new Map<string, { country?: string; count: number }>();
+    const byCity = new Map<string, string | undefined>();
     for (const entry of entries) {
       if (!entry.city) continue;
-      const current = byCity.get(entry.city) ?? { country: entry.country, count: 0 };
-      if (!current.country && entry.country) current.country = entry.country;
-      current.count += 1;
-      byCity.set(entry.city, current);
+      if (!byCity.get(entry.city) && entry.country) byCity.set(entry.city, entry.country);
+      else if (!byCity.has(entry.city)) byCity.set(entry.city, entry.country);
     }
+    // Group cities by host country, then alphabetically within each country.
     return [...byCity.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([city, info]): FilterOption => ({
+      .sort(([cityA, countryA], [cityB, countryB]) =>
+        (countryA ?? "").localeCompare(countryB ?? "") || cityA.localeCompare(cityB)
+      )
+      .map(([city, country]): FilterOption => ({
         value: city,
         label: city,
-        meta: `${info.count} fixture${info.count > 1 ? "s" : ""}${info.country ? ` · ${info.country}` : ""}`,
         icon: (
           <span className="filter-flag host" aria-hidden="true">
-            {countryFlag(info.country)}
+            {countryFlag(country)}
           </span>
         )
       }));
@@ -1645,7 +1666,6 @@ function UpcomingView({
           label="Team"
           value={teamFilter}
           placeholder="All teams"
-          emptyMeta="Certain and possible fixtures"
           options={teamOptions}
           onChange={setTeamFilter}
         />
@@ -1653,7 +1673,6 @@ function UpcomingView({
           label="City"
           value={cityFilter}
           placeholder="All cities"
-          emptyMeta="All host cities"
           options={cityOptions}
           onChange={setCityFilter}
         />
@@ -1682,6 +1701,7 @@ function UpcomingView({
                     key={entry.id}
                     entry={entry}
                     teamsById={teamsById}
+                    teamReach={teamReach}
                     onNavigateToGroup={onNavigateToGroup}
                     onNavigateToBracket={onNavigateToBracket}
                   />
@@ -1703,22 +1723,18 @@ function ScheduleFilterSelect({
   label,
   value,
   placeholder,
-  emptyMeta,
   options,
   onChange
 }: {
   label: string;
   value: string;
   placeholder: string;
-  emptyMeta: string;
   options: FilterOption[];
   onChange: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const selected = options.find((option) => option.value === value);
-  const selectedLabel = selected?.label ?? placeholder;
-  const selectedMeta = selected?.meta ?? emptyMeta;
 
   useEffect(() => {
     if (!open) return;
@@ -1731,23 +1747,20 @@ function ScheduleFilterSelect({
 
   return (
     <div className={`schedule-filter ${open ? "open" : ""}`} ref={rootRef}>
-      <span className="schedule-filter-label">{label}</span>
       <button
         type="button"
         className={`schedule-filter-trigger ${value ? "selected" : ""}`}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-label={label}
         onClick={() => setOpen((current) => !current)}
         onKeyDown={(event) => {
           if (event.key === "Escape") setOpen(false);
         }}
       >
-        {selected?.icon ?? <span className="filter-flag empty" aria-hidden="true" />}
-        <span className="filter-copy">
-          <span className="filter-value">{selectedLabel}</span>
-          <span className="filter-meta">{selectedMeta}</span>
-        </span>
-        <ChevronDown size={16} className={open ? "flip" : ""} />
+        {selected?.icon ?? <span className="filter-leading">{label}</span>}
+        <span className="filter-value">{selected?.label ?? placeholder}</span>
+        <ChevronDown size={15} className={open ? "flip" : ""} />
       </button>
       {open ? (
         <div className="schedule-filter-menu" role="listbox" aria-label={label}>
@@ -1762,11 +1775,8 @@ function ScheduleFilterSelect({
             }}
           >
             <span className="filter-flag empty" aria-hidden="true" />
-            <span className="filter-copy">
-              <span className="filter-value">{placeholder}</span>
-              <span className="filter-meta">{emptyMeta}</span>
-            </span>
-            {!value ? <Check size={15} /> : null}
+            <span className="filter-value">{placeholder}</span>
+            {!value ? <Check size={14} /> : null}
           </button>
           {options.map((option) => (
             <button
@@ -1781,11 +1791,8 @@ function ScheduleFilterSelect({
               }}
             >
               {option.icon ?? <span className="filter-flag empty" aria-hidden="true" />}
-              <span className="filter-copy">
-                <span className="filter-value">{option.label}</span>
-                {option.meta ? <span className="filter-meta">{option.meta}</span> : null}
-              </span>
-              {option.value === value ? <Check size={15} /> : null}
+              <span className="filter-value">{option.label}</span>
+              {option.value === value ? <Check size={14} /> : null}
             </button>
           ))}
         </div>
@@ -1807,7 +1814,7 @@ function ScheduleTeamLabel({
     return (
       <span className={`team-label tbd ${align}`}>
         <span className="schedule-dot" />
-        <span>To be decided</span>
+        <span className="tbd-text">To be decided</span>
       </span>
     );
   }
@@ -1820,21 +1827,90 @@ function ScheduleTeamLabel({
   );
 }
 
+type QualifierRow = { team: Team; reach: number | undefined };
+
+function sideQualifiers(
+  side: ScheduleSide,
+  teamsById: Record<string, Team>,
+  teamReach: Record<string, TeamSimulationSummary> | undefined,
+  stage?: Stage
+): QualifierRow[] {
+  const ids = side.kind === "team" ? [side.teamId] : side.candidates;
+  const rows = ids
+    .map((id): QualifierRow | null => {
+      const team = teamsById[id];
+      if (!team) return null;
+      // A settled side is certain to play, so it shows 100%.
+      if (side.kind === "team") return { team, reach: 1 };
+      const reach = stage ? teamReach?.[id]?.stageReach?.[stage] : undefined;
+      return { team, reach: typeof reach === "number" ? reach : undefined };
+    })
+    .filter((row): row is QualifierRow => Boolean(row));
+  if (side.kind === "tbd") {
+    rows.sort((a, b) => (b.reach ?? 0) - (a.reach ?? 0) || a.team.name.localeCompare(b.team.name));
+  }
+  return rows;
+}
+
+// Who can still play each side of an undecided tie — kept split into the home
+// and away columns so the "A vs B" shape stays clear. Shown when a tile expands.
+function QualifierList({
+  home,
+  away,
+  teamsById,
+  teamReach,
+  stage
+}: {
+  home: ScheduleSide;
+  away: ScheduleSide;
+  teamsById: Record<string, Team>;
+  teamReach?: Record<string, TeamSimulationSummary>;
+  stage?: Stage;
+}) {
+  const homeRows = sideQualifiers(home, teamsById, teamReach, stage);
+  const awayRows = sideQualifiers(away, teamsById, teamReach, stage);
+  if (!homeRows.length && !awayRows.length) return null;
+
+  const column = (rows: QualifierRow[], side: "left" | "right") => (
+    <div className={`qualifier-col ${side}`}>
+      {rows.map((row) => (
+        <span className="qualifier" key={row.team.id}>
+          <img src={row.team.logo} alt="" />
+          <span className="qualifier-name">{row.team.shortName}</span>
+          {typeof row.reach === "number" ? <b>{formatPercent(row.reach, 0)}</b> : null}
+        </span>
+      ))}
+    </div>
+  );
+
+  return (
+    // Clicks inside the expanded panel must not collapse the tile.
+    <div className="schedule-card-qualifiers" onClick={(event) => event.stopPropagation()}>
+      {column(homeRows, "left")}
+      <span className="qualifier-vs">vs</span>
+      {column(awayRows, "right")}
+    </div>
+  );
+}
+
 function ScheduleProbCenter({
   entry,
-  onNavigateToBracket
+  expandable,
+  expanded
 }: {
   entry: ScheduleEntry;
-  onNavigateToBracket: (matchId: string) => void;
+  expandable: boolean;
+  expanded: boolean;
 }) {
-  // Whenever a contestant is still undecided, point the user at the bracket
-  // instead of showing odds for a match-up we don't know yet.
+  // Undecided tie: hint that the tile opens to reveal each side's chances,
+  // rather than showing odds for a match-up we don't know yet.
   if (entry.home.kind === "tbd" || entry.away.kind === "tbd") {
+    if (!expandable) return <span className="prob-vs">vs</span>;
     return (
-      <button type="button" className="schedule-bracket-link" onClick={() => onNavigateToBracket(entry.id)}>
-        Bracket
-        <ChevronRight size={13} />
-      </button>
+      <span className="schedule-odds-hint" aria-hidden="true">
+        <ChevronDown size={13} className={expanded ? "flip" : ""} />
+        chances
+      </span>
     );
   }
   if (entry.status === "live" && typeof entry.homeScore === "number" && typeof entry.awayScore === "number") {
@@ -1850,11 +1926,12 @@ function ScheduleProbCenter({
   if (typeof entry.homeWinProbability === "number") {
     const homeP = entry.homeWinProbability;
     const awayP = 1 - homeP;
+    const [homePct, awayPct] = percentsTo100([homeP, awayP]);
     return (
       <div className="odds">
         <div className="odds-figures">
-          <span className="fig home">{formatPercent(homeP, 0)}</span>
-          <span className="fig away">{formatPercent(awayP, 0)}</span>
+          <span className="fig home">{homePct}%</span>
+          <span className="fig away">{awayPct}%</span>
         </div>
         <div className="odds-track">
           <i className="home" style={{ width: `${homeP * 100}%` }} />
@@ -1866,12 +1943,13 @@ function ScheduleProbCenter({
   // 1·X·2 odds (group fixtures).
   const p = entry.prediction;
   if (p && typeof p.homeWin === "number" && typeof p.awayWin === "number") {
+    const [homePct, drawPct, awayPct] = percentsTo100([p.homeWin, p.draw, p.awayWin]);
     return (
       <div className="odds">
         <div className="odds-figures three">
-          <span className="fig home">{formatPercent(p.homeWin, 0)}</span>
-          <span className="fig draw">{formatPercent(p.draw, 0)}</span>
-          <span className="fig away">{formatPercent(p.awayWin, 0)}</span>
+          <span className="fig home">{homePct}%</span>
+          <span className="fig draw">{drawPct}%</span>
+          <span className="fig away">{awayPct}%</span>
         </div>
         <div className="odds-track">
           <i className="home" style={{ width: `${p.homeWin * 100}%` }} />
@@ -1887,41 +1965,106 @@ function ScheduleProbCenter({
 function ScheduleRow({
   entry,
   teamsById,
+  teamReach,
   onNavigateToGroup,
   onNavigateToBracket
 }: {
   entry: ScheduleEntry;
   teamsById: Record<string, Team>;
+  teamReach?: Record<string, TeamSimulationSummary>;
   onNavigateToGroup: (group: GroupLetter) => void;
   onNavigateToBracket: (matchId: string) => void;
 }) {
   const kickoffTime = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" }).format(new Date(entry.date));
+  const [expanded, setExpanded] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Teams that could still fill an undecided slot (settled sides are excluded).
+  const candidateIds = useMemo(
+    () => [
+      ...new Set([
+        ...(entry.home.kind === "tbd" ? entry.home.candidates : []),
+        ...(entry.away.kind === "tbd" ? entry.away.candidates : [])
+      ])
+    ],
+    [entry.home, entry.away]
+  );
+  const canExpand = candidateIds.length > 0;
+
+  useEffect(() => {
+    if (!expanded) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setExpanded(false);
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [expanded]);
+
+  const toggle = () => {
+    if (canExpand) setExpanded((current) => !current);
+  };
 
   return (
-    <div className={`schedule-card ${entry.status === "live" ? "live" : ""}`}>
-      <div className="schedule-card-head">
-        <span className="schedule-kickoff">
-          <span className="schedule-time">{kickoffTime}</span>
-          {entry.city ? <span className="schedule-city">{entry.city}</span> : null}
-          {entry.status === "live" ? <em className="schedule-live">Live</em> : null}
-        </span>
-        {entry.kind === "group" && entry.group ? (
-          <button
-            type="button"
-            className="schedule-stage link"
-            onClick={() => onNavigateToGroup(entry.group!)}
-          >
-            Group {entry.group}
-          </button>
-        ) : (
-          <span className="schedule-stage">{entry.stageLabel}</span>
-        )}
+    <div
+      ref={rootRef}
+      className={`schedule-card ${entry.status === "live" ? "live" : ""} ${canExpand ? "expandable" : ""} ${expanded ? "expanded" : ""}`}
+    >
+      <div
+        className="schedule-card-main"
+        role={canExpand ? "button" : undefined}
+        tabIndex={canExpand ? 0 : undefined}
+        aria-expanded={canExpand ? expanded : undefined}
+        onClick={canExpand ? toggle : undefined}
+        onKeyDown={
+          canExpand
+            ? (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  toggle();
+                }
+              }
+            : undefined
+        }
+      >
+        <div className="schedule-card-head">
+          <span className="schedule-kickoff">
+            <span className="schedule-time">{kickoffTime}</span>
+            {entry.city ? <span className="schedule-city">{entry.city}</span> : null}
+            {entry.status === "live" ? <em className="schedule-live">Live</em> : null}
+          </span>
+          {entry.kind === "group" && entry.group ? (
+            <button
+              type="button"
+              className="schedule-stage link"
+              onClick={(event) => {
+                event.stopPropagation();
+                onNavigateToGroup(entry.group!);
+              }}
+            >
+              Group {entry.group}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="schedule-stage link"
+              onClick={(event) => {
+                event.stopPropagation();
+                onNavigateToBracket(entry.id);
+              }}
+            >
+              {entry.stageLabel}
+            </button>
+          )}
+        </div>
+        <div className="score-line">
+          <ScheduleTeamLabel side={entry.home} teamsById={teamsById} />
+          <ScheduleProbCenter entry={entry} expandable={canExpand} expanded={expanded} />
+          <ScheduleTeamLabel side={entry.away} teamsById={teamsById} align="right" />
+        </div>
       </div>
-      <div className="score-line">
-        <ScheduleTeamLabel side={entry.home} teamsById={teamsById} />
-        <ScheduleProbCenter entry={entry} onNavigateToBracket={onNavigateToBracket} />
-        <ScheduleTeamLabel side={entry.away} teamsById={teamsById} align="right" />
-      </div>
+      {expanded ? (
+        <QualifierList home={entry.home} away={entry.away} teamsById={teamsById} teamReach={teamReach} stage={entry.stage} />
+      ) : null}
     </div>
   );
 }
