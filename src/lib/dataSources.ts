@@ -506,6 +506,14 @@ function buildConfirmedFixtures(
     const hasRealScore = status === "completed" || status === "live";
     const date = competition.date ?? event.date;
 
+    // ESPN flags the advancing side on each competitor, which already accounts
+    // for a penalty shoot-out when regulation finished level.
+    let winnerTeamId: string | undefined;
+    if (status === "completed") {
+      if (home?.winner) winnerTeamId = homeTeam.id;
+      else if (away?.winner) winnerTeamId = awayTeam.id;
+    }
+
     const market = findMarketForMatch({ homeTeamId: homeTeam.id, awayTeamId: awayTeam.id, date } as Match, teamsById, marketIndex);
     const probabilities = market ? orientedProbabilities(market, homeTeam, awayTeam) : undefined;
     const scoreSeed = `${event.id}-${homeTeam.id}-${awayTeam.id}`;
@@ -525,6 +533,7 @@ function buildConfirmedFixtures(
       status,
       homeScore: hasRealScore ? Number(home.score) : undefined,
       awayScore: hasRealScore ? Number(away.score) : undefined,
+      winnerTeamId,
       prediction
     });
   }

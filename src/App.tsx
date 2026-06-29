@@ -565,7 +565,8 @@ function App() {
           data.matches,
           data.knockoutMarkets,
           MONTE_CARLO_ITERATIONS,
-          MONTE_CARLO_SEED
+          MONTE_CARLO_SEED,
+          data.knockoutFixtures ?? []
         );
         if (!cancelled && simulationRequestRef.current === requestId) setSimulations(result);
       }, 0);
@@ -601,6 +602,7 @@ function App() {
       teams: data.teams,
       matches: data.matches,
       knockoutMarkets: data.knockoutMarkets,
+      knockoutFixtures: data.knockoutFixtures ?? [],
       iterations: MONTE_CARLO_ITERATIONS,
       seed: MONTE_CARLO_SEED
     });
@@ -613,7 +615,10 @@ function App() {
   }, [data]);
 
   const projection = useMemo(
-    () => (data ? projectTournament(data.teams, data.matches, data.knockoutMarkets, overrides, bracketPicks) : null),
+    () =>
+      data
+        ? projectTournament(data.teams, data.matches, data.knockoutMarkets, overrides, bracketPicks, data.knockoutFixtures ?? [])
+        : null,
     [data, overrides, bracketPicks]
   );
   const teamsById = useMemo(() => (data ? toTeamsById(data.teams) : {}), [data]);
@@ -1238,6 +1243,7 @@ function BracketView({
 }) {
   const champion = bracket.find((match) => match.id === "M104")?.winnerTeamId;
   const pickCount = Object.keys(bracketPicks).length;
+
   const orderedByStage = useMemo(() => {
     const byStage: Record<Stage, BracketMatch[]> = { R32: [], R16: [], QF: [], SF: [], Final: [] };
     for (const match of bracket) byStage[match.stage].push(match);
@@ -1321,9 +1327,12 @@ function BracketCard({
   const awayProb = typeof homeProb === "number" ? 1 - homeProb : undefined;
   const predictedWinnerId =
     home && away && typeof homeProb === "number" ? (homeProb >= 0.5 ? home.id : away.id) : match.winnerTeamId;
+  // A finished tie shows its real score in place of the advance odds and can no
+  // longer be re-picked — the result already decides who goes through.
+  const isFinal = Boolean(match.final) && typeof match.homeScore === "number" && typeof match.awayScore === "number";
 
   return (
-    <article className={`bracket-card ${picked ? "picked" : ""}`}>
+    <article className={`bracket-card ${picked ? "picked" : ""} ${isFinal ? "final" : ""}`}>
       <div className="bracket-card-head">
         <span className="match-date" title={venueTitle}>
           {info ? formatKickoff(info.date) : ""}
@@ -1334,16 +1343,18 @@ function BracketCard({
       </div>
       <BracketTeam
         team={home}
-        probability={decided ? homeProb : undefined}
+        probability={isFinal ? undefined : decided ? homeProb : undefined}
+        score={isFinal ? match.homeScore : undefined}
         winner={match.winnerTeamId === home?.id}
-        clickable={decided}
+        clickable={decided && !isFinal}
         onClick={() => onPickWinner(match.id, home?.id, predictedWinnerId)}
       />
       <BracketTeam
         team={away}
-        probability={decided ? awayProb : undefined}
+        probability={isFinal ? undefined : decided ? awayProb : undefined}
+        score={isFinal ? match.awayScore : undefined}
         winner={match.winnerTeamId === away?.id}
-        clickable={decided}
+        clickable={decided && !isFinal}
         onClick={() => onPickWinner(match.id, away?.id, predictedWinnerId)}
       />
     </article>
@@ -1353,27 +1364,39 @@ function BracketCard({
 function BracketTeam({
   team,
   probability,
+  score,
   winner,
   clickable,
   onClick
 }: {
   team?: Team;
   probability?: number;
+  score?: number;
   winner: boolean;
   clickable: boolean;
   onClick: () => void;
 }) {
+  const figure =
+    typeof score === "number"
+      ? `${team?.name ?? ""} — scored ${score}`
+      : team
+        ? `${team.name} — ${typeof probability === "number" ? formatPercent(probability, 0) : "?"} to advance`
+        : undefined;
   return (
     <button
       className={`bracket-team ${winner ? "winner" : ""}`}
       onClick={onClick}
       disabled={!clickable}
       type="button"
-      title={team ? `${team.name} — ${typeof probability === "number" ? formatPercent(probability, 0) : "?"} to advance` : undefined}
+      title={figure}
     >
       {team ? <img src={team.logo} alt="" /> : <span className="bracket-dot" />}
       <span>{team?.shortName ?? "To be decided"}</span>
-      {typeof probability === "number" ? <b>{formatPercent(probability, 0)}</b> : null}
+      {typeof score === "number" ? (
+        <b className="bracket-score">{score}</b>
+      ) : typeof probability === "number" ? (
+        <b>{formatPercent(probability, 0)}</b>
+      ) : null}
     </button>
   );
 }

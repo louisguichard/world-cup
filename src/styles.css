@@ -1482,6 +1482,12 @@ h2 {
   font-size: 12px;
 }
 
+.bracket-team b.bracket-score {
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
 .bracket-dot {
   width: 8px;
   height: 8px;

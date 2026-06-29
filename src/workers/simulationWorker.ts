@@ -1,4 +1,4 @@
-import type { Match, PolymarketMatchMarket, Team, TournamentSimulationResult } from "../types";
+import type { ConfirmedFixture, Match, PolymarketMatchMarket, Team, TournamentSimulationResult } from "../types";
 import { simulateTournamentOutcomes } from "../lib/tournament";
 
 type SimulationRequest = {
@@ -6,6 +6,7 @@ type SimulationRequest = {
   teams: Team[];
   matches: Match[];
   knockoutMarkets: PolymarketMatchMarket[];
+  knockoutFixtures: ConfirmedFixture[];
   iterations: number;
   seed: number;
 };
@@ -17,10 +18,10 @@ type SimulationResponse = {
 };
 
 self.onmessage = (event: MessageEvent<SimulationRequest>) => {
-  const { requestId, teams, matches, knockoutMarkets, iterations, seed } = event.data;
+  const { requestId, teams, matches, knockoutMarkets, knockoutFixtures, iterations, seed } = event.data;
 
   try {
-    const result = simulateTournamentOutcomes(teams, matches, knockoutMarkets, iterations, seed);
+    const result = simulateTournamentOutcomes(teams, matches, knockoutMarkets, iterations, seed, knockoutFixtures);
     self.postMessage({ requestId, result } satisfies SimulationResponse);
   } catch (error) {
     self.postMessage({

@@ -118,6 +118,9 @@ export type BracketMatch = {
   marketSlug?: string;
   source: "scheduled" | "simulated";
   manual?: boolean;
+  // True when the tie has actually been played: homeScore/awayScore and
+  // winnerTeamId are real results, not projections.
+  final?: boolean;
   note?: string;
 };
 
@@ -140,6 +143,9 @@ export type ConfirmedFixture = {
   status: MatchStatus;
   homeScore?: number;
   awayScore?: number;
+  // Team that actually advanced. Carries the result of a penalty shoot-out, so
+  // it can differ from the regulation score when home/away finished level.
+  winnerTeamId?: string;
   prediction?: Prediction;
 };
 

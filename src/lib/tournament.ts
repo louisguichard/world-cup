@@ -2,6 +2,7 @@ import { thirdPlaceMap } from "../data/thirdPlaceMap";
 import { knockoutSchedule } from "../data/knockoutSchedule";
 import type {
   BracketMatch,
+  ConfirmedFixture,
   GroupLetter,
   GroupStanding,
   Match,
@@ -389,6 +390,35 @@ function seedLabel(seed: string, thirdMapping: Record<string, string>): string {
   return seed;
 }
 
+// A finished knockout tie, keyed by its (unordered) team pair so it can be
+// matched against the bracket's projected pairing regardless of home/away order.
+type KnockoutResult = { winnerTeamId?: string; scores: Record<string, number> };
+type KnockoutResults = Map<string, KnockoutResult>;
+
+function teamPairKey(a: string, b: string): string {
+  return [a, b].sort().join("|");
+}
+
+export function buildKnockoutResults(fixtures: ConfirmedFixture[] = []): KnockoutResults {
+  const map: KnockoutResults = new Map();
+  for (const fixture of fixtures) {
+    if (fixture.status !== "completed") continue;
+    if (typeof fixture.homeScore !== "number" || typeof fixture.awayScore !== "number") continue;
+    const winnerTeamId =
+      fixture.winnerTeamId ??
+      (fixture.homeScore === fixture.awayScore
+        ? undefined
+        : fixture.homeScore > fixture.awayScore
+          ? fixture.homeTeamId
+          : fixture.awayTeamId);
+    map.set(teamPairKey(fixture.homeTeamId, fixture.awayTeamId), {
+      winnerTeamId,
+      scores: { [fixture.homeTeamId]: fixture.homeScore, [fixture.awayTeamId]: fixture.awayScore }
+    });
+  }
+  return map;
+}
+
 function playKnockoutMatch(
   id: string,
   stage: Stage,
@@ -399,7 +429,8 @@ function playKnockoutMatch(
   random?: () => number,
   picks: Record<string, string> = {},
   homeSeedLabel?: string,
-  awaySeedLabel?: string
+  awaySeedLabel?: string,
+  knockoutResults?: KnockoutResults
 ): BracketMatch {
   const home = homeTeamId ? teamsById[homeTeamId] : undefined;
   const away = awayTeamId ? teamsById[awayTeamId] : undefined;
@@ -419,9 +450,16 @@ function playKnockoutMatch(
 
   const marketProbability = knockoutMarketProbability(id, home, away, knockoutMarkets);
   const probability = marketProbability?.homeWinProbability ?? knockoutWinProbability(home, away);
+
+  // A really-played tie is a fact: its winner advances and its score is shown,
+  // ahead of any user pick or projection. We only treat it as final when the
+  // advancing side is known (ESPN resolves penalty shoot-outs for us).
+  const real = knockoutResults?.get(teamPairKey(home.id, away.id));
+  const isFinal = Boolean(real && real.winnerTeamId === home.id) || Boolean(real && real.winnerTeamId === away.id);
+
   const pick = picks[id];
-  const manual = !random && (pick === home.id || pick === away.id);
-  const winnerTeamId = manual
+  const manual = !isFinal && !random && (pick === home.id || pick === away.id);
+  const projectedWinnerId = manual
     ? pick
     : random
       ? random() <= probability
@@ -430,7 +468,12 @@ function playKnockoutMatch(
       : probability >= 0.5
         ? home.id
         : away.id;
-  const score: Partial<ReturnType<typeof knockoutScore>> = random ? {} : knockoutScore(home, away, winnerTeamId);
+  const winnerTeamId: string = isFinal ? real!.winnerTeamId! : projectedWinnerId;
+  const score: Partial<ReturnType<typeof knockoutScore>> = isFinal
+    ? { homeScore: real!.scores[home.id], awayScore: real!.scores[away.id] }
+    : random
+      ? {}
+      : knockoutScore(home, away, winnerTeamId);
 
   return {
     id,
@@ -449,6 +492,7 @@ function playKnockoutMatch(
     marketSlug: marketProbability?.marketSlug,
     source: "simulated",
     manual,
+    final: isFinal,
     note: score.note
   };
 }
@@ -518,7 +562,8 @@ function buildBracketFromStandings(
   teamsById: TeamsById,
   knockoutMarkets: PolymarketMatchMarket[] = [],
   random?: () => number,
-  picks: Record<string, string> = {}
+  picks: Record<string, string> = {},
+  knockoutResults?: KnockoutResults
 ): BracketMatch[] {
   const standingsByGroup = Object.fromEntries(
     standings.map((standing) => [standing.group, standing.rows])
@@ -541,7 +586,8 @@ function buildBracketFromStandings(
       random,
       picks,
       seedLabel(homeSeed, thirdMapping),
-      seedLabel(awaySeed, thirdMapping)
+      seedLabel(awaySeed, thirdMapping),
+      knockoutResults
     )
   );
 
@@ -550,7 +596,7 @@ function buildBracketFromStandings(
   for (const stage of ["R16", "QF", "SF", "Final"] as const) {
     const winners = bracketWinners(allMatches);
     const stageMatches = nextRoundDefinitions[stage].map(([id, homeSeed, awaySeed]) =>
-      playKnockoutMatch(id, stage, winners[homeSeed], winners[awaySeed], teamsById, knockoutMarkets, random, picks, homeSeed, awaySeed)
+      playKnockoutMatch(id, stage, winners[homeSeed], winners[awaySeed], teamsById, knockoutMarkets, random, picks, homeSeed, awaySeed, knockoutResults)
     );
     allMatches.push(...stageMatches);
   }
@@ -563,7 +609,8 @@ export function projectTournament(
   matches: Match[],
   knockoutMarkets: PolymarketMatchMarket[] = [],
   overrides: Record<string, ScoreOverride> = {},
-  bracketPicks: Record<string, string> = {}
+  bracketPicks: Record<string, string> = {},
+  knockoutFixtures: ConfirmedFixture[] = []
 ): TournamentProjection {
   const teamsById = toTeamsById(teams);
   const scoredMatches = materializeMatches(matches, teamsById, overrides);
@@ -573,8 +620,9 @@ export function projectTournament(
     .slice(0, 8)
     .map((record) => record.group)
     .sort();
+  const knockoutResults = buildKnockoutResults(knockoutFixtures);
   const bracketTeamsById = toTeamsById(applyProjectedGroupForm(teams, scoredMatches));
-  const bracket = buildBracketFromStandings(standings, bracketTeamsById, knockoutMarkets, undefined, bracketPicks);
+  const bracket = buildBracketFromStandings(standings, bracketTeamsById, knockoutMarkets, undefined, bracketPicks, knockoutResults);
 
   return {
     scoredMatches,
@@ -590,9 +638,10 @@ export function simulateChampionOdds(
   matches: Match[],
   knockoutMarkets: PolymarketMatchMarket[] = [],
   iterations = 3000,
-  seed = 4242
+  seed = 4242,
+  knockoutFixtures: ConfirmedFixture[] = []
 ): Array<{ teamId: string; probability: number }> {
-  return simulateTournamentOutcomes(teams, matches, knockoutMarkets, iterations, seed).championOdds;
+  return simulateTournamentOutcomes(teams, matches, knockoutMarkets, iterations, seed, knockoutFixtures).championOdds;
 }
 
 function makeSeededRandom(seed: number): () => number {
@@ -667,9 +716,11 @@ export function simulateTournamentOutcomes(
   matches: Match[],
   knockoutMarkets: PolymarketMatchMarket[] = [],
   iterations = 3000,
-  seed = 4242
+  seed = 4242,
+  knockoutFixtures: ConfirmedFixture[] = []
 ): TournamentSimulationResult {
   const teamsById = toTeamsById(teams);
+  const knockoutResults = buildKnockoutResults(knockoutFixtures);
   const stateByTeam = Object.fromEntries(
     teams.map((team) => [
       team.id,
@@ -685,7 +736,7 @@ export function simulateTournamentOutcomes(
     const scoredMatches = materializeMatches(matches, teamsById, {}, random);
     const standings = computeStandings(scoredMatches, teams);
     const bracketTeamsById = toTeamsById(applyProjectedGroupForm(teams, scoredMatches));
-    const bracket = buildBracketFromStandings(standings, bracketTeamsById, knockoutMarkets, random);
+    const bracket = buildBracketFromStandings(standings, bracketTeamsById, knockoutMarkets, random, {}, knockoutResults);
 
     for (const match of bracket) {
       if (!match.homeTeamId || !match.awayTeamId) continue;
