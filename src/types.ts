@@ -56,6 +56,8 @@ export type Match = {
   group: GroupLetter;
   date: string;
   venue?: string;
+  city?: string;
+  country?: string;
   homeTeamId: string;
   awayTeamId: string;
   status: MatchStatus;
@@ -127,10 +129,25 @@ export type TournamentProjection = {
   bracket: BracketMatch[];
 };
 
+export type ConfirmedFixture = {
+  id: string;
+  date: string;
+  round: string;
+  city?: string;
+  country?: string;
+  homeTeamId: string;
+  awayTeamId: string;
+  status: MatchStatus;
+  homeScore?: number;
+  awayScore?: number;
+  prediction?: Prediction;
+};
+
 export type DataLoadResult = {
   teams: Team[];
   matches: Match[];
   knockoutMarkets: PolymarketMatchMarket[];
+  knockoutFixtures: ConfirmedFixture[];
   loadedAt: string;
   sources: {
     espn: boolean;

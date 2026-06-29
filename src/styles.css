@@ -403,6 +403,12 @@ select:focus-visible,
   transition: color 0.18s ease, background 0.18s ease;
 }
 
+.segmented button svg {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+}
+
 .segmented button:hover {
   color: var(--text);
 }
@@ -1326,6 +1332,10 @@ h2 {
   min-height: 112px;
 }
 
+.bracket-cell.flash {
+  z-index: 4;
+}
+
 /* Connectors */
 .bracket-round:not(.is-final) .bracket-cell::before {
   content: "";
@@ -1365,6 +1375,10 @@ h2 {
   border-radius: 12px;
   background: var(--surface-2);
   transition: border-color 0.18s ease;
+}
+
+.bracket-cell.flash .bracket-card {
+  animation: bracket-focus 1.35s ease-out both;
 }
 
 .bracket-card.picked {
@@ -1476,31 +1490,232 @@ h2 {
   border: 1px dashed var(--line-strong);
 }
 
+@keyframes bracket-focus {
+  0% {
+    border-color: var(--line);
+    background: var(--surface-2);
+  }
+  18%,
+  62% {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  100% {
+    border-color: var(--line);
+    background: var(--surface-2);
+  }
+}
+
 /* =========================================================================
    Upcoming schedule
    ========================================================================= */
 
 .schedule-days {
   display: grid;
-  gap: 18px;
+  gap: 26px;
 }
 
 .schedule-note {
   margin-top: -8px;
 }
 
-.schedule-day {
+.schedule-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 4px 0 24px;
+}
+
+.schedule-filter {
+  position: relative;
+  flex: 1 1 220px;
+  display: grid;
+  gap: 6px;
+  min-width: min(220px, 100%);
+}
+
+.schedule-filter.open {
+  z-index: 20;
+}
+
+.schedule-filter-label {
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.schedule-filter-trigger {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 42px;
+  min-width: 0;
+  padding: 0 11px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  background: var(--surface-2);
+  text-align: left;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.schedule-filter-trigger:hover,
+.schedule-filter.open .schedule-filter-trigger {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+}
+
+.schedule-filter-trigger svg {
+  color: var(--faint);
+  transition: transform 0.16s ease, color 0.16s ease;
+}
+
+.schedule-filter-trigger.selected svg,
+.schedule-filter.open .schedule-filter-trigger svg {
+  color: var(--accent);
+}
+
+.filter-flag {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: var(--r);
+  border-radius: 6px;
+  background: var(--inset);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.filter-flag.team img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.filter-flag.host {
+  font-size: 15px;
+  background: var(--inset);
+}
+
+.filter-flag.empty::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line-strong);
+}
+
+.filter-copy {
+  display: grid;
+  min-width: 0;
+}
+
+.filter-value,
+.filter-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter-value {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.filter-meta {
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.schedule-filter-trigger .filter-meta {
+  display: none;
+}
+
+.schedule-filter-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: 1px;
+  max-height: 286px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+
+.schedule-filter-option {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 42px;
+  padding: 6px 7px;
+  border-radius: 8px;
+  color: var(--muted);
+  text-align: left;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.schedule-filter-option:hover,
+.schedule-filter-option.active {
+  color: var(--text);
+  background: var(--surface-3);
+}
+
+.schedule-filter-option.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: none;
+}
+
+.schedule-filter-option > svg {
+  justify-self: center;
+  color: var(--accent);
+}
+
+.schedule-filter-clear {
+  height: 42px;
+  padding: 0 13px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  background: var(--surface-2);
+  font-size: 13px;
+  font-weight: 700;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.schedule-filter-clear:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+}
+
+.schedule-day {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .schedule-day h3 {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--line);
+  padding-left: 2px;
   color: var(--text);
   font-family: var(--font-display);
   font-size: 18px;
@@ -1509,42 +1724,79 @@ h2 {
 
 .schedule-list {
   display: grid;
-  gap: 1px;
-  background: var(--line);
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: stretch;
 }
 
-@media (min-width: 700px) {
+@media (min-width: 680px) {
   .schedule-list {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 1040px) {
   .schedule-list {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 480px) {
-  .schedule-list {
-    grid-template-columns: 1fr;
-  }
-  .schedule-meta-end {
-    display: none;
-  }
+/* Fixed, identical match boxes — mirrors the group-fixture card look */
+.schedule-card {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  height: 100%;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
 }
 
-.schedule-row.live {
-  background: linear-gradient(90deg, rgba(255, 92, 92, 0.08), var(--surface) 28%);
+.schedule-card.live {
+  border-color: rgba(255, 92, 92, 0.35);
+  background: linear-gradient(160deg, rgba(255, 92, 92, 0.08), var(--surface) 60%);
+}
+
+.schedule-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
 }
 
 .schedule-kickoff {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--muted);
-  font-size: 13px;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  font-size: 12.5px;
   font-weight: 600;
+}
+
+.schedule-time {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.schedule-city {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--faint);
+}
+
+.schedule-city::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--faint);
 }
 
 .schedule-live {
@@ -1562,61 +1814,18 @@ h2 {
   text-transform: uppercase;
 }
 
-.schedule-meta-start,
-.schedule-meta-end {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  min-width: 0;
-}
-
-.schedule-meta-start {
-  flex: 1 1 auto;
-  justify-content: flex-start;
-}
-
-.schedule-meta-end {
-  flex: 0 1 auto;
-  justify-content: flex-end;
-  margin-left: auto;
-  color: var(--faint);
-  font-size: 11.5px;
-}
-
 .schedule-stage {
+  flex: 0 0 auto;
   padding: 3px 8px;
   border-radius: 999px;
   border: 1px solid var(--line);
   color: var(--muted);
   background: rgba(255, 255, 255, 0.03);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.schedule-projected-teams {
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 210, 125, 0.28);
-  color: var(--warn);
-  background: var(--gold-soft);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-}
-
-.schedule-proj-label {
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  color: var(--faint);
-  background: rgba(255, 255, 255, 0.03);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 button.schedule-stage.link {
@@ -1630,19 +1839,6 @@ button.schedule-stage.link:hover {
   background: var(--accent-soft);
 }
 
-.schedule-venue {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.schedule-market {
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 700;
-}
-
 .schedule-dot {
   width: 20px;
   height: 20px;
@@ -1651,40 +1847,111 @@ button.schedule-stage.link:hover {
   border: 1px dashed var(--line-strong);
 }
 
-.schedule-row .score-line {
-  grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr);
+.schedule-card .score-line {
+  grid-template-columns: minmax(0, 1fr) 124px minmax(0, 1fr);
+  gap: 10px;
 }
 
-.prob-bar {
+@media (max-width: 420px) {
+  .schedule-card .score-line {
+    grid-template-columns: minmax(0, 1fr) 100px minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+
+.team-label.tbd {
+  color: var(--faint);
+  font-size: 12.5px;
+}
+
+/* Slim, modern odds bar: figures sit above a thin two/three-part track. */
+.odds {
   display: flex;
-  height: 28px;
-  border-radius: 4px;
-  overflow: hidden;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.odds-figures {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
   font-size: 11px;
   font-weight: 700;
+  line-height: 1;
 }
 
-.prob-segment {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.prob-segment.home {
-  background: var(--accent-soft);
+.odds-figures .fig.home {
   color: var(--accent);
 }
 
-.prob-segment.draw {
-  background: var(--inset);
+.odds-figures .fig.away {
   color: var(--muted);
 }
 
-.prob-segment.away {
-  background: var(--surface-3);
+.odds-figures .fig.draw {
   color: var(--faint);
+}
+
+.odds-track {
+  display: flex;
+  height: 5px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--inset);
+}
+
+.odds-track i {
+  display: block;
+  height: 100%;
+}
+
+.odds-track i.home {
+  background: var(--accent);
+}
+
+.odds-track i.draw {
+  background: var(--line-2);
+}
+
+.odds-track i.away {
+  background: var(--line-strong);
+}
+
+.odds-live {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.schedule-bracket-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--accent-line);
+  border-radius: 8px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-size: 11.5px;
+  font-weight: 800;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.schedule-bracket-link:hover {
+  color: var(--text);
+  border-color: rgba(54, 232, 160, 0.52);
+  background: rgba(54, 232, 160, 0.18);
+}
+
+.schedule-bracket-link svg {
+  flex: 0 0 auto;
 }
 
 .prob-vs {
@@ -2284,15 +2551,41 @@ button.schedule-stage.link:hover {
   }
 
   .segmented {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     min-width: 0;
   }
 
   .segmented button {
-    flex: 1;
     min-width: 0;
     justify-content: center;
+    min-height: 42px;
     padding: 0 10px;
     gap: 7px;
+  }
+
+  /* Icon-only on mobile so all three tabs read identically (the long
+     "Probabilities" label otherwise crowds the icons out of view). */
+  .segmented button span {
+    display: none;
+  }
+
+  .segmented button svg {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+  }
+
+  .schedule-filters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .schedule-filter,
+  .schedule-filter-clear {
+    width: 100%;
   }
 
   /* Methodology becomes an icon-only button, pinned next to the brand */

@@ -1,10 +1,12 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   BarChart3,
   BookOpen,
   CalendarDays,
   ChevronDown,
+  ChevronRight,
+  Check,
   Database,
   Dices,
   Lock,
@@ -18,10 +20,12 @@ import {
 } from "lucide-react";
 import type {
   BracketMatch,
+  ConfirmedFixture,
   DataLoadResult,
   GroupLetter,
   GroupStanding,
   Match,
+  MatchStatus,
   MatchWithScore,
   OpponentProbability,
   ScoreOverride,
@@ -56,23 +60,36 @@ type SimulationWorkerResponse = {
 
 type AppTab = "tournament" | "probabilistic" | "upcoming";
 
+// One contestant of a fixture: either a settled team or still to be decided.
+type ScheduleSide = { kind: "team"; teamId: string } | { kind: "tbd" };
+
 type ScheduleEntry = {
   id: string;
   date: string;
   stageLabel: string;
-  venue?: string;
-  homeTeamId?: string;
-  awayTeamId?: string;
-  homeSeedLabel?: string;
-  awaySeedLabel?: string;
-  status?: Match["status"];
+  city?: string;
+  country?: string;
+  group?: GroupLetter;
+  home: ScheduleSide;
+  away: ScheduleSide;
+  status?: MatchStatus;
   homeScore?: number;
   awayScore?: number;
-  prediction?: Match["prediction"];
+  // Two-way advance odds (knockout), set only when both sides are settled teams.
   homeWinProbability?: number;
-  marketSlug?: string;
+  // 1·X·2 odds (group fixtures).
+  prediction?: Match["prediction"];
+  // Every team that can still reach this fixture (confirmed or potential) —
+  // powers the per-team filter.
+  teamPool: string[];
   kind: "group" | "knockout";
-  group?: GroupLetter;
+};
+
+type FilterOption = {
+  value: string;
+  label: string;
+  meta?: string;
+  icon?: ReactNode;
 };
 
 const stageLabels: Record<Stage, string> = {
@@ -197,52 +214,201 @@ function scheduleDateKey(value: string): string {
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
 
+function teamPairKey(a: string, b: string): string {
+  return [a, b].sort().join("|");
+}
+
+function countryFlag(country?: string): string {
+  const normalized = String(country ?? "").trim().toLowerCase();
+  if (!normalized) return "•";
+  if (["usa", "us", "united states", "united states of america"].includes(normalized)) return "🇺🇸";
+  if (["canada", "ca"].includes(normalized)) return "🇨🇦";
+  if (["mexico", "méxico", "mx"].includes(normalized)) return "🇲🇽";
+  return country?.slice(0, 2).toUpperCase() ?? "•";
+}
+
+// The Upcoming view is driven by exactly the same bracket the Tournament view
+// renders, so the two stay in lock-step. Each knockout side becomes a settled
+// team only when it is confirmed by the real fixture/result feed; projected-only
+// sides are intentionally displayed as "To be decided".
 function buildUpcomingSchedule(
   matches: Match[],
   scoredMatches: MatchWithScore[],
-  bracket: BracketMatch[]
+  bracket: BracketMatch[],
+  knockoutFixtures: ConfirmedFixture[]
 ): ScheduleEntry[] {
   const scoredById = Object.fromEntries(scoredMatches.map((match) => [match.id, match]));
   const entries: ScheduleEntry[] = [];
+  // Keep fixtures visible until ~3h past kick-off (covers a match in progress),
+  // then drop them so already-played games don't linger in the upcoming list.
+  const now = Date.now();
+  const KICKOFF_GRACE_MS = 3 * 60 * 60 * 1000;
+  const hasKickedOff = (date: string) => {
+    const time = Date.parse(date);
+    return Number.isFinite(time) && time < now - KICKOFF_GRACE_MS;
+  };
 
+  // --- Group fixtures (1·X·2 odds) -------------------------------------------
   for (const match of matches) {
     if (match.status === "completed") continue;
+    if (match.status !== "live" && hasKickedOff(match.date)) continue;
     const scored = scoredById[match.id];
     entries.push({
       id: match.id,
       date: match.date,
       stageLabel: `Group ${match.group}`,
-      venue: match.venue,
+      city: match.city,
+      country: match.country,
       group: match.group,
-      homeTeamId: match.homeTeamId,
-      awayTeamId: match.awayTeamId,
+      home: { kind: "team", teamId: match.homeTeamId },
+      away: { kind: "team", teamId: match.awayTeamId },
       status: match.status,
       homeScore: scored?.homeScore,
       awayScore: scored?.awayScore,
       prediction: match.prediction,
+      teamPool: [match.homeTeamId, match.awayTeamId],
       kind: "group"
     });
   }
 
-  for (const match of bracket) {
-    const info = knockoutSchedule[match.id];
-    if (!info) continue;
+  // --- Knockout fixtures, straight from the bracket --------------------------
+  const bracketById = Object.fromEntries(bracket.map((match) => [match.id, match]));
+
+  // Join the projected R32 ties to real ESPN results by team pair, so we know
+  // which are actually decided (and by whom) rather than merely projected.
+  const realByPair = new Map<string, ConfirmedFixture>();
+  for (const fixture of knockoutFixtures) {
+    realByPair.set(teamPairKey(fixture.homeTeamId, fixture.awayTeamId), fixture);
+  }
+  const realResult = (matchId: string) => {
+    const bracketMatch = bracketById[matchId];
+    if (!bracketMatch?.homeTeamId || !bracketMatch?.awayTeamId) return undefined;
+    const fixture = realByPair.get(teamPairKey(bracketMatch.homeTeamId, bracketMatch.awayTeamId));
+    if (!fixture) return undefined;
+    let winnerTeamId: string | undefined;
+    let loserTeamId: string | undefined;
+    if (
+      fixture.status === "completed" &&
+      typeof fixture.homeScore === "number" &&
+      typeof fixture.awayScore === "number" &&
+      fixture.homeScore !== fixture.awayScore
+    ) {
+      winnerTeamId = fixture.homeScore > fixture.awayScore ? fixture.homeTeamId : fixture.awayTeamId;
+      loserTeamId = fixture.homeScore > fixture.awayScore ? fixture.awayTeamId : fixture.homeTeamId;
+    }
+    return { status: fixture.status, winnerTeamId, loserTeamId, homeScore: fixture.homeScore, awayScore: fixture.awayScore };
+  };
+
+  // A feeder reference ("W73") points at match M73. Resolve it to the settled
+  // winner if its tie has actually been played, otherwise leave it undecided.
+  const feederId = (ref?: string) => (ref ? `M${ref.replace(/^W/, "")}` : undefined);
+  const resolveSide = (matchId: string, picker: "home" | "away"): ScheduleSide => {
+    const bracketMatch = bracketById[matchId];
+    if (!bracketMatch) return { kind: "tbd" };
+    if (bracketMatch.stage === "R32") {
+      const teamId = picker === "home" ? bracketMatch.homeTeamId : bracketMatch.awayTeamId;
+      const confirmedFixture =
+        bracketMatch.homeTeamId && bracketMatch.awayTeamId
+          ? realByPair.get(teamPairKey(bracketMatch.homeTeamId, bracketMatch.awayTeamId))
+          : undefined;
+      return teamId && confirmedFixture ? { kind: "team", teamId } : { kind: "tbd" };
+    }
+    const feeder = feederId(picker === "home" ? bracketMatch.homeSeedLabel : bracketMatch.awaySeedLabel);
+    const winner = feeder ? realResult(feeder)?.winnerTeamId : undefined;
+    return winner ? { kind: "team", teamId: winner } : { kind: "tbd" };
+  };
+
+  // Every team that could still play a given tie: its own confirmed teams for a
+  // settled match, or the union of both feeders' candidate pools further up.
+  const poolCache = new Map<string, string[]>();
+  const candidatesFor = (matchId: string): string[] => {
+    const cached = poolCache.get(matchId);
+    if (cached) return cached;
+    poolCache.set(matchId, []); // guard against cycles
+    const bracketMatch = bracketById[matchId];
+    let pool: string[] = [];
+    if (bracketMatch) {
+      if (bracketMatch.stage === "R32") {
+        const winner = realResult(matchId)?.winnerTeamId;
+        if (winner) pool = [winner];
+        else if (bracketMatch.homeTeamId && bracketMatch.awayTeamId)
+          pool = [bracketMatch.homeTeamId, bracketMatch.awayTeamId];
+      } else {
+        const home = feederId(bracketMatch.homeSeedLabel);
+        const away = feederId(bracketMatch.awaySeedLabel);
+        pool = [...new Set([...(home ? candidatesFor(home) : []), ...(away ? candidatesFor(away) : [])])];
+      }
+    }
+    poolCache.set(matchId, pool);
+    return pool;
+  };
+
+  for (const bracketMatch of bracket) {
+    const info = knockoutSchedule[bracketMatch.id];
+    if (!info || hasKickedOff(info.date)) continue;
+
+    const home = resolveSide(bracketMatch.id, "home");
+    const away = resolveSide(bracketMatch.id, "away");
+    const real = bracketMatch.stage === "R32" ? realResult(bracketMatch.id) : undefined;
+    if (real?.status === "completed") continue; // already played → drop
+
+    let status: MatchStatus = "scheduled";
+    let homeScore: number | undefined;
+    let awayScore: number | undefined;
+    if (real?.status === "live") {
+      status = "live";
+      homeScore = real.homeScore;
+      awayScore = real.awayScore;
+    }
+
+    // Odds are only meaningful when both sides are settled and match the
+    // bracket's projected pairing (always true for the Round of 32).
+    let homeWinProbability: number | undefined;
+    if (
+      home.kind === "team" &&
+      away.kind === "team" &&
+      home.teamId === bracketMatch.homeTeamId &&
+      away.teamId === bracketMatch.awayTeamId
+    ) {
+      homeWinProbability = bracketMatch.homeWinProbability;
+    }
+
     entries.push({
-      id: match.id,
+      id: bracketMatch.id,
       date: info.date,
-      stageLabel: stageLabels[match.stage],
-      venue: formatVenueTitle(info),
-      homeTeamId: match.homeTeamId,
-      awayTeamId: match.awayTeamId,
-      homeSeedLabel: match.homeSeedLabel,
-      awaySeedLabel: match.awaySeedLabel,
-      homeWinProbability: match.homeWinProbability,
-      marketSlug: match.marketSlug,
+      stageLabel: stageLabels[bracketMatch.stage],
+      city: info.hostCity,
+      country: info.country,
+      home,
+      away,
+      status,
+      homeScore,
+      awayScore,
+      homeWinProbability,
+      teamPool: candidatesFor(bracketMatch.id),
       kind: "knockout"
     });
   }
 
-  return entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const thirdPlaceInfo = knockoutSchedule.M103;
+  if (thirdPlaceInfo && !hasKickedOff(thirdPlaceInfo.date)) {
+    const homeLoser = realResult("M101")?.loserTeamId;
+    const awayLoser = realResult("M102")?.loserTeamId;
+    entries.push({
+      id: "M103",
+      date: thirdPlaceInfo.date,
+      stageLabel: "Third place",
+      city: thirdPlaceInfo.hostCity,
+      country: thirdPlaceInfo.country,
+      home: homeLoser ? { kind: "team", teamId: homeLoser } : { kind: "tbd" },
+      away: awayLoser ? { kind: "team", teamId: awayLoser } : { kind: "tbd" },
+      status: "scheduled",
+      teamPool: [...new Set([...candidatesFor("M101"), ...candidatesFor("M102")])],
+      kind: "knockout"
+    });
+  }
+
+  return entries.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
 }
 
 function formatVenueTitle(info: KnockoutInfo): string {
@@ -448,7 +614,10 @@ function App() {
   }, [data, overrides, bracketPicks]);
   const championId = projection?.bracket.find((match) => match.id === "M104")?.winnerTeamId;
   const upcomingSchedule = useMemo(
-    () => (data && projection ? buildUpcomingSchedule(data.matches, projection.scoredMatches, projection.bracket) : []),
+    () =>
+      data && projection
+        ? buildUpcomingSchedule(data.matches, projection.scoredMatches, projection.bracket, data.knockoutFixtures ?? [])
+        : [],
     [data, projection]
   );
 
@@ -496,6 +665,25 @@ function App() {
     setTab("tournament");
     setTournamentOpenGroup(group);
     setGroupFocusRequest((count) => count + 1);
+  };
+
+  const navigateToBracketMatch = (matchId: string) => {
+    setView("app");
+    setTab("tournament");
+    // Wait for the bracket to mount, then bring the matching cell into view.
+    setTimeout(() => {
+      const targetIds = matchId === "M103" ? ["M101", "M102"] : [matchId];
+      const cells = targetIds
+        .map((id) => document.getElementById(`bracket-${id}`))
+        .filter((cell): cell is HTMLElement => Boolean(cell));
+      cells[0]?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      for (const cell of cells) {
+        cell.classList.remove("flash");
+        void cell.offsetWidth;
+        cell.classList.add("flash");
+      }
+      setTimeout(() => cells.forEach((cell) => cell.classList.remove("flash")), 1400);
+    }, 80);
   };
 
   if (loading && !data) {
@@ -551,19 +739,10 @@ function App() {
                 setView("app");
                 setTab("tournament");
               }}
+              aria-label="Tournament"
             >
               <Trophy size={16} />
               <span>Tournament</span>
-            </button>
-            <button
-              className={view === "app" && tab === "probabilistic" ? "active" : ""}
-              onClick={() => {
-                setView("app");
-                setTab("probabilistic");
-              }}
-            >
-              <BarChart3 size={16} />
-              <span>Probabilities</span>
             </button>
             <button
               className={view === "app" && tab === "upcoming" ? "active" : ""}
@@ -571,9 +750,21 @@ function App() {
                 setView("app");
                 setTab("upcoming");
               }}
+              aria-label="Upcoming"
             >
               <CalendarDays size={16} />
               <span>Upcoming</span>
+            </button>
+            <button
+              className={view === "app" && tab === "probabilistic" ? "active" : ""}
+              onClick={() => {
+                setView("app");
+                setTab("probabilistic");
+              }}
+              aria-label="Probabilities"
+            >
+              <BarChart3 size={16} />
+              <span>Probabilities</span>
             </button>
           </div>
           <button
@@ -664,7 +855,12 @@ function App() {
           ) : null}
 
           {tab === "upcoming" && data && projection ? (
-            <UpcomingView entries={upcomingSchedule} teamsById={teamsById} onNavigateToGroup={navigateToGroup} />
+            <UpcomingView
+              entries={upcomingSchedule}
+              teamsById={teamsById}
+              onNavigateToGroup={navigateToGroup}
+              onNavigateToBracket={navigateToBracketMatch}
+            />
           ) : null}
         </>
       )}
@@ -1068,7 +1264,7 @@ function BracketView({
           {bracketStages.map((stage) => (
             <div className={`bracket-round ${stage === "Final" ? "is-final" : ""}`} key={stage}>
               {orderedByStage[stage].map((match) => (
-                <div className="bracket-cell" key={match.id}>
+                <div className="bracket-cell" id={`bracket-${match.id}`} key={match.id}>
                   <BracketCard
                     match={match}
                     teamsById={teamsById}
@@ -1156,7 +1352,7 @@ function BracketTeam({
       title={team ? `${team.name} — ${typeof probability === "number" ? formatPercent(probability, 0) : "?"} to advance` : undefined}
     >
       {team ? <img src={team.logo} alt="" /> : <span className="bracket-dot" />}
-      <span>{team?.shortName ?? "TBD"}</span>
+      <span>{team?.shortName ?? "To be decided"}</span>
       {typeof probability === "number" ? <b>{formatPercent(probability, 0)}</b> : null}
     </button>
   );
@@ -1352,15 +1548,73 @@ function ProbabilityView({
 function UpcomingView({
   entries,
   teamsById,
-  onNavigateToGroup
+  onNavigateToGroup,
+  onNavigateToBracket
 }: {
   entries: ScheduleEntry[];
   teamsById: Record<string, Team>;
   onNavigateToGroup: (group: GroupLetter) => void;
+  onNavigateToBracket: (matchId: string) => void;
 }) {
+  const [teamFilter, setTeamFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+
+  // Teams that can still feature in some upcoming fixture, and the cities that
+  // host them — the two filter dimensions.
+  const teamOptions = useMemo(() => {
+    const ids = new Set<string>();
+    for (const entry of entries) for (const id of entry.teamPool) ids.add(id);
+    return [...ids]
+      .map((id) => teamsById[id])
+      .filter((team): team is Team => Boolean(team))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((team): FilterOption => ({
+        value: team.id,
+        label: team.name,
+        meta: `Group ${team.group}`,
+        icon: (
+          <span className="filter-flag team" aria-hidden="true">
+            {team.logo ? <img src={team.logo} alt="" /> : team.abbreviation.slice(0, 2)}
+          </span>
+        )
+      }));
+  }, [entries, teamsById]);
+
+  const cityOptions = useMemo(() => {
+    const byCity = new Map<string, { country?: string; count: number }>();
+    for (const entry of entries) {
+      if (!entry.city) continue;
+      const current = byCity.get(entry.city) ?? { country: entry.country, count: 0 };
+      if (!current.country && entry.country) current.country = entry.country;
+      current.count += 1;
+      byCity.set(entry.city, current);
+    }
+    return [...byCity.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([city, info]): FilterOption => ({
+        value: city,
+        label: city,
+        meta: `${info.count} fixture${info.count > 1 ? "s" : ""}${info.country ? ` · ${info.country}` : ""}`,
+        icon: (
+          <span className="filter-flag host" aria-hidden="true">
+            {countryFlag(info.country)}
+          </span>
+        )
+      }));
+  }, [entries]);
+
+  const filtered = useMemo(
+    () =>
+      entries.filter(
+        (entry) =>
+          (!teamFilter || entry.teamPool.includes(teamFilter)) && (!cityFilter || entry.city === cityFilter)
+      ),
+    [entries, teamFilter, cityFilter]
+  );
+
   const groupedDays = useMemo(() => {
     const groups: Array<{ key: string; label: string; entries: ScheduleEntry[] }> = [];
-    for (const entry of entries) {
+    for (const entry of filtered) {
       const key = scheduleDateKey(entry.date);
       const last = groups[groups.length - 1];
       if (last?.key === key) {
@@ -1370,10 +1624,9 @@ function UpcomingView({
       }
     }
     return groups;
-  }, [entries]);
+  }, [filtered]);
 
-  const groupCount = entries.filter((entry) => entry.kind === "group").length;
-  const knockoutCount = entries.filter((entry) => entry.kind === "knockout").length;
+  const hasFilter = Boolean(teamFilter || cityFilter);
 
   return (
     <section className="schedule-layout">
@@ -1382,141 +1635,292 @@ function UpcomingView({
           <span className="section-kicker">Fixtures</span>
           <h2>Upcoming matches</h2>
         </div>
-        <span className="quiet-note">
-          {groupCount} group · {knockoutCount} knockout
-        </span>
       </div>
       <p className="view-note schedule-note">
-        Scheduled fixtures show win probabilities from Polymarket or the strength model. Live matches show the current score.
+        Settled ties show win probabilities from Polymarket or the strength model. Undecided ties link through to the bracket.
       </p>
 
-      {entries.length ? (
+      <div className="schedule-filters">
+        <ScheduleFilterSelect
+          label="Team"
+          value={teamFilter}
+          placeholder="All teams"
+          emptyMeta="Certain and possible fixtures"
+          options={teamOptions}
+          onChange={setTeamFilter}
+        />
+        <ScheduleFilterSelect
+          label="City"
+          value={cityFilter}
+          placeholder="All cities"
+          emptyMeta="All host cities"
+          options={cityOptions}
+          onChange={setCityFilter}
+        />
+        {hasFilter ? (
+          <button
+            type="button"
+            className="schedule-filter-clear"
+            onClick={() => {
+              setTeamFilter("");
+              setCityFilter("");
+            }}
+          >
+            Clear
+          </button>
+        ) : null}
+      </div>
+
+      {groupedDays.length ? (
         <div className="schedule-days">
           {groupedDays.map((day) => (
             <article className="schedule-day" key={day.key}>
               <h3>{day.label}</h3>
               <div className="schedule-list">
                 {day.entries.map((entry) => (
-                  <ScheduleRow key={entry.id} entry={entry} teamsById={teamsById} onNavigateToGroup={onNavigateToGroup} />
+                  <ScheduleRow
+                    key={entry.id}
+                    entry={entry}
+                    teamsById={teamsById}
+                    onNavigateToGroup={onNavigateToGroup}
+                    onNavigateToBracket={onNavigateToBracket}
+                  />
                 ))}
               </div>
             </article>
           ))}
         </div>
       ) : (
-        <p className="view-note">No upcoming fixtures are scheduled right now.</p>
+        <p className="view-note">
+          {hasFilter ? "No fixtures match these filters." : "No upcoming fixtures are scheduled right now."}
+        </p>
       )}
     </section>
   );
 }
 
-function ScheduleTeamLabel({
-  team,
+function ScheduleFilterSelect({
   label,
+  value,
+  placeholder,
+  emptyMeta,
+  options,
+  onChange
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  emptyMeta: string;
+  options: FilterOption[];
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const selected = options.find((option) => option.value === value);
+  const selectedLabel = selected?.label ?? placeholder;
+  const selectedMeta = selected?.meta ?? emptyMeta;
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [open]);
+
+  return (
+    <div className={`schedule-filter ${open ? "open" : ""}`} ref={rootRef}>
+      <span className="schedule-filter-label">{label}</span>
+      <button
+        type="button"
+        className={`schedule-filter-trigger ${value ? "selected" : ""}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") setOpen(false);
+        }}
+      >
+        {selected?.icon ?? <span className="filter-flag empty" aria-hidden="true" />}
+        <span className="filter-copy">
+          <span className="filter-value">{selectedLabel}</span>
+          <span className="filter-meta">{selectedMeta}</span>
+        </span>
+        <ChevronDown size={16} className={open ? "flip" : ""} />
+      </button>
+      {open ? (
+        <div className="schedule-filter-menu" role="listbox" aria-label={label}>
+          <button
+            type="button"
+            role="option"
+            aria-selected={!value}
+            className={`schedule-filter-option ${!value ? "active" : ""}`}
+            onClick={() => {
+              onChange("");
+              setOpen(false);
+            }}
+          >
+            <span className="filter-flag empty" aria-hidden="true" />
+            <span className="filter-copy">
+              <span className="filter-value">{placeholder}</span>
+              <span className="filter-meta">{emptyMeta}</span>
+            </span>
+            {!value ? <Check size={15} /> : null}
+          </button>
+          {options.map((option) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={option.value === value}
+              className={`schedule-filter-option ${option.value === value ? "active" : ""}`}
+              key={option.value}
+              onClick={() => {
+                onChange(option.value);
+                setOpen(false);
+              }}
+            >
+              {option.icon ?? <span className="filter-flag empty" aria-hidden="true" />}
+              <span className="filter-copy">
+                <span className="filter-value">{option.label}</span>
+                {option.meta ? <span className="filter-meta">{option.meta}</span> : null}
+              </span>
+              {option.value === value ? <Check size={15} /> : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ScheduleTeamLabel({
+  side,
+  teamsById,
   align = "left"
 }: {
-  team?: Team;
-  label: string;
+  side: ScheduleSide;
+  teamsById: Record<string, Team>;
   align?: "left" | "right";
 }) {
+  if (side.kind === "tbd") {
+    return (
+      <span className={`team-label tbd ${align}`}>
+        <span className="schedule-dot" />
+        <span>To be decided</span>
+      </span>
+    );
+  }
+  const team = teamsById[side.teamId];
   return (
     <span className={`team-label ${align}`}>
       {team ? <img src={team.logo} alt="" /> : <span className="schedule-dot" />}
-      <span>{label}</span>
+      <span>{team?.shortName ?? "To be decided"}</span>
     </span>
   );
 }
 
-function ScheduleProbCenter({ entry }: { entry: ScheduleEntry }) {
+function ScheduleProbCenter({
+  entry,
+  onNavigateToBracket
+}: {
+  entry: ScheduleEntry;
+  onNavigateToBracket: (matchId: string) => void;
+}) {
+  // Whenever a contestant is still undecided, point the user at the bracket
+  // instead of showing odds for a match-up we don't know yet.
+  if (entry.home.kind === "tbd" || entry.away.kind === "tbd") {
+    return (
+      <button type="button" className="schedule-bracket-link" onClick={() => onNavigateToBracket(entry.id)}>
+        Bracket
+        <ChevronRight size={13} />
+      </button>
+    );
+  }
   if (entry.status === "live" && typeof entry.homeScore === "number" && typeof entry.awayScore === "number") {
     return (
-      <>
+      <div className="odds-live">
         <span className="score-display">{entry.homeScore}</span>
         <span className="score-separator">–</span>
         <span className="score-display">{entry.awayScore}</span>
-      </>
+      </div>
     );
   }
-  const homeP = entry.homeWinProbability ?? entry.prediction?.homeWin;
-  const drawP = entry.prediction?.draw;
-  const awayP =
-    typeof entry.homeWinProbability === "number" ? 1 - entry.homeWinProbability : entry.prediction?.awayWin;
-  if (typeof homeP !== "number" || typeof awayP !== "number") {
-    return <span className="prob-vs">vs</span>;
-  }
-  return (
-    <div className="prob-bar">
-      <div className="prob-segment home" style={{ flex: homeP }}>
-        {formatPercent(homeP, 0)}
-      </div>
-      {typeof drawP === "number" && drawP > 0 ? (
-        <div className="prob-segment draw" style={{ flex: drawP }}>
-          {formatPercent(drawP, 0)}
+  // Two-way advance odds (knockout): figures sit above a thin split track.
+  if (typeof entry.homeWinProbability === "number") {
+    const homeP = entry.homeWinProbability;
+    const awayP = 1 - homeP;
+    return (
+      <div className="odds">
+        <div className="odds-figures">
+          <span className="fig home">{formatPercent(homeP, 0)}</span>
+          <span className="fig away">{formatPercent(awayP, 0)}</span>
         </div>
-      ) : null}
-      <div className="prob-segment away" style={{ flex: awayP }}>
-        {formatPercent(awayP, 0)}
+        <div className="odds-track">
+          <i className="home" style={{ width: `${homeP * 100}%` }} />
+          <i className="away" style={{ width: `${awayP * 100}%` }} />
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+  // 1·X·2 odds (group fixtures).
+  const p = entry.prediction;
+  if (p && typeof p.homeWin === "number" && typeof p.awayWin === "number") {
+    return (
+      <div className="odds">
+        <div className="odds-figures three">
+          <span className="fig home">{formatPercent(p.homeWin, 0)}</span>
+          <span className="fig draw">{formatPercent(p.draw, 0)}</span>
+          <span className="fig away">{formatPercent(p.awayWin, 0)}</span>
+        </div>
+        <div className="odds-track">
+          <i className="home" style={{ width: `${p.homeWin * 100}%` }} />
+          <i className="draw" style={{ width: `${p.draw * 100}%` }} />
+          <i className="away" style={{ width: `${p.awayWin * 100}%` }} />
+        </div>
+      </div>
+    );
+  }
+  return <span className="prob-vs">vs</span>;
 }
 
 function ScheduleRow({
   entry,
   teamsById,
-  onNavigateToGroup
+  onNavigateToGroup,
+  onNavigateToBracket
 }: {
   entry: ScheduleEntry;
   teamsById: Record<string, Team>;
   onNavigateToGroup: (group: GroupLetter) => void;
+  onNavigateToBracket: (matchId: string) => void;
 }) {
-  const home = entry.homeTeamId ? teamsById[entry.homeTeamId] : undefined;
-  const away = entry.awayTeamId ? teamsById[entry.awayTeamId] : undefined;
-  const homeLabel = home?.name ?? entry.homeSeedLabel ?? "TBD";
-  const awayLabel = away?.name ?? entry.awaySeedLabel ?? "TBD";
-  const marketSlug =
-    entry.kind === "group" && entry.prediction?.method === "polymarket"
-      ? entry.prediction.marketSlug
-      : entry.marketSlug;
-  const marketUrl = polymarketEventUrl(marketSlug);
   const kickoffTime = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" }).format(new Date(entry.date));
 
   return (
-    <div className={`match-row schedule-row ${entry.status === "live" ? "live" : ""}`}>
-      <div className="match-meta">
-        <div className="schedule-meta-start">
-          <span className="schedule-kickoff">
-            {kickoffTime}
-            {entry.status === "live" ? <em className="schedule-live">Live</em> : null}
-          </span>
-          {entry.kind === "group" && entry.group ? (
-            <button
-              type="button"
-              className="schedule-stage link"
-              onClick={() => onNavigateToGroup(entry.group!)}
-            >
-              Group {entry.group}
-            </button>
-          ) : (
-            <span className="schedule-stage">{entry.stageLabel}</span>
-          )}
-        </div>
-        <div className="schedule-meta-end">
-          {entry.kind === "knockout" ? (
-            <span className="schedule-projected-teams">Projected teams</span>
-          ) : null}
-          {entry.venue ? <span className="schedule-venue">{entry.venue}</span> : null}
-          {marketUrl ? (
-            <a className="schedule-market" href={marketUrl} target="_blank" rel="noreferrer">
-              Polymarket
-            </a>
-          ) : null}
-        </div>
+    <div className={`schedule-card ${entry.status === "live" ? "live" : ""}`}>
+      <div className="schedule-card-head">
+        <span className="schedule-kickoff">
+          <span className="schedule-time">{kickoffTime}</span>
+          {entry.city ? <span className="schedule-city">{entry.city}</span> : null}
+          {entry.status === "live" ? <em className="schedule-live">Live</em> : null}
+        </span>
+        {entry.kind === "group" && entry.group ? (
+          <button
+            type="button"
+            className="schedule-stage link"
+            onClick={() => onNavigateToGroup(entry.group!)}
+          >
+            Group {entry.group}
+          </button>
+        ) : (
+          <span className="schedule-stage">{entry.stageLabel}</span>
+        )}
       </div>
       <div className="score-line">
-        <ScheduleTeamLabel team={home} label={homeLabel} />
-        <ScheduleProbCenter entry={entry} />
-        <ScheduleTeamLabel team={away} label={awayLabel} align="right" />
+        <ScheduleTeamLabel side={entry.home} teamsById={teamsById} />
+        <ScheduleProbCenter entry={entry} onNavigateToBracket={onNavigateToBracket} />
+        <ScheduleTeamLabel side={entry.away} teamsById={teamsById} align="right" />
       </div>
     </div>
   );

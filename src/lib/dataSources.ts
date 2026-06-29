@@ -1,4 +1,4 @@
-import type { DataLoadResult, GroupLetter, Match, OutcomeProbabilities, PolymarketMatchMarket, Team } from "../types";
+import type { ConfirmedFixture, DataLoadResult, GroupLetter, Match, MatchStatus, OutcomeProbabilities, PolymarketMatchMarket, Team } from "../types";
 import { buildPrediction, makeFallbackPrediction, normalizeProbabilities } from "./predictions";
 import { normalizeName, pairKey } from "./normalize";
 import { addModelRatings, calibrateRatingsToTitleMarket, type FifaRanking, type MatchMarket, type RatingMarket } from "./ratings";
@@ -10,10 +10,15 @@ const POLYMARKET_WINNER_PATH = "/events/slug/world-cup-winner";
 const FIFA_RANKINGS_PATH = "/api/v3/rankings?gender=1&count=211&locale=en";
 const TITLE_FORCE_CALIBRATION_ITERATIONS = 3000;
 const TITLE_FORCE_CALIBRATION_SEED = 20260624;
-const POLYMARKET_GAMES_PATHS = Array.from({ length: 8 }, (_, index) => index * 100).map(
+// Polymarket publishes one event per fixture under the World-Cup tag (the broad
+// `games` tag mixes in every sport and buries the moneyline events past the
+// pagination window, which is why per-match markets were never picked up).
+const POLYMARKET_GAMES_PATHS = Array.from({ length: 4 }, (_, index) => index * 100).map(
   (offset) =>
-    `/events?tag_slug=games&active=true&closed=false&limit=100&offset=${offset}&end_date_min=2026-06-11T00:00:00Z&end_date_max=2026-07-20T23:59:00Z`
+    `/events?tag_slug=fifa-world-cup&active=true&closed=false&limit=100&offset=${offset}&end_date_min=2026-06-11T00:00:00Z&end_date_max=2026-07-20T23:59:00Z`
 );
+const ESPN_KNOCKOUT_PATH =
+  "/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260628-20260720&limit=200";
 
 function isBrowser(): boolean {
   return typeof window !== "undefined";
@@ -109,6 +114,18 @@ function parseConduct(details: any[] | undefined): Record<string, number> {
   return conduct;
 }
 
+function cityFromVenue(venue: any): string | undefined {
+  const city = venue?.address?.city;
+  if (!city) return undefined;
+  // ESPN gives "Houston, Texas" — keep just the city, drop the state/region.
+  return String(city).split(",")[0].trim() || undefined;
+}
+
+function countryFromVenue(venue: any): string | undefined {
+  const country = venue?.address?.country ?? venue?.address?.countryCode ?? venue?.country;
+  return country ? String(country).trim() : undefined;
+}
+
 function parseEspnScoreboard(scoreboard: any): { teams: Team[]; matches: Match[] } {
   const teams = new Map<string, Team>();
   const matches: Match[] = [];
@@ -156,6 +173,8 @@ function parseEspnScoreboard(scoreboard: any): { teams: Team[]; matches: Match[]
       group,
       date: competition.date ?? event.date,
       venue: competition.venue?.fullName,
+      city: cityFromVenue(competition.venue),
+      country: countryFromVenue(competition.venue),
       homeTeamId: home.team.id,
       awayTeamId: away.team.id,
       status,
@@ -451,6 +470,68 @@ function addPredictions(matches: Match[], teams: Team[], matchMarkets: Record<st
   });
 }
 
+async function loadKnockoutScoreboard(): Promise<any> {
+  return fetchJson<any>(ESPN_KNOCKOUT_PATH, "espn");
+}
+
+function roundLabelFromNote(note?: string): string {
+  return String(note ?? "")
+    .replace(/^FIFA World Cup,?\s*/i, "")
+    .trim() || "Knockout";
+}
+
+// Builds the list of confirmed real fixtures from the ESPN bracket. ESPN lists
+// later rounds with placeholders ("Round of 32 3 Winner"); those are deliberately
+// skipped here, while the UI adds the official TBD fixtures from knockoutSchedule.
+function buildConfirmedFixtures(
+  scoreboard: any,
+  teams: Team[],
+  polymarketMarkets: PolymarketMatchMarket[]
+): ConfirmedFixture[] {
+  const teamsById = Object.fromEntries(teams.map((team) => [team.id, team]));
+  const marketIndex = buildMarketIndex(polymarketMarkets);
+  const fixtures: ConfirmedFixture[] = [];
+
+  for (const event of scoreboard?.events ?? []) {
+    const competition = event?.competitions?.[0];
+    const competitors = competition?.competitors ?? [];
+    const home = competitors.find((competitor: any) => competitor.homeAway === "home");
+    const away = competitors.find((competitor: any) => competitor.homeAway === "away");
+    const homeTeam = teamsById[home?.team?.id];
+    const awayTeam = teamsById[away?.team?.id];
+    if (!homeTeam || !awayTeam) continue;
+
+    const statusType = competition.status?.type;
+    const status: MatchStatus = statusType?.completed ? "completed" : statusType?.state === "in" ? "live" : "scheduled";
+    const hasRealScore = status === "completed" || status === "live";
+    const date = competition.date ?? event.date;
+
+    const market = findMarketForMatch({ homeTeamId: homeTeam.id, awayTeamId: awayTeam.id, date } as Match, teamsById, marketIndex);
+    const probabilities = market ? orientedProbabilities(market, homeTeam, awayTeam) : undefined;
+    const scoreSeed = `${event.id}-${homeTeam.id}-${awayTeam.id}`;
+    const prediction =
+      market && probabilities
+        ? buildPrediction(probabilities, "polymarket", market.marketSlug, scoreSeed)
+        : makeFallbackPrediction(homeTeam, awayTeam, scoreSeed);
+
+    fixtures.push({
+      id: String(event.id),
+      date,
+      round: roundLabelFromNote(competition.altGameNote ?? competition.notes?.[0]?.headline),
+      city: cityFromVenue(competition.venue),
+      country: countryFromVenue(competition.venue),
+      homeTeamId: homeTeam.id,
+      awayTeamId: awayTeam.id,
+      status,
+      homeScore: hasRealScore ? Number(home.score) : undefined,
+      awayScore: hasRealScore ? Number(away.score) : undefined,
+      prediction
+    });
+  }
+
+  return fixtures.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+}
+
 function collectRatingMarkets(
   teams: Team[],
   polymarketMarkets: PolymarketMatchMarket[],
@@ -490,9 +571,17 @@ function collectRatingMarkets(
 export async function loadWorldCupData(): Promise<DataLoadResult> {
   const warnings: string[] = [];
   const scoreboardPromise = fetchJson<any>(ESPN_SCOREBOARD_PATH, "espn");
-  const auxiliarySourcesPromise = Promise.allSettled([loadTitleProbabilities(), loadPolymarketGames(), loadFifaRankings()]);
+  const auxiliarySourcesPromise = Promise.allSettled([
+    loadTitleProbabilities(),
+    loadPolymarketGames(),
+    loadFifaRankings(),
+    loadKnockoutScoreboard()
+  ]);
 
-  const [scoreboard, [titleResult, gamesResult, rankingResult]] = await Promise.all([scoreboardPromise, auxiliarySourcesPromise]);
+  const [scoreboard, [titleResult, gamesResult, rankingResult, knockoutResult]] = await Promise.all([
+    scoreboardPromise,
+    auxiliarySourcesPromise
+  ]);
   const parsed = parseEspnScoreboard(scoreboard);
 
   if (parsed.matches.length !== 72) {
@@ -536,16 +625,14 @@ export async function loadWorldCupData(): Promise<DataLoadResult> {
   ).championOdds;
   const teams = calibrateRatingsToTitleMarket(initialTeams, rawCalibrationOdds);
   const matches = addPredictions(parsed.matches, teams, matchMarkets);
-  const polymarketPredictions = Object.keys(matchMarkets).length;
-
-  if (polymarketPredictions === 0 && polymarketMarkets.length === 0) {
-    warnings.push("No usable Polymarket per-match market; predictions rely on the FIFA-adjusted strength model only.");
-  }
+  const knockoutScoreboard = knockoutResult.status === "fulfilled" ? knockoutResult.value : null;
+  const knockoutFixtures = buildConfirmedFixtures(knockoutScoreboard, teams, polymarketMarkets);
 
   return {
     teams,
     matches,
     knockoutMarkets: polymarketMarkets,
+    knockoutFixtures,
     loadedAt: new Date().toISOString(),
     sources: {
       espn: true,
