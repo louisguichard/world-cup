@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T02:06:44.632Z",
+  "updatedAt": "2026-06-30T02:10:07.483Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -565,6 +565,14 @@
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "4.0.0",
+      "build": 76,
+      "message": "Production deploy: knockout bracket results + tournament phase UX (build 76)",
+      "timestamp": "2026-06-30T02:10:07.482Z"
+    },
     {
       "url": "",
       "environment": "production",
