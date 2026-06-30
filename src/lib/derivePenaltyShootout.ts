@@ -1,9 +1,25 @@
-import type { MatchEvent, PenaltyKick, PenaltyShootout } from "../types";
+import type { MatchEvent, MergedMatch, PenaltyKick, PenaltyShootout } from "../types";
+import { isKnockoutMatch } from "./resolveMatchWinner";
 
-type PenaltyAggregate = {
+export type PenaltyAggregate = {
   home: number;
   away: number;
 };
+
+const PENALTY_KICK_TYPES = new Set<MatchEvent["type"]>(["goal", "penalty_missed", "penalty_saved"]);
+
+function isPenaltyKickEvent(event: MatchEvent): boolean {
+  return PENALTY_KICK_TYPES.has(event.type);
+}
+
+function isPostFtShootoutEvent(event: MatchEvent): boolean {
+  return event.minute >= 120 && isPenaltyKickEvent(event);
+}
+
+function isShootoutEvent(event: MatchEvent, duringPenalties: boolean): boolean {
+  if (duringPenalties && isPenaltyKickEvent(event)) return true;
+  return isPostFtShootoutEvent(event);
+}
 
 /** Build shootout from Zafronix aggregate penalty totals when kick-by-kick data is unavailable. */
 export function penaltyShootoutFromAggregate(aggregate: PenaltyAggregate): PenaltyShootout {
@@ -17,12 +33,7 @@ export function penaltyShootoutFromAggregate(aggregate: PenaltyAggregate): Penal
   };
 }
 
-function isShootoutEvent(event: MatchEvent, duringPenalties: boolean): boolean {
-  if (!duringPenalties) return false;
-  return event.type === "goal" || event.type === "penalty_missed" || event.type === "penalty_saved";
-}
-
-/** Derive ordered penalty kicks from match events during the penalties period. */
+/** Derive ordered penalty kicks from match events during or after the penalties period. */
 export function penaltyShootoutFromEvents(
   events: MatchEvent[],
   homeTeamId: string,
@@ -60,12 +71,13 @@ export function derivePenaltyShootout(input: {
   homeTeamId: string;
   awayTeamId: string;
   period?: string;
+  decidedByPenalties?: boolean;
   existing?: PenaltyShootout;
   aggregate?: PenaltyAggregate;
 }): PenaltyShootout | undefined {
   if (input.existing) return input.existing;
 
-  const duringPenalties = input.period === "penalties";
+  const duringPenalties = input.period === "penalties" || input.decidedByPenalties === true;
   const fromEvents = penaltyShootoutFromEvents(
     input.events,
     input.homeTeamId,
@@ -82,11 +94,33 @@ export function derivePenaltyShootout(input: {
 }
 
 export function matchHadPenaltyShootout(
-  match: { homeScore?: number; awayScore?: number; penaltyShootout?: PenaltyShootout; period?: string }
+  match: {
+    homeScore?: number;
+    awayScore?: number;
+    penaltyShootout?: PenaltyShootout;
+    period?: string;
+    decidedByPenalties?: boolean;
+  }
 ): boolean {
   if (match.penaltyShootout) return true;
+  if (match.decidedByPenalties) return true;
   if (match.period === "penalties") return true;
   const home = match.homeScore ?? 0;
   const away = match.awayScore ?? 0;
   return home === away && match.period === "full_time";
+}
+
+/** True when a completed knockout match was decided by penalty shootout. */
+export function isKnockoutPenaltyDecided(
+  match: MergedMatch,
+  _shootout?: PenaltyShootout
+): boolean {
+  if (!isKnockoutMatch(match)) return false;
+  if (match.status !== "completed") return false;
+
+  const home = match.homeScore ?? 0;
+  const away = match.awayScore ?? 0;
+  if (home !== away) return false;
+
+  return true;
 }

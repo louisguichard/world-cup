@@ -109,6 +109,15 @@ export const APP_COPY = {
     wins: "Wins",
     ties: "Ties",
     losses: "Losses",
+    /** Compact headers for team drawer overview table */
+    gp: "GP",
+    w: "W",
+    d: "D",
+    l: "L",
+    gf: "GF",
+    ga: "GA",
+    gd: "GD",
+    pts: "Pts",
     time: "Time",
     home: "Home",
     score: "Score",
@@ -267,6 +276,12 @@ export const APP_COPY = {
     halftime: "Halftime",
     kickoff: "Kickoff",
     penalties: "Penalties",
+    penaltiesLine: (home: number, away: number) => ({
+      prefix: "Penalties:",
+      home: String(home),
+      sep: "–",
+      away: String(away),
+    }),
     postponed: "Postponed",
     interrupted: "Stopped",
     extraTimeBreak: "Extra time break",
@@ -442,6 +457,9 @@ export const APP_COPY = {
     fullAliveSpan: "They stayed mathematically alive for",
     fullFooter: "No remaining result can now move them back into qualification.",
     qualPathTitle: "Qualification path",
+    advancementTitle: "Advancement to next round",
+    advancementHint: "Whether this team can still move on in the knockout bracket.",
+    tournamentExitTitle: "Tournament exit",
   },
 
   pwa: {

@@ -1,23 +1,25 @@
 import type { MergedMatch } from "../../types";
 import { useMemo } from "react";
 import { formatKickoffDate } from "../../lib/formatKickoff";
+import { teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
+import { resolveDisplayMatch } from "../../lib/resolveDisplayMatch";
+import { resolveEventsForMatch } from "../../lib/resolveMatchEvents";
+import { useMaterializedMatchIndex } from "../../hooks/useMaterializedMatchIndex";
+import { useKnockoutPenaltyResult } from "../../hooks/useKnockoutPenaltyResult";
+import { useStore } from "../../store";
+import { VenueLabel } from "../venue/VenueLabel";
+import { MatchGoalScorers } from "./MatchGoalScorers";
+import { KnockoutResultScoreboard } from "./KnockoutResultScoreboard";
 import {
   flagTeamIdForMatch,
   resolveMatchTeam,
   scheduleNameHintForMatch,
-  teamDisplayNameForMatch,
 } from "../../lib/matchTeamDisplay";
-import { derivePenaltyShootout } from "../../lib/derivePenaltyShootout";
-import { resolveDisplayMatch } from "../../lib/resolveDisplayMatch";
 import { isAdvancingTeam } from "../../lib/resolveMatchWinner";
-import { resolveEventsForMatch } from "../../lib/resolveMatchEvents";
-import { useMaterializedMatchIndex } from "../../hooks/useMaterializedMatchIndex";
-import { useStore } from "../../store";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
-import { VenueLabel } from "../venue/VenueLabel";
-import { MatchGoalScorers } from "./MatchGoalScorers";
-import { PenaltyShootoutBar } from "./PenaltyShootoutBar";
+
+const EMPTY_SHOOTOUT = { home: [], away: [], homeScore: 0, awayScore: 0 };
 
 export interface ResultMatchCardProps {
   match: MergedMatch;
@@ -39,17 +41,8 @@ export function ResultMatchCard({ match: rawMatch }: ResultMatchCardProps) {
     [match, matchEvents, teams]
   );
 
-  const penaltyShootout = useMemo(
-    () =>
-      derivePenaltyShootout({
-        events,
-        homeTeamId: match.homeTeamId,
-        awayTeamId: match.awayTeamId,
-        period: match.period,
-        existing: match.penaltyShootout,
-      }),
-    [events, match]
-  );
+  const { showPenalties, shootout, winnerTeamId, stageLabel, loading } =
+    useKnockoutPenaltyResult(match);
 
   const home = resolveMatchTeam(match, "home", teams);
   const away = resolveMatchTeam(match, "away", teams);
@@ -58,15 +51,19 @@ export function ResultMatchCard({ match: rawMatch }: ResultMatchCardProps) {
   const homeName = teamDisplayNameForMatch(match, "home", teams);
   const awayName = teamDisplayNameForMatch(match, "away", teams);
   const kickoffDate = formatKickoffDate(match.date);
-  const homeAdvancing = isAdvancingTeam(match, match.homeTeamId, teams, penaltyShootout);
-  const awayAdvancing = isAdvancingTeam(match, match.awayTeamId, teams, penaltyShootout);
+  const homeAdvancing = isAdvancingTeam(match, match.homeTeamId, teams, shootout);
+  const awayAdvancing = isAdvancingTeam(match, match.awayTeamId, teams, shootout);
+
+  const ariaLabel = showPenalties && shootout
+    ? `${homeName} ${homeScore}–${awayScore} ${awayName}, penalties ${shootout.homeScore}–${shootout.awayScore}, ${stageLabel ?? "Final"}`
+    : `${homeName} ${homeScore}–${awayScore} ${awayName}, Final`;
 
   return (
     <article
       className="result-match-card result-match-card--interactive"
       role="button"
       tabIndex={0}
-      aria-label={`${homeName} ${homeScore}–${awayScore} ${awayName}, Final`}
+      aria-label={ariaLabel}
       onClick={() => openMatchDetail(match.matchId ?? match.id, { from: "results" })}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -81,44 +78,51 @@ export function ResultMatchCard({ match: rawMatch }: ResultMatchCardProps) {
         <VenueLabel matchId={match.matchId ?? match.id} venueString={match.venue} inline />
       </div>
 
-      <div className="result-match-card-scoreline">
-        <div
-          className={`result-match-card-team${homeAdvancing ? " result-match-card-team--advancing" : ""}`}
-        >
-          {home ? (
-            <TeamLabel team={home} displayName={homeName} nested />
-          ) : (
-            <TeamLabelById
-              teamId={flagTeamIdForMatch(match, "home", teams)}
-              nameHint={scheduleNameHintForMatch(match, "home")}
-              displayName={homeName}
-              nested
-            />
-          )}
+      {showPenalties ? (
+        <KnockoutResultScoreboard
+          match={match}
+          shootout={shootout ?? EMPTY_SHOOTOUT}
+          teams={teams}
+          winnerTeamId={winnerTeamId}
+          stageLabel={stageLabel}
+          loading={loading}
+        />
+      ) : (
+        <div className="result-match-card-scoreline">
+          <div
+            className={`result-match-card-team${homeAdvancing ? " result-match-card-team--advancing" : ""}`}
+          >
+            {home ? (
+              <TeamLabel team={home} displayName={homeName} nested />
+            ) : (
+              <TeamLabelById
+                teamId={flagTeamIdForMatch(match, "home", teams)}
+                nameHint={scheduleNameHintForMatch(match, "home")}
+                displayName={homeName}
+                nested
+              />
+            )}
+          </div>
+          <strong className="result-match-card-score">{homeScore}</strong>
+          <span className="result-match-card-sep">–</span>
+          <strong className="result-match-card-score">{awayScore}</strong>
+          <div
+            className={`result-match-card-team result-match-card-team--away${awayAdvancing ? " result-match-card-team--advancing" : ""}`}
+          >
+            {away ? (
+              <TeamLabel team={away} displayName={awayName} align="right" nested />
+            ) : (
+              <TeamLabelById
+                teamId={flagTeamIdForMatch(match, "away", teams)}
+                nameHint={scheduleNameHintForMatch(match, "away")}
+                displayName={awayName}
+                align="right"
+                nested
+              />
+            )}
+          </div>
         </div>
-        <strong className="result-match-card-score">{homeScore}</strong>
-        <span className="result-match-card-sep">–</span>
-        <strong className="result-match-card-score">{awayScore}</strong>
-        <div
-          className={`result-match-card-team result-match-card-team--away${awayAdvancing ? " result-match-card-team--advancing" : ""}`}
-        >
-          {away ? (
-            <TeamLabel team={away} displayName={awayName} align="right" nested />
-          ) : (
-            <TeamLabelById
-              teamId={flagTeamIdForMatch(match, "away", teams)}
-              nameHint={scheduleNameHintForMatch(match, "away")}
-              displayName={awayName}
-              align="right"
-              nested
-            />
-          )}
-        </div>
-      </div>
-
-      {penaltyShootout ? (
-        <PenaltyShootoutBar match={match} shootout={penaltyShootout} />
-      ) : null}
+      )}
 
       <MatchGoalScorers
         events={events}

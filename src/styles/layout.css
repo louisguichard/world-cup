@@ -280,6 +280,23 @@
   max-height: 100%;
 }
 
+.splash-unofficial-watermark {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: min(72vw, 520px);
+  height: auto;
+  translate: -50% -50%;
+  opacity: 0.06;
+  filter: blur(1px) saturate(1.1);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+html[data-theme="light"] .splash-unofficial-watermark {
+  opacity: 0.04;
+}
+
 .splash-celebration-orbit {
   position: absolute;
   left: 50%;

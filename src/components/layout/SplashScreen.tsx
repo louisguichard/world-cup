@@ -44,6 +44,12 @@ export function SplashScreen() {
   return (
     <div className={`splash-screen splash-screen--${phase}`} role="dialog" aria-label={splash.loadingAria}>
       <div className="splash-celebration-bg" aria-hidden>
+        <img
+          className="splash-unofficial-watermark"
+          src={APP_BRAND.logoUnofficial}
+          alt=""
+          decoding="async"
+        />
         <span className="splash-celebration-orbit splash-celebration-orbit--a" />
         <span className="splash-celebration-orbit splash-celebration-orbit--b" />
         <span className="splash-celebration-rays" />

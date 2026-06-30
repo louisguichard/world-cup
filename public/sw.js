@@ -1,11 +1,12 @@
 /* App shell service worker — enables install + offline fallback for static assets. */
-const CACHE = "wc-shell-v5";
+const CACHE = "wc-shell-v6";
 const PRECACHE = [
   "/",
   "/index.html",
   "/manifest.json",
-  "/logo/wc-trophy-logo.png",
-  "/logo/wc-trophy-mark.png",
+  "/logos/tournament/official/128.png",
+  "/logos/tournament/white/128.png",
+  "/logos/tournament/official/64.png",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
 ];
@@ -49,6 +50,7 @@ function isAppShellRequest(url) {
     path.endsWith(".ttf") ||
     path.startsWith("/icons/") ||
     path.startsWith("/logo/") ||
+    path.startsWith("/logos/") ||
     path.startsWith("/fonts/")
   );
 }

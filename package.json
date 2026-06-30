@@ -53,6 +53,8 @@
     "test:rapidapi:full": "node scripts/test-rapidapi-full.mjs",
     "test:rapidapi:proxy": "node scripts/test-rapidapi-full.mjs -- --proxy",
     "sync:api-flags": "node scripts/sync-api-flags.mjs",
+    "logos:sync": "node tools/sync-football-logos.mjs",
+    "logos:validate": "node tools/validate-team-logos.mjs",
     "version:show": "node scripts/version.mjs show",
     "version:build": "node scripts/version.mjs build",
     "version:patch": "node scripts/version.mjs patch",

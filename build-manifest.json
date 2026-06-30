@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-30T02:10:07.483Z",
+  "updatedAt": "2026-06-30T02:42:27.586Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 77,
+      "kind": "build",
+      "message": "260 file(s) in build-manifest.json, index.html, package.json, public, src, tools — 260 files changed, 1993 insertions(+), 330 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T02:42:27.172Z"
+    },
     {
       "version": "4.0.0",
       "build": 76,
@@ -312,17 +320,25 @@
       "message": "7 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, vercel.json, version.json — 7 files changed, 56 insertions(+), 45 deletions(-)",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T19:31:38.935Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 37,
-      "kind": "build",
-      "message": "Use path query param for Vercel rapid rewrites",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T19:31:38.882Z"
     }
   ],
   "commits": [
+    {
+      "hash": "d220627397ecd9429e622f0c7a6da21e48322f5b",
+      "shortHash": "d220627",
+      "message": "Add football-logos branding, knockout penalty scores, and team drawer UX fixes.",
+      "version": "4.0.0",
+      "build": 77,
+      "timestamp": "2026-06-30T02:42:27.582Z"
+    },
+    {
+      "hash": "96ce7e72679adf8515cf38f9c295747709c4ebfb",
+      "shortHash": "96ce7e7",
+      "message": "Record v4.0.0 build 76 production deploy on Vercel.",
+      "version": "4.0.0",
+      "build": 76,
+      "timestamp": "2026-06-30T02:10:17.231Z"
+    },
     {
       "hash": "ed6849c4330df70b6703e0939e144ab7fe30c770",
       "shortHash": "ed6849c",
@@ -546,22 +562,6 @@
       "version": "4.0.0",
       "build": 7,
       "timestamp": "2026-06-27T14:28:01.873Z"
-    },
-    {
-      "hash": "cb362421d091099af32856d8792e701df7cda704",
-      "shortHash": "cb36242",
-      "message": "Fix uiDebugBridge missing module and reach 0-issue uidebug gate",
-      "version": "4.0.0",
-      "build": 7,
-      "timestamp": "2026-06-27T14:27:17.487Z"
-    },
-    {
-      "hash": "aa7e77d590ee1c7c7dad95d2632ed28352ffd164",
-      "shortHash": "aa7e77d",
-      "message": "Record v4.0.0 build 5 production deploy on Vercel.",
-      "version": "4.0.0",
-      "build": 5,
-      "timestamp": "2026-06-27T07:54:32.582Z"
     }
   ],
   "deploys": [

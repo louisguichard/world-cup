@@ -17,6 +17,7 @@ import styles from "./ScheduleView.module.css";
 import { FootballPredictionInsightsPanel } from "../predictions/FootballPredictionInsightsPanel";
 import { VenueLabel } from "../venue/VenueLabel";
 import { TeamFlag } from "../team/TeamFlag";
+import { CompactMatchScore } from "../match/CompactMatchScore";
 import { teamDisplayNameForMatch, flagTeamIdForMatch, scheduleNameHintForMatch, resolveMatchTeam } from "../../lib/matchTeamDisplay";
 import { APP_BRAND } from "../../config/appMeta";
 import { APP_COPY } from "../../lib/appCopy";
@@ -305,11 +306,7 @@ function ScheduleMatchTable({ matches, teams, onOpenMatch }: ScheduleMatchTableP
                 </td>
                 <td className={styles.scoreCell}>
                   {m.status === "completed" || m.status === "live" ? (
-                    <>
-                      {m.homeScore ?? "–"}{" "}
-                      <span style={{ color: "var(--faint)" }}>–</span>{" "}
-                      {m.awayScore ?? "–"}
-                    </>
+                    <CompactMatchScore match={m} perspective="home" />
                   ) : (
                     <span style={{ color: "var(--faint)", fontSize: "0.85rem" }}>vs</span>
                   )}

@@ -455,6 +455,8 @@ export type MergedMatch = {
   lastUpdatedAt?: number;
   prediction?: Prediction;
   penaltyShootout?: PenaltyShootout;
+  /** Set when the match was decided by a knockout penalty shootout. */
+  decidedByPenalties?: boolean;
 };
 
 export type BroadcastChip = {

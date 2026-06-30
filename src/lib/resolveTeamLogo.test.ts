@@ -27,9 +27,7 @@ describe("resolveTeamLogo", () => {
         abbreviation: "COD",
         logo: "https://upload.wikimedia.org/wikipedia/commons/a/a7/Kit_shorts_cod2526h.png",
       })
-    ).toBe(
-      "https://upload.wikimedia.org/wikipedia/en/6/62/Congolese_Association_Football_Federation_logo.png"
-    );
+    ).toBe(TEAM_LOGO_OVERRIDES.COD);
   });
 
   it("prefers override over API logo when both exist", () => {
@@ -52,10 +50,10 @@ describe("resolveTeamLogo", () => {
 
   it("covers all 48 WC 2026 nations", () => {
     expect(TEAM_LOGO_ABBREVIATIONS.length).toBe(48);
-    expect(TEAM_LOGO_OVERRIDES.BIH).toContain("Bosnia");
-    expect(TEAM_LOGO_OVERRIDES.QAT).toContain("Qatar");
-    expect(TEAM_LOGO_OVERRIDES.KOR).toContain("Korea");
-    expect(TEAM_LOGO_OVERRIDES.SEN).toContain("Senegal");
+    expect(TEAM_LOGO_OVERRIDES.BIH).toBe("/logos/teams/256x256/bosnia-and-herzegovina.png");
+    expect(TEAM_LOGO_OVERRIDES.QAT).toBe("/logos/teams/256x256/qatar.png");
+    expect(TEAM_LOGO_OVERRIDES.KOR).toBe("/logos/teams/256x256/south-korea.png");
+    expect(TEAM_LOGO_OVERRIDES.SEN).toBe("/logos/teams/256x256/senegal.png");
   });
 
   it("uses override even when API logo is missing", () => {
@@ -99,8 +97,6 @@ describe("applyTeamLogoOverrides", () => {
     };
 
     const patched = applyTeamLogoOverrides(teams);
-    expect(patched.drcongo.logo).toBe(
-      "https://upload.wikimedia.org/wikipedia/en/6/62/Congolese_Association_Football_Federation_logo.png"
-    );
+    expect(patched.drcongo.logo).toBe(TEAM_LOGO_OVERRIDES.COD);
   });
 });

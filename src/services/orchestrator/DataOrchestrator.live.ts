@@ -1,5 +1,6 @@
 import type { MergedMatch } from "../../types";
 import { enrichMatchesPenaltyShootouts } from "../../lib/enrichMatchPenaltyShootout";
+import { enrichKnockoutPenaltiesFromZafronix } from "../../lib/fetchKnockoutPenaltyResult";
 import { deriveStandingsIfScored, standingsEqual } from "../../lib/qualification";
 import { writeLiveMatchCache } from "../../lib/liveMatchCache";
 import { readStandingsCache, writeStandingsCache } from "../../lib/standingsCache";
@@ -277,6 +278,10 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
   const primary = selectPrimaryMatch(Object.values(merged), store.primaryLiveMatchId);
 
   merged = enrichMatchesPenaltyShootouts(merged, store.matchEvents);
+
+  if (!options?.light) {
+    merged = await enrichKnockoutPenaltiesFromZafronix(merged);
+  }
 
   store.batchPollUpdate({
     matches: merged,

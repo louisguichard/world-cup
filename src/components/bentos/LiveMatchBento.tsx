@@ -56,6 +56,7 @@ export function LiveMatchBento({ match, variant }: Props) {
         homeTeamId: match.homeTeamId,
         awayTeamId: match.awayTeamId,
         period: match.period,
+        decidedByPenalties: match.decidedByPenalties,
         existing: match.penaltyShootout,
       }),
     [events, match]
@@ -152,7 +153,7 @@ export function LiveMatchBento({ match, variant }: Props) {
         )}
       </div>
 
-      {penaltyShootout ? (
+      {isLive && match.period === "penalties" && penaltyShootout ? (
         <PenaltyShootoutBar match={match} shootout={penaltyShootout} compact />
       ) : null}
 

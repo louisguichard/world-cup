@@ -144,7 +144,7 @@
   --heading-weight: 700;
   --heading-stroke: 0.45px;
 
-  /* Trophy logo — warm studio glow for photographic trophy asset */
+  /* Tournament logo — FWC 2026 multicolor glow */
   --trophy-glow-filter:
     drop-shadow(0 0 4px color-mix(in srgb, var(--fwc-gold) 55%, transparent))
     drop-shadow(0 0 12px color-mix(in srgb, var(--fwc-gold) 28%, transparent))

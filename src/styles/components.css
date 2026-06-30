@@ -194,13 +194,19 @@
 }
 
 .team-sheet-body {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   padding: var(--space-4) var(--space-5) calc(var(--space-4) + var(--safe-bottom));
   color: var(--text-secondary);
   font-size: 0.9rem;
   line-height: 1.55;
+}
+
+.team-sheet--portal .team-sheet-body {
+  scrollbar-width: thin;
 }
 
 .team-match-history {
@@ -230,12 +236,59 @@
 
 .team-match-history-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  grid-template-columns: minmax(0, 4.5rem) minmax(0, 1fr) auto minmax(0, 4.5rem);
   align-items: center;
   gap: 10px;
   padding: 8px 0;
   border-bottom: 1px solid var(--line);
   font-size: 0.85rem;
+}
+
+.compact-match-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+
+.compact-match-score-ft {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.compact-match-score-pens {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.compact-match-score-pens-winner {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.team-sheet-elimination {
+  margin: 0 0 16px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--fwc-bright-red) 8%, var(--surface-raised));
+  border: 1px solid color-mix(in srgb, var(--fwc-bright-red) 25%, transparent);
+}
+
+.team-sheet-elimination-lead {
+  margin: 8px 0 0;
+  line-height: 1.45;
+}
+
+.team-sheet-elimination-match {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .team-match-history-opponent {

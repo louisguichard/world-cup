@@ -10,13 +10,25 @@ export const APP_BRAND = {
   shortName: "Road to the Final",
   /** Two-letter mark in top bar (fallback text) */
   mark: "WC",
-  /** Official-style photographic World Cup trophy mark */
-  logoMark: "/logo/wc-trophy-mark.png",
-  /** Full trophy for splash & marketing */
-  logoFull: "/logo/wc-trophy-logo.png",
+  /** Official FIFA World Cup 2026 logo — light UI (main) */
+  logoMarkLight: "/logos/tournament/official/128.png",
+  /** Official FIFA World Cup 2026 logo — dark UI (white variant) */
+  logoMarkDark: "/logos/tournament/white/128.png",
+  /** Full tournament logo — light UI */
+  logoFullLight: "/logos/tournament/official/512.png",
+  /** Full tournament logo — dark UI */
+  logoFullDark: "/logos/tournament/white/512.png",
   /** Compact splash hero */
-  logoSplash: "/logo/wc-trophy-splash.png",
-  logoAlt: "FIFA World Cup trophy — Road to the Final 2026",
+  logoSplash: "/logos/tournament/official/700.png",
+  /** Unofficial variant — decorative accent only */
+  logoUnofficial: "/logos/tournament/unofficial/256.png",
+  /** Favicon / PWA source */
+  logoFavicon: "/logos/tournament/official/64.png",
+  logoAlt: "FIFA World Cup 2026 official logo",
+  /** @deprecated use logoMarkLight / logoMarkDark — kept for legacy references */
+  logoMark: "/logos/tournament/official/128.png",
+  /** @deprecated use logoFullLight / logoFullDark */
+  logoFull: "/logos/tournament/official/512.png",
   /** Splash headline line 1 */
   splashLine1: "ROAD TO THE",
   /** Splash headline line 2 */

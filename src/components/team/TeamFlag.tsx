@@ -8,6 +8,7 @@ import {
   resolveTeamLogoByAbbrev,
   resolveTeamLogoFromHint,
 } from "../../lib/resolveTeamLogo";
+import { teamLogoSrcSetForFlagSize, teamLogoUrlForFlagSize } from "../../lib/footballLogoUrl";
 import { resolveTeamFromStore } from "../../lib/matchTeamDisplay";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { useStore } from "../../store";
@@ -59,6 +60,11 @@ export function TeamFlag({ team, teamId, nameHint, size = "sm", compact, dim, cl
     resolveTeamLogo(effectiveTeam) ??
     resolveTeamLogoFromHint(teamId) ??
     (abbrev ? resolveTeamLogoByAbbrev(abbrev) : undefined);
+  const logoSrc = abbrev && logo?.startsWith("/logos/teams/")
+    ? teamLogoUrlForFlagSize(abbrev, size)
+    : logo;
+  const logoSrcSet =
+    abbrev && logo?.startsWith("/logos/teams/") ? teamLogoSrcSetForFlagSize(abbrev, size) : undefined;
   const titles = getTeamWorldCupTitles(effectiveTeam);
   const wrapClass = [
     "team-flag-wrap",
@@ -74,9 +80,10 @@ export function TeamFlag({ team, teamId, nameHint, size = "sm", compact, dim, cl
       {compact ? null : <WorldCupStars count={titles} size={size} />}
       <TeamThemeRoot teamId={id} className={wrapClass}>
         <span className={`team-flag-inner ${innerSizeClass[size]}`}>
-          {logo ? (
+          {logoSrc ? (
             <img
-              src={logo}
+              src={logoSrc}
+              srcSet={logoSrcSet}
               alt=""
               className="team-flag-img"
               loading="lazy"

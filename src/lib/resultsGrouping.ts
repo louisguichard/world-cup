@@ -52,7 +52,7 @@ function groupMatchday(group: string, date: string): number {
   return index >= 0 ? index + 1 : 1;
 }
 
-function resolveScheduleStage(match: MergedMatch): string {
+export function resolveScheduleStage(match: MergedMatch): string {
   if (match.matchId) {
     const entry = scheduleByMatchId.get(match.matchId);
     if (entry?.stage) return entry.stage;
@@ -61,6 +61,13 @@ function resolveScheduleStage(match: MergedMatch): string {
     return STAGE_TO_SCHEDULE[match.stage] ?? "knockout";
   }
   return "knockout";
+}
+
+/** User-facing knockout stage label (e.g. "Round of 32"). */
+export function getKnockoutStageLabel(match: MergedMatch): string | undefined {
+  if (match.group) return undefined;
+  const stage = resolveScheduleStage(match);
+  return STAGE_LABELS[stage] ?? "Knockout";
 }
 
 function sectionKeyForMatch(match: MergedMatch): { key: string; label: string; sortOrder: number } {

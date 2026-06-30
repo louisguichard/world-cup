@@ -1,4 +1,7 @@
 import { APP_BRAND } from "../../config/appMeta";
+import { resolveColorScheme } from "../../lib/colorScheme";
+import { tournamentLogoForTheme } from "../../lib/footballLogoUrl";
+import { useStore } from "../../store";
 
 type BrandLogoProps = {
   /** Render size in CSS pixels */
@@ -20,10 +23,29 @@ const SIZE_PX: Record<NonNullable<BrandLogoProps["size"]>, number> = {
   hero: 220,
 };
 
-const SRC: Record<NonNullable<BrandLogoProps["variant"]>, string> = {
-  mark: APP_BRAND.logoMark,
-  full: APP_BRAND.logoFull,
-};
+const MARK_LOGO_SIZE = {
+  sm: 64,
+  md: 128,
+  lg: 256,
+  xl: 512,
+  hero: 700,
+} as const;
+
+function markSrcForTheme(theme: "light" | "dark", size: NonNullable<BrandLogoProps["size"]>): string {
+  return tournamentLogoForTheme(theme, MARK_LOGO_SIZE[size], "mark");
+}
+
+function markSrcSetForTheme(theme: "light" | "dark", size: NonNullable<BrandLogoProps["size"]>): string | undefined {
+  if (size === "hero") return undefined;
+  const base = MARK_LOGO_SIZE[size];
+  const retina = size === "sm" ? 128 : size === "md" ? 256 : size === "lg" ? 512 : 700;
+  return `${tournamentLogoForTheme(theme, base, "mark")} 1x, ${tournamentLogoForTheme(theme, retina, "mark")} 2x`;
+}
+
+function fullSrcForTheme(theme: "light" | "dark", size: NonNullable<BrandLogoProps["size"]>): string {
+  const logoSize = size === "hero" ? 700 : 512;
+  return tournamentLogoForTheme(theme, logoSize, "full");
+}
 
 export function BrandLogo({
   size = "md",
@@ -33,8 +55,11 @@ export function BrandLogo({
   blendEdges = false,
   celebration = false,
 }: BrandLogoProps) {
+  const colorScheme = useStore((s) => s.colorScheme);
+  const theme = resolveColorScheme(colorScheme);
   const px = SIZE_PX[size];
-  const src = SRC[variant];
+  const src = variant === "mark" ? markSrcForTheme(theme, size) : fullSrcForTheme(theme, size);
+  const srcSet = variant === "mark" ? markSrcSetForTheme(theme, size) : undefined;
   const showAccents = celebration || !blendEdges;
   const shellClass = [
     "brand-logo-shell",
@@ -57,7 +82,7 @@ export function BrandLogo({
       ) : null}
       <img
         src={src}
-        srcSet={variant === "mark" ? `${APP_BRAND.logoMark} 1x, /logo/wc-trophy-mark@2x.png 2x` : undefined}
+        srcSet={srcSet}
         alt={alt}
         className={`brand-logo brand-logo--${size} brand-logo--${variant}`}
         width={px}

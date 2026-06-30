@@ -11,10 +11,15 @@ export function enrichMatchPenaltyShootout(
     homeTeamId: match.homeTeamId,
     awayTeamId: match.awayTeamId,
     period: match.period,
+    decidedByPenalties: match.decidedByPenalties,
     existing: match.penaltyShootout,
   });
   if (!shootout) return match;
-  return { ...match, penaltyShootout: shootout };
+  return {
+    ...match,
+    penaltyShootout: shootout,
+    decidedByPenalties: match.decidedByPenalties ?? true,
+  };
 }
 
 export function enrichMatchesPenaltyShootouts(

@@ -1,21 +1,45 @@
-/** Validates team logo override URLs (run: node tools/validate-team-logos.mjs) */
-import { TEAM_LOGO_OVERRIDES } from "../src/data/teamLogoOverrides.ts";
+/** Validates self-hosted team logo files (run: pnpm logos:validate) */
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { FOOTBALL_LOGO_SLUGS } from "../src/data/footballLogoSlugs.ts";
 
-const entries = Object.entries(TEAM_LOGO_OVERRIDES);
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, "..");
+const PUBLIC = join(ROOT, "public");
+
+const TEAM_SIZES = ["64x64", "128x128", "256x256", "512x512"];
+const TOURNAMENT_VARIANTS = ["official", "white", "unofficial"];
+const TOURNAMENT_SIZES = [64, 128, 256, 512, 700];
+
 let failed = 0;
 
-for (const [abbrev, url] of entries) {
-  try {
-    const res = await fetch(url, { method: "HEAD", redirect: "follow" });
-    const ok = res.ok;
-    console.log(`${ok ? "OK" : "FAIL"} ${abbrev} ${res.status} ${url}`);
-    if (!ok) failed += 1;
-  } catch (err) {
-    console.log(`FAIL ${abbrev} ${err instanceof Error ? err.message : err}`);
-    failed += 1;
+for (const [abbrev, slug] of Object.entries(FOOTBALL_LOGO_SLUGS)) {
+  let teamOk = true;
+  for (const size of TEAM_SIZES) {
+    const path = join(PUBLIC, "logos", "teams", size, `${slug}.png`);
+    if (!existsSync(path)) {
+      console.log(`FAIL ${abbrev} missing ${path.replace(ROOT, "")}`);
+      failed += 1;
+      teamOk = false;
+    }
   }
-  await new Promise((r) => setTimeout(r, 120));
+  if (teamOk) console.log(`OK ${abbrev} ${slug}`);
 }
 
-console.log(`\n${entries.length - failed}/${entries.length} passed`);
+for (const variant of TOURNAMENT_VARIANTS) {
+  for (const size of TOURNAMENT_SIZES) {
+    const path = join(PUBLIC, "logos", "tournament", variant, `${size}.png`);
+    if (!existsSync(path)) {
+      console.log(`FAIL tournament ${variant} ${size}px`);
+      failed += 1;
+    }
+  }
+}
+
+const expected =
+  Object.keys(FOOTBALL_LOGO_SLUGS).length * TEAM_SIZES.length +
+  TOURNAMENT_VARIANTS.length * TOURNAMENT_SIZES.length;
+const passed = expected - failed;
+console.log(`\n${passed}/${expected} passed`);
 process.exit(failed > 0 ? 1 : 0);

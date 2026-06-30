@@ -26,7 +26,13 @@ import { TeamBettingPanel } from "./TeamBettingPanel";
 import { TeamHighlightlyPanel } from "./TeamHighlightlyPanel";
 import { useHighlightlyTeamData } from "../../hooks/useHighlightlyTeamData";
 import { useEliminationStory } from "../../hooks/useEliminationStory";
+import { useTeamTournamentStatus } from "../../hooks/useTeamTournamentStatus";
 import { KnockoutStoryCard } from "./KnockoutStoryCard";
+import { TeamEliminationCard } from "./TeamEliminationCard";
+import { CompactMatchScore } from "../match/CompactMatchScore";
+import { advancementSectionCopy } from "../../lib/teamTournamentStatus";
+import { qualCopyFromVariant } from "../../lib/appCopy";
+import type { QualificationDisplay } from "../../lib/qualificationDisplay";
 import { predictionsForTeam } from "../../lib/matchFootballPredictions";
 import type { MergedMatch } from "../../types";
 
@@ -80,6 +86,7 @@ export function TeamDetailSheet() {
   );
 
   const { story: eliminationStory } = useEliminationStory(teamId);
+  const tournamentStatus = useTeamTournamentStatus(teamId ?? undefined);
 
   const groupStanding = useMemo(() => {
     if (!team) return null;
@@ -158,10 +165,29 @@ export function TeamDetailSheet() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, close]);
 
+  const qualDisplay = qualView?.display ?? null;
+
+  const badgeDisplay: QualificationDisplay | null =
+    tournamentStatus?.phase === "eliminated"
+      ? (() => {
+          const copy = qualCopyFromVariant("confirmed-eliminated");
+          return {
+            variant: "confirmed-eliminated" as const,
+            label: copy.label,
+            shortLabel: copy.shortLabel,
+            rowClass: "qual-row--confirmed-eliminated",
+            hint: tournamentStatus.hint,
+          };
+        })()
+      : qualDisplay;
+
+  const advancementCopy = tournamentStatus ? advancementSectionCopy(tournamentStatus) : null;
+
   if (!open || !team || !teamId) return null;
 
-  const qualDisplay = qualView?.display ?? null;
-  const isEliminated = qual && (!qual.canQualify || qual.lifeState === "eliminated");
+  const isEliminated =
+    tournamentStatus?.phase === "eliminated" ||
+    Boolean(qual && (!qual.canQualify || qual.lifeState === "eliminated"));
 
   const openFixture = (match: MergedMatch) => {
     openMatchDetail(match.id, { from: "live" });
@@ -190,7 +216,7 @@ export function TeamDetailSheet() {
                     : null}
                 </p>
               </div>
-              {qual ? <QualificationStatusBadge qual={qual} size="sm" /> : null}
+              {qual ? <QualificationStatusBadge qual={qual} display={badgeDisplay ?? undefined} size="sm" /> : null}
             </div>
             <button type="button" onClick={close} aria-label="Close">
               ×
@@ -209,7 +235,12 @@ export function TeamDetailSheet() {
         <div className="team-sheet-body">
           {tab === "overview" ? (
             <>
-              {qualDisplay ? (
+              {tournamentStatus ? (
+                <p className="team-sheet-qual-oneliner">
+                  <strong>{tournamentStatus.label}</strong>
+                  {tournamentStatus.hint ? ` — ${tournamentStatus.hint}` : ""}
+                </p>
+              ) : qualDisplay ? (
                 <p className="team-sheet-qual-oneliner">
                   <strong>{qualDisplay.label}</strong> — {qualDisplay.hint}
                 </p>
@@ -219,14 +250,14 @@ export function TeamDetailSheet() {
                 <table className="team-sheet-standings">
                   <thead>
                     <tr>
-                      <th>{APP_COPY.table.gamesPlayed}</th>
-                      <th>{APP_COPY.table.wins}</th>
-                      <th>{APP_COPY.table.ties}</th>
-                      <th>{APP_COPY.table.losses}</th>
-                      <th>{APP_COPY.table.goalsFor}</th>
-                      <th>{APP_COPY.table.goalsAgainst}</th>
-                      <th>{APP_COPY.table.goalDiff}</th>
-                      <th>{APP_COPY.table.points}</th>
+                      <th>{APP_COPY.table.gp}</th>
+                      <th>{APP_COPY.table.w}</th>
+                      <th>{APP_COPY.table.d}</th>
+                      <th>{APP_COPY.table.l}</th>
+                      <th>{APP_COPY.table.gf}</th>
+                      <th>{APP_COPY.table.ga}</th>
+                      <th>{APP_COPY.table.gd}</th>
+                      <th>{APP_COPY.table.pts}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -267,11 +298,9 @@ export function TeamDetailSheet() {
               ) : (
                 <ul className="team-match-history-list">
                   {allFixtures.map((match) => {
-                    const isHome = match.homeTeamId === teamId;
-                    const opponentId = isHome ? match.awayTeamId : match.homeTeamId;
+                    const opponentId =
+                      match.homeTeamId === teamId ? match.awayTeamId : match.homeTeamId;
                     const opponent = resolveTeamFromStore(teams, opponentId);
-                    const teamScore = isHome ? (match.homeScore ?? 0) : (match.awayScore ?? 0);
-                    const oppScore = isHome ? (match.awayScore ?? 0) : (match.homeScore ?? 0);
                     return (
                       <li key={match.id}>
                         <button
@@ -292,9 +321,7 @@ export function TeamDetailSheet() {
                               {teamDisplayName(opponent, opponentId)}
                             </span>
                           </span>
-                          <span>
-                            {match.homeScore !== undefined ? `${teamScore}–${oppScore}` : "vs"}
-                          </span>
+                          <CompactMatchScore match={match} teamId={teamId} />
                           <time dateTime={match.date}>{formatKickoffDate(match.date)}</time>
                         </button>
                       </li>
@@ -391,7 +418,11 @@ export function TeamDetailSheet() {
 
           {tab === "context" ? (
             <>
-              {eliminationStory ? (
+              {tournamentStatus?.phase === "eliminated" ? (
+                <TeamEliminationCard status={tournamentStatus} teamId={teamId} />
+              ) : null}
+
+              {eliminationStory && tournamentStatus?.phase !== "eliminated" ? (
                 <KnockoutStoryCard
                   story={eliminationStory}
                   teamId={teamId}
@@ -399,23 +430,32 @@ export function TeamDetailSheet() {
                 />
               ) : null}
 
-              {qual && qualDisplay ? (
-                <div className={`team-sheet-qual ${qualDisplay.rowClass}`}>
-                  <h3>{APP_COPY.knockoutStory.qualPathTitle}</h3>
+              {advancementCopy ? (
+                <div
+                  className={`team-sheet-qual ${
+                    tournamentStatus?.phase === "eliminated"
+                      ? "qual-row--confirmed-eliminated"
+                      : qualDisplay?.rowClass ?? ""
+                  }`}
+                >
+                  <h3>{advancementCopy.title}</h3>
+                  <p className="team-sheet-qual-hint">{APP_COPY.knockoutStory.advancementHint}</p>
                   <p className="team-sheet-qual-label">
-                    <strong>{qualDisplay.label}</strong>
+                    <strong>{advancementCopy.label}</strong>
                   </p>
-                  <p className="team-sheet-qual-hint">{qualDisplay.hint}</p>
-                  <p>{qual.reason}</p>
-                  {qual.canQualify && qual.projectionScore > 0 ? (
-                    <p className="team-sheet-qual-meta">
-                      Projection score: {qual.projectionScore}/100 (rule-based model, not a betting probability)
-                    </p>
+                  <p>{advancementCopy.hint}</p>
+                  {qual && tournamentStatus?.phase === "group" && qual.canQualify ? (
+                    <>
+                      <p>{qual.reason}</p>
+                      {qual.canQualify && qual.projectionScore > 0 ? (
+                        <p className="team-sheet-qual-meta">
+                          Projection score: {qual.projectionScore}/100 (rule-based model, not a betting
+                          probability)
+                        </p>
+                      ) : null}
+                    </>
                   ) : null}
-                  {qual.eliminationReason && qual.eliminationReason !== qual.reason ? (
-                    <p>{qual.eliminationReason}</p>
-                  ) : null}
-                  {qual.canQualify && qual.status === "at_risk" && thirdRank >= 0 ? (
+                  {qual?.canQualify && qual.status === "at_risk" && thirdRank >= 0 ? (
                     <p>
                       Best-third rank (alive teams): {thirdRank + 1} — cut line is top 8.
                     </p>

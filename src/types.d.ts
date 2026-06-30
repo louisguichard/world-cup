@@ -363,6 +363,7 @@ export type MergedMatch = {
     lastUpdatedAt?: number;
     prediction?: Prediction;
     penaltyShootout?: PenaltyShootout;
+    decidedByPenalties?: boolean;
 };
 export type BroadcastChip = {
     matchId: string;

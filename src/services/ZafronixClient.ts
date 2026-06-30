@@ -265,6 +265,27 @@ export async function fetchMatchHistory(matchId: string): Promise<ZafronixMatch[
 
 // ── Match writes (admin / sandbox) ───────────────────────────────────────────
 
+/** GET /matches/{matchId}/result */
+export async function fetchMatchResult(matchId: string): Promise<ZafronixMatchResultPayload | null> {
+  const data = await fetchApi<
+    ZafronixMatchResultPayload | { result?: ZafronixMatchResultPayload; data?: ZafronixMatchResultPayload }
+  >(zafronixEndpoints.matchResult(matchId));
+  if (!data) return null;
+  if (typeof data === "object" && "penalties" in data && data.penalties) {
+    return data as ZafronixMatchResultPayload;
+  }
+  if (typeof data === "object" && "result" in data && data.result) {
+    return data.result;
+  }
+  if (typeof data === "object" && "data" in data && data.data) {
+    return data.data;
+  }
+  if (typeof data === "object" && "homeScore" in data) {
+    return data as ZafronixMatchResultPayload;
+  }
+  return null;
+}
+
 /** POST /matches/{matchId}/result */
 export async function postMatchResult(
   matchId: string,

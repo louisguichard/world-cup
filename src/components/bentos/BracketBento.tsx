@@ -18,6 +18,7 @@ import type {
   Team
 } from "../../types";
 import { useStore } from "../../store";
+import { CompactMatchScore } from "../match/CompactMatchScore";
 import { VenueLabel } from "../venue/VenueLabel";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
 import { TeamFlag } from "../team/TeamFlag";
@@ -274,6 +275,9 @@ function BracketCardReadonly({
     ? resolveOfficialMatchKickoff({ matchId: match.id, date: info.date })
     : undefined;
   const { homeConfirmed, awayConfirmed } = isSlotConfirmed(match, mode, standings, liveMatches, qualContext);
+  const liveMerged =
+    liveMatches[match.id] ??
+    Object.values(liveMatches).find((m) => m.matchId === match.id || m.id === match.id);
 
   return (
     <article className="bracket-card">
@@ -303,7 +307,11 @@ function BracketCardReadonly({
         teamsById={teamsById}
         onTeamSelect={onTeamSelect}
       />
-      {match.homeScore !== undefined && match.awayScore !== undefined ? (
+      {liveMerged && liveMerged.homeScore !== undefined ? (
+        <div className="bracket-scoreline">
+          <CompactMatchScore match={liveMerged} perspective="home" />
+        </div>
+      ) : match.homeScore !== undefined && match.awayScore !== undefined ? (
         <div className="bracket-scoreline">
           {match.homeScore} – {match.awayScore}
         </div>
