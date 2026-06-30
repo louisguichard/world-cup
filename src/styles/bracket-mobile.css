@@ -1,0 +1,301 @@
+/* =========================================================================
+   Bracket — iPhone & iPad touch layout
+   ========================================================================= */
+
+/* Live embed sits in a narrow column — always use stacked cards, never desktop tree math */
+.live-bracket-embed {
+  --bracket-slot-h: auto;
+  --bracket-card-gap: 10px;
+  --bracket-col-width: min(72vw, 200px);
+  --bracket-col-gap: 12px;
+  min-width: 0;
+}
+
+.live-bracket-embed .bracket-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+}
+
+.live-bracket-embed .bracket-section {
+  overflow: hidden;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.live-bracket-embed .bracket-rounds {
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  align-items: flex-start;
+}
+
+.live-bracket-embed .bracket-round {
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  justify-content: flex-start !important;
+}
+
+.live-bracket-embed .bracket-round[data-stage] .bracket-cell,
+.live-bracket-embed .bracket-cell {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: visible;
+}
+
+.live-bracket-embed .bracket-team-slot .bracket-team .team-name-text,
+.live-bracket-embed .bracket-card .team-name-text {
+  max-width: none !important;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+@media (max-width: 1023px) {
+  .bracket-view,
+  .live-bracket-embed {
+    --bracket-slot-h: auto;
+    --bracket-card-gap: 10px;
+    min-width: 0;
+  }
+
+  .bracket-view .bracket-section,
+  .live-bracket-embed .bracket-section {
+    overflow: hidden;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .bracket-scroll {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: var(--layout-gutter);
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .bracket-head {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: var(--bracket-col-gap);
+    width: max-content;
+    min-width: max-content;
+    margin-bottom: 10px;
+    padding-inline: 2px;
+  }
+
+  .bracket-head h3 {
+    flex: 0 0 var(--bracket-col-width);
+    width: var(--bracket-col-width);
+    min-width: var(--bracket-col-width);
+    margin: 0;
+    text-align: center;
+    font-size: 0.75rem;
+  }
+
+  .bracket-view .bracket-rounds,
+  .live-bracket-embed .bracket-rounds {
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  .bracket-view .bracket-round,
+  .live-bracket-embed .bracket-round {
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  .bracket-rounds {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: var(--bracket-col-gap);
+    position: relative;
+    width: max-content;
+    min-width: max-content;
+    min-height: 0 !important;
+    height: auto !important;
+    padding-bottom: 8px;
+  }
+
+  .bracket-round {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 var(--bracket-col-width);
+    width: var(--bracket-col-width);
+    min-width: var(--bracket-col-width);
+    height: auto !important;
+    align-self: flex-start;
+    justify-content: flex-start !important;
+    gap: var(--bracket-card-gap);
+  }
+
+  .bracket-round.is-final {
+    justify-content: flex-start !important;
+  }
+
+  .bracket-round[data-stage="R32"] .bracket-cell,
+  .bracket-round[data-stage="R16"] .bracket-cell,
+  .bracket-round[data-stage="QF"] .bracket-cell,
+  .bracket-round[data-stage="SF"] .bracket-cell,
+  .bracket-round[data-stage="Final"] .bracket-cell,
+  .bracket-cell {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible;
+    padding: 2px 0;
+  }
+
+  .bracket-view .bracket-cell {
+    max-width: var(--bracket-col-width);
+  }
+
+  .bracket-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .bracket-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 6px;
+    padding: 5px 8px;
+    font-size: 0.65rem;
+  }
+
+  .bracket-card-head .match-date {
+    flex: 1 1 100%;
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .bracket-card-head .venue-label,
+  .bracket-card-head [class*="venue"] {
+    flex: 1 1 auto;
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+    font-size: 0.62rem;
+    line-height: 1.2;
+  }
+
+  .bracket-team-slot {
+    padding: 5px 8px;
+  }
+
+  .bracket-team-slot .bracket-team,
+  .bracket-team-slot .bracket-team-themed {
+    align-items: flex-start;
+    min-height: 0;
+    gap: 6px;
+  }
+
+  /* Full card width for names — 2-line clamp instead of 80px ellipsis */
+  .bracket-team-slot .bracket-team .team-name-text,
+  .bracket-card .team-name-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none !important;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.72rem;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  .bracket-team-slot .bracket-team .team-flag-wrap,
+  .bracket-team-slot .bracket-team-flag {
+    margin-top: 1px;
+  }
+
+  .bracket-scoreline {
+    padding: 4px 8px 6px;
+    font-size: 11px;
+  }
+
+  .live-bracket-embed__panel .bracket-scroll {
+    margin-inline: calc(-1 * var(--surface-shadow-bleed) / 2);
+    padding-inline: max(8px, calc(var(--surface-shadow-bleed) / 2));
+  }
+}
+
+/* iPhone — one round column per swipe */
+@media (max-width: 430px) {
+  .bracket-view,
+  .live-bracket-embed {
+    --bracket-col-width: min(84vw, 228px);
+    --bracket-col-gap: 14px;
+    --bracket-card-gap: 10px;
+  }
+
+  .bracket-scroll {
+    scroll-snap-type: x mandatory;
+  }
+
+  .bracket-round {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .bracket-view .bracket-toggle {
+    grid-template-columns: 1fr 1fr !important;
+    font-size: 0.8rem;
+  }
+
+  .bracket-view .hero-panel--compact h1 {
+    font-size: clamp(1.2rem, 5vw, 1.6rem);
+  }
+}
+
+/* iPad — ~2 round columns visible */
+@media (min-width: 431px) and (max-width: 1023px) {
+  .bracket-view,
+  .live-bracket-embed {
+    --bracket-col-width: min(40vw, 196px);
+    --bracket-col-gap: 18px;
+    --bracket-card-gap: 12px;
+  }
+
+  .bracket-scroll {
+    scroll-snap-type: x proximity;
+  }
+
+  .bracket-round {
+    scroll-snap-align: start;
+  }
+
+  .bracket-team-slot .bracket-team .team-name-text,
+  .bracket-card .team-name-text {
+    font-size: 0.74rem;
+  }
+}

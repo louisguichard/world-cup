@@ -1,6 +1,46 @@
 {
-  "updatedAt": "2026-06-30T07:02:23.374Z",
+  "updatedAt": "2026-06-30T07:23:06.034Z",
   "builds": [
+    {
+      "version": "5.0.0",
+      "build": 17,
+      "kind": "build",
+      "message": "22 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 22 files changed, 942 insertions(+), 273 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:23:06.034Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 16,
+      "kind": "build",
+      "message": "Show match dates on schedule cards, venue rows, and timeline",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:22:31.067Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 15,
+      "kind": "build",
+      "message": "Fix bracket fixture table, confirmed-only live overlay, R16 feeders",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:20:47.352Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 14,
+      "kind": "build",
+      "message": "Mobile bracket layout overhaul and UI debug text-truncation scan",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:19:54.884Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 13,
+      "kind": "build",
+      "message": "Defer bracket projection off main thread; fix mobile cell overflow",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:07:56.592Z"
+    },
     {
       "version": "5.0.0",
       "build": 12,
@@ -280,49 +320,17 @@
       "message": "Add horizontal padding and margin to LiveView upcoming fixtures section",
       "date": "2026-06-30",
       "timestamp": "2026-06-30T04:28:10.661Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 85,
-      "kind": "build",
-      "message": "10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 10 files changed, 78 insertions(+), 63 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T04:19:42.982Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 84,
-      "kind": "build",
-      "message": "polish bracket knockout copy, connector CSS, live feeder highlights",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T04:18:21.941Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 83,
-      "kind": "build",
-      "message": "21 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 21 files changed, 643 insertions(+), 118 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T03:51:27.158Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 82,
-      "kind": "build",
-      "message": "fix bracket live scores, LOCKED IN badge, connector slot layout",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T03:47:51.151Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 81,
-      "kind": "build",
-      "message": "fix live ET period label, penalty bar visibility, goal event fetch",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T03:44:22.527Z"
     }
   ],
   "commits": [
+    {
+      "hash": "8a7f3b8d9ffd598b73260efbec2102a6c04dae98",
+      "shortHash": "8a7f3b8",
+      "message": "Record v5.0.0 build 12 production deploy on Vercel.",
+      "version": "5.0.0",
+      "build": 12,
+      "timestamp": "2026-06-30T07:02:30.569Z"
+    },
     {
       "hash": "c28a9c43ea7cddabf04daaef641d2bd85b99c07d",
       "shortHash": "c28a9c4",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 50,
       "timestamp": "2026-06-28T05:00:22.841Z"
-    },
-    {
-      "hash": "3bb701e0a593c7e019bc786fc704553e9f5a1e74",
-      "shortHash": "3bb701e",
-      "message": "Record v4.0.0 build 48 production deploy on Vercel.",
-      "version": "4.0.0",
-      "build": 48,
-      "timestamp": "2026-06-28T04:53:00.318Z"
     }
   ],
   "deploys": [

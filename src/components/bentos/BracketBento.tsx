@@ -1,4 +1,4 @@
-import { memo, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { knockoutSchedule } from "../../data/knockoutSchedule";
 import { buildQualificationContext, computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
 import { buildCanonicalTournamentDataset } from "../../lib/canonicalTournamentDataset";
@@ -17,7 +17,8 @@ import type {
   GroupStanding,
   MergedMatch,
   Stage,
-  Team
+  Team,
+  TournamentProjection,
 } from "../../types";
 import { useStore } from "../../store";
 import {
@@ -402,44 +403,80 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
   );
 
   const deferredProjectionMatches = useDeferredValue(projectionMatches);
+  const isModePending = mode !== deferredMode;
+  const [, startProjectionTransition] = useTransition();
+  const [projection, setProjection] = useState<Pick<TournamentProjection, "bracket" | "standings"> | null>(
+    null
+  );
 
-  const projectedProjection = useMemo(() => {
-    if (deferredMode !== "projected" || !teams.length) return null;
-    const store = useStore.getState();
-    const effectiveStandings =
-      store.groupStandings.length > 0 ? store.groupStandings : readStandingsCache() ?? [];
-    const mergedSchedule = materializeFullSchedule(
-      store.teams,
-      store.liveMatches,
-      effectiveStandings
-    );
-    return projectTournament(
-      teams,
-      deferredProjectionMatches,
-      store.knockoutMarkets,
-      store.scoreOverrides,
-      {},
-      qualContext.lockedGroupMatchCount,
-      qualContext.lockedStandingsByGroup,
-      mergedSchedule
-    );
+  useEffect(() => {
+    if (!teams.length) {
+      setProjection(null);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      if (cancelled) return;
+      const t0 = performance.now();
+      const store = useStore.getState();
+      let result: Pick<TournamentProjection, "bracket" | "standings"> | null = null;
+
+      if (deferredMode === "projected") {
+        const effectiveStandings =
+          store.groupStandings.length > 0 ? store.groupStandings : readStandingsCache() ?? [];
+        const mergedSchedule = materializeFullSchedule(
+          store.teams,
+          store.liveMatches,
+          effectiveStandings
+        );
+        result = projectTournament(
+          teams,
+          deferredProjectionMatches,
+          store.knockoutMarkets,
+          store.scoreOverrides,
+          {},
+          qualContext.lockedGroupMatchCount,
+          qualContext.lockedStandingsByGroup,
+          mergedSchedule
+        );
+      } else {
+        result = buildConfirmedOnlyBracket(teams, matches, store.liveMatches, qualContext);
+      }
+
+      const elapsedMs = Math.round(performance.now() - t0);
+      // #region agent log
+      fetch("http://127.0.0.1:7681/ingest/f800a0a9-8d11-45c6-8805-1b187f693046", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "99cde0" },
+        body: JSON.stringify({
+          sessionId: "99cde0",
+          location: "BracketBento.tsx:projectionEffect",
+          message: "projection computed async",
+          data: { mode: deferredMode, elapsedMs, fingerprint: projectionFingerprint.slice(0, 40) },
+          timestamp: Date.now(),
+          hypothesisId: "H1",
+        }),
+      }).catch(() => {});
+      // #endregion
+
+      startProjectionTransition(() => {
+        if (!cancelled) setProjection(result);
+      });
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [
     deferredMode,
-    teams,
-    deferredProjectionMatches,
     projectionFingerprint,
-    qualContext.lockedGroupMatchCount,
-    qualContext.lockedStandingsByGroup,
+    teams,
+    matches,
+    deferredProjectionMatches,
+    qualContext,
   ]);
-
-  const confirmedProjection = useMemo(() => {
-    if (deferredMode !== "confirmed" || !teams.length) return null;
-    const liveMatches = useStore.getState().liveMatches;
-    return buildConfirmedOnlyBracket(teams, matches, liveMatches, qualContext);
-  }, [deferredMode, teams, matches, qualContext, projectionFingerprint]);
-
-  const projection =
-    deferredMode === "confirmed" ? confirmedProjection : projectedProjection;
 
   const orderedByStage = useMemo(() => {
     if (!projection?.bracket) {
@@ -556,7 +593,7 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
             : bb.confirmedHint
           : bb.projectedHint}
       </p>
-      {!projection ? (
+      {!projection || isModePending ? (
         <LoadingState label={bb.loading} />
       ) : (
         <div className="bracket-scroll" ref={scrollRef}>

@@ -6,11 +6,11 @@ import type { BracketMatch, Stage } from "../../types";
  * Derived from KNOCKOUT_ROUND_FIXTURES feeder groupings.
  */
 export const R32_VISUAL_ORDER: string[] = [
-  "M74",
-  "M77",
   "M73",
+  "M74",
   "M75",
   "M76",
+  "M77",
   "M78",
   "M79",
   "M80",
@@ -19,8 +19,8 @@ export const R32_VISUAL_ORDER: string[] = [
   "M83",
   "M84",
   "M85",
-  "M87",
   "M86",
+  "M87",
   "M88",
 ];
 

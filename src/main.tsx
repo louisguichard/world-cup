@@ -14,6 +14,7 @@ import "./styles/layout.css";
 import "./styles/app-views.css";
 import "./styles/components.css";
 import "./styles/responsive.css";
+import "./styles/bracket-mobile.css";
 import "./styles/platform.css";
 import "./styles/modules.css";
 import "./styles/edges.css";

@@ -32,8 +32,8 @@ describe("bracketVisualOrder", () => {
 
   it("assigns R16 child index to feeder midpoint", () => {
     const index = buildBracketVisualIndexMap();
-    expect(index.get("M89")).toBe((index.get("M74")! + index.get("M77")!) / 2);
-    expect(index.get("M90")).toBe((index.get("M73")! + index.get("M75")!) / 2);
+    expect(index.get("M89")).toBe((index.get("M73")! + index.get("M74")!) / 2);
+    expect(index.get("M90")).toBe((index.get("M75")! + index.get("M76")!) / 2);
   });
 
   it("sorts emitted bracket slots by topology, not emission order", () => {
@@ -42,12 +42,12 @@ describe("bracketVisualOrder", () => {
       slot("M89", "R16"),
       slot("M88", "R32"),
       slot("M74", "R32"),
-      slot("M77", "R32"),
       slot("M73", "R32"),
+      slot("M75", "R32"),
     ];
 
     const ordered = orderBracketByStage(shuffled);
-    expect(ordered.R32.map((m) => m.id)).toEqual(["M74", "M77", "M73", "M88"]);
+    expect(ordered.R32.map((m) => m.id)).toEqual(["M73", "M74", "M75", "M88"]);
     expect(ordered.R16.map((m) => m.id)).toEqual(["M89", "M96"]);
   });
 });

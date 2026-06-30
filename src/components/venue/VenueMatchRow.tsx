@@ -1,4 +1,4 @@
-import { formatKickoffTime } from "../../lib/formatKickoff";
+import { formatKickoff } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { APP_COPY } from "../../lib/appCopy";
 import {
@@ -71,7 +71,9 @@ export function VenueMatchRow({ match, home, away, onSelect }: Props) {
         <span className={`${styles.statusBadge} ${badge.className}`}>{badge.label}</span>
       </div>
       <div className={styles.venueMatchMeta}>
-        <time dateTime={match.date}>{formatKickoffTime(match.date)}</time>
+        <time dateTime={match.date}>
+          {formatKickoff(match.date, match.status === "completed" || !!match.locked)}
+        </time>
         <span className={styles.venueMatchStage}>{stageLabel}</span>
       </div>
       {isScored ? (

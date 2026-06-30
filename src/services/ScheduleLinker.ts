@@ -9,6 +9,7 @@ export type ScheduleLinkIndices = {
   composite: Record<string, string>;
   pair: Record<string, string>;
   kickoff: Record<string, string>;
+  espnEventId: Record<string, string>;
 };
 
 export function buildScheduleLinkIndex(
@@ -17,15 +18,19 @@ export function buildScheduleLinkIndex(
   const composite: Record<string, string> = {};
   const pair: Record<string, string> = {};
   const kickoff: Record<string, string> = {};
+  const espnEventId: Record<string, string> = {};
 
   for (const entry of entries) {
     const matchId = `M${entry.matchNumber}`;
+    if (entry.espnEventId) {
+      espnEventId[entry.espnEventId] = matchId;
+    }
     composite[matchCompositeKey(entry.homeTeam, entry.awayTeam, entry.kickoff.utc)] = matchId;
     pair[pairKey(entry.homeTeam, entry.awayTeam)] = matchId;
     kickoff[normalizeKickoffUtc(entry.kickoff.utc)] = matchId;
   }
 
-  return { composite, pair, kickoff };
+  return { composite, pair, kickoff, espnEventId };
 }
 
 const scheduleLinkIndices = buildScheduleLinkIndex();
@@ -34,6 +39,12 @@ export function linkMatchToSchedule(
   match: Partial<MergedMatch>,
   teams: Record<string, Team>
 ): string | undefined {
+  const espnId = match.espnEventId ?? (/^\d+$/.test(match.id ?? "") ? match.id : undefined);
+  if (espnId) {
+    const byEspn = scheduleLinkIndices.espnEventId[espnId];
+    if (byEspn) return byEspn;
+  }
+
   const homeName = resolveTeamFromStore(teams, match.homeTeamId ?? "")?.name;
   const awayName = resolveTeamFromStore(teams, match.awayTeamId ?? "")?.name;
 

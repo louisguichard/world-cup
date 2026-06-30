@@ -1,4 +1,5 @@
 import type { MergedMatch, Team } from "../../types";
+import { formatMatchDateCompact } from "../../lib/formatKickoff";
 import { VenueMatchRow } from "./VenueMatchRow";
 import styles from "./VenueTimelinePreview.module.css";
 
@@ -20,6 +21,9 @@ export function VenueTimelinePreview({ matches, teamsById, onSelectMatch, stacke
         const id = match.matchId ?? match.id;
         return (
           <div key={id} className={styles.timelineItem}>
+            <time className={styles.dateChip} dateTime={match.date}>
+              {formatMatchDateCompact(match.date)}
+            </time>
             <VenueMatchRow
               match={match}
               home={teamsById[match.homeTeamId]}

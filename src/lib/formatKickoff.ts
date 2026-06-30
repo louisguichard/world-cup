@@ -21,6 +21,12 @@ const timeFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: localTimeZone
 });
 
+const compactDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  day: "numeric",
+  timeZone: localTimeZone
+});
+
 /**
  * Formats a match ISO date string to official kickoff display.
  * Completed matches show date only; upcoming/live show date + time.
@@ -47,4 +53,11 @@ export function formatKickoffDate(isoDate: string): string {
   const date = parseIso(isoDate);
   if (!date) return "";
   return dateFormatter.format(date);
+}
+
+/** Returns "June 11" style — for compact venue rows, timeline, bracket headers. */
+export function formatMatchDateCompact(isoDate: string): string {
+  const date = parseIso(isoDate);
+  if (!date) return "";
+  return compactDateFormatter.format(date);
 }

@@ -8,6 +8,11 @@
 ## [Unreleased]
 
 ### Builds
+- **5.0.0 build 17** (2026-06-30): 22 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 22 files changed, 942 insertions(+), 273 deletions(-)
+- **5.0.0 build 16** (2026-06-30): Show match dates on schedule cards, venue rows, and timeline
+- **5.0.0 build 15** (2026-06-30): Fix bracket fixture table, confirmed-only live overlay, R16 feeders
+- **5.0.0 build 14** (2026-06-30): Mobile bracket layout overhaul and UI debug text-truncation scan
+- **5.0.0 build 13** (2026-06-30): Defer bracket projection off main thread; fix mobile cell overflow
 - **5.0.0 build 12** (2026-06-30): 25 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, scripts, src, version.json — 25 files changed, 1139 insertions(+), 150 deletions(-)
 - **5.0.0 build 11** (2026-06-30): Remove debug instrumentation after bracket perf and smart polling verification
 - **5.0.0 build 10** (2026-06-30): Stop bracket poll cascade: projection fingerprint, remove liveMatches schedule subscription

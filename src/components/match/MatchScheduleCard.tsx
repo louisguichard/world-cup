@@ -1,7 +1,7 @@
 import type { MergedMatch, Team } from "../../types";
 import { useMemo } from "react";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
-import { formatKickoffTime } from "../../lib/formatKickoff";
+import { formatKickoff, formatKickoffDate } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { APP_COPY } from "../../lib/appCopy";
 import { matchStageLabel } from "../../lib/matchStageLabel";
@@ -109,10 +109,10 @@ export function MatchScheduleCard({
   const stageLabel = match.stage ? matchStageLabel(match) : undefined;
 
   const metaTimeDisplay = isDone
-    ? APP_COPY.match.final
+    ? `${formatKickoffDate(kickoffUtc)} · ${APP_COPY.match.final}`
     : isLive
       ? formatLiveClock(match)
-      : formatKickoffTime(kickoffUtc);
+      : formatKickoff(kickoffUtc);
 
   const cardClass = [
     "schedule-card",

@@ -5,24 +5,24 @@ import {
   type QualificationMatchContext,
 } from "../thirdPlaceQualification";
 
-/** Official FIFA WC 2026 Round of 32 fixture pairing table. */
+/** Official FIFA WC 2026 Round of 32 fixture pairing table (aligned with matchSchedule.json). */
 export const ROUND_OF_32_FIXTURES = [
   ["M73", "2A", "2B"],
-  ["M74", "1E", "3:1E"],
-  ["M75", "1F", "2C"],
-  ["M76", "1C", "2F"],
-  ["M77", "1I", "3:1I"],
-  ["M78", "2E", "2I"],
+  ["M74", "1C", "2F"],
+  ["M75", "1E", "3:1E"],
+  ["M76", "1F", "2C"],
+  ["M77", "2E", "2I"],
+  ["M78", "1I", "3:1I"],
   ["M79", "1A", "3:1A"],
   ["M80", "1L", "3:1L"],
-  ["M81", "1D", "3:1D"],
-  ["M82", "1G", "3:1G"],
-  ["M83", "2K", "2L"],
-  ["M84", "1H", "2J"],
+  ["M81", "1G", "3:1G"],
+  ["M82", "1D", "3:1D"],
+  ["M83", "1H", "2J"],
+  ["M84", "2K", "2L"],
   ["M85", "1B", "3:1B"],
-  ["M86", "1J", "2H"],
-  ["M87", "1K", "3:1K"],
-  ["M88", "2D", "2G"],
+  ["M86", "2D", "2G"],
+  ["M87", "1J", "2H"],
+  ["M88", "1K", "3:1K"],
 ] as const;
 
 export type R32Slot = {

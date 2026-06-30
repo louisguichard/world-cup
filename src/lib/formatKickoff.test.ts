@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatKickoff, formatKickoffDate, formatKickoffTime } from "./formatKickoff";
+import { formatKickoff, formatKickoffDate, formatKickoffTime, formatMatchDateCompact } from "./formatKickoff";
 
 describe("formatKickoffDate", () => {
   it("formats a valid UTC ISO string to a weekday date", () => {
@@ -26,6 +26,21 @@ describe("formatKickoffTime", () => {
   it("returns empty string for invalid input", () => {
     expect(formatKickoffTime("")).toBe("");
     expect(formatKickoffTime("invalid")).toBe("");
+  });
+});
+
+describe("formatMatchDateCompact", () => {
+  it('formats as "Month Day" without weekday or time', () => {
+    const result = formatMatchDateCompact("2026-06-11T19:00:00Z");
+    expect(result).toMatch(/June/);
+    expect(result).toMatch(/11/);
+    expect(result).not.toMatch(/·/);
+    expect(result).not.toMatch(/(AM|PM)/);
+  });
+
+  it("returns empty string for invalid input", () => {
+    expect(formatMatchDateCompact("")).toBe("");
+    expect(formatMatchDateCompact("invalid")).toBe("");
   });
 });
 

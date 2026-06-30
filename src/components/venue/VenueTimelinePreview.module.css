@@ -10,6 +10,16 @@
 .timelineItem {
   flex: 0 0 min(260px, 80vw);
   scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dateChip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+  letter-spacing: 0.02em;
 }
 
 .timeline--stacked {
