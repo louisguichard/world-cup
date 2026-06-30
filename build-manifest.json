@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T07:00:02.385Z",
+  "updatedAt": "2026-06-30T07:02:23.374Z",
   "builds": [
     {
       "version": "5.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "c28a9c43ea7cddabf04daaef641d2bd85b99c07d",
+      "shortHash": "c28a9c4",
+      "message": "Improve bracket responsiveness and smart match-lifecycle polling.",
+      "version": "5.0.0",
+      "build": 12,
+      "timestamp": "2026-06-30T07:00:02.786Z"
+    },
+    {
       "hash": "2eb7ac4fe6b8c7802a2e9742e96ec30c1edfd166",
       "shortHash": "2eb7ac4",
       "message": "Record v5.0.0 build 4 production deploy on Vercel.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 48,
       "timestamp": "2026-06-28T04:53:00.318Z"
-    },
-    {
-      "hash": "fb43d1a6aada2e744feb6b50a58147210c9d898f",
-      "shortHash": "fb43d1a",
-      "message": "Fix Vercel deploy by staging unfinished serverless API routes.",
-      "version": "4.0.0",
-      "build": 48,
-      "timestamp": "2026-06-28T04:50:52.524Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "5.0.0",
+      "build": 12,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-30T07:02:23.373Z"
+    },
     {
       "url": "",
       "environment": "production",
@@ -716,14 +724,6 @@
       "build": 20,
       "message": "Production deploy via deploy:vercel",
       "timestamp": "2026-06-27T07:07:43.846Z"
-    },
-    {
-      "url": "",
-      "environment": "production",
-      "version": "3.0.0",
-      "build": 19,
-      "message": "Production deploy via deploy:vercel",
-      "timestamp": "2026-06-27T07:05:03.480Z"
     }
   ]
 }
