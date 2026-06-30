@@ -1901,14 +1901,15 @@ h2 {
 }
 
 .bracket-head {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  flex-direction: row;
   gap: var(--bracket-gap);
   min-width: 1180px;
   margin-bottom: 12px;
 }
 
 .bracket-head h3 {
+  flex: 1 1 0;
   color: var(--faint);
   font-family: var(--font-brand);
   font-size: 11px;
@@ -1918,15 +1919,42 @@ h2 {
 }
 
 .bracket-rounds {
+  --bracket-slot-h: 88px;
   display: flex;
+  flex-direction: row;
+  align-items: stretch;
   min-width: 1180px;
+  min-height: calc(16 * var(--bracket-slot-h));
+  position: relative;
 }
 
 .bracket-round {
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
+  justify-content: space-around;
   margin-right: var(--bracket-gap);
+  gap: 0;
+}
+
+.bracket-round:nth-child(1) .bracket-cell {
+  flex: 0 0 calc(100% / 16);
+}
+
+.bracket-round:nth-child(2) .bracket-cell {
+  flex: 0 0 calc(100% / 8);
+}
+
+.bracket-round:nth-child(3) .bracket-cell {
+  flex: 0 0 calc(100% / 4);
+}
+
+.bracket-round:nth-child(4) .bracket-cell {
+  flex: 0 0 calc(100% / 2);
+}
+
+.bracket-round:nth-child(5) .bracket-cell {
+  flex: 0 0 100%;
 }
 
 .bracket-round.is-final {
@@ -1936,11 +1964,14 @@ h2 {
 .bracket-cell {
   flex: 0 0 auto;
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
   position: relative;
   height: auto;
   min-height: 0;
-  margin-bottom: 16px;
+  margin-bottom: 0;
+  padding: 4px 0;
+  box-sizing: border-box;
 }
 
 /* Connectors */

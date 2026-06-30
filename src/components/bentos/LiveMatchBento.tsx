@@ -23,7 +23,7 @@ import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
 import { VenueLabel } from "../venue/VenueLabel";
 import { resolveEventsForMatch } from "../../lib/resolveMatchEvents";
-import { derivePenaltyShootout } from "../../lib/derivePenaltyShootout";
+import { derivePenaltyShootout, matchHadPenaltyShootout } from "../../lib/derivePenaltyShootout";
 import { PenaltyShootoutBar } from "../match/PenaltyShootoutBar";
 
 type Props = {
@@ -40,7 +40,9 @@ export function LiveMatchBento({ match, variant }: Props) {
 
   const isLive = match.status === "live";
   const clockLabel = isLive ? formatLiveClock(match) : APP_COPY.match.final;
-  const periodLabel = isLive ? formatPeriodLabel(match.period, match.status) : null;
+  const periodLabel = isLive
+    ? formatPeriodLabel(match.period, match.status, match.clockMinute)
+    : null;
   const broadcast =
     (match.matchId ? getBroadcast(match.matchId) : undefined) ?? getBroadcastByKickoff(match.date);
   const events = useMemo(
@@ -66,6 +68,13 @@ export function LiveMatchBento({ match, variant }: Props) {
   const homeName = teamLiveCardNameForMatch(match, "home", teams);
   const awayName = teamLiveCardNameForMatch(match, "away", teams);
   const isCompact = true;
+
+  const showPenaltyBar =
+    isLive &&
+    penaltyShootout &&
+    (match.period === "penalties" ||
+      match.decidedByPenalties === true ||
+      matchHadPenaltyShootout(match));
 
   const scorerEvents = useMemo(
     () => (latestGoal?.scorerEvent ? [latestGoal.scorerEvent] : []),
@@ -153,8 +162,15 @@ export function LiveMatchBento({ match, variant }: Props) {
         )}
       </div>
 
-      {isLive && match.period === "penalties" && penaltyShootout ? (
-        <PenaltyShootoutBar match={match} shootout={penaltyShootout} compact />
+      {showPenaltyBar ? (
+        <PenaltyShootoutBar
+          match={match}
+          shootout={penaltyShootout}
+          homeTeam={home}
+          awayTeam={away}
+          compact
+          isLive
+        />
       ) : null}
 
       <div

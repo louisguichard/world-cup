@@ -240,8 +240,23 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
   const liveMatches = Object.values(merged).filter((m) => m.status === "live" && !m.locked);
 
   if (!options?.light) {
+    const primaryId = store.primaryLiveMatchId;
+    const primaryMatch =
+      (primaryId ? liveMatches.find((m) => m.id === primaryId) : undefined) ?? liveMatches[0];
+    const otherLive = primaryMatch
+      ? liveMatches.filter((m) => m.id !== primaryMatch.id)
+      : liveMatches;
+
+    if (primaryMatch) {
+      const primaryEvents = await fetchMatchEvents(
+        primaryMatch,
+        primaryMatch.matchId ?? primaryMatch.id
+      );
+      publishMatchEvents(primaryMatch, primaryEvents);
+    }
+
     await Promise.allSettled(
-      liveMatches.map(async (m) => {
+      otherLive.map(async (m) => {
         const events = await fetchMatchEvents(m, m.matchId ?? m.id);
         publishMatchEvents(m, events);
       })

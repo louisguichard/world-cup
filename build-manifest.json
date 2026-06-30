@@ -1,6 +1,30 @@
 {
-  "updatedAt": "2026-06-30T03:33:32.575Z",
+  "updatedAt": "2026-06-30T03:51:27.158Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 83,
+      "kind": "build",
+      "message": "21 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 21 files changed, 643 insertions(+), 118 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T03:51:27.158Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 82,
+      "kind": "build",
+      "message": "fix bracket live scores, LOCKED IN badge, connector slot layout",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T03:47:51.151Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 81,
+      "kind": "build",
+      "message": "fix live ET period label, penalty bar visibility, goal event fetch",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T03:44:22.527Z"
+    },
     {
       "version": "4.0.0",
       "build": 80,
@@ -296,33 +320,17 @@
       "message": "19 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, package.json, scripts — 19 files changed, 71658 insertions(+), 206 deletions(-)",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T21:23:18.806Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 43,
-      "kind": "build",
-      "message": "Fix standings/third-place from ESPN; refresh audit snapshot and boot cache v6",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T21:23:10.410Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 42,
-      "kind": "build",
-      "message": "Sync match schedule from ESPN; bump boot cache v5 for fresh standings",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T21:12:45.530Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 41,
-      "kind": "build",
-      "message": "Remove duplicate sofascore6 rewrite; document Getty/YouTube env vars",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T21:00:03.328Z"
     }
   ],
   "commits": [
+    {
+      "hash": "478a2bd7bcc1044b850d1148f83cb4c356c270a4",
+      "shortHash": "478a2bd",
+      "message": "Record v4.0.0 build 80 production deploy on Vercel.",
+      "version": "4.0.0",
+      "build": 80,
+      "timestamp": "2026-06-30T03:33:37.781Z"
+    },
     {
       "hash": "8c21bd81042133cb553ef3f74bcae2d3e97304d3",
       "shortHash": "8c21bd8",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 23,
       "timestamp": "2026-06-27T17:27:59.717Z"
-    },
-    {
-      "hash": "39ef43287811ce7573d1e663f6af2f99d07b6042",
-      "shortHash": "39ef432",
-      "message": "Wire IPTV RapidAPI providers as stream fallback on match watch tab",
-      "version": "4.0.0",
-      "build": 19,
-      "timestamp": "2026-06-27T16:56:33.074Z"
     }
   ],
   "deploys": [

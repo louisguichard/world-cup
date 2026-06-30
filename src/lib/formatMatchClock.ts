@@ -2,6 +2,23 @@ import type { MatchPeriod, MatchStatus } from "../types";
 import type { MergedMatch } from "../types";
 import { APP_COPY } from "./appCopy";
 
+/** Infer period from clock minute when the API period field is stale or wrong. */
+export function inferPeriodFromClock(
+  period: MatchPeriod | undefined,
+  clockMinute: number | undefined
+): MatchPeriod | undefined {
+  if (clockMinute === undefined) return period;
+  if (period === "penalties" || period === "full_time") return period;
+
+  if (clockMinute >= 106 && period !== "extra_time_second") {
+    return "extra_time_second";
+  }
+  if (clockMinute >= 91 && clockMinute <= 105 && period === "second_half") {
+    return "extra_time_first";
+  }
+  return period;
+}
+
 type ClockFields = Pick<
   MergedMatch,
   "status" | "period" | "displayClock" | "clockMinute" | "clockExtra"
@@ -45,13 +62,16 @@ export function formatLiveClock(match: ClockFields): string {
 /** Human-readable period label for live matches. */
 export function formatPeriodLabel(
   period?: MatchPeriod,
-  status?: MatchStatus
+  status?: MatchStatus,
+  clockMinute?: number
 ): string | null {
   if (status === "completed" || period === "full_time") {
     return APP_COPY.match.fullTime;
   }
 
-  switch (period) {
+  const effectivePeriod = inferPeriodFromClock(period, clockMinute);
+
+  switch (effectivePeriod) {
     case "first_half":
       return APP_COPY.match.firstHalf;
     case "second_half":
@@ -73,7 +93,7 @@ export function formatPeriodLabel(
     case "interrupted":
       return APP_COPY.match.interrupted;
     default:
-      if (period === undefined) return null;
+      if (effectivePeriod === undefined) return null;
       return null;
   }
 }

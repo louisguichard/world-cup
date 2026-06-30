@@ -72,4 +72,9 @@ describe("formatPeriodLabel", () => {
     expect(formatPeriodLabel("full_time", "completed")).toBe(APP_COPY.match.fullTime);
     expect(formatPeriodLabel(undefined, "completed")).toBe(APP_COPY.match.fullTime);
   });
+
+  it("infers extra time from stale second_half period and clock minute", () => {
+    expect(formatPeriodLabel("second_half", "live", 106)).toBe(APP_COPY.match.extraTimeSecond);
+    expect(formatPeriodLabel("second_half", "live", 95)).toBe(APP_COPY.match.extraTimeFirst);
+  });
 });

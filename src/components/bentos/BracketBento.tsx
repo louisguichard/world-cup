@@ -30,7 +30,6 @@ import { resolveMatchWinner } from "../../lib/resolveMatchWinner";
 import type { TeamThemeStatus } from "../team/TeamThemeRoot";
 
 const allBracketStages: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
-const stageColumns: Record<Stage, number> = { R32: 1, R16: 2, QF: 3, SF: 4, Final: 5 };
 
 /** Locked-in mode: R32 first; later rounds appear as feeder winners are confirmed. */
 function visibleBracketStages(
@@ -43,10 +42,14 @@ function visibleBracketStages(
   const laterStages: Stage[] = ["R16", "QF", "SF", "Final"];
 
   for (const stage of laterStages) {
-    const hasConfirmedSlot = orderedByStage[stage].some(
-      (match) => match.homeCertainty === "confirmed" || match.awayCertainty === "confirmed"
+    const hasReachableSlot = orderedByStage[stage].some(
+      (match) =>
+        match.homeCertainty === "confirmed" ||
+        match.awayCertainty === "confirmed" ||
+        (match.homeSeedLabel?.startsWith("W") && Boolean(match.homeTeamId)) ||
+        (match.awaySeedLabel?.startsWith("W") && Boolean(match.awayTeamId))
     );
-    if (!hasConfirmedSlot) break;
+    if (!hasReachableSlot) break;
     stages.push(stage);
   }
 
@@ -172,6 +175,7 @@ function BracketTeamReadonly({
   mode,
   teamsById,
   status = "default",
+  stage,
   onTeamSelect
 }: {
   team?: Team;
@@ -183,6 +187,7 @@ function BracketTeamReadonly({
   mode: "confirmed" | "projected";
   teamsById: Record<string, Team>;
   status?: TeamThemeStatus;
+  stage?: Stage;
   onTeamSelect?: (teamId: string) => void;
 }) {
   const resolvedTeamId = team?.id ?? teamId;
@@ -190,6 +195,9 @@ function BracketTeamReadonly({
 
   const effectiveCertainty: BracketSlotCertainty =
     mode === "confirmed" && !slotConfirmed ? "tbd" : slotConfirmed ? "confirmed" : "projected";
+  const isKnockoutCard = Boolean(stage);
+  const showConfirmedBadge =
+    effectiveCertainty === "confirmed" && mode === "confirmed" && !isKnockoutCard;
 
   const resolvedStatus: TeamThemeStatus = winner ? "advancing" : status;
   const visibleGhosts = ghosts?.slice(0, 2) ?? [];
@@ -258,7 +266,7 @@ function BracketTeamReadonly({
         </span>
         {winner ? <b>✓</b> : null}
       </button>
-      {effectiveCertainty === "confirmed" ? (
+      {showConfirmedBadge ? (
         <>
           <CertaintyBadge certainty="confirmed" size="xs" />
         </>
@@ -321,6 +329,7 @@ function BracketCardReadonly({
         ghosts={homeConfirmed ? undefined : match.homeGhosts}
         mode={mode}
         teamsById={teamsById}
+        stage={match.stage}
         onTeamSelect={onTeamSelect}
       />
       <BracketTeamReadonly
@@ -332,6 +341,7 @@ function BracketCardReadonly({
         ghosts={awayConfirmed ? undefined : match.awayGhosts}
         mode={mode}
         teamsById={teamsById}
+        stage={match.stage}
         onTeamSelect={onTeamSelect}
       />
       {liveMerged && liveMerged.homeScore !== undefined ? (
@@ -385,8 +395,7 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
           return (
             m.homeScore !== undefined &&
             m.awayScore !== undefined &&
-            m.status === "completed" &&
-            m.locked
+            ((m.status === "completed" && m.locked) || m.status === "live")
           );
         }
         if (m.group) return true;
@@ -498,9 +507,7 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
         <div className="bracket-scroll" ref={scrollRef}>
           <div className="bracket-head">
             {bracketStages.map((stage) => (
-              <h3 key={stage} style={{ gridColumn: stageColumns[stage] }}>
-                {stage}
-              </h3>
+              <h3 key={stage}>{stage}</h3>
             ))}
           </div>
           <div className="bracket-rounds" style={{ position: "relative" }}>

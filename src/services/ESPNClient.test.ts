@@ -31,4 +31,31 @@ describe("parseEspnClockFields", () => {
     expect(fields.clockMinute).toBe(67);
     expect(fields.period).toBe("second_half");
   });
+
+  it("maps extra time second half when displayClock is 106'", () => {
+    const fields = parseEspnClockFields({
+      displayClock: "106'",
+      period: 2,
+      type: { state: "in", detail: "2nd Half" }
+    });
+    expect(fields.clockMinute).toBe(106);
+    expect(fields.period).toBe("extra_time_second");
+  });
+
+  it("maps ESPN period 3 and 4 to extra time halves", () => {
+    expect(
+      parseEspnClockFields({
+        displayClock: "92'",
+        period: 3,
+        type: { state: "in", detail: "2nd Half" }
+      }).period
+    ).toBe("extra_time_first");
+    expect(
+      parseEspnClockFields({
+        displayClock: "108'",
+        period: 4,
+        type: { state: "in", detail: "2nd Half" }
+      }).period
+    ).toBe("extra_time_second");
+  });
 });

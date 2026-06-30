@@ -8,6 +8,9 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 83** (2026-06-30): 21 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 21 files changed, 643 insertions(+), 118 deletions(-)
+- **4.0.0 build 82** (2026-06-30): fix bracket live scores, LOCKED IN badge, connector slot layout
+- **4.0.0 build 81** (2026-06-30): fix live ET period label, penalty bar visibility, goal event fetch
 - **4.0.0 build 80** (2026-06-30): 1 file(s) in src — 1 file changed, 42 insertions(+), 7 deletions(-)
 - **4.0.0 build 79** (2026-06-30): 21 file(s) in src — 21 files changed, 868 insertions(+), 233 deletions(-)
 - **4.0.0 build 78** (2026-06-30): 29 file(s) in public, src — 29 files changed, 226 insertions(+), 58 deletions(-)

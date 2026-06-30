@@ -49,7 +49,6 @@ body {
 
 .bracket-head,
 .bracket-rounds {
-  grid-template-columns: repeat(5, var(--bracket-col-width));
   gap: var(--bracket-col-gap);
   min-width: min(
     100%,

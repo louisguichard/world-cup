@@ -1,57 +1,128 @@
 .bar {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-2, #1a2332) 88%, transparent);
 }
 
 .barCompact {
   margin-top: 4px;
+  padding: 8px 10px;
 }
 
-.kicks {
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  padding: 4px 6px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--surface-2, #1a2332) 88%, transparent);
 }
 
-.side {
+.headerLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-warm, #f59e0b);
+}
+
+.headerScore {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text, #f3f4f6);
+  font-variant-numeric: tabular-nums;
+}
+
+.rows {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.teamRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.72;
+  transition: opacity 0.2s ease;
+}
+
+.teamRowActive {
+  opacity: 1;
+}
+
+.teamName {
+  flex: 0 0 auto;
+  min-width: 2.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted, #9ca3af);
+}
+
+.kicks {
+  display: flex;
+  flex: 1;
   flex-wrap: wrap;
-  gap: 4px;
+  justify-content: center;
+  gap: 5px;
   align-items: center;
 }
 
-.side:last-child {
-  flex-direction: row-reverse;
+.teamTally {
+  flex: 0 0 auto;
+  min-width: 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text, #f3f4f6);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .kick {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 999px;
   flex-shrink: 0;
 }
 
 .kickScored {
-  background: var(--accent, #3b82f6);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--accent, #3b82f6) 50%, transparent);
+  background: var(--success, #16a34a);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--success, #16a34a) 45%, transparent);
 }
 
 .kickMissed {
   background: transparent;
-  border: 2px solid var(--muted, #6b7280);
-  opacity: 0.75;
+  border: 2px solid var(--danger, #dc2626);
+  opacity: 0.85;
+}
+
+.kickPending {
+  background: transparent;
+  border: 2px solid var(--text, #f3f4f6);
+  animation: penPulse 1s ease-in-out infinite;
+}
+
+.kickActive {
+  transform: scale(1.15);
 }
 
 .label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: var(--muted, #9ca3af);
   letter-spacing: 0.02em;
   text-align: center;
+}
+
+@keyframes penPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--text, #fff) 35%, transparent);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px transparent;
+  }
 }

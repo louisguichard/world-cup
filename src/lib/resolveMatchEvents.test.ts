@@ -65,4 +65,36 @@ describe("resolveEventsForMatch", () => {
     const events = resolveEventsForMatch(match, { [match.id]: [espnGoal] }, teams);
     expect(events[0]?.teamId).toBe("jor");
   });
+
+  it("resolves events stored under espnEventId for knockout matches", () => {
+    const knockoutMatch: MergedMatch = {
+      id: "store-m74",
+      matchId: "M74",
+      espnEventId: "401999888",
+      stage: "R32",
+      homeTeamId: "ned",
+      awayTeamId: "mar",
+      date: "2026-06-29T19:00:00Z",
+      status: "live",
+      homeConduct: 0,
+      awayConduct: 0,
+      homeScore: 1,
+      awayScore: 0,
+      source: "espn",
+    };
+    const goal: MatchEvent = {
+      providerId: "espn-m74-1",
+      minute: 23,
+      type: "goal",
+      teamId: "mar",
+      playerName: "Hakimi",
+    };
+    const events = resolveEventsForMatch(
+      knockoutMatch,
+      { "401999888": [goal] },
+      { mar: { id: "mar", name: "Morocco", shortName: "MAR", abbreviation: "MAR", group: "E", rating: 1500 } }
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0]?.playerName).toBe("Hakimi");
+  });
 });

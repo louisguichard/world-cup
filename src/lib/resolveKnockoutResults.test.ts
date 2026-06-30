@@ -29,10 +29,40 @@ const france: Team = {
   rating: 1950
 };
 
+const morocco: Team = {
+  id: "mar",
+  name: "Morocco",
+  shortName: "MAR",
+  abbreviation: "MAR",
+  group: "E",
+  rating: 1750
+};
+
+const netherlands: Team = {
+  id: "ned",
+  name: "Netherlands",
+  shortName: "NED",
+  abbreviation: "NED",
+  group: "E",
+  rating: 1850
+};
+
+const brazil: Team = {
+  id: "bra",
+  name: "Brazil",
+  shortName: "BRA",
+  abbreviation: "BRA",
+  group: "F",
+  rating: 2000
+};
+
 const teamsById: Record<string, Team> = {
   por: portugal,
   rsa: southAfrica,
-  fra: france
+  fra: france,
+  mar: morocco,
+  ned: netherlands,
+  bra: brazil
 };
 
 function completedKnockout(partial: Partial<MergedMatch> & Pick<MergedMatch, "id">): MergedMatch {
@@ -223,5 +253,80 @@ describe("resolveKnockoutResults", () => {
     expect(result).toBe(bracket);
     expect(result.find((m) => m.id === "M73")?.source).toBe("simulated");
     expect(result.find((m) => m.id === "M73")?.winnerTeamId).toBe("rsa");
+  });
+
+  it("stamps live knockout leader with projected certainty and propagates to R16", () => {
+    const bracket: BracketMatch[] = [
+      simulatedR32("M74", "ned", "mar"),
+      {
+        id: "M89",
+        stage: "R16",
+        label: "M89",
+        homeTeamId: "ned",
+        awayTeamId: "bra",
+        homeSeedLabel: "W74",
+        awaySeedLabel: "W77",
+        homeScore: 2,
+        awayScore: 1,
+        winnerTeamId: "ned",
+        source: "simulated",
+      },
+    ];
+
+    const merged: MergedMatch[] = [
+      {
+        id: "M74",
+        matchId: "M74",
+        stage: "R32",
+        date: "2026-06-29T19:00:00Z",
+        homeTeamId: "ned",
+        awayTeamId: "mar",
+        status: "live",
+        homeScore: 1,
+        awayScore: 2,
+        homeConduct: 0,
+        awayConduct: 0,
+        locked: false,
+        source: "espn",
+      },
+    ];
+
+    const result = resolveKnockoutResults(bracket, merged, teamsById);
+    const m74 = result.find((m) => m.id === "M74");
+    const m89 = result.find((m) => m.id === "M89");
+
+    expect(m74?.homeScore).toBe(1);
+    expect(m74?.awayScore).toBe(2);
+    expect(m74?.winnerTeamId).toBe("mar");
+    expect(m74?.homeCertainty).toBe("projected");
+    expect(m89?.homeTeamId).toBe("mar");
+    expect(m89?.homeCertainty).toBe("projected");
+  });
+
+  it("does not propagate winner from a live tied knockout match", () => {
+    const bracket: BracketMatch[] = [simulatedR32("M74", "ned", "mar")];
+    const merged: MergedMatch[] = [
+      {
+        id: "M74",
+        matchId: "M74",
+        stage: "R32",
+        date: "2026-06-29T19:00:00Z",
+        homeTeamId: "ned",
+        awayTeamId: "mar",
+        status: "live",
+        homeScore: 1,
+        awayScore: 1,
+        homeConduct: 0,
+        awayConduct: 0,
+        locked: false,
+        source: "espn",
+      },
+    ];
+
+    const result = resolveKnockoutResults(bracket, merged, teamsById);
+    const m74 = result.find((m) => m.id === "M74");
+
+    expect(m74?.winnerTeamId).toBeUndefined();
+    expect(m74?.homeCertainty).toBe("projected");
   });
 });

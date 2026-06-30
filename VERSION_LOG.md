@@ -106,6 +106,18 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+
+## [4.0.0] build 83 — 2026-06-30 (build)
+- 21 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 21 files changed, 643 insertions(+), 118 deletions(-)
+
+## [4.0.0] build 82 — 2026-06-30 (build)
+- fix bracket live scores, LOCKED IN badge, connector slot layout
+
+## [4.0.0] build 81 — 2026-06-30 (build)
+- fix live ET period label, penalty bar visibility, goal event fetch
+
 ## [4.0.0] build 80 — 2026-06-30 (build)
 - 1 file(s) in src — 1 file changed, 42 insertions(+), 7 deletions(-)
 

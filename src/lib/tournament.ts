@@ -774,19 +774,58 @@ function resolveFeederTeam(
   return byId.get(upstreamId)?.winnerTeamId;
 }
 
-function buildCompletedKnockoutLookup(mergedMatches: MergedMatch[]): Map<string, MergedMatch> {
-  const completedKnockout = new Map<string, MergedMatch>();
+function feederMatchIdFromSeed(seedLabel: string | undefined): string | undefined {
+  if (!seedLabel?.startsWith("W")) return undefined;
+  return `M${seedLabel.slice(1)}`;
+}
+
+function feederCertaintyFromUpstream(upstream: BracketMatch | undefined): BracketSlotCertainty {
+  if (!upstream?.winnerTeamId) return "tbd";
+  if (upstream.homeCertainty === "confirmed" && upstream.awayCertainty === "confirmed") {
+    return "confirmed";
+  }
+  return "projected";
+}
+
+type KnockoutOverlayEntry = {
+  match: MergedMatch;
+  isLive: boolean;
+};
+
+function buildKnockoutOverlayLookup(mergedMatches: MergedMatch[]): Map<string, KnockoutOverlayEntry> {
+  const lookup = new Map<string, KnockoutOverlayEntry>();
   for (const match of mergedMatches) {
     if (!isKnockoutMatch(match)) continue;
-    if (match.status !== "completed") continue;
     if (typeof match.homeScore !== "number" || typeof match.awayScore !== "number") continue;
+
+    const isLive = match.status === "live";
+    const isCompleted = match.status === "completed";
+    if (!isLive && !isCompleted) continue;
+
+    const entry: KnockoutOverlayEntry = { match, isLive };
     const key = match.matchId ?? match.id;
-    completedKnockout.set(key, match);
+    lookup.set(key, entry);
     if (match.id && match.id !== key) {
-      completedKnockout.set(match.id, match);
+      lookup.set(match.id, entry);
     }
   }
-  return completedKnockout;
+  return lookup;
+}
+
+/** Provisional leader while a knockout match is still live (no penalty resolution). */
+function resolveLiveKnockoutLeader(
+  match: MergedMatch,
+  teamsById: TeamsById
+): string | undefined {
+  const home = match.homeScore ?? 0;
+  const away = match.awayScore ?? 0;
+  if (home > away) {
+    return resolveCanonicalTeamId(match.homeTeamId, teamsById[match.homeTeamId]);
+  }
+  if (away > home) {
+    return resolveCanonicalTeamId(match.awayTeamId, teamsById[match.awayTeamId]);
+  }
+  return undefined;
 }
 
 /** Overlay confirmed knockout results onto a projected bracket and propagate winners forward. */
@@ -796,8 +835,8 @@ export function resolveKnockoutResults(
   teamsById: TeamsById = {},
   knockoutMarkets: PolymarketMatchMarket[] = []
 ): BracketMatch[] {
-  const completedKnockout = buildCompletedKnockoutLookup(mergedMatches);
-  if (completedKnockout.size === 0) {
+  const knockoutOverlay = buildKnockoutOverlayLookup(mergedMatches);
+  if (knockoutOverlay.size === 0) {
     return bracket;
   }
 
@@ -807,22 +846,41 @@ export function resolveKnockoutResults(
     for (const bm of bracket) {
       if (bm.stage !== stage) continue;
 
-      const completed = completedKnockout.get(bm.id);
-      if (completed) {
-        const winnerTeamId = resolveMatchWinner(completed, teamsById);
+      const overlay = knockoutOverlay.get(bm.id);
+      if (overlay) {
+        const { match, isLive } = overlay;
+        if (isLive) {
+          const winnerTeamId = resolveLiveKnockoutLeader(match, teamsById);
+          byId.set(bm.id, {
+            ...byId.get(bm.id)!,
+            homeTeamId: match.homeTeamId,
+            awayTeamId: match.awayTeamId,
+            homeScore: match.homeScore,
+            awayScore: match.awayScore,
+            winnerTeamId,
+            source: "scheduled",
+            homeCertainty: "projected",
+            awayCertainty: "projected",
+            homeGhosts: undefined,
+            awayGhosts: undefined,
+          });
+          continue;
+        }
+
+        const winnerTeamId = resolveMatchWinner(match, teamsById);
         byId.set(bm.id, {
           ...byId.get(bm.id)!,
-          homeTeamId: completed.homeTeamId,
-          awayTeamId: completed.awayTeamId,
-          homeScore: completed.homeScore,
-          awayScore: completed.awayScore,
+          homeTeamId: match.homeTeamId,
+          awayTeamId: match.awayTeamId,
+          homeScore: match.homeScore,
+          awayScore: match.awayScore,
           winnerTeamId,
-          penaltyShootout: completed.penaltyShootout,
+          penaltyShootout: match.penaltyShootout,
           source: "scheduled",
           homeCertainty: "confirmed",
           awayCertainty: "confirmed",
           homeGhosts: undefined,
-          awayGhosts: undefined
+          awayGhosts: undefined,
         });
         continue;
       }
@@ -835,13 +893,17 @@ export function resolveKnockoutResults(
         byId.set(bm.id, {
           ...current,
           homeTeamId,
-          awayTeamId
+          awayTeamId,
         });
         continue;
       }
 
-      const homeConfirmed = Boolean(resolveFeederTeam(current.homeSeedLabel, byId));
-      const awayConfirmed = Boolean(resolveFeederTeam(current.awaySeedLabel, byId));
+      const homeFeederId = feederMatchIdFromSeed(current.homeSeedLabel);
+      const awayFeederId = feederMatchIdFromSeed(current.awaySeedLabel);
+      const homeUpstream = homeFeederId ? byId.get(homeFeederId) : undefined;
+      const awayUpstream = awayFeederId ? byId.get(awayFeederId) : undefined;
+      const homeFeederCertainty = feederCertaintyFromUpstream(homeUpstream);
+      const awayFeederCertainty = feederCertaintyFromUpstream(awayUpstream);
 
       const fresh = playKnockoutMatch(
         bm.id,
@@ -858,10 +920,20 @@ export function resolveKnockoutResults(
 
       byId.set(bm.id, {
         ...fresh,
-        homeCertainty: homeConfirmed ? "confirmed" : current.homeCertainty,
-        awayCertainty: awayConfirmed ? "confirmed" : current.awayCertainty,
-        homeGhosts: homeConfirmed ? undefined : current.homeGhosts,
-        awayGhosts: awayConfirmed ? undefined : current.awayGhosts
+        homeCertainty:
+          homeFeederCertainty === "confirmed"
+            ? "confirmed"
+            : homeFeederCertainty === "projected"
+              ? "projected"
+              : current.homeCertainty,
+        awayCertainty:
+          awayFeederCertainty === "confirmed"
+            ? "confirmed"
+            : awayFeederCertainty === "projected"
+              ? "projected"
+              : current.awayCertainty,
+        homeGhosts: homeFeederCertainty === "confirmed" ? undefined : current.homeGhosts,
+        awayGhosts: awayFeederCertainty === "confirmed" ? undefined : current.awayGhosts,
       });
     }
   }

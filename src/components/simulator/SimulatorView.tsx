@@ -81,7 +81,6 @@ const stageShort: Record<Stage, string> = {
   SF: "SF",
   Final: "Final"
 };
-const stageColumns: Record<Stage, number> = { R32: 1, R16: 2, QF: 3, SF: 4, Final: 5 };
 const bracketRows: Record<string, number> = {
   M74: 1,
   M77: 3,
@@ -954,9 +953,7 @@ function BracketView({
       <div className="bracket-scroll">
         <div className="bracket-head">
           {bracketStages.map((stage) => (
-            <h3 key={stage} style={{ gridColumn: stageColumns[stage] }}>
-              {stageShort[stage]}
-            </h3>
+            <h3 key={stage}>{stageShort[stage]}</h3>
           ))}
         </div>
         <div className="bracket-rounds">

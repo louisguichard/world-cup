@@ -11,6 +11,11 @@ describe("bracketTree", () => {
     expect(BRACKET_FEED_MAP.M90).toEqual(["M73", "M75"]);
   });
 
+  it("maps R16 M89 to feeders M74 and M77", () => {
+    expect(BRACKET_FEED_MAP.M89).toEqual(["M74", "M77"]);
+    expect(findChildBracketMatchId("M74")).toBe("M89");
+  });
+
   it("marks R32 matches as null feeders", () => {
     expect(BRACKET_FEED_MAP.M73).toBeNull();
     expect(BRACKET_FEED_MAP.M88).toBeNull();

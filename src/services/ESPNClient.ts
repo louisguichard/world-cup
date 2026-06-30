@@ -1,5 +1,6 @@
 import type { GroupLetter, Match, MatchEvent, MatchPeriod, Team } from "../types";
 import { isApiEnabled } from "../config/apiFlags";
+import { inferPeriodFromClock } from "../lib/formatMatchClock";
 import type { ApiRequestIntent } from "../config/apiQuotaPolicy";
 import { acquireApiQuota, logApiQuotaBlock } from "./ApiQuotaGovernor";
 import { mapEspnDetailsToEvents } from "./matchDetail/mapEspnToEvents";
@@ -90,6 +91,10 @@ export function parseEspnClockFields(status: EspnCompetitionStatus | undefined):
     period = detail.includes("2") ? "extra_time_second" : "extra_time_first";
   } else if (detail.includes("half time") || detail === "halftime") {
     period = "half_time";
+  } else if (periodNum === 3) {
+    period = "extra_time_first";
+  } else if (periodNum === 4) {
+    period = "extra_time_second";
   } else if (periodNum === 1 || detail.includes("1st")) {
     period = "first_half";
   } else if (periodNum === 2 || detail.includes("2nd")) {
@@ -97,6 +102,8 @@ export function parseEspnClockFields(status: EspnCompetitionStatus | undefined):
   } else if (state === "in") {
     period = "second_half";
   }
+
+  period = inferPeriodFromClock(period, clockMinute);
 
   const clockRunning = state === "in";
 
