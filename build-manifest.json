@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T01:52:52.064Z",
+  "updatedAt": "2026-06-30T01:54:08.408Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "b4bc175b626b669d30ae97a590f408112a930b01",
+      "shortHash": "b4bc175",
+      "message": "Fix live and results match cards with resolved teams, venue, penalties, and weather.",
+      "version": "4.0.0",
+      "build": 74,
+      "timestamp": "2026-06-30T01:52:52.360Z"
+    },
+    {
       "hash": "b1a90ad67ca854ed88c418d68a5ec4a18e9a8ca8",
       "shortHash": "b1a90ad",
       "message": "Record v4.0.0 build 73 production deploy on Vercel.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 2,
       "timestamp": "2026-06-27T07:37:40.966Z"
-    },
-    {
-      "hash": "058178a9ab2ee08280f79153d19a0b66a45d9bc2",
-      "shortHash": "058178a",
-      "message": "Sync build-manifest commit record for c3bca56.",
-      "version": "4.0.0",
-      "build": 2,
-      "timestamp": "2026-06-27T07:35:47.917Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "4.0.0",
+      "build": 74,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-30T01:54:08.406Z"
+    },
     {
       "url": "",
       "environment": "production",
