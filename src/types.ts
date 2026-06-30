@@ -445,6 +445,8 @@ export type MergedMatch = {
   group?: GroupLetter;
   stage?: Stage;
   date: string;
+  /** Unix epoch ms of scheduled kickoff — used by smart polling lifecycle */
+  kickoffMs?: number;
   venue?: string;
   homeTeamId: string;
   awayTeamId: string;

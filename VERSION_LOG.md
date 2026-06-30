@@ -138,6 +138,38 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+
+
+
+
+
+
+## [5.0.0] build 12 — 2026-06-30 (build)
+- 25 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, scripts, src, version.json — 25 files changed, 1139 insertions(+), 150 deletions(-)
+
+## [5.0.0] build 11 — 2026-06-30 (build)
+- Remove debug instrumentation after bracket perf and smart polling verification
+
+## [5.0.0] build 10 — 2026-06-30 (build)
+- Stop bracket poll cascade: projection fingerprint, remove liveMatches schedule subscription
+
+## [5.0.0] build 9 — 2026-06-30 (build)
+- Bracket perf fixes: fingerprint selectors, RAF measure debounce, startTransition toggle
+
+## [5.0.0] build 8 — 2026-06-30 (build)
+- Locked-in bracket uses buildConfirmedOnlyBracket, no projection leak
+
+## [5.0.0] build 7 — 2026-06-30 (build)
+- Smart match-lifecycle polling: phase-aware intervals and heavy/light source selection
+
+## [5.0.0] build 6 — 2026-06-30 (build)
+- Bracket perf: transition toggle, knockout selectors, RAF measure, venue hero fallback
+
+## [5.0.0] build 5 — 2026-06-30 (build)
+- Bracket toggle responsiveness: click-through overlay, mobile scroll, deferred projection
+
 ## [5.0.0] build 4 — 2026-06-30 (build)
 - 8 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 8 files changed, 224 insertions(+), 48 deletions(-)
 

@@ -1,6 +1,70 @@
 {
-  "updatedAt": "2026-06-30T06:34:56.138Z",
+  "updatedAt": "2026-06-30T07:00:02.385Z",
   "builds": [
+    {
+      "version": "5.0.0",
+      "build": 12,
+      "kind": "build",
+      "message": "25 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, scripts, src, version.json — 25 files changed, 1139 insertions(+), 150 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:00:02.385Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 11,
+      "kind": "build",
+      "message": "Remove debug instrumentation after bracket perf and smart polling verification",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:59:53.399Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 10,
+      "kind": "build",
+      "message": "Stop bracket poll cascade: projection fingerprint, remove liveMatches schedule subscription",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:57:43.159Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 9,
+      "kind": "build",
+      "message": "Bracket perf fixes: fingerprint selectors, RAF measure debounce, startTransition toggle",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:54:33.672Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 8,
+      "kind": "build",
+      "message": "Locked-in bracket uses buildConfirmedOnlyBracket, no projection leak",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:52:20.550Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 7,
+      "kind": "build",
+      "message": "Smart match-lifecycle polling: phase-aware intervals and heavy/light source selection",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:52:01.346Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 6,
+      "kind": "build",
+      "message": "Bracket perf: transition toggle, knockout selectors, RAF measure, venue hero fallback",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:41:38.502Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 5,
+      "kind": "build",
+      "message": "Bracket toggle responsiveness: click-through overlay, mobile scroll, deferred projection",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:38:46.434Z"
+    },
     {
       "version": "5.0.0",
       "build": 4,
@@ -256,73 +320,17 @@
       "message": "fix live ET period label, penalty bar visibility, goal event fetch",
       "date": "2026-06-30",
       "timestamp": "2026-06-30T03:44:22.527Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 80,
-      "kind": "build",
-      "message": "1 file(s) in src — 1 file changed, 42 insertions(+), 7 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T03:31:48.594Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 79,
-      "kind": "build",
-      "message": "21 file(s) in src — 21 files changed, 868 insertions(+), 233 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T03:10:09.638Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 78,
-      "kind": "build",
-      "message": "29 file(s) in public, src — 29 files changed, 226 insertions(+), 58 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T02:50:43.082Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 77,
-      "kind": "build",
-      "message": "260 file(s) in build-manifest.json, index.html, package.json, public, src, tools — 260 files changed, 1993 insertions(+), 330 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T02:42:27.172Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 76,
-      "kind": "build",
-      "message": "18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 18 files changed, 545 insertions(+), 64 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T02:06:18.409Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 75,
-      "kind": "build",
-      "message": "Stamp real knockout results into bracket projection; add tournament phase config",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T02:01:50.852Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 74,
-      "kind": "build",
-      "message": "22 file(s) in src — 22 files changed, 870 insertions(+), 77 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T01:52:52.064Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 73,
-      "kind": "build",
-      "message": "30 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, src, version.json — 30 files changed, 881 insertions(+), 404 deletions(-)",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T20:11:25.728Z"
     }
   ],
   "commits": [
+    {
+      "hash": "2eb7ac4fe6b8c7802a2e9742e96ec30c1edfd166",
+      "shortHash": "2eb7ac4",
+      "message": "Record v5.0.0 build 4 production deploy on Vercel.",
+      "version": "5.0.0",
+      "build": 4,
+      "timestamp": "2026-06-30T06:35:28.617Z"
+    },
     {
       "hash": "7232bee2c0b25a7887c4511067469814839ed8bf",
       "shortHash": "7232bee",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 48,
       "timestamp": "2026-06-28T04:50:52.524Z"
-    },
-    {
-      "hash": "8ef15c96b5052823e6b1b0167694ef948d1f9c92",
-      "shortHash": "8ef15c9",
-      "message": "Merge origin/main and ship live card, weather, and events work.",
-      "version": "4.0.0",
-      "build": 45,
-      "timestamp": "2026-06-28T04:48:44.263Z"
     }
   ],
   "deploys": [

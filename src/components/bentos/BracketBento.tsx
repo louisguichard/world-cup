@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { knockoutSchedule } from "../../data/knockoutSchedule";
 import { buildQualificationContext, computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
 import { buildCanonicalTournamentDataset } from "../../lib/canonicalTournamentDataset";
@@ -7,7 +7,8 @@ import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import { formatKickoffLabel, resolveOfficialMatchKickoff } from "../../services/ScheduleLinker";
-import { useMaterializedSchedule } from "../../hooks/useMaterializedSchedule";
+import { materializeFullSchedule } from "../../lib/materializeFullSchedule";
+import { readStandingsCache } from "../../lib/standingsCache";
 import { useTournamentPhase } from "../../hooks/useTournamentPhase";
 import type {
   BracketGhostCandidate,
@@ -19,6 +20,11 @@ import type {
   Team
 } from "../../types";
 import { useStore } from "../../store";
+import {
+  useBracketProjectionFingerprint,
+  useBracketTeams,
+  useKnockoutLiveMatches,
+} from "../../store/selectors/bracketSelectors";
 import { CompactMatchScore } from "../match/CompactMatchScore";
 import { VenueLabel } from "../venue/VenueLabel";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
@@ -28,6 +34,7 @@ import { LoadingState } from "../shared/LoadingState";
 import { BracketConnectorOverlay } from "./BracketConnectorOverlay";
 import { lookupBracketLiveMatch } from "../../lib/bracketTree";
 import { orderBracketByStage } from "../../lib/brackets/bracketVisualOrder";
+import { buildConfirmedOnlyBracket } from "../../lib/brackets/buildConfirmedOnlyBracket";
 import { isKnockoutMatch, resolveMatchWinner } from "../../lib/resolveMatchWinner";
 import type { TeamThemeStatus } from "../team/TeamThemeRoot";
 
@@ -45,11 +52,7 @@ function visibleBracketStages(
 
   for (const stage of laterStages) {
     const hasReachableSlot = orderedByStage[stage].some(
-      (match) =>
-        match.homeCertainty === "confirmed" ||
-        match.awayCertainty === "confirmed" ||
-        (match.homeSeedLabel?.startsWith("W") && Boolean(match.homeTeamId)) ||
-        (match.awaySeedLabel?.startsWith("W") && Boolean(match.awayTeamId))
+      (match) => match.homeCertainty === "confirmed" || match.awayCertainty === "confirmed"
     );
     if (!hasReachableSlot) break;
     stages.push(stage);
@@ -366,24 +369,22 @@ function BracketCardReadonly({
   );
 }
 
-export function BracketBento({ embedded = false }: { embedded?: boolean }) {
+function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
   const mode = useStore((s) => s.bracketViewMode);
+  const deferredMode = useDeferredValue(mode);
   const openTeamSheet = useStore((s) => s.openTeamSheet);
-  const teamsMap = useStore((s) => s.teams);
-  const liveMatchesMap = useStore((s) => s.liveMatches);
-  const markets = useStore((s) => s.knockoutMarkets);
-  const overrides = useStore((s) => s.scoreOverrides);
-  const mergedSchedule = useMaterializedSchedule();
+  const teamsMap = useBracketTeams();
+  const knockoutLiveMatches = useKnockoutLiveMatches();
+  const projectionFingerprint = useBracketProjectionFingerprint(deferredMode);
   const { isKnockoutActive } = useTournamentPhase();
-  const canonical = useMemo(
-    () =>
-      buildCanonicalTournamentDataset({
-        teams: teamsMap,
-        liveMatches: liveMatchesMap,
-        knockoutMarkets: markets,
-      }),
-    [teamsMap, liveMatchesMap, markets]
-  );
+  const canonical = useMemo(() => {
+    const { teams, liveMatches, knockoutMarkets } = useStore.getState();
+    return buildCanonicalTournamentDataset({
+      teams,
+      liveMatches,
+      knockoutMarkets,
+    });
+  }, [projectionFingerprint]);
   const teams = canonical.teams;
   const matches = canonical.matches;
   const qualContext = useMemo(
@@ -394,34 +395,51 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
   const projectionMatches = useMemo(
     () =>
       matches.filter((m) => {
-        if (mode === "confirmed") {
-          return (
-            m.homeScore !== undefined &&
-            m.awayScore !== undefined &&
-            ((m.status === "completed" && m.locked) || m.status === "live")
-          );
-        }
         if (m.group) return true;
         return m.homeScore !== undefined && m.awayScore !== undefined;
       }) as Parameters<typeof projectTournament>[1],
-    [matches, mode]
+    [matches]
   );
 
   const deferredProjectionMatches = useDeferredValue(projectionMatches);
 
-  const projection = useMemo(() => {
-    if (!teams.length) return null;
+  const projectedProjection = useMemo(() => {
+    if (deferredMode !== "projected" || !teams.length) return null;
+    const store = useStore.getState();
+    const effectiveStandings =
+      store.groupStandings.length > 0 ? store.groupStandings : readStandingsCache() ?? [];
+    const mergedSchedule = materializeFullSchedule(
+      store.teams,
+      store.liveMatches,
+      effectiveStandings
+    );
     return projectTournament(
       teams,
       deferredProjectionMatches,
-      markets,
-      overrides,
+      store.knockoutMarkets,
+      store.scoreOverrides,
       {},
       qualContext.lockedGroupMatchCount,
       qualContext.lockedStandingsByGroup,
       mergedSchedule
     );
-  }, [teams, deferredProjectionMatches, markets, overrides, qualContext.lockedGroupMatchCount, qualContext.lockedStandingsByGroup, mergedSchedule]);
+  }, [
+    deferredMode,
+    teams,
+    deferredProjectionMatches,
+    projectionFingerprint,
+    qualContext.lockedGroupMatchCount,
+    qualContext.lockedStandingsByGroup,
+  ]);
+
+  const confirmedProjection = useMemo(() => {
+    if (deferredMode !== "confirmed" || !teams.length) return null;
+    const liveMatches = useStore.getState().liveMatches;
+    return buildConfirmedOnlyBracket(teams, matches, liveMatches, qualContext);
+  }, [deferredMode, teams, matches, qualContext, projectionFingerprint]);
+
+  const projection =
+    deferredMode === "confirmed" ? confirmedProjection : projectedProjection;
 
   const orderedByStage = useMemo(() => {
     if (!projection?.bracket) {
@@ -431,7 +449,7 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
   }, [projection?.bracket]);
 
   const bb = APP_COPY.bracketBento;
-  const bracketStages = visibleBracketStages(mode, orderedByStage);
+  const bracketStages = visibleBracketStages(deferredMode, orderedByStage);
   const scrollRef = useRef<HTMLDivElement>(null);
   const roundsRef = useRef<HTMLDivElement>(null);
   const [cardRects, setCardRects] = useState<Map<string, DOMRect>>(new Map());
@@ -463,30 +481,37 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
       setContainerSize({ width: origin.width, height: origin.height });
     };
 
-    const ro = new ResizeObserver(measure);
+    let rafId = 0;
+    const debouncedMeasure = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(measure);
+    };
+
+    const ro = new ResizeObserver(debouncedMeasure);
     ro.observe(roundsEl);
-    scrollEl.addEventListener("scroll", measure, { passive: true });
-    window.addEventListener("resize", measure);
-    measure();
+    scrollEl.addEventListener("scroll", debouncedMeasure, { passive: true });
+    window.addEventListener("resize", debouncedMeasure);
+    debouncedMeasure();
 
     let cancelled = false;
     void document.fonts?.ready.then(() => {
-      if (!cancelled) measure();
+      if (!cancelled) debouncedMeasure();
     });
 
     return () => {
       cancelled = true;
+      cancelAnimationFrame(rafId);
       ro.disconnect();
-      scrollEl.removeEventListener("scroll", measure);
-      window.removeEventListener("resize", measure);
+      scrollEl.removeEventListener("scroll", debouncedMeasure);
+      window.removeEventListener("resize", debouncedMeasure);
     };
-  }, [projection?.bracket, bracketStages, mode]);
+  }, [projection?.bracket, bracketStages, deferredMode]);
 
   const { confirmedWinners, liveProvisionalFeeders } = useMemo(() => {
     const confirmed = new Set<string>();
     const liveProvisional = new Set<string>();
 
-    for (const [key, match] of Object.entries(liveMatchesMap)) {
+    for (const [key, match] of Object.entries(knockoutLiveMatches)) {
       const id = match.matchId ?? match.id ?? key;
       if (match.status === "completed" && match.locked) {
         confirmed.add(id);
@@ -507,7 +532,7 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
     }
 
     return { confirmedWinners: confirmed, liveProvisionalFeeders: liveProvisional };
-  }, [liveMatchesMap, projection?.bracket]);
+  }, [knockoutLiveMatches, projection?.bracket]);
 
   const showConnectors = bracketStages.length > 1;
 
@@ -560,9 +585,9 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
                     <BracketCardReadonly
                       match={match}
                       teamsById={teamsMap}
-                      mode={mode}
+                      mode={deferredMode}
                       standings={projection.standings}
-                      liveMatches={liveMatchesMap}
+                      liveMatches={knockoutLiveMatches}
                       qualContext={qualContext}
                       onTeamSelect={openTeamSheet}
                     />
@@ -576,3 +601,5 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
     </section>
   );
 }
+
+export const BracketBento = memo(BracketBentoInner);

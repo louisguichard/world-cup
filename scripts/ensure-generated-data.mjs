@@ -28,7 +28,11 @@ if (missing.length === 0) {
 }
 
 console.log(`Missing generated data (${missing.length}): ${missing.join(", ")}`);
-execSync("npm run sync:paninarr && npm run sync:player-database && npm run sync:kamp-matches", {
-  stdio: "inherit",
-  cwd: ROOT,
-});
+const scripts = [
+  "scripts/sync-paninarr-assets.mjs",
+  "scripts/sync-player-database.mjs",
+  "scripts/sync-kamp-matches.mjs",
+];
+for (const script of scripts) {
+  execSync(`node ${join(ROOT, script)}`, { stdio: "inherit", cwd: ROOT, env: { ...process.env } });
+}

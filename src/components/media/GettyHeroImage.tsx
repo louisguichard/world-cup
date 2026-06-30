@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styles from "./GettyHeroImage.module.css";
 
 type Props = {
@@ -18,11 +19,21 @@ export function GettyHeroImage({
   className = "",
   aspect = "wide",
 }: Props) {
+  const [failed, setFailed] = useState(false);
+
   if (loading && !imageUrl) {
     return <div className={`${styles.frame} ${styles.skeleton} ${styles[aspect]} ${className}`.trim()} aria-hidden />;
   }
 
-  if (!imageUrl) return null;
+  if (!imageUrl || failed) {
+    return (
+      <div
+        className={`${styles.frame} ${styles.fallback} ${styles[aspect]} ${className}`.trim()}
+        role="img"
+        aria-label={title ?? "Venue image unavailable"}
+      />
+    );
+  }
 
   return (
     <figure className={`${styles.frame} ${styles[aspect]} ${className}`.trim()}>
@@ -32,6 +43,7 @@ export function GettyHeroImage({
         className={styles.img}
         loading="lazy"
         decoding="async"
+        onError={() => setFailed(true)}
       />
       <figcaption className={styles.credit}>{credit}</figcaption>
     </figure>

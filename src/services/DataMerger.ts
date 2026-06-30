@@ -21,11 +21,24 @@ const PRECEDENCE: Record<SourceKind, number> = {
   model: 0
 };
 
+function resolveKickoffMs(
+  incoming: Partial<MergedMatch>,
+  existing?: MergedMatch
+): number | undefined {
+  if (incoming.kickoffMs != null && !Number.isNaN(incoming.kickoffMs)) return incoming.kickoffMs;
+  const dateIso = incoming.date ?? existing?.date;
+  if (!dateIso) return existing?.kickoffMs;
+  const parsed = Date.parse(dateIso);
+  return Number.isNaN(parsed) ? existing?.kickoffMs : parsed;
+}
+
 export function applyLiveScore(
   existing: MergedMatch | undefined,
   incoming: Partial<MergedMatch>,
   source: SourceKind
 ): MergedMatch {
+  const kickoffMs = resolveKickoffMs(incoming, existing);
+
   if (!existing) {
     return {
       id: incoming.id ?? "",
@@ -38,7 +51,8 @@ export function applyLiveScore(
       locked: incoming.locked ?? false,
       source,
       dataSource: source,
-      ...incoming
+      ...incoming,
+      kickoffMs,
     } as MergedMatch;
   }
 
@@ -56,6 +70,7 @@ export function applyLiveScore(
   return {
     ...existing,
     ...incoming,
+    kickoffMs,
     source: source === "manual" ? "manual" : existing.source === "manual" ? "manual" : source,
     dataSource: source,
     lastUpdatedAt: Date.now()

@@ -28,7 +28,7 @@ import { logger } from "../Logger";
 import { computeScoreConsensus, type ScoreVote } from "./LiveScoreConsensus";
 import { selectPrimaryMatch } from "../PollingEngine";
 import { MODULE_IDS } from "../../lib/moduleIds";
-import { pollIntervalMs } from "../../lib/pollPolicy";
+import { smartPollIntervalMs } from "../../lib/pollPolicy";
 
 const MAX_DISAGREEMENTS = 3;
 const disagreementCounts = new Map<string, number>();
@@ -350,7 +350,7 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
   refreshStandingsAndSimulation(merged, { scheduleSimulationRun: !options?.light });
   store.touchModuleFreshness(MODULE_IDS.groupStandings);
 
-  const intervalMs = pollIntervalMs(liveCount > 0);
+  const { intervalMs } = smartPollIntervalMs(Object.values(merged));
 
   if (typeof window !== "undefined") {
     window.__pollingStatus = {

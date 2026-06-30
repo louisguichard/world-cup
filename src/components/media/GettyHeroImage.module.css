@@ -47,6 +47,10 @@
   animation: gettyShimmer 1.2s ease-in-out infinite;
 }
 
+.fallback {
+  background: var(--surface-2, #1e293b);
+}
+
 @keyframes gettyShimmer {
   0% {
     background-position: 100% 0;

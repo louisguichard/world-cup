@@ -85,7 +85,8 @@ export function BracketConnectorOverlay({
   return (
     <svg
       aria-hidden="true"
-      className={styles.overlay}
+      className={`${styles.overlay} bracket-connector-overlay`}
+      style={{ pointerEvents: "none" }}
       width={containerSize.width}
       height={containerSize.height}
     >

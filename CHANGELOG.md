@@ -8,6 +8,14 @@
 ## [Unreleased]
 
 ### Builds
+- **5.0.0 build 12** (2026-06-30): 25 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, scripts, src, version.json — 25 files changed, 1139 insertions(+), 150 deletions(-)
+- **5.0.0 build 11** (2026-06-30): Remove debug instrumentation after bracket perf and smart polling verification
+- **5.0.0 build 10** (2026-06-30): Stop bracket poll cascade: projection fingerprint, remove liveMatches schedule subscription
+- **5.0.0 build 9** (2026-06-30): Bracket perf fixes: fingerprint selectors, RAF measure debounce, startTransition toggle
+- **5.0.0 build 8** (2026-06-30): Locked-in bracket uses buildConfirmedOnlyBracket, no projection leak
+- **5.0.0 build 7** (2026-06-30): Smart match-lifecycle polling: phase-aware intervals and heavy/light source selection
+- **5.0.0 build 6** (2026-06-30): Bracket perf: transition toggle, knockout selectors, RAF measure, venue hero fallback
+- **5.0.0 build 5** (2026-06-30): Bracket toggle responsiveness: click-through overlay, mobile scroll, deferred projection
 - **5.0.0 build 4** (2026-06-30): 8 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 8 files changed, 224 insertions(+), 48 deletions(-)
 - **5.0.0 build 3** (2026-06-30): Bracket visual order + paired elbow connectors fix crossing lines
 - **5.0.0 build 2** (2026-06-30): 120 file(s) in .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json — 120 files changed, 7308 insertions(+), 2610 deletions(-)

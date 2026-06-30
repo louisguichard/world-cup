@@ -1,15 +1,10 @@
 import type { MergedMatch } from "../types";
-import { isLightPoll } from "../lib/pollPolicy";
+import { shouldRunHeavyPoll, smartPollIntervalMs } from "../lib/pollPolicy";
 import { shouldRunPollFallback } from "../config/liveDataFlags";
 import { getLockedSet } from "../store/slices/matchSlice";
 import { useStore } from "../store";
-import { recommendedPollIntervalMs } from "./ApiQuotaGovernor";
 import { DataOrchestrator } from "./orchestrator/DataOrchestrator";
 import { logger } from "./Logger";
-
-function hasAnyLive(matches: Record<string, MergedMatch>): boolean {
-  return Object.values(matches).some((m) => m.status === "live");
-}
 
 function allMatchesLocked(
   matches: Record<string, MergedMatch>,
@@ -44,6 +39,7 @@ class PollingEngine {
   private static instance: PollingEngine | null = null;
   private running = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
+
   static getInstance(): PollingEngine {
     if (!PollingEngine.instance) {
       PollingEngine.instance = new PollingEngine();
@@ -54,13 +50,13 @@ class PollingEngine {
   start(): void {
     if (this.running) return;
     this.running = true;
-    logger.info("PollingEngine started", "PollingEngine");
+    logger.info("PollingEngine started (smart schedule)", "PollingEngine");
 
     if (typeof window !== "undefined") {
       window.__pollingStatus = {
         running: true,
         liveMatchCount: 0,
-        intervalMs: recommendedPollIntervalMs(true),
+        intervalMs: 300_000,
         lastPollAt: null,
         consecutiveErrors: 0,
       };
@@ -78,13 +74,11 @@ class PollingEngine {
     }
   }
 
-  /** Pause scheduling while the tab is hidden — no API calls in background. */
   pauseForHiddenTab(): void {
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;
   }
 
-  /** Resume polling when the tab becomes visible again. */
   resumeFromHiddenTab(): void {
     if (!this.running || typeof document === "undefined" || document.hidden) return;
     void this.poll();
@@ -95,19 +89,55 @@ class PollingEngine {
     if (typeof document !== "undefined" && document.hidden) return;
     if (this.timer) clearTimeout(this.timer);
 
-    const isLive = hasAnyLive(useStore.getState().liveMatches);
-    const delay = recommendedPollIntervalMs(isLive);
+    const allMatches = Object.values(useStore.getState().liveMatches);
+    const { intervalMs, reason, phase } = smartPollIntervalMs(allMatches);
+
+    const nextKickoffWakeup = this.msUntilNextImminentMatch(allMatches);
+    const effectiveDelay = Math.min(intervalMs, nextKickoffWakeup);
+
+    logger.debug(
+      `Next poll in ${Math.round(effectiveDelay / 1000)}s — ${reason}`,
+      "PollingEngine",
+      { phase }
+    );
 
     if (typeof window !== "undefined" && window.__pollingStatus) {
-      window.__pollingStatus.intervalMs = delay;
+      window.__pollingStatus.intervalMs = effectiveDelay;
     }
 
-    this.timer = setTimeout(() => void this.poll(), delay);
+    this.timer = setTimeout(() => void this.poll(), effectiveDelay);
+  }
+
+  /**
+   * Returns ms until the earliest upcoming match enters the "imminent" window.
+   * If a match kicks off in 20 min, we return (20min - 15min) = 5min
+   * so the engine wakes up to start pre-polling.
+   * Returns Infinity if no matches are coming up.
+   */
+  private msUntilNextImminentMatch(matches: MergedMatch[]): number {
+    const IMMINENT_LEAD = 15 * 60 * 1000;
+    const now = Date.now();
+    let soonest = Infinity;
+    for (const m of matches) {
+      const kickoff =
+        m.kickoffMs != null && !Number.isNaN(m.kickoffMs)
+          ? m.kickoffMs
+          : m.date
+            ? Date.parse(m.date)
+            : NaN;
+      if (Number.isNaN(kickoff) || m.status === "completed" || m.locked) continue;
+      const msUntilImminent = kickoff - IMMINENT_LEAD - now;
+      if (msUntilImminent > 0 && msUntilImminent < soonest) {
+        soonest = msUntilImminent;
+      }
+    }
+    return soonest;
   }
 
   private async fetchAndMerge(): Promise<number> {
-    const isLive = hasAnyLive(useStore.getState().liveMatches);
-    return DataOrchestrator.getInstance().tickLive({ light: isLightPoll(isLive) });
+    const allMatches = Object.values(useStore.getState().liveMatches);
+    const heavy = shouldRunHeavyPoll(allMatches);
+    return DataOrchestrator.getInstance().tickLive({ light: !heavy });
   }
 
   private async poll(): Promise<void> {
@@ -120,8 +150,6 @@ class PollingEngine {
     }
 
     const store = useStore.getState();
-    let consecutiveErrors = store.consecutiveErrors;
-
     const matchIds = Object.keys(store.liveMatches);
     if (
       matchIds.length > 0 &&
@@ -134,8 +162,13 @@ class PollingEngine {
       return;
     }
 
+    let consecutiveErrors = store.consecutiveErrors;
     try {
       await this.fetchAndMerge();
+      if (typeof window !== "undefined" && window.__pollingStatus) {
+        window.__pollingStatus.consecutiveErrors = 0;
+        window.__pollingStatus.lastPollAt = Date.now();
+      }
     } catch (error) {
       consecutiveErrors += 1;
       store.batchPollUpdate({
@@ -147,7 +180,6 @@ class PollingEngine {
         error: error instanceof Error ? error.message : String(error),
         consecutiveErrors,
       });
-
       if (typeof window !== "undefined" && window.__pollingStatus) {
         window.__pollingStatus.consecutiveErrors = consecutiveErrors;
         window.__pollingStatus.lastPollAt = Date.now();
