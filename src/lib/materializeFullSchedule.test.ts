@@ -35,9 +35,9 @@ describe("materializeFullSchedule knockout resolution", () => {
     ];
 
     const schedule = materializeFullSchedule(teams, {}, standings);
-    const m73 = schedule.find((m) => m.matchId === "M73");
-    expect(m73?.homeTeamId).toBe("mex");
-    expect(m73?.awayTeamId).toBe("ecu");
+    const m81 = schedule.find((m) => m.matchId === "M81");
+    expect(m81?.homeTeamId).toBe("mex");
+    expect(m81?.awayTeamId).toBe("ecu");
   });
 
   it("leaves knockout slots empty when standings are unavailable", () => {
@@ -59,9 +59,9 @@ describe("materializeFullSchedule knockout resolution", () => {
       },
     ];
     const liveMatches = {
-      M73: {
+      M81: {
         id: "760484",
-        matchId: "M73",
+        matchId: "M81",
         date: "2026-06-28T19:00:00Z",
         homeTeamId: "2nd Group A",
         awayTeamId: "2nd Group B",
@@ -75,9 +75,9 @@ describe("materializeFullSchedule knockout resolution", () => {
     };
 
     const schedule = materializeFullSchedule(teams, liveMatches, standings);
-    const m73 = schedule.find((m) => m.matchId === "M73");
-    expect(m73?.homeTeamId).toBe("rsa");
-    expect(m73?.awayTeamId).toBe("ecu");
-    expect(m73?.espnEventId).toBe("760484");
+    const m81 = schedule.find((m) => m.matchId === "M81");
+    expect(m81?.homeTeamId).toBe("rsa");
+    expect(m81?.awayTeamId).toBe("ecu");
+    expect(m81?.espnEventId).toBe("760484");
   });
 });

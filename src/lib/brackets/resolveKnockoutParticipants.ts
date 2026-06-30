@@ -1,7 +1,10 @@
 import type { GroupStanding, MergedMatch, Team } from "../../types";
 import { buildQualificationContext, type QualificationMatchContext } from "../qualification";
+import { resolveMatchWinner } from "../resolveMatchWinner";
+import { isKnockoutBracketMatchId } from "../bracketTree";
 import { getR32Slots } from "./getR32Slots";
-import { KNOCKOUT_ROUND_FIXTURES } from "./knockoutRoundFixtures";
+import { KNOCKOUT_LATER_STAGES, KNOCKOUT_ROUND_FIXTURES } from "./knockoutRoundFixtures";
+import { resolveOfficialKnockoutSlotId } from "./resolveOfficialKnockoutSlot";
 
 export type KnockoutSide = {
   teamId?: string;
@@ -15,18 +18,27 @@ export type KnockoutParticipant = {
 
 export type KnockoutParticipantMap = Record<string, KnockoutParticipant>;
 
-function knockoutWinner(match: MergedMatch | undefined): string | undefined {
-  if (!match || match.status !== "completed" || match.homeScore === undefined || match.awayScore === undefined) {
-    return undefined;
-  }
-  if (match.homeScore > match.awayScore) return match.homeTeamId || undefined;
-  if (match.awayScore > match.homeScore) return match.awayTeamId || undefined;
-  return undefined;
+function isKnockoutMatchId(matchId: string): boolean {
+  return isKnockoutBracketMatchId(matchId);
 }
 
-function isKnockoutMatchId(matchId: string): boolean {
-  const num = Number(matchId.replace(/^M/, ""));
-  return Number.isFinite(num) && num >= 73;
+function indexWinnersByOfficialSlot(
+  liveMatches: Record<string, MergedMatch>,
+  slotStandings: GroupStanding[],
+  teams: Record<string, Team>
+): Record<string, string | undefined> {
+  const winners: Record<string, string | undefined> = {};
+
+  for (const m of Object.values(liveMatches)) {
+    const winner = resolveMatchWinner(m, teams);
+    if (!winner) continue;
+    const stored = m.matchId ?? m.id ?? "";
+    const officialId = resolveOfficialKnockoutSlotId(m, stored, slotStandings, teams);
+    if (!isKnockoutMatchId(officialId)) continue;
+    winners[`W${officialId.slice(1)}`] = winner;
+  }
+
+  return winners;
 }
 
 /**
@@ -53,15 +65,9 @@ export function resolveKnockoutParticipants(
     };
   }
 
-  const winners: Record<string, string | undefined> = {};
-  for (const m of Object.values(liveMatches)) {
-    const matchId = m.matchId ?? m.id;
-    if (!isKnockoutMatchId(matchId)) continue;
-    const winner = knockoutWinner(m);
-    if (winner) winners[`W${matchId.slice(1)}`] = winner;
-  }
+  const winners = indexWinnersByOfficialSlot(liveMatches, standings, teams);
 
-  for (const stage of ["R16", "QF", "SF", "Final"] as const) {
+  for (const stage of KNOCKOUT_LATER_STAGES) {
     for (const [matchId, homeSource, awaySource] of KNOCKOUT_ROUND_FIXTURES[stage]) {
       slots[matchId] = {
         home: { teamId: winners[homeSource], source: homeSource },

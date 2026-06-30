@@ -1,5 +1,5 @@
+import { completedMatchPillLabel } from "../../lib/matchStageLabel";
 import { formatTimeAgo } from "../../lib/localDate";
-import { APP_COPY } from "../../lib/appCopy";
 import type { MergedMatch } from "../../types";
 import { useStore } from "../../store";
 import { useKnockoutPenaltyResult } from "../../hooks/useKnockoutPenaltyResult";
@@ -26,6 +26,7 @@ function StandardResultRow({ match, onSelect }: ResultRowProps) {
   const resolvedAway = resolveMatchTeam(match, "away", teams);
   const homeName = teamDisplayNameForMatch(match, "home", teams);
   const awayName = teamDisplayNameForMatch(match, "away", teams);
+  const pillLabel = completedMatchPillLabel(match);
   const ago = formatTimeAgo(match.date);
   const homeAdvancing = isAdvancingTeam(match, match.homeTeamId, teams);
   const awayAdvancing = isAdvancingTeam(match, match.awayTeamId, teams);
@@ -64,7 +65,7 @@ function StandardResultRow({ match, onSelect }: ResultRowProps) {
         </span>
       </div>
       <div className="fixture-matchup__meta">
-        <span className="final-pill">{APP_COPY.match.final}</span>
+        <span className="final-pill">{pillLabel}</span>
         {ago ? <span className="recent-result-ago">{ago}</span> : null}
       </div>
     </button>
@@ -75,6 +76,7 @@ function PenaltyResultRow({ match, onSelect }: ResultRowProps) {
   const teams = useStore((s) => s.teams);
   const { showPenalties, shootout, winnerTeamId, stageLabel, loading } =
     useKnockoutPenaltyResult(match);
+  const pillLabel = completedMatchPillLabel(match);
   const ago = formatTimeAgo(match.date);
 
   if (!showPenalties) return <StandardResultRow match={match} onSelect={onSelect} />;
@@ -99,7 +101,7 @@ function PenaltyResultRow({ match, onSelect }: ResultRowProps) {
         loading={penaltyLoading || loading}
         meta={
           <>
-            <span className="final-pill">{APP_COPY.match.final}</span>
+            <span className="final-pill">{pillLabel}</span>
             {ago ? <span className="recent-result-ago">{ago}</span> : null}
           </>
         }

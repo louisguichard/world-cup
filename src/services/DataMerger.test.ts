@@ -106,8 +106,41 @@ describe("enrichFromSofaScore", () => {
     expect(result).toBe(manual);
   });
 
-  it("never downgrades completed to live via status patch", () => {
-    const result = enrichFromSofaScore(espnLive, { status: "scheduled" });
+  it("does not promote scheduled to live via sofascore status patch", () => {
+    const scheduled = { ...espnLive, status: "scheduled" as const, clockMinute: undefined, displayClock: undefined };
+    const result = enrichFromSofaScore(scheduled, { status: "live", homeScore: 0, awayScore: 0, displayClock: "0'" });
     expect(result.status).toBe("scheduled");
+    expect(result.displayClock).toBe("0'");
+  });
+
+  it("never applies live status from secondary enrichment", () => {
+    const result = enrichFromSofaScore(espnLive, { status: "live", homeScore: 2 });
+    expect(result.status).toBe("live");
+    expect(result.homeScore).toBe(2);
+  });
+
+  it("coerces premature ESPN live at merge time", () => {
+    const kickoff = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const scheduled = {
+      id: "M77",
+      date: kickoff,
+      homeTeamId: "fra",
+      awayTeamId: "swe",
+      status: "scheduled" as const,
+      homeConduct: 0,
+      awayConduct: 0,
+      locked: false,
+      source: "espn" as const,
+      dataSource: "espn" as const,
+    };
+    const result = applyLiveScore(scheduled, {
+      status: "live",
+      homeScore: 0,
+      awayScore: 0,
+      clockMinute: 0,
+      displayClock: "0'",
+    }, "espn");
+    expect(result.status).toBe("scheduled");
+    expect(result.displayClock).toBeUndefined();
   });
 });

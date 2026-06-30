@@ -8,6 +8,24 @@
 ## [Unreleased]
 
 ### Builds
+- **5.0.0 build 41** (2026-06-30): 71 file(s) in .github, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, package.json — 71 files changed, 4138 insertions(+), 671 deletions(-)
+- **5.0.0 build 40** (2026-06-30): Bracket routing, live phase gates, CI pnpm lockfile, ThirdPlace stage types
+- **5.0.0 build 39** (2026-06-30): Live view uses lifecycle active phase instead of status===live gate
+- **5.0.0 build 38** (2026-06-30): Fix R16 cross-bracket routing, locked-in TBD slots, storedId slot trust, knockout stage pills
+- **5.0.0 build 37** (2026-06-30): Stabilize premature-live merge test against wall clock
+- **5.0.0 build 36** (2026-06-30): Self-healing tournament rules audit suite and RULES singleton
+- **5.0.0 build 35** (2026-06-30): ESPN-only live promotion with demotion reconcile
+- **5.0.0 build 34** (2026-06-30): Reject premature live status before kickoff window
+- **5.0.0 build 33** (2026-06-30): Stage-aware match lifecycle: group 100min cap, no ET phase
+- **5.0.0 build 32** (2026-06-30): Add tournament rules JSON, validators, and FIFA tiebreaker order fix
+- **5.0.0 build 31** (2026-06-30): Block secondary live promotion; reconcile with ESPN scoreboard
+- **5.0.0 build 30** (2026-06-30): Guard past-kickoff lifecycle until API leaves scheduled
+- **5.0.0 build 29** (2026-06-30): Finalize bracket SoT in getR32Slots and knockoutRoundFixtures per JSON
+- **5.0.0 build 28** (2026-06-30): Complete bracket resolution: ThirdPlace, official ESPN slot re-key, remove thirdPlaceMap from R32
+- **5.0.0 build 27** (2026-06-30): Import official knockout bracket JSON and JSON parity tests
+- **5.0.0 build 26** (2026-06-30): Align bracket engine 1:1 with world_cup_2026_knockout_bracket.json
+- **5.0.0 build 25** (2026-06-30): Bracket runtime audit instrumentation
+- **5.0.0 build 24** (2026-06-30): Audit-corrected WC2026 bracket progression and R32 fixtures
 - **5.0.0 build 23** (2026-06-30): 34 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, scripts, src, version.json — 34 files changed, 767 insertions(+), 438 deletions(-)
 - **5.0.0 build 22** (2026-06-30): Remove debug instrumentation and trim perf hot-path bloat
 - **5.0.0 build 21** (2026-06-30): Shared schedule and qual caches; dedupe expensive derived data across components

@@ -33,9 +33,14 @@ import { TeamFlag } from "../team/TeamFlag";
 import { CertaintyBadge } from "../shared/CertaintyBadge";
 import { LoadingState } from "../shared/LoadingState";
 import { BracketConnectorOverlay } from "./BracketConnectorOverlay";
-import { lookupBracketLiveMatch } from "../../lib/bracketTree";
+import { BRACKET_FEED_MAP, lookupBracketLiveMatch } from "../../lib/bracketTree";
 import { orderBracketByStage } from "../../lib/brackets/bracketVisualOrder";
 import { buildConfirmedOnlyBracket } from "../../lib/brackets/buildConfirmedOnlyBracket";
+import {
+  KNOCKOUT_ROUND_FIXTURES,
+  ROUND_OF_32_FIXTURES,
+  validateR32FixtureSeeds,
+} from "../../lib/brackets/bracketProgression";
 import { isKnockoutMatch, resolveMatchWinner } from "../../lib/resolveMatchWinner";
 import type { TeamThemeStatus } from "../team/TeamThemeRoot";
 
@@ -454,10 +459,43 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
 
   const orderedByStage = useMemo(() => {
     if (!projection?.bracket) {
-      return { R32: [], R16: [], QF: [], SF: [], Final: [] } as Record<Stage, BracketMatch[]>;
+      return { R32: [], R16: [], QF: [], SF: [], ThirdPlace: [], Final: [] } as Record<Stage, BracketMatch[]>;
     }
     return orderBracketByStage(projection.bracket);
   }, [projection?.bracket]);
+
+  useEffect(() => {
+    if (!projection?.bracket) return;
+    const slot = (id: string) => projection.bracket.find((m) => m.id === id);
+    const m76 = slot("M76");
+    const m90 = slot("M90");
+    const m89 = slot("M89");
+    // #region agent log
+    fetch("http://127.0.0.1:7681/ingest/f800a0a9-8d11-45c6-8805-1b187f693046", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
+      body: JSON.stringify({
+        sessionId: "0b0776",
+        runId: "bracket-audit",
+        hypothesisId: "H1-H3",
+        location: "BracketBento.tsx:bracketAudit",
+        message: "bracket engine runtime audit",
+        data: {
+          mode: deferredMode,
+          r32ValidationErrors: validateR32FixtureSeeds(),
+          canonicalR16: KNOCKOUT_ROUND_FIXTURES.R16,
+          feedM89: BRACKET_FEED_MAP.M89,
+          feedM90: BRACKET_FEED_MAP.M90,
+          m76Fixture: ROUND_OF_32_FIXTURES.find(([id]) => id === "M76"),
+          m76Teams: m76 ? { home: m76.homeTeamId, away: m76.awayTeamId, winner: m76.winnerTeamId } : null,
+          m89Teams: m89 ? { home: m89.homeTeamId, away: m89.awayTeamId, homeSeed: m89.homeSeedLabel, awaySeed: m89.awaySeedLabel } : null,
+          m90Teams: m90 ? { home: m90.homeTeamId, away: m90.awayTeamId, homeSeed: m90.homeSeedLabel, awaySeed: m90.awaySeedLabel } : null,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
+  }, [projection?.bracket, deferredMode]);
 
   const bb = APP_COPY.bracketBento;
   const bracketStages = visibleBracketStages(deferredMode, orderedByStage);

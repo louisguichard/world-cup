@@ -1,0 +1,180 @@
+{
+    "tournament_info": {
+        "name": "FIFA World Cup 2026",
+        "knockout_format": "32-team single elimination",
+        "round_of_32_matches": {
+            "73": {
+                "home": "1A (Mexico)",
+                "away": "3E (Ecuador)"
+            },
+            "74": {
+                "home": "1B (Switzerland)",
+                "away": "3J (Algeria)"
+            },
+            "75": {
+                "home": "1D (United States)",
+                "away": "3B (Bosnia and Herzegovina)"
+            },
+            "76": {
+                "home": "1E (Germany)",
+                "away": "3D (Paraguay)"
+            },
+            "77": {
+                "home": "1G (Belgium)",
+                "away": "3I (Senegal)"
+            },
+            "78": {
+                "home": "1I (France)",
+                "away": "3F (Sweden)"
+            },
+            "79": {
+                "home": "1K (Colombia)",
+                "away": "3L (Ghana)"
+            },
+            "80": {
+                "home": "1L (England)",
+                "away": "3K (DR Congo)"
+            },
+            "81": {
+                "home": "2A (South Africa)",
+                "away": "2B (Canada)"
+            },
+            "82": {
+                "home": "2D (Australia)",
+                "away": "2G (Egypt)"
+            },
+            "83": {
+                "home": "2K (Portugal)",
+                "away": "2L (Croatia)"
+            },
+            "84": {
+                "home": "1H (Spain)",
+                "away": "2J (Austria)"
+            },
+            "85": {
+                "home": "1C (Brazil)",
+                "away": "2F (Japan)"
+            },
+            "86": {
+                "home": "1F (Netherlands)",
+                "away": "3C (Morocco)"
+            },
+            "87": {
+                "home": "1J (Argentina)",
+                "away": "3H (Cabo Verde)"
+            },
+            "88": {
+                "home": "2E (Ivory Coast)",
+                "away": "2I (Norway)"
+            }
+        },
+        "bracket_progression": {
+            "round_of_16": {
+                "89": {
+                    "from": [
+                        "74",
+                        "77"
+                    ]
+                },
+                "90": {
+                    "from": [
+                        "75",
+                        "73"
+                    ]
+                },
+                "91": {
+                    "from": [
+                        "76",
+                        "78"
+                    ]
+                },
+                "92": {
+                    "from": [
+                        "79",
+                        "80"
+                    ]
+                },
+                "93": {
+                    "from": [
+                        "83",
+                        "84"
+                    ]
+                },
+                "94": {
+                    "from": [
+                        "81",
+                        "82"
+                    ]
+                },
+                "95": {
+                    "from": [
+                        "86",
+                        "88"
+                    ]
+                },
+                "96": {
+                    "from": [
+                        "85",
+                        "87"
+                    ]
+                }
+            },
+            "quarter_finals": {
+                "97": {
+                    "from": [
+                        "89",
+                        "90"
+                    ]
+                },
+                "98": {
+                    "from": [
+                        "93",
+                        "94"
+                    ]
+                },
+                "99": {
+                    "from": [
+                        "91",
+                        "92"
+                    ]
+                },
+                "100": {
+                    "from": [
+                        "95",
+                        "96"
+                    ]
+                }
+            },
+            "semi_finals": {
+                "101": {
+                    "from": [
+                        "97",
+                        "98"
+                    ]
+                },
+                "102": {
+                    "from": [
+                        "99",
+                        "100"
+                    ]
+                }
+            },
+            "third_place": {
+                "103": {
+                    "from": [
+                        "101_loser",
+                        "102_loser"
+                    ]
+                }
+            },
+            "final": {
+                "104": {
+                    "from": [
+                        "101_winner",
+                        "102_winner"
+                    ]
+                }
+            }
+        }
+    }
+}

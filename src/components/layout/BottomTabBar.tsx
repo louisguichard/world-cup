@@ -1,4 +1,5 @@
 import type { TabId } from "../../types";
+import { isMergedMatchInActivePhase } from "../../lib/matchLifecycle";
 import { useStore } from "../../store";
 import { APP_COPY } from "../../lib/appCopy";
 import { navigateToTab } from "../../lib/navigateToTab";
@@ -19,7 +20,7 @@ export function BottomTabBar() {
   const liveCount = useStore((s) => {
     let count = 0;
     for (const match of Object.values(s.liveMatches)) {
-      if (match.status === "live") count += 1;
+      if (isMergedMatchInActivePhase(match)) count += 1;
     }
     return count;
   });

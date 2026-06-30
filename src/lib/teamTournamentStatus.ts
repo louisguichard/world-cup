@@ -11,6 +11,7 @@ const SCHEDULE_TO_STAGE: Record<string, Stage> = {
   round_of_16: "R16",
   quarterfinal: "QF",
   semifinal: "SF",
+  third_place: "ThirdPlace",
   final: "Final",
 };
 
@@ -19,6 +20,7 @@ const STAGE_COPY: Record<Stage, string> = {
   R16: APP_COPY.results.stageR16,
   QF: APP_COPY.results.stageQF,
   SF: APP_COPY.results.stageSF,
+  ThirdPlace: APP_COPY.results.stageThirdPlace,
   Final: APP_COPY.results.stageFinal,
 };
 

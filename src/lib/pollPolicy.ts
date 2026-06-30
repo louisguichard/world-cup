@@ -21,6 +21,19 @@ function resolveKickoffMs(match: MergedMatch): number | undefined {
   return Number.isNaN(parsed) ? undefined : parsed;
 }
 
+function toMatchPhaseInput(match: MergedMatch, kickoffMs: number) {
+  return {
+    kickoffMs,
+    status: match.status,
+    clockMinute: match.clockMinute,
+    locked: match.locked,
+    group: match.group,
+    stage: match.stage,
+    matchId: match.matchId,
+    id: match.id,
+  };
+}
+
 /**
  * Compute the optimal next poll interval in ms by examining every active match.
  * Returns the MINIMUM interval across all non-dormant, non-locked matches.
@@ -36,15 +49,7 @@ export function smartPollIntervalMs(
   for (const match of matches) {
     const kickoffMs = resolveKickoffMs(match);
     if (kickoffMs == null) continue;
-    const phase = getMatchPhase(
-      {
-        kickoffMs,
-        status: match.status,
-        clockMinute: match.clockMinute,
-        locked: match.locked,
-      },
-      nowMs
-    );
+    const phase = getMatchPhase(toMatchPhaseInput(match, kickoffMs), nowMs);
     const interval = getPhaseInterval(phase);
     if (interval < minInterval) {
       minInterval = interval;
@@ -69,12 +74,7 @@ export function shouldRunHeavyPoll(matches: MergedMatch[], nowMs = Date.now()): 
     const kickoffMs = resolveKickoffMs(m);
     if (kickoffMs == null) return false;
     const phase = getMatchPhase(
-      {
-        kickoffMs,
-        status: m.status,
-        clockMinute: m.clockMinute,
-        locked: m.locked,
-      },
+      toMatchPhaseInput(m, kickoffMs),
       nowMs
     );
     return phase === "live_first" || phase === "live_second" || phase === "extra_time";

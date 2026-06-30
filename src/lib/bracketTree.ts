@@ -21,7 +21,10 @@ function buildBracketFeedMap(): Record<string, [string, string] | null> {
 }
 
 export function seedLabelToMatchId(seedLabel: string): string {
-  return seedLabel.startsWith("W") ? `M${seedLabel.slice(1)}` : seedLabel;
+  if (seedLabel.startsWith("W") || seedLabel.startsWith("L")) {
+    return `M${seedLabel.slice(1)}`;
+  }
+  return seedLabel;
 }
 
 /** First downstream match that consumes this feeder (e.g. M73 → M90). */

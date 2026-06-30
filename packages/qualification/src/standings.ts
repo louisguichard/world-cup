@@ -97,28 +97,33 @@ function resolveHeadToHeadTies(records: TeamRecord[], groupMatches: MatchWithSco
   );
 }
 
-function applyOverallTieBreakers(buckets: TeamRecord[][]): TeamRecord[][] {
-  const criteria = [
-    () => (record: TeamRecord) => record.goalDifference,
-    () => (record: TeamRecord) => record.goalsFor,
-    () => (record: TeamRecord) => record.conduct,
-    () => (record: TeamRecord) => rankingValue(record),
-  ];
+function breakPointTie(records: TeamRecord[], groupMatches: MatchWithScore[]): TeamRecord[] {
+  let buckets: TeamRecord[][] = [records];
 
-  for (const criterion of criteria) {
+  // Steps 2–3: overall goal difference and goals scored (all group matches).
+  for (const valueFor of [
+    (record: TeamRecord) => record.goalDifference,
+    (record: TeamRecord) => record.goalsFor,
+  ]) {
     buckets = buckets.flatMap((bucket) => {
       if (bucket.length <= 1) return [bucket];
-      return groupByValue(bucket, criterion());
+      return groupByValue(bucket, valueFor);
     });
   }
 
-  return buckets;
-}
+  // Steps 4–6: head-to-head sub-table among teams still tied.
+  buckets = buckets.flatMap((bucket) =>
+    bucket.length <= 1 ? [bucket] : resolveHeadToHeadTies(bucket, groupMatches)
+  );
 
-function breakPointTie(records: TeamRecord[], groupMatches: MatchWithScore[]): TeamRecord[] {
-  const headToHeadBuckets = resolveHeadToHeadTies(records, groupMatches);
-  const resolvedBuckets = applyOverallTieBreakers(headToHeadBuckets);
-  return resolvedBuckets.flatMap((bucket) =>
+  // Step 7: fair play conduct points.
+  buckets = buckets.flatMap((bucket) => {
+    if (bucket.length <= 1) return [bucket];
+    return groupByValue(bucket, (record) => record.conduct);
+  });
+
+  // Step 8: drawing of lots (stable team-id ordering as deterministic stand-in).
+  return buckets.flatMap((bucket) =>
     [...bucket].sort((a, b) => rankingValue(b) - rankingValue(a) || a.teamId.localeCompare(b.teamId))
   );
 }

@@ -174,9 +174,9 @@ describe("matchTeamDisplay", () => {
     ];
 
     const schedule = materializeFullSchedule(catalog, {}, standings);
-    const m73 = schedule.find((m) => m.matchId === "M73");
-    expect(m73?.homeTeamId).toBe("mex");
-    expect(teamDisplayNameForMatch(m73!, "home", catalog)).toBe("Mexico");
-    expect(teamDisplayNameForMatch(m73!, "away", catalog)).toBe("Ecuador");
+    const m81 = schedule.find((m) => m.matchId === "M81");
+    expect(m81?.homeTeamId).toBe("mex");
+    expect(teamDisplayNameForMatch(m81!, "home", catalog)).toBe("Mexico");
+    expect(teamDisplayNameForMatch(m81!, "away", catalog)).toBe("Ecuador");
   });
 });

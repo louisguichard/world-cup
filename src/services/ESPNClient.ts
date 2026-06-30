@@ -194,11 +194,16 @@ export function parseEspnScoreboard(scoreboard: unknown): {
 
     const statusType = competition.status?.type;
     const state = statusType?.state;
-    const status = statusType?.completed ? "completed" : state === "in" ? "live" : "scheduled";
-    const hasRealScore = status === "completed" || status === "live";
-    const conduct = parseConduct(competition.details ?? []);
     const clockFields = parseEspnClockFields(competition.status);
     const statusDetail = String(statusType?.detail ?? "").toLowerCase();
+    const isInPlay =
+      state === "in" ||
+      clockFields.period === "half_time" ||
+      statusDetail.includes("half time") ||
+      statusDetail === "halftime";
+    const status = statusType?.completed ? "completed" : isInPlay ? "live" : "scheduled";
+    const hasRealScore = status === "completed" || status === "live";
+    const conduct = parseConduct(competition.details ?? []);
     const statusName = String(statusType?.name ?? "");
     const decidedByPenalties =
       statusDetail.includes("pen") || statusName === "STATUS_FINAL_PEN";

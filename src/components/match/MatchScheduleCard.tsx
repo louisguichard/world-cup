@@ -34,6 +34,7 @@ import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
 import { GoalCelebrationOverlay } from "./GoalCelebrationOverlay";
 import goalStyles from "./GoalCelebrationOverlay.module.css";
 import { ScenarioBranchButton } from "../analyst/ScenarioBranchButton";
+import { isMergedMatchEffectivelyLive } from "../../lib/matchLifecycle";
 
 type Props = {
   match: MergedMatch;
@@ -65,7 +66,7 @@ export const MatchScheduleCard = memo(function MatchScheduleCard({
   const broadcast =
     (match.matchId ? getBroadcast(match.matchId) : undefined) ?? getBroadcastByKickoff(match.date);
   const kickoffUtc = match.date;
-  const isLive = match.status === "live";
+  const isLive = isMergedMatchEffectivelyLive(match);
   const isDone = match.status === "completed" || match.locked;
   const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId, isLive ? "live" : "default");
 

@@ -34,7 +34,8 @@ const STAGE_TO_SCHEDULE: Record<Stage, string> = {
   R16: "round_of_16",
   QF: "quarterfinal",
   SF: "semifinal",
-  Final: "final"
+  ThirdPlace: "third_place",
+  Final: "final",
 };
 
 const scheduleByMatchId = new Map<string, MatchScheduleEntry>(

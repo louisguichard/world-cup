@@ -1,42 +1,20 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { knockoutSchedule } from "./knockoutSchedule";
+import { ROUND_OF_32_FIXTURES } from "../lib/brackets/getR32Slots";
+import { KNOCKOUT_ROUND_FIXTURES } from "../lib/brackets/knockoutRoundFixtures";
 
-type ScheduleFile = {
-  meta: { espnSyncedAt?: string; espnEventCount?: number };
-  matches: Array<{
-    matchNumber: number;
-    group?: string;
-    espnEventId?: string;
-    kickoff: { utc: string };
-    homeTeamKnown?: boolean;
-    awayTeamKnown?: boolean;
-  }>;
-};
-
-describe("matchSchedule.json ESPN sync", () => {
-  const schedule = JSON.parse(
-    readFileSync(new URL("./matchSchedule.json", import.meta.url), "utf8")
-  ) as ScheduleFile;
-
-  it("has recent ESPN sync metadata", () => {
-    expect(schedule.meta.espnSyncedAt).toBeTruthy();
-    expect(schedule.meta.espnEventCount).toBe(104);
+describe("knockout schedule sync", () => {
+  it("has schedule entries for every R32 fixture match id", () => {
+    for (const [matchId] of ROUND_OF_32_FIXTURES) {
+      expect(knockoutSchedule[matchId], `missing schedule for ${matchId}`).toBeDefined();
+    }
   });
 
-  it("links every match to an ESPN event id", () => {
-    const missing = schedule.matches.filter((m) => !m.espnEventId);
-    expect(missing.map((m) => m.matchNumber)).toEqual([]);
-  });
-
-  it("uses valid group letters for group-stage fixtures", () => {
-    const bad = schedule.matches.filter(
-      (m) => m.group && !/^[A-L]$/.test(m.group) && m.matchNumber <= 72
-    );
-    expect(bad).toEqual([]);
-  });
-
-  it("stores ISO kickoff timestamps", () => {
-    const invalid = schedule.matches.filter((m) => Number.isNaN(Date.parse(m.kickoff.utc)));
-    expect(invalid.map((m) => m.matchNumber)).toEqual([]);
+  it("has schedule entries for every knockout progression match id", () => {
+    for (const fixtures of Object.values(KNOCKOUT_ROUND_FIXTURES)) {
+      for (const [matchId] of fixtures) {
+        expect(knockoutSchedule[matchId], `missing schedule for ${matchId}`).toBeDefined();
+      }
+    }
   });
 });

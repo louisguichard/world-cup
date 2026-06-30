@@ -1,6 +1,7 @@
 import type { MergedMatch } from "../../types";
 import { enrichMatchesPenaltyShootouts } from "../../lib/enrichMatchPenaltyShootout";
 import { enrichKnockoutPenaltiesFromZafronix } from "../../lib/fetchKnockoutPenaltyResult";
+import { reconcileEspnLiveAuthority, espnScoreboardConfirmsLive } from "../../lib/espnLiveAuthority";
 import { deriveStandingsIfScored, standingsEqual } from "../../lib/qualification";
 import { writeLiveMatchCache } from "../../lib/liveMatchCache";
 import { readStandingsCache, writeStandingsCache } from "../../lib/standingsCache";
@@ -152,12 +153,15 @@ async function collectAllVotes(
 function applyConsensusToMatch(
   merged: Record<string, MergedMatch>,
   storeKey: string,
-  votes: ScoreVote[]
+  votes: ScoreVote[],
+  espnMatches: import("../../types").Match[],
+  teams: Record<string, import("../../types").Team>
 ): void {
   const existing = merged[storeKey];
   if (!existing || existing.locked) return;
 
   const consensus = computeScoreConsensus(votes);
+  const espnLive = espnScoreboardConfirmsLive(existing, espnMatches, merged, teams, storeKey);
 
   if (consensus.agreed) {
     disagreementCounts.delete(storeKey);
@@ -184,7 +188,7 @@ function applyConsensusToMatch(
       homeScore: consensus.homeScore,
       awayScore: consensus.awayScore,
       clockMinute: consensus.clockMinute,
-      status: "live",
+      ...(espnLive ? { status: "live" as const } : {}),
       lastUpdatedAt: Date.now(),
     }, "espn");
     return;
@@ -201,7 +205,6 @@ function applyConsensusToMatch(
         homeScore: wclive.homeScore,
         awayScore: wclive.awayScore,
         clockMinute: wclive.clockMinute,
-        status: "live",
         lastUpdatedAt: Date.now(),
       }, "espn");
       logger.warn("Consensus fallback to wclive", "DataOrchestrator.live", { matchId: storeKey });
@@ -264,6 +267,24 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
     }
   }
 
+  const demoted = reconcileEspnLiveAuthority(merged, espn.matches, teams);
+  if (demoted.length > 0) {
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
+      body: JSON.stringify({
+        sessionId: "0b0776",
+        location: "DataOrchestrator.live.ts:reconcileEspnLiveAuthority",
+        message: "demoted phantom live matches",
+        data: { demoted },
+        timestamp: Date.now(),
+        hypothesisId: "H3-espn-demote",
+      }),
+    }).catch(() => {});
+    // #endregion
+  }
+
   const liveMatches = Object.values(merged).filter((m) => m.status === "live" && !m.locked);
 
   if (!options?.light) {
@@ -292,8 +313,26 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
     const votesByMatch = await collectAllVotes(merged, teams, espn.matches);
     for (const [storeKey, votes] of votesByMatch) {
       if (votes.length > 0) {
-        applyConsensusToMatch(merged, storeKey, votes);
+        applyConsensusToMatch(merged, storeKey, votes, espn.matches, teams);
       }
+    }
+
+    const postConsensusDemoted = reconcileEspnLiveAuthority(merged, espn.matches, teams);
+    if (postConsensusDemoted.length > 0) {
+      // #region agent log
+      fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
+        body: JSON.stringify({
+          sessionId: "0b0776",
+          location: "DataOrchestrator.live.ts:postConsensusReconcile",
+          message: "demoted after consensus",
+          data: { demoted: postConsensusDemoted },
+          timestamp: Date.now(),
+          hypothesisId: "H3-espn-demote",
+        }),
+      }).catch(() => {});
+      // #endregion
     }
 
     const { events: enrichmentEvents, source: enrichmentSource } = await fetchEnrichmentEvents();
@@ -310,6 +349,24 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
     logger.debug("Light poll — ESPN scoreboard only", "DataOrchestrator.live", {
       espnCount: espn.matches.length,
     });
+  }
+
+  const postEnrichmentDemoted = reconcileEspnLiveAuthority(merged, espn.matches, teams);
+  if (postEnrichmentDemoted.length > 0) {
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
+      body: JSON.stringify({
+        sessionId: "0b0776",
+        location: "DataOrchestrator.live.ts:postEnrichmentReconcile",
+        message: "demoted phantom live after enrichment",
+        data: { demoted: postEnrichmentDemoted },
+        timestamp: Date.now(),
+        hypothesisId: "H3-espn-demote",
+      }),
+    }).catch(() => {});
+    // #endregion
   }
 
   for (const m of Object.values(merged)) {

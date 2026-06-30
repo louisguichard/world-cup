@@ -59,9 +59,9 @@ function goalDifference(record: Pick<TeamRecord, "goalsFor" | "goalsAgainst">): 
 }
 
 function matchResultPoints(goalsFor: number, goalsAgainst: number): number {
-  if (goalsFor > goalsAgainst) return 3;
-  if (goalsFor === goalsAgainst) return 1;
-  return 0;
+  if (goalsFor > goalsAgainst) return MATCH_POINTS.win;
+  if (goalsFor === goalsAgainst) return MATCH_POINTS.draw;
+  return MATCH_POINTS.loss;
 }
 
 function matchResultShare(goalsFor: number, goalsAgainst: number): number {
@@ -79,13 +79,20 @@ function formMarginMultiplier(homeScore: number, awayScore: number): number {
 }
 
 import { getR32Slots } from "./brackets/getR32Slots";
-import { KNOCKOUT_ROUND_FIXTURES } from "./brackets/knockoutRoundFixtures";
+import { KNOCKOUT_LATER_STAGES, KNOCKOUT_ROUND_FIXTURES } from "./brackets/knockoutRoundFixtures";
+import { resolveOfficialKnockoutSlotId } from "./brackets/resolveOfficialKnockoutSlot";
 import { rankThirdPlaceRecords } from "./thirdPlaceRanking";
 import {
   isKnockoutEliminated,
   rankAliveBestThirds,
   type QualificationMatchContext
 } from "./thirdPlaceQualification";
+import {
+  logTournamentRuleViolation,
+  validateKnockoutProgression,
+  validateMatchResult,
+} from "./tournamentValidation";
+import { MATCH_POINTS } from "./tournamentRules";
 
 function rankingValue(record: TeamRecord): number {
   return record.fifaRank ? 10000 - record.fifaRank : record.rating;
@@ -172,32 +179,33 @@ function resolveHeadToHeadTies(records: TeamRecord[], groupMatches: MatchWithSco
   return buckets.flatMap((bucket) => (bucket.length <= 1 ? [bucket] : resolveHeadToHeadTies(bucket, groupMatches)));
 }
 
-function applyOverallTieBreakers(buckets: TeamRecord[][]): TeamRecord[][] {
-  const criteria = [
-    () => (record: TeamRecord) => record.goalDifference,
-    () => (record: TeamRecord) => record.goalsFor,
-    () => (record: TeamRecord) => record.conduct,
-    () => (record: TeamRecord) => rankingValue(record)
-  ];
+function breakPointTie(records: TeamRecord[], groupMatches: MatchWithScore[]): TeamRecord[] {
+  let buckets: TeamRecord[][] = [records];
 
-  for (const criterion of criteria) {
+  // Steps 2–3: overall goal difference and goals scored (all group matches).
+  for (const valueFor of [
+    (record: TeamRecord) => record.goalDifference,
+    (record: TeamRecord) => record.goalsFor,
+  ]) {
     buckets = buckets.flatMap((bucket) => {
-      if (bucket.length <= 1) {
-        return [bucket];
-      }
-
-      return groupByValue(bucket, criterion());
+      if (bucket.length <= 1) return [bucket];
+      return groupByValue(bucket, valueFor);
     });
   }
 
-  return buckets;
-}
+  // Steps 4–6: head-to-head sub-table among teams still tied.
+  buckets = buckets.flatMap((bucket) =>
+    bucket.length <= 1 ? [bucket] : resolveHeadToHeadTies(bucket, groupMatches)
+  );
 
-function breakPointTie(records: TeamRecord[], groupMatches: MatchWithScore[]): TeamRecord[] {
-  const headToHeadBuckets = resolveHeadToHeadTies(records, groupMatches);
-  const resolvedBuckets = applyOverallTieBreakers(headToHeadBuckets);
+  // Step 7: fair play conduct points.
+  buckets = buckets.flatMap((bucket) => {
+    if (bucket.length <= 1) return [bucket];
+    return groupByValue(bucket, (record) => record.conduct);
+  });
 
-  return resolvedBuckets.flatMap((bucket) =>
+  // Step 8: drawing of lots (stable team-id ordering as deterministic stand-in).
+  return buckets.flatMap((bucket) =>
     [...bucket].sort((a, b) => rankingValue(b) - rankingValue(a) || a.teamId.localeCompare(b.teamId))
   );
 }
@@ -487,7 +495,16 @@ function knockoutMarketProbability(
 }
 
 function bracketWinners(matches: BracketMatch[]): Record<string, string | undefined> {
-  return Object.fromEntries(matches.map((match) => [`W${match.id.replace("M", "")}`, match.winnerTeamId]));
+  const map: Record<string, string | undefined> = Object.fromEntries(
+    matches.map((match) => [`W${match.id.replace("M", "")}`, match.winnerTeamId])
+  );
+  for (const match of matches) {
+    if (!match.winnerTeamId || !match.homeTeamId || !match.awayTeamId) continue;
+    const loser =
+      match.winnerTeamId === match.homeTeamId ? match.awayTeamId : match.homeTeamId;
+    map[`L${match.id.replace("M", "")}`] = loser;
+  }
+  return map;
 }
 
 function buildBracketFromStandings(
@@ -516,7 +533,7 @@ function buildBracketFromStandings(
 
   const allMatches = [...r32];
 
-  for (const stage of ["R16", "QF", "SF", "Final"] as const) {
+  for (const stage of KNOCKOUT_LATER_STAGES) {
     const winners = bracketWinners(allMatches);
     const stageMatches = nextRoundDefinitions[stage].map(([id, homeSeed, awaySeed]) =>
       playKnockoutMatch(id, stage, winners[homeSeed], winners[awaySeed], teamsById, knockoutMarkets, random, picks, homeSeed, awaySeed)
@@ -763,15 +780,24 @@ export function annotateBracketCertainty(
   return annotated;
 }
 
-const KNOCKOUT_STAGE_ORDER: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
+const KNOCKOUT_STAGE_ORDER: Stage[] = ["R32", ...KNOCKOUT_LATER_STAGES];
 
 function resolveFeederTeam(
   seedLabel: string | undefined,
   byId: Map<string, BracketMatch>
 ): string | undefined {
-  if (!seedLabel?.startsWith("W")) return undefined;
-  const upstreamId = `M${seedLabel.slice(1)}`;
-  return byId.get(upstreamId)?.winnerTeamId;
+  if (!seedLabel) return undefined;
+  if (seedLabel.startsWith("W")) {
+    return byId.get(`M${seedLabel.slice(1)}`)?.winnerTeamId;
+  }
+  if (seedLabel.startsWith("L")) {
+    const upstream = byId.get(`M${seedLabel.slice(1)}`);
+    if (!upstream?.winnerTeamId || !upstream.homeTeamId || !upstream.awayTeamId) return undefined;
+    return upstream.winnerTeamId === upstream.homeTeamId
+      ? upstream.awayTeamId
+      : upstream.homeTeamId;
+  }
+  return undefined;
 }
 
 function feederMatchIdFromSeed(seedLabel: string | undefined): string | undefined {
@@ -792,8 +818,13 @@ type KnockoutOverlayEntry = {
   isLive: boolean;
 };
 
-function buildKnockoutOverlayLookup(mergedMatches: MergedMatch[]): Map<string, KnockoutOverlayEntry> {
+function buildKnockoutOverlayLookup(
+  mergedMatches: MergedMatch[],
+  slotStandings: GroupStanding[] = [],
+  teamsById: TeamsById = {}
+): Map<string, KnockoutOverlayEntry> {
   const lookup = new Map<string, KnockoutOverlayEntry>();
+  const rekeys: Array<{ stored: string; official: string }> = [];
   for (const match of mergedMatches) {
     if (!isKnockoutMatch(match)) continue;
     if (typeof match.homeScore !== "number" || typeof match.awayScore !== "number") continue;
@@ -803,12 +834,36 @@ function buildKnockoutOverlayLookup(mergedMatches: MergedMatch[]): Map<string, K
     if (!isLive && !isCompleted) continue;
 
     const entry: KnockoutOverlayEntry = { match, isLive };
-    const key = match.matchId ?? match.id;
-    lookup.set(key, entry);
-    if (match.id && match.id !== key) {
+    const storedKey = match.matchId ?? match.id ?? "";
+    const officialKey =
+      slotStandings.length > 0 && storedKey
+        ? resolveOfficialKnockoutSlotId(match, storedKey, slotStandings, teamsById)
+        : storedKey;
+    if (officialKey !== storedKey) {
+      rekeys.push({ stored: storedKey, official: officialKey });
+    }
+    lookup.set(officialKey, entry);
+    if (match.id && match.id !== officialKey) {
       lookup.set(match.id, entry);
     }
   }
+  // #region agent log
+  if (rekeys.length > 0) {
+    fetch("http://127.0.0.1:7681/ingest/f800a0a9-8d11-45c6-8805-1b187f693046", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
+      body: JSON.stringify({
+        sessionId: "0b0776",
+        runId: "overlay-rekey",
+        hypothesisId: "H3-espn-slot",
+        location: "tournament.ts:buildKnockoutOverlayLookup",
+        message: "ESPN match re-keyed to official bracket slot",
+        data: { rekeys },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+  }
+  // #endregion
   return lookup;
 }
 
@@ -833,9 +888,10 @@ export function resolveKnockoutResults(
   bracket: BracketMatch[],
   mergedMatches: MergedMatch[],
   teamsById: TeamsById = {},
-  knockoutMarkets: PolymarketMatchMarket[] = []
+  knockoutMarkets: PolymarketMatchMarket[] = [],
+  slotStandings: GroupStanding[] = []
 ): BracketMatch[] {
-  const knockoutOverlay = buildKnockoutOverlayLookup(mergedMatches);
+  const knockoutOverlay = buildKnockoutOverlayLookup(mergedMatches, slotStandings, teamsById);
   if (knockoutOverlay.size === 0) {
     return bracket;
   }
@@ -868,6 +924,10 @@ export function resolveKnockoutResults(
         }
 
         const winnerTeamId = resolveMatchWinner(match, teamsById);
+        const resultViolation = validateMatchResult(match);
+        if (resultViolation) {
+          logTournamentRuleViolation(resultViolation, "resolveKnockoutResults");
+        }
         byId.set(bm.id, {
           ...byId.get(bm.id)!,
           homeTeamId: match.homeTeamId,
@@ -938,7 +998,16 @@ export function resolveKnockoutResults(
     }
   }
 
-  return bracket.map((bm) => byId.get(bm.id)!);
+  const resolved = bracket.map((bm) => byId.get(bm.id)!);
+  const progressionViolation = validateKnockoutProgression(
+    bracketWinners(resolved),
+    resolved
+  );
+  if (progressionViolation) {
+    logTournamentRuleViolation(progressionViolation, "resolveKnockoutResults");
+  }
+
+  return resolved;
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -981,7 +1050,8 @@ export function projectTournament(
     annotatedBracket,
     mergedMatches,
     bracketTeamsById,
-    knockoutMarkets
+    knockoutMarkets,
+    standings
   );
 
   return {
@@ -1011,8 +1081,8 @@ function makeSeededRandom(seed: number): () => number {
   };
 }
 
-function emptyStageCounts(): Record<"R32" | "R16" | "QF" | "SF" | "Final" | "Champion", number> {
-  return { R32: 0, R16: 0, QF: 0, SF: 0, Final: 0, Champion: 0 };
+function emptyStageCounts(): Record<"R32" | "R16" | "QF" | "SF" | "ThirdPlace" | "Final" | "Champion", number> {
+  return { R32: 0, R16: 0, QF: 0, SF: 0, ThirdPlace: 0, Final: 0, Champion: 0 };
 }
 
 function emptyOpponentCounts(): Record<Stage, Map<string, number>> {
@@ -1021,7 +1091,8 @@ function emptyOpponentCounts(): Record<Stage, Map<string, number>> {
     R16: new Map(),
     QF: new Map(),
     SF: new Map(),
-    Final: new Map()
+    ThirdPlace: new Map(),
+    Final: new Map(),
   };
 }
 

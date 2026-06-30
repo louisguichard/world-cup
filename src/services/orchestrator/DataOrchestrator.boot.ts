@@ -9,6 +9,7 @@ import {
 } from "../../lib/bootProfile";
 import { hydrateBootFromCache, persistBootCache } from "../../lib/bootCache";
 import { hasLiveMatchesInCache } from "../../lib/liveMatchCache";
+import { reconcileEspnLiveAuthority } from "../../lib/espnLiveAuthority";
 import {
   finishBootTracking,
   formatBootReport,
@@ -348,6 +349,8 @@ export async function runBoot(): Promise<void> {
         }
       }
     }
+
+    reconcileEspnLiveAuthority(liveMatches, espnData.matches, teams);
 
     store.setLiveMatches(liveMatches);
     for (const m of Object.values(liveMatches)) {

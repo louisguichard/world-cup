@@ -1,0 +1,156 @@
+{
+  "tournament_metadata": {
+    "name": "FIFA World Cup 2026",
+    "edition": 23,
+    "total_teams": 48,
+    "host_countries": ["United States", "Canada", "Mexico"],
+    "total_matches": 104,
+    "phases": ["Group Stage", "Round of 32", "Round of 16", "Quarter-finals", "Semi-finals", "Third-place Playoff", "Final"]
+  },
+  "global_invariants": {
+    "strict_roster_limit_per_team": 26,
+    "regulation_time_minutes": 90,
+    "halves_count": 2,
+    "half_duration_minutes": 45,
+    "base_points_allocation": {
+      "win": 3,
+      "draw": 1,
+      "loss": 0
+    },
+    "substitution_rules": {
+      "base_allowed_substitutions": 5,
+      "maximum_substitution_windows_regulation": 3,
+      "halftime_window_counts_as_window": false,
+      "extra_time_additional_substitution": 1,
+      "extra_time_additional_window": 1,
+      "concussion_substitution_allowance": 1,
+      "concussion_substitution_counts_against_base": false
+    }
+  },
+  "group_stage_engine": {
+    "group_count": 12,
+    "teams_per_group": 4,
+    "total_group_stage_matches": 72,
+    "groups": {
+      "A": ["Mexico", "GroupA_Team2", "GroupA_Team3", "GroupA_Team4"],
+      "B": ["GroupB_Team1", "GroupB_Team2", "GroupB_Team3", "GroupB_Team4"],
+      "C": ["GroupC_Team1", "GroupC_Team2", "GroupC_Team3", "GroupC_Team4"],
+      "D": ["United States", "GroupD_Team2", "GroupD_Team3", "GroupD_Team4"],
+      "E": ["GroupE_Team1", "GroupE_Team2", "GroupE_Team3", "GroupE_Team4"],
+      "F": ["GroupF_Team1", "GroupF_Team2", "GroupF_Team3", "GroupF_Team4"],
+      "G": ["GroupG_Team1", "GroupG_Team2", "GroupG_Team3", "GroupG_Team4"],
+      "H": ["GroupH_Team1", "GroupH_Team2", "GroupH_Team3", "GroupH_Team4"],
+      "I": ["GroupI_Team1", "GroupI_Team2", "GroupI_Team3", "GroupI_Team4"],
+      "J": ["GroupJ_Team1", "GroupJ_Team2", "GroupJ_Team3", "GroupJ_Team4"],
+      "K": ["GroupK_Team1", "GroupK_Team2", "GroupK_Team3", "GroupK_Team4"],
+      "L": ["England", "GroupL_Team2", "GroupL_Team3", "GroupL_Team4"]
+    },
+    "tiebreaker_hierarchy_sequential": [
+      { "step": 1, "criterion": "Greatest number of points obtained in all group matches" },
+      { "step": 2, "criterion": "Superior goal difference in all group matches" },
+      { "step": 3, "criterion": "Greatest number of goals scored in all group matches" },
+      { "step": 4, "criterion": "Greatest number of points obtained in the group matches between the teams concerned" },
+      { "step": 5, "criterion": "Superior goal difference in the group matches between the teams concerned" },
+      { "step": 6, "criterion": "Greatest number of goals scored in the group matches between the teams concerned" },
+      { "step": 7, "criterion": "Highest fair play conduct points system (Yellow card: -1, Indirect Red: -3, Direct Red: -4, Yellow followed by Direct Red: -5)" },
+      { "step": 8, "criterion": "Drawing of lots by the FIFA Organizing Committee" }
+    ]
+  },
+  "third_place_qualification_matrix": {
+    "total_third_place_teams": 12,
+    "slots_available_for_advancement": 8,
+    "ranking_criteria": [
+      { "step": 1, "criterion": "Total points accumulated in group stage" },
+      { "step": 2, "criterion": "Superior overall goal difference" },
+      { "step": 3, "criterion": "Highest overall goals scored" },
+      { "step": 4, "criterion": "Lowest disciplinary fair play points" },
+      { "step": 5, "criterion": "FIFA World Ranking position" }
+    ],
+    "anti_rematch_constraint": "A third-place team CANNOT play against the winner of their own origin group in the Round of 32."
+  },
+  "knockout_logic_engine": {
+    "phase_rules": {
+      "draws_permitted": false,
+      "requires_absolute_winner": true,
+      "overtime_mechanism": "Extra Time",
+      "tie_resolution_mechanism": "Penalty Shootout"
+    },
+    "round_of_32": {
+      "matches": {
+        "73": { "home_source": "1A", "away_source": "3C/3D/3E/3F", "target_match_next": 90, "target_slot": "away" },
+        "74": { "home_source": "1B", "away_source": "3E/3F/3G/3H", "target_match_next": 89, "target_slot": "home" },
+        "75": { "home_source": "1C", "away_source": "3F/3G/3H/3I", "target_match_next": 90, "target_slot": "home" },
+        "76": { "home_source": "1D", "away_source": "3G/3H/3I/3J", "target_match_next": 91, "target_slot": "home" },
+        "77": { "home_source": "1E", "away_source": "3A/3B/3C/3D", "target_match_next": 89, "target_slot": "away" },
+        "78": { "home_source": "1F", "away_source": "3A/3B/3C/3E", "target_match_next": 91, "target_slot": "away" },
+        "79": { "home_source": "1G", "away_source": "3A/3B/3D/3E", "target_match_next": 92, "target_slot": "home" },
+        "80": { "home_source": "1H", "away_source": "3B/3C/3F/3G", "target_match_next": 92, "target_slot": "away" },
+        "81": { "home_source": "1I", "away_source": "3C/3D/3E/3H", "target_match_next": 94, "target_slot": "home" },
+        "82": { "home_source": "1J", "away_source": "3I/3J/3K/3L", "target_match_next": 94, "target_slot": "away" },
+        "83": { "home_source": "1K", "away_source": "3I/3J/3K/3L", "target_match_next": 93, "target_slot": "home" },
+        "84": { "home_source": "1L", "away_source": "3I/3J/3K/3L", "target_match_next": 93, "target_slot": "away" },
+        "85": { "home_source": "2A", "away_source": "2B", "target_match_next": 96, "target_slot": "home" },
+        "86": { "home_source": "2C", "away_source": "2D", "target_match_next": 95, "target_slot": "home" },
+        "87": { "home_source": "2E", "away_source": "2F", "target_match_next": 96, "target_slot": "away" },
+        "88": { "home_source": "2G", "away_source": "2H", "target_match_next": 95, "target_slot": "away" }
+      }
+    },
+    "round_of_16": {
+      "matches": {
+        "89": { "home_source": "winner_74", "away_source": "winner_77", "target_match_next": 97, "target_slot": "home" },
+        "90": { "home_source": "winner_75", "away_source": "winner_73", "target_match_next": 97, "target_slot": "away" },
+        "91": { "home_source": "winner_76", "away_source": "winner_78", "target_match_next": 99, "target_slot": "home" },
+        "92": { "home_source": "winner_79", "away_source": "winner_80", "target_match_next": 99, "target_slot": "away" },
+        "93": { "home_source": "winner_83", "away_source": "winner_84", "target_match_next": 98, "target_slot": "home" },
+        "94": { "home_source": "winner_81", "away_source": "winner_82", "target_match_next": 98, "target_slot": "away" },
+        "95": { "home_source": "winner_86", "away_source": "winner_88", "target_match_next": 100, "target_slot": "home" },
+        "96": { "home_source": "winner_85", "away_source": "winner_87", "target_match_next": 100, "target_slot": "away" }
+      }
+    },
+    "quarter_finals": {
+      "matches": {
+        "97": { "home_source": "winner_89", "away_source": "winner_90", "target_match_next": 101, "target_slot": "home" },
+        "98": { "home_source": "winner_93", "away_source": "winner_94", "target_match_next": 101, "target_slot": "away" },
+        "99": { "home_source": "winner_91", "away_source": "winner_92", "target_match_next": 102, "target_slot": "home" },
+        "100": { "home_source": "winner_95", "away_source": "winner_96", "target_match_next": 102, "target_slot": "away" }
+      }
+    },
+    "semi_finals": {
+      "matches": {
+        "101": { "home_source": "winner_97", "away_source": "winner_98", "target_winner_next": 104, "target_loser_next": 103, "target_slot_winner": "home", "target_slot_loser": "home" },
+        "102": { "home_source": "winner_99", "away_source": "winner_100", "target_winner_next": 104, "target_loser_next": 103, "target_slot_winner": "away", "target_slot_loser": "away" }
+      }
+    },
+    "finals_phase": {
+      "matches": {
+        "103": { "type": "Third-place Playoff", "home_source": "loser_101", "away_source": "loser_102" },
+        "104": { "type": "Final", "home_source": "winner_101", "away_source": "winner_102" }
+      }
+    }
+  },
+  "match_event_invariants": {
+    "extra_time_protocol": {
+      "condition_triggered_on": "Score equality after 90 minutes of regulation time",
+      "halves_count": 2,
+      "half_duration_minutes": 15,
+      "total_duration_minutes": 30,
+      "golden_goal_rule_active": false,
+      "must_complete_full_30_minutes": true
+    },
+    "penalty_shootout_protocol": {
+      "condition_triggered_on": "Score equality after full completion of 30 minutes of Extra Time",
+      "minimum_initial_kicks_per_team": 5,
+      "format": "Alternating sequence (ABAB)",
+      "sudden_death_condition": "Tied after the initial 5 rounds of alternating kicks",
+      "sudden_death_format": "1 round alternating until one team scores and the other fails",
+      "eligible_kickers_constraint": "Only players who are on the pitch at the final whistle of Extra Time are eligible to participate."
+    },
+    "strict_state_denial_rules": [
+      { "id": "ERR_001", "rule": "A team cannot play a group match against an opponent not assigned to their alphanumeric group array." },
+      { "id": "ERR_002", "rule": "A team cannot advance to the knockout stage with fewer points than a team they are ranked below in their group's sequential tiebreaker structure." },
+      { "id": "ERR_003", "rule": "A knockout match cannot terminate with a 'Draw' flag status under any condition." },
+      { "id": "ERR_004", "rule": "A single player cannot be substituted twice within the same match fixture unless under the explicit medical exemption for a verified head injury." },
+      { "id": "ERR_005", "rule": "The loser of a knockout match is strictly denied progression to any higher-tier match node except for the specific structural fallback to Match 103 from the Semi-final nodes." }
+    ]
+  }
+}

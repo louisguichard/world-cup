@@ -11,11 +11,14 @@ import type {
 import { isKnockoutBracketMatchId, lookupBracketLiveMatch, seedLabelToMatchId } from "../bracketTree";
 import { materializeFullSchedule } from "../materializeFullSchedule";
 import { computeStandings } from "../tournament";
-import { computeQualificationStatus, type QualificationMatchContext } from "../qualification";
+import type { QualificationMatchContext } from "../qualification";
 import { resolveMatchWinner } from "../resolveMatchWinner";
 import { getR32Slots, ROUND_OF_32_FIXTURES } from "./getR32Slots";
-import type { GroupLetter } from "../../types";
-import { KNOCKOUT_ROUND_FIXTURES } from "./knockoutRoundFixtures";
+import { KNOCKOUT_LATER_STAGES, KNOCKOUT_ROUND_FIXTURES } from "./knockoutRoundFixtures";
+import {
+  liveMatchFitsR32Slot,
+  resolveOfficialKnockoutSlotId,
+} from "./resolveOfficialKnockoutSlot";
 
 type TeamsById = Record<string, Team>;
 
@@ -67,109 +70,6 @@ function lookupScheduleKnockoutMatch(
   return scheduleMatches.get(bracketMatchId) ?? lookupBracketLiveMatch(liveMatches, bracketMatchId);
 }
 
-function teamMatchesSeed(
-  teamId: string,
-  seed: string,
-  standings: GroupStanding[]
-): boolean {
-  if (seed.startsWith("3:")) return false;
-  const rank = Number(seed[0]) - 1;
-  const group = seed[1] as GroupLetter;
-  const rows = standings.find((standing) => standing.group === group)?.rows;
-  return rows?.[rank]?.teamId === teamId;
-}
-
-function teamsMatchFixtureSeeds(
-  homeTeamId: string,
-  awayTeamId: string,
-  homeSeed: string,
-  awaySeed: string,
-  standings: GroupStanding[]
-): boolean {
-  return (
-    (teamMatchesSeed(homeTeamId, homeSeed, standings) &&
-      teamMatchesSeed(awayTeamId, awaySeed, standings)) ||
-    (teamMatchesSeed(homeTeamId, awaySeed, standings) &&
-      teamMatchesSeed(awayTeamId, homeSeed, standings))
-  );
-}
-
-function teamsFitSlotByGroup(
-  homeTeamId: string,
-  awayTeamId: string,
-  homeSeed: string,
-  awaySeed: string,
-  teamsById: TeamsById
-): boolean {
-  if (homeSeed.startsWith("3:") || awaySeed.startsWith("3:")) return false;
-  const homeTeam = teamsById[homeTeamId];
-  const awayTeam = teamsById[awayTeamId];
-  if (!homeTeam || !awayTeam) return false;
-  const homeGroup = homeSeed[1];
-  const awayGroup = awaySeed[1];
-  return (
-    (homeTeam.group === homeGroup && awayTeam.group === awayGroup) ||
-    (homeTeam.group === awayGroup && awayTeam.group === homeGroup)
-  );
-}
-
-function liveMatchFitsSlot(
-  match: MergedMatch,
-  homeSeed: string,
-  awaySeed: string,
-  slotStandings: GroupStanding[],
-  teamsById: TeamsById
-): boolean {
-  if (!match.homeTeamId || !match.awayTeamId) return false;
-  return (
-    teamsMatchFixtureSeeds(match.homeTeamId, match.awayTeamId, homeSeed, awaySeed, slotStandings) ||
-    teamsFitSlotByGroup(match.homeTeamId, match.awayTeamId, homeSeed, awaySeed, teamsById)
-  );
-}
-function findOfficialR32SlotForLiveMatch(
-  match: MergedMatch,
-  standings: GroupStanding[],
-  teamsById: TeamsById
-): string | undefined {
-  if (!match.homeTeamId || !match.awayTeamId) return undefined;
-  for (const [matchId, homeSeed, awaySeed] of ROUND_OF_32_FIXTURES) {
-    if (liveMatchFitsSlot(match, homeSeed, awaySeed, standings, teamsById)) {
-      return matchId;
-    }
-  }
-  return undefined;
-}
-
-function findSlotByVenue(match: MergedMatch): string | undefined {
-  const venue = (match.venue ?? "").toLowerCase();
-  if (!venue) return undefined;
-
-  for (const [matchId, info] of Object.entries(knockoutSchedule)) {
-    const num = Number(matchId.replace(/^M/, ""));
-    if (!Number.isFinite(num) || num < 73 || num > 88) continue;
-    const stadium = info.stadium.toLowerCase();
-    const city = info.venueCity.toLowerCase();
-    if (venue.includes(stadium) || venue.includes(city) || venue.includes(info.hostCity.toLowerCase())) {
-      return matchId;
-    }
-  }
-
-  return undefined;
-}
-
-function resolveOfficialKnockoutSlotId(
-  match: MergedMatch,
-  storedId: string,
-  slotStandings: GroupStanding[],
-  teamsById: TeamsById
-): string {
-  return (
-    findOfficialR32SlotForLiveMatch(match, slotStandings, teamsById) ??
-    findSlotByVenue(match) ??
-    storedId
-  );
-}
-
 function indexLiveByOfficialSlot(
   liveMatches: Record<string, MergedMatch>,
   slotStandings: GroupStanding[],
@@ -214,7 +114,7 @@ function lookupLiveForSlot(
   if (fixture) {
     const [, homeSeed, awaySeed] = fixture;
     for (const match of liveByPair.values()) {
-      if (liveMatchFitsSlot(match, homeSeed, awaySeed, slotStandings, teamsById)) {
+      if (liveMatchFitsR32Slot(match, homeSeed, awaySeed, slotStandings, teamsById)) {
         return match;
       }
     }
@@ -223,7 +123,7 @@ function lookupLiveForSlot(
   const scheduled = lookupScheduleKnockoutMatch(scheduleMatches, liveMatches, slot.matchId);
   if (scheduled?.homeTeamId && scheduled?.awayTeamId && fixture) {
     const [, homeSeed, awaySeed] = fixture;
-    if (liveMatchFitsSlot(scheduled, homeSeed, awaySeed, slotStandings, teamsById)) {
+    if (liveMatchFitsR32Slot(scheduled, homeSeed, awaySeed, slotStandings, teamsById)) {
       return scheduled;
     }
   }
@@ -274,17 +174,6 @@ function indexConfirmedWinners(
   return confirmedWinners;
 }
 
-function slotCertainty(
-  teamId: string | undefined,
-  standings: GroupStanding[],
-  qualContext: QualificationMatchContext
-): "confirmed" | "tbd" {
-  if (!teamId) return "tbd";
-  return computeQualificationStatus(teamId, standings, qualContext).certainty === "confirmed"
-    ? "confirmed"
-    : "tbd";
-}
-
 function buildR32Match(
   slot: ReturnType<typeof getR32Slots>[number],
   scheduleMatches: Map<string, MergedMatch>,
@@ -292,9 +181,7 @@ function buildR32Match(
   liveMatches: Record<string, MergedMatch>,
   liveByPair: Map<string, MergedMatch>,
   slotStandings: GroupStanding[],
-  teamsById: TeamsById,
-  standings: GroupStanding[],
-  qualContext: QualificationMatchContext
+  teamsById: TeamsById
 ): BracketMatch {
   const live = lookupLiveForSlot(
     slot,
@@ -309,8 +196,8 @@ function buildR32Match(
   const winnerTeamId =
     isCompleted && live ? resolveMatchWinner(live, teamsById) ?? undefined : undefined;
 
-  const homeTeamId = live?.homeTeamId ?? slot.homeTeamId;
-  const awayTeamId = live?.awayTeamId ?? slot.awayTeamId;
+  const homeTeamId = isCompleted ? live?.homeTeamId : undefined;
+  const awayTeamId = isCompleted ? live?.awayTeamId : undefined;
 
   return {
     id: slot.matchId,
@@ -324,12 +211,40 @@ function buildR32Match(
     awayScore: isCompleted ? live?.awayScore : undefined,
     winnerTeamId,
     source: "scheduled",
-    homeCertainty: live?.homeTeamId ? "confirmed" : slotCertainty(homeTeamId, standings, qualContext),
-    awayCertainty: live?.awayTeamId ? "confirmed" : slotCertainty(awayTeamId, standings, qualContext),
+    homeCertainty: homeTeamId ? "confirmed" : "tbd",
+    awayCertainty: awayTeamId ? "confirmed" : "tbd",
     homeGhosts: [],
     awayGhosts: [],
     penaltyShootout: live?.penaltyShootout,
   };
+}
+
+function indexConfirmedLosers(
+  scheduleMatches: Map<string, MergedMatch>,
+  teamsById: TeamsById
+): Map<string, string> {
+  const confirmedLosers = new Map<string, string>();
+  for (const [matchId, match] of scheduleMatches) {
+    if (match.status !== "completed" || !match.locked) continue;
+    const winner = resolveMatchWinner(match, teamsById);
+    if (!winner) continue;
+    const loser = winner === match.homeTeamId ? match.awayTeamId : match.homeTeamId;
+    if (loser) confirmedLosers.set(`L${matchId.slice(1)}`, loser);
+  }
+  return confirmedLosers;
+}
+
+function participantFromSeed(
+  seed: string,
+  confirmedParticipants: Map<string, string>
+): string | undefined {
+  if (seed.startsWith("L")) {
+    return confirmedParticipants.get(seed);
+  }
+  if (seed.startsWith("W")) {
+    return confirmedParticipants.get(seedLabelToMatchId(seed));
+  }
+  return undefined;
 }
 
 function buildLaterRoundMatch(
@@ -337,15 +252,13 @@ function buildLaterRoundMatch(
   stage: Exclude<Stage, "R32">,
   homeSeed: string,
   awaySeed: string,
-  confirmedWinners: Map<string, string>,
+  confirmedParticipants: Map<string, string>,
   scheduleMatches: Map<string, MergedMatch>,
   liveMatches: Record<string, MergedMatch>,
   teamsById: TeamsById
 ): BracketMatch {
-  const homeFeederId = seedLabelToMatchId(homeSeed);
-  const awayFeederId = seedLabelToMatchId(awaySeed);
-  const homeTeamId = confirmedWinners.get(homeFeederId);
-  const awayTeamId = confirmedWinners.get(awayFeederId);
+  const homeTeamId = participantFromSeed(homeSeed, confirmedParticipants);
+  const awayTeamId = participantFromSeed(awaySeed, confirmedParticipants);
 
   const live = lookupScheduleKnockoutMatch(scheduleMatches, liveMatches, matchId);
   const isCompleted = live?.status === "completed" && live?.locked === true;
@@ -353,7 +266,7 @@ function buildLaterRoundMatch(
     isCompleted && live ? resolveMatchWinner(live, teamsById) ?? undefined : undefined;
 
   if (isCompleted && winnerTeamId) {
-    confirmedWinners.set(matchId, winnerTeamId);
+    confirmedParticipants.set(matchId, winnerTeamId);
   }
 
   return {
@@ -406,6 +319,9 @@ export function buildConfirmedOnlyBracket(
     teamsById,
     slotStandings
   );
+  for (const [key, teamId] of indexConfirmedLosers(scheduleMatches, teamsById)) {
+    confirmedWinners.set(key, teamId);
+  }
 
   const bracket: BracketMatch[] = [];
 
@@ -418,9 +334,7 @@ export function buildConfirmedOnlyBracket(
       liveMatches,
       liveByPair,
       slotStandings,
-      teamsById,
-      standings,
-      qualContext
+      teamsById
     );
     bracket.push(r32Match);
     if (r32Match.winnerTeamId) {
@@ -428,7 +342,7 @@ export function buildConfirmedOnlyBracket(
     }
   }
 
-  for (const stage of ["R16", "QF", "SF", "Final"] as const) {
+  for (const stage of KNOCKOUT_LATER_STAGES) {
     for (const [matchId, homeSeed, awaySeed] of KNOCKOUT_ROUND_FIXTURES[stage]) {
       if (!knockoutSchedule[matchId]) continue;
       const later = buildLaterRoundMatch(

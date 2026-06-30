@@ -1,3 +1,11 @@
+import { isKnockoutMatch } from "./resolveMatchWinner";
+import type { GroupLetter, Stage } from "../types";
+import {
+  GROUP_MAX_PLAYING_MINUTES,
+  KNOCKOUT_MAX_PLAYING_MINUTES_WITH_BUFFER,
+  REGULATION_MINUTES,
+} from "./tournamentRules";
+
 export type MatchPhase =
   | "dormant"
   | "imminent"
@@ -8,37 +16,218 @@ export type MatchPhase =
   | "post_match"
   | "locked";
 
+export type MatchPhaseInput = {
+  kickoffMs?: number;
+  date?: string;
+  status: string;
+  clockMinute?: number;
+  locked?: boolean;
+  group?: GroupLetter;
+  stage?: Stage;
+  matchId?: string;
+  id?: string;
+  period?: string;
+};
+
 const IMMINENT_MS = 15 * 60 * 1000;
 const POST_MATCH_WINDOW_MS = 45 * 60 * 1000;
 
-export function getMatchPhase(
-  match: {
-    kickoffMs: number;
-    status: string;
-    clockMinute?: number;
-    locked?: boolean;
-  },
+/** Upstream feeds may flip to "live" before kickoff; ignore until within this window. */
+export const PRE_KICKOFF_LIVE_TOLERANCE_MS = 2 * 60 * 1000;
+
+export function resolveMatchKickoffMs(match: { kickoffMs?: number; date?: string }): number | undefined {
+  if (match.kickoffMs != null && !Number.isNaN(match.kickoffMs)) return match.kickoffMs;
+  if (!match.date) return undefined;
+  const parsed = Date.parse(match.date);
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
+
+export function isActiveLivePhase(phase: MatchPhase): boolean {
+  return (
+    phase === "live_first" ||
+    phase === "halftime" ||
+    phase === "live_second" ||
+    phase === "extra_time"
+  );
+}
+
+/** True when a match should appear in the live-now surface (includes imminent and brief post-match). */
+export function isActivePhase(phase: MatchPhase): boolean {
+  return (
+    isActiveLivePhase(phase) ||
+    phase === "imminent" ||
+    phase === "post_match"
+  );
+}
+
+function isInPlayFeedStatus(status: string): boolean {
+  const s = status.toLowerCase();
+  return (
+    s === "live" ||
+    s === "halftime" ||
+    s === "half_time" ||
+    s === "paused" ||
+    s === "delayed" ||
+    s === "interrupted" ||
+    s === "inprogress" ||
+    s === "in"
+  );
+}
+
+function liveClockPhase(match: MatchPhaseInput): MatchPhase {
+  const min = match.clockMinute ?? 0;
+  const knockout = matchAllowsExtraTime(match);
+  if (knockout && min >= REGULATION_MINUTES) return "extra_time";
+  if (min >= REGULATION_MINUTES / 2 + 1) return "live_second";
+  if (min >= REGULATION_MINUTES / 2 - 1 && min <= REGULATION_MINUTES / 2 + 1) return "halftime";
+  return "live_first";
+}
+
+/** True when a match should render as live — rejects premature upstream "live" before kickoff. */
+export function isMatchEffectivelyLive(match: MatchPhaseInput, nowMs = Date.now()): boolean {
+  if (match.status !== "live" || match.locked) return false;
+  return isActiveLivePhase(getMatchPhase(match, nowMs));
+}
+
+export function isMergedMatchEffectivelyLive(
+  match: MatchPhaseInput & { kickoffMs?: number; date?: string },
   nowMs = Date.now()
-): MatchPhase {
+): boolean {
+  const kickoffMs = match.kickoffMs ?? resolveMatchKickoffMs(match);
+  if (kickoffMs == null) return isInPlayFeedStatus(match.status) && !match.locked;
+  return isMatchEffectivelyLive({ ...match, kickoffMs }, nowMs);
+}
+
+/** Broad live-now visibility — uses lifecycle phase, not raw status === "live". */
+export function isMergedMatchInActivePhase(
+  match: MatchPhaseInput & { kickoffMs?: number; date?: string; locked?: boolean },
+  nowMs = Date.now()
+): boolean {
+  if (match.locked) return false;
+  const kickoffMs = match.kickoffMs ?? resolveMatchKickoffMs(match);
+  if (kickoffMs == null) {
+    return isInPlayFeedStatus(match.status);
+  }
+  return isActivePhase(getMatchPhase({ ...match, kickoffMs }, nowMs));
+}
+
+type LiveClockFields = {
+  clockMinute?: number;
+  clockExtra?: number;
+  clockRunning?: boolean;
+  displayClock?: string;
+  period?: string;
+};
+
+/** Reject persisted `live` when kickoff has not arrived — applies to every data source. */
+export function coerceLiveStatusForKickoff<T extends MatchPhaseInput & LiveClockFields>(
+  match: T,
+  nowMs = Date.now()
+): T {
+  const kickoffMs = match.kickoffMs ?? resolveMatchKickoffMs(match);
+  if (match.status !== "live" || kickoffMs == null) return match;
+  if (isMatchEffectivelyLive({ ...match, kickoffMs }, nowMs)) return match;
+  return {
+    ...match,
+    kickoffMs,
+    status: "scheduled",
+    clockMinute: undefined,
+    clockExtra: undefined,
+    clockRunning: undefined,
+    displayClock: undefined,
+    period: undefined,
+  };
+}
+
+function matchAllowsExtraTime(match: MatchPhaseInput): boolean {
+  return isKnockoutMatch({
+    matchId: match.matchId,
+    id: match.id ?? match.matchId ?? "",
+    group: match.group,
+    stage: match.stage,
+  });
+}
+
+function estimatedMaxDurationMinutes(match: MatchPhaseInput): number {
+  return matchAllowsExtraTime(match)
+    ? KNOCKOUT_MAX_PLAYING_MINUTES_WITH_BUFFER
+    : GROUP_MAX_PLAYING_MINUTES;
+}
+
+export function getMatchPhase(match: MatchPhaseInput, nowMs = Date.now()): MatchPhase {
   if (match.locked || match.status === "locked") return "locked";
 
+  const kickoffMs = match.kickoffMs ?? (match.date ? Date.parse(match.date) : NaN);
+  if (!Number.isFinite(kickoffMs)) return "dormant";
+
+  const status = match.status.toLowerCase();
+  if (status === "postponed" || status === "cancelled") return "dormant";
+
+  const msUntilKickoff = kickoffMs - nowMs;
+
   if (match.status === "completed") {
-    const estimatedEndMs = match.kickoffMs + 115 * 60 * 1000;
+    const estimatedEndMs = kickoffMs + estimatedMaxDurationMinutes(match) * 60 * 1000;
     if (nowMs - estimatedEndMs < POST_MATCH_WINDOW_MS) return "post_match";
     return "locked";
   }
 
-  if (match.status === "live") {
-    const min = match.clockMinute ?? 0;
-    if (min >= 90) return "extra_time";
-    if (min >= 46) return "live_second";
-    if (min >= 44 && min <= 46) return "halftime";
-    return "live_first";
+  if (match.period === "half_time" || status === "halftime" || status === "half_time") {
+    return "halftime";
   }
 
-  const msUntilKickoff = match.kickoffMs - nowMs;
+  if (match.status === "live" && msUntilKickoff > PRE_KICKOFF_LIVE_TOLERANCE_MS) {
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
+      body: JSON.stringify({
+        sessionId: "0b0776",
+        location: "matchLifecycle.ts:getMatchPhase",
+        message: "rejected premature live status",
+        data: {
+          matchId: match.matchId ?? match.id,
+          msUntilKickoff,
+          status: match.status,
+        },
+        timestamp: Date.now(),
+        hypothesisId: "H4-premature-live",
+      }),
+    }).catch(() => {});
+    // #endregion
+    if (msUntilKickoff <= IMMINENT_MS) return "imminent";
+    return "dormant";
+  }
+
+  if (isInPlayFeedStatus(match.status)) {
+    return liveClockPhase(match);
+  }
+
   if (msUntilKickoff <= IMMINENT_MS && msUntilKickoff > 0) return "imminent";
-  if (msUntilKickoff <= 0) return "live_first";
+  if (msUntilKickoff <= 0) {
+    const phase: MatchPhase =
+      match.status === "scheduled" || status === "delayed" ? "imminent" : liveClockPhase(match);
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
+      body: JSON.stringify({
+        sessionId: "0b0776",
+        location: "matchLifecycle.ts:getMatchPhase",
+        message: "past-kickoff phase",
+        data: {
+          status: match.status,
+          msUntilKickoff,
+          phase,
+          group: match.group,
+          knockout: matchAllowsExtraTime(match),
+        },
+        timestamp: Date.now(),
+        hypothesisId: "H1-lifecycle",
+      }),
+    }).catch(() => {});
+    // #endregion
+    return phase;
+  }
 
   return "dormant";
 }

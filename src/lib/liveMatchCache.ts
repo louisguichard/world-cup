@@ -1,4 +1,5 @@
 import type { MergedMatch } from "../types";
+import { isMergedMatchEffectivelyLive } from "./matchLifecycle";
 import { bootCacheSchemaFields, matchesBootCacheSchema } from "./bootCacheSchema";
 import { BOOT_CACHE_SCHEMA_VERSION, BOOT_CACHE_VERSION } from "./bootCacheVersion";
 
@@ -47,5 +48,5 @@ export function writeLiveMatchCache(matches: Record<string, MergedMatch>): void 
 }
 
 export function hasLiveMatchesInCache(matches: Record<string, MergedMatch>): boolean {
-  return Object.values(matches).some((m) => m.status === "live");
+  return Object.values(matches).some((m) => isMergedMatchEffectivelyLive(m));
 }

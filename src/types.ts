@@ -9,7 +9,7 @@ export type MatchStatus =
   | "interrupted"
   | "cancelled";
 export type SourceKind = "espn" | "sofascore" | "polymarket" | "model" | "manual";
-export type Stage = "R32" | "R16" | "QF" | "SF" | "Final";
+export type Stage = "R32" | "R16" | "QF" | "SF" | "ThirdPlace" | "Final";
 
 export type Team = {
   id: string;

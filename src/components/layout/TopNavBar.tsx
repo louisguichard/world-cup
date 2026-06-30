@@ -1,3 +1,4 @@
+import { isMergedMatchInActivePhase } from "../../lib/matchLifecycle";
 import { useStore } from "../../store";
 import { APP_BRAND } from "../../config/appMeta";
 import { APP_COPY } from "../../lib/appCopy";
@@ -11,7 +12,7 @@ export function TopNavBar({ compact = false }: { compact?: boolean }) {
   const liveCount = useStore((s) => {
     let count = 0;
     for (const match of Object.values(s.liveMatches)) {
-      if (match.status === "live") count += 1;
+      if (isMergedMatchInActivePhase(match)) count += 1;
     }
     return count;
   });

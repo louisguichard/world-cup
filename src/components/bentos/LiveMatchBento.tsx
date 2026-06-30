@@ -25,6 +25,7 @@ import { TeamLabelById } from "../team/TeamLabelById";
 import { VenueLabel } from "../venue/VenueLabel";
 import { resolveEventsForMatch } from "../../lib/resolveMatchEvents";
 import { derivePenaltyShootout, matchHadPenaltyShootout } from "../../lib/derivePenaltyShootout";
+import { isMergedMatchInActivePhase } from "../../lib/matchLifecycle";
 import { PenaltyShootoutBar } from "../match/PenaltyShootoutBar";
 
 type Props = {
@@ -39,7 +40,7 @@ export function LiveMatchBento({ match, variant }: Props) {
   const away = resolveTeamFromStore(teams, match.awayTeamId);
   const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId);
 
-  const isLive = match.status === "live";
+  const isLive = isMergedMatchInActivePhase(match);
   const clockLabel = isLive ? formatLiveClock(match) : APP_COPY.match.final;
   const periodLabel = isLive
     ? formatPeriodLabel(match.period, match.status, match.clockMinute)

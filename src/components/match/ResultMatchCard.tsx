@@ -1,5 +1,6 @@
 import type { MergedMatch } from "../../types";
 import { useMemo } from "react";
+import { completedMatchPillLabel } from "../../lib/matchStageLabel";
 import { formatKickoffDate } from "../../lib/formatKickoff";
 import { teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { resolveDisplayMatch } from "../../lib/resolveDisplayMatch";
@@ -51,6 +52,7 @@ export function ResultMatchCard({ match: rawMatch }: ResultMatchCardProps) {
   const homeName = teamDisplayNameForMatch(match, "home", teams);
   const awayName = teamDisplayNameForMatch(match, "away", teams);
   const kickoffDate = formatKickoffDate(match.date);
+  const pillLabel = completedMatchPillLabel(match);
   const homeAdvancing = isAdvancingTeam(match, match.homeTeamId, teams, shootout);
   const awayAdvancing = isAdvancingTeam(match, match.awayTeamId, teams, shootout);
 
@@ -78,7 +80,7 @@ export function ResultMatchCard({ match: rawMatch }: ResultMatchCardProps) {
       }}
     >
       <div className="result-match-card-meta">
-        <span className="final-pill">FINAL</span>
+        <span className="final-pill">{pillLabel}</span>
         {kickoffDate ? <time dateTime={match.date}>{kickoffDate}</time> : null}
         <VenueLabel matchId={match.matchId ?? match.id} venueString={match.venue} inline />
       </div>

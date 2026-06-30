@@ -1,0 +1,266 @@
+{
+  "A": [
+    {
+      "teamId": "cze",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "kor",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "mex",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "rsa",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "B": [
+    {
+      "teamId": "bih",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "can",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "qat",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "sui",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "C": [
+    {
+      "teamId": "bra",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "hai",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "mar",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "sco",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "D": [
+    {
+      "teamId": "aus",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "par",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "tur",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "usa",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "E": [
+    {
+      "teamId": "civ",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "cuw",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "ecu",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "ger",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "F": [
+    {
+      "teamId": "jpn",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "ned",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "swe",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "tun",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "G": [
+    {
+      "teamId": "bel",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "egy",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "irn",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "nzl",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "H": [
+    {
+      "teamId": "cpv",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "esp",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "ksa",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "uru",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "I": [
+    {
+      "teamId": "fra",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "irq",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "nor",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "sen",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "J": [
+    {
+      "teamId": "alg",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "arg",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "aut",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "jor",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "K": [
+    {
+      "teamId": "cod",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "col",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "por",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "uzb",
+      "rank": 4,
+      "points": 0
+    }
+  ],
+  "L": [
+    {
+      "teamId": "cro",
+      "rank": 1,
+      "points": 0
+    },
+    {
+      "teamId": "eng",
+      "rank": 2,
+      "points": 0
+    },
+    {
+      "teamId": "gha",
+      "rank": 3,
+      "points": 0
+    },
+    {
+      "teamId": "pan",
+      "rank": 4,
+      "points": 0
+    }
+  ]
+}

@@ -1,0 +1,228 @@
+{
+  "M73": {
+    "matchNumber": 73,
+    "homeSource": "1A",
+    "awaySource": "3C/3D/3E/3F",
+    "targetMatchNext": 90,
+    "targetSlot": "away"
+  },
+  "M74": {
+    "matchNumber": 74,
+    "homeSource": "1B",
+    "awaySource": "3E/3F/3G/3H",
+    "targetMatchNext": 89,
+    "targetSlot": "home"
+  },
+  "M75": {
+    "matchNumber": 75,
+    "homeSource": "1C",
+    "awaySource": "3F/3G/3H/3I",
+    "targetMatchNext": 90,
+    "targetSlot": "home"
+  },
+  "M76": {
+    "matchNumber": 76,
+    "homeSource": "1D",
+    "awaySource": "3G/3H/3I/3J",
+    "targetMatchNext": 91,
+    "targetSlot": "home"
+  },
+  "M77": {
+    "matchNumber": 77,
+    "homeSource": "1E",
+    "awaySource": "3A/3B/3C/3D",
+    "targetMatchNext": 89,
+    "targetSlot": "away"
+  },
+  "M78": {
+    "matchNumber": 78,
+    "homeSource": "1F",
+    "awaySource": "3A/3B/3C/3E",
+    "targetMatchNext": 91,
+    "targetSlot": "away"
+  },
+  "M79": {
+    "matchNumber": 79,
+    "homeSource": "1G",
+    "awaySource": "3A/3B/3D/3E",
+    "targetMatchNext": 92,
+    "targetSlot": "home"
+  },
+  "M80": {
+    "matchNumber": 80,
+    "homeSource": "1H",
+    "awaySource": "3B/3C/3F/3G",
+    "targetMatchNext": 92,
+    "targetSlot": "away"
+  },
+  "M81": {
+    "matchNumber": 81,
+    "homeSource": "1I",
+    "awaySource": "3C/3D/3E/3H",
+    "targetMatchNext": 94,
+    "targetSlot": "home"
+  },
+  "M82": {
+    "matchNumber": 82,
+    "homeSource": "1J",
+    "awaySource": "3I/3J/3K/3L",
+    "targetMatchNext": 94,
+    "targetSlot": "away"
+  },
+  "M83": {
+    "matchNumber": 83,
+    "homeSource": "1K",
+    "awaySource": "3I/3J/3K/3L",
+    "targetMatchNext": 93,
+    "targetSlot": "home"
+  },
+  "M84": {
+    "matchNumber": 84,
+    "homeSource": "1L",
+    "awaySource": "3I/3J/3K/3L",
+    "targetMatchNext": 93,
+    "targetSlot": "away"
+  },
+  "M85": {
+    "matchNumber": 85,
+    "homeSource": "2A",
+    "awaySource": "2B",
+    "targetMatchNext": 96,
+    "targetSlot": "home"
+  },
+  "M86": {
+    "matchNumber": 86,
+    "homeSource": "2C",
+    "awaySource": "2D",
+    "targetMatchNext": 95,
+    "targetSlot": "home"
+  },
+  "M87": {
+    "matchNumber": 87,
+    "homeSource": "2E",
+    "awaySource": "2F",
+    "targetMatchNext": 96,
+    "targetSlot": "away"
+  },
+  "M88": {
+    "matchNumber": 88,
+    "homeSource": "2G",
+    "awaySource": "2H",
+    "targetMatchNext": 95,
+    "targetSlot": "away"
+  },
+  "M89": {
+    "matchNumber": 89,
+    "homeSource": "winner_74",
+    "awaySource": "winner_77",
+    "targetMatchNext": 97,
+    "targetSlot": "home"
+  },
+  "M90": {
+    "matchNumber": 90,
+    "homeSource": "winner_75",
+    "awaySource": "winner_73",
+    "targetMatchNext": 97,
+    "targetSlot": "away"
+  },
+  "M91": {
+    "matchNumber": 91,
+    "homeSource": "winner_76",
+    "awaySource": "winner_78",
+    "targetMatchNext": 99,
+    "targetSlot": "home"
+  },
+  "M92": {
+    "matchNumber": 92,
+    "homeSource": "winner_79",
+    "awaySource": "winner_80",
+    "targetMatchNext": 99,
+    "targetSlot": "away"
+  },
+  "M93": {
+    "matchNumber": 93,
+    "homeSource": "winner_83",
+    "awaySource": "winner_84",
+    "targetMatchNext": 98,
+    "targetSlot": "home"
+  },
+  "M94": {
+    "matchNumber": 94,
+    "homeSource": "winner_81",
+    "awaySource": "winner_82",
+    "targetMatchNext": 98,
+    "targetSlot": "away"
+  },
+  "M95": {
+    "matchNumber": 95,
+    "homeSource": "winner_86",
+    "awaySource": "winner_88",
+    "targetMatchNext": 100,
+    "targetSlot": "home"
+  },
+  "M96": {
+    "matchNumber": 96,
+    "homeSource": "winner_85",
+    "awaySource": "winner_87",
+    "targetMatchNext": 100,
+    "targetSlot": "away"
+  },
+  "M97": {
+    "matchNumber": 97,
+    "homeSource": "winner_89",
+    "awaySource": "winner_90",
+    "targetMatchNext": 101,
+    "targetSlot": "home"
+  },
+  "M98": {
+    "matchNumber": 98,
+    "homeSource": "winner_93",
+    "awaySource": "winner_94",
+    "targetMatchNext": 101,
+    "targetSlot": "away"
+  },
+  "M99": {
+    "matchNumber": 99,
+    "homeSource": "winner_91",
+    "awaySource": "winner_92",
+    "targetMatchNext": 102,
+    "targetSlot": "home"
+  },
+  "M100": {
+    "matchNumber": 100,
+    "homeSource": "winner_95",
+    "awaySource": "winner_96",
+    "targetMatchNext": 102,
+    "targetSlot": "away"
+  },
+  "M101": {
+    "matchNumber": 101,
+    "homeSource": "winner_97",
+    "awaySource": "winner_98",
+    "targetWinnerNext": 104,
+    "targetLoserNext": 103,
+    "targetSlotWinner": "home",
+    "targetSlotLoser": "home"
+  },
+  "M102": {
+    "matchNumber": 102,
+    "homeSource": "winner_99",
+    "awaySource": "winner_100",
+    "targetWinnerNext": 104,
+    "targetLoserNext": 103,
+    "targetSlotWinner": "away",
+    "targetSlotLoser": "away"
+  },
+  "M103": {
+    "matchNumber": 103,
+    "homeSource": "loser_101",
+    "awaySource": "loser_102",
+    "type": "Third-place Playoff"
+  },
+  "M104": {
+    "matchNumber": 104,
+    "homeSource": "winner_101",
+    "awaySource": "winner_102",
+    "type": "Final"
+  }
+}

@@ -15,6 +15,7 @@ function row(teamId: string, group: GroupStanding["group"], points: number): Tea
     points,
     conduct: 0,
     group,
+    rating: 1500,
   };
 }
 
@@ -22,30 +23,52 @@ function standing(group: GroupStanding["group"], rows: TeamRecord[]): GroupStand
   return { group, rows };
 }
 
-describe("getR32Slots", () => {
-  it("returns 16 official R32 fixtures", () => {
+describe("ROUND_OF_32_FIXTURES — source of truth enforcement", () => {
+  it("has exactly 16 fixtures", () => {
     expect(ROUND_OF_32_FIXTURES).toHaveLength(16);
-    const slots = getR32Slots([], {});
-    expect(slots).toHaveLength(16);
-    expect(slots[0]?.matchId).toBe("M73");
   });
 
-  it("maps group winners and runners-up to seeds", () => {
+  it("M73 is 1A vs 3E", () => {
+    expect(ROUND_OF_32_FIXTURES[0]).toEqual(["M73", "1A", "3E"]);
+  });
+  it("M74 is 1B vs 3J", () => {
+    expect(ROUND_OF_32_FIXTURES[1]).toEqual(["M74", "1B", "3J"]);
+  });
+  it("M75 is 1D vs 3B", () => {
+    expect(ROUND_OF_32_FIXTURES[2]).toEqual(["M75", "1D", "3B"]);
+  });
+  it("M81 is 2A vs 2B", () => {
+    expect(ROUND_OF_32_FIXTURES[8]).toEqual(["M81", "2A", "2B"]);
+  });
+  it("M84 is 1H vs 2J", () => {
+    expect(ROUND_OF_32_FIXTURES[11]).toEqual(["M84", "1H", "2J"]);
+  });
+  it("M85 is 1C vs 2F", () => {
+    expect(ROUND_OF_32_FIXTURES[12]).toEqual(["M85", "1C", "2F"]);
+  });
+  it("M87 is 1J vs 3H", () => {
+    expect(ROUND_OF_32_FIXTURES[14]).toEqual(["M87", "1J", "3H"]);
+  });
+  it("M88 is 2E vs 2I", () => {
+    expect(ROUND_OF_32_FIXTURES[15]).toEqual(["M88", "2E", "2I"]);
+  });
+
+  it("M73 resolves 1A winner and 3E third-place qualifier", () => {
     const standings: GroupStanding[] = [
-      standing("A", [row("usa", "A", 9), row("mex", "A", 6), row("can", "A", 3), row("per", "A", 0)]),
-      standing("B", [row("bra", "B", 9), row("ecu", "B", 6), row("chi", "B", 3), row("bol", "B", 0)]),
+      standing("A", [row("mex", "A", 9), row("can", "A", 6), row("usa", "A", 3), row("per", "A", 0)]),
+      standing("E", [row("ger", "E", 9), row("esp", "E", 6), row("ecu", "E", 3), row("arg", "E", 0)]),
     ];
     const teams: Record<string, Team> = {
-      usa: { id: "usa", name: "USA", shortName: "USA", abbreviation: "USA", group: "A", rating: 80 },
-      mex: { id: "mex", name: "Mexico", shortName: "MEX", abbreviation: "MEX", group: "A", rating: 75 },
-      bra: { id: "bra", name: "Brazil", shortName: "BRA", abbreviation: "BRA", group: "B", rating: 90 },
-      ecu: { id: "ecu", name: "Ecuador", shortName: "ECU", abbreviation: "ECU", group: "B", rating: 70 },
+      mex: { id: "mex", name: "Mexico", shortName: "MEX", abbreviation: "MEX", group: "A", rating: 80 },
+      ecu: { id: "ecu", name: "Ecuador", shortName: "ECU", abbreviation: "ECU", group: "E", rating: 70 },
     };
-    const slots = getR32Slots(standings, teams);
+    const slots = getR32Slots(standings, teams, {
+      lockedGroupMatchCount: { A: 6, E: 6 },
+      lockedStandingsByGroup: {},
+    });
     const m73 = slots.find((s) => s.matchId === "M73");
+    expect(m73?.homeSource).toBe("1A");
+    expect(m73?.awaySource).toBe("3E");
     expect(m73?.homeTeamId).toBe("mex");
-    expect(m73?.awayTeamId).toBe("ecu");
-    expect(m73?.homeSource).toBe("2A");
-    expect(m73?.awaySource).toBe("2B");
   });
 });

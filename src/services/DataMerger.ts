@@ -1,4 +1,5 @@
 import type { MergedMatch, SourceKind } from "../types";
+import { coerceLiveStatusForKickoff } from "../lib/matchLifecycle";
 
 export type SofaEnrichmentPatch = Pick<
   Partial<MergedMatch>,
@@ -32,15 +33,24 @@ function resolveKickoffMs(
   return Number.isNaN(parsed) ? existing?.kickoffMs : parsed;
 }
 
-export function applyLiveScore(
-  existing: MergedMatch | undefined,
+function stripUntrustedLivePromotion(
   incoming: Partial<MergedMatch>,
   source: SourceKind
-): MergedMatch {
-  const kickoffMs = resolveKickoffMs(incoming, existing);
+): Partial<MergedMatch> {
+  if (incoming.status !== "live") return incoming;
+  if (source === "espn" || source === "manual") return incoming;
+  const { status: _status, ...rest } = incoming;
+  return rest;
+}
 
-  if (!existing) {
-    return {
+function finalizeMergedMatch(
+  existing: MergedMatch | undefined,
+  incoming: Partial<MergedMatch>,
+  source: SourceKind,
+  kickoffMs: number | undefined
+): MergedMatch {
+  const merged = {
+    ...(existing ?? {
       id: incoming.id ?? "",
       date: incoming.date ?? new Date().toISOString(),
       homeTeamId: incoming.homeTeamId ?? "",
@@ -51,9 +61,32 @@ export function applyLiveScore(
       locked: incoming.locked ?? false,
       source,
       dataSource: source,
-      ...incoming,
-      kickoffMs,
-    } as MergedMatch;
+    }),
+    ...incoming,
+    kickoffMs,
+    source:
+      source === "manual"
+        ? "manual"
+        : existing?.source === "manual"
+          ? "manual"
+          : source,
+    dataSource: source,
+    lastUpdatedAt: Date.now(),
+  } as MergedMatch;
+
+  return coerceLiveStatusForKickoff(merged as MergedMatch);
+}
+
+export function applyLiveScore(
+  existing: MergedMatch | undefined,
+  incoming: Partial<MergedMatch>,
+  source: SourceKind
+): MergedMatch {
+  const kickoffMs = resolveKickoffMs(incoming, existing);
+  const patch = stripUntrustedLivePromotion(incoming, source);
+
+  if (!existing) {
+    return finalizeMergedMatch(undefined, patch, source, kickoffMs);
   }
 
   if (existing.source === "manual" && source !== "manual") {
@@ -67,14 +100,7 @@ export function applyLiveScore(
     return existing;
   }
 
-  return {
-    ...existing,
-    ...incoming,
-    kickoffMs,
-    source: source === "manual" ? "manual" : existing.source === "manual" ? "manual" : source,
-    dataSource: source,
-    lastUpdatedAt: Date.now()
-  };
+  return finalizeMergedMatch(existing, patch, source, kickoffMs);
 }
 
 /** Secondary SofaScore enrichment — never overwrites locked/completed/manual ESPN matches. */
@@ -99,17 +125,33 @@ export function enrichFromSofaScore(
   if (patch.homeScore !== undefined) updates.homeScore = patch.homeScore;
   if (patch.awayScore !== undefined) updates.awayScore = patch.awayScore;
 
-  if (patch.status) {
+  // Secondary sources never own lifecycle — only ESPN promotes to live.
+  if (patch.status === "live") {
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
+      body: JSON.stringify({
+        sessionId: "0b0776",
+        location: "DataMerger.ts:enrichFromSofaScore",
+        message: "blocked secondary live status patch",
+        data: { matchId: existing.matchId ?? existing.id, existingStatus: existing.status },
+        timestamp: Date.now(),
+        hypothesisId: "H2-sofa-promote",
+      }),
+    }).catch(() => {});
+    // #endregion
+  } else if (patch.status) {
     updates.status = patch.status;
   }
 
-  return {
+  return coerceLiveStatusForKickoff({
     ...existing,
     ...updates,
     locked: existing.locked,
     source: existing.source,
-    dataSource: existing.dataSource ?? existing.source
-  };
+    dataSource: existing.dataSource ?? existing.source,
+  } as MergedMatch);
 }
 
 export function reconcileScoreAndEvents(

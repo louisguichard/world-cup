@@ -108,6 +108,16 @@ describe("shouldRunHeavyPoll", () => {
     ).toBe(false);
   });
 
+  it("is false when kickoff passed but status is still scheduled", () => {
+    const now = kickoff + 5 * 60 * 1000;
+    expect(
+      shouldRunHeavyPoll(
+        [makeMatch({ id: "m1", date: new Date(kickoff).toISOString(), status: "scheduled" })],
+        now
+      )
+    ).toBe(false);
+  });
+
   it("is true during live_first", () => {
     const now = kickoff + 20 * 60 * 1000;
     expect(

@@ -72,14 +72,16 @@ const stageLabels: Record<Stage, string> = {
   R16: "Round of 16",
   QF: "Quarter-finals",
   SF: "Semi-finals",
-  Final: "Final"
+  ThirdPlace: "Third Place",
+  Final: "Final",
 };
 const stageShort: Record<Stage, string> = {
   R32: "R32",
   R16: "R16",
   QF: "QF",
   SF: "SF",
-  Final: "Final"
+  ThirdPlace: "3P",
+  Final: "Final",
 };
 const bracketRows: Record<string, number> = {
   M74: 1,
@@ -114,7 +116,7 @@ const bracketRows: Record<string, number> = {
   M102: 24,
   M104: 16
 };
-const bracketStages: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
+const bracketStages: Stage[] = ["R32", "R16", "QF", "SF", "ThirdPlace", "Final"];
 
 function loadOverrides(): Record<string, ScoreOverride> {
   try {
@@ -916,7 +918,14 @@ function BracketView({
   const champion = bracket.find((match) => match.id === "M104")?.winnerTeamId;
   const pickCount = Object.keys(bracketPicks).length;
   const orderedByStage = useMemo(() => {
-    const byStage: Record<Stage, BracketMatch[]> = { R32: [], R16: [], QF: [], SF: [], Final: [] };
+    const byStage: Record<Stage, BracketMatch[]> = {
+      R32: [],
+      R16: [],
+      QF: [],
+      SF: [],
+      ThirdPlace: [],
+      Final: [],
+    };
     for (const match of bracket) byStage[match.stage].push(match);
     for (const stage of bracketStages) {
       byStage[stage].sort((a, b) => (bracketRows[a.id] ?? 0) - (bracketRows[b.id] ?? 0));

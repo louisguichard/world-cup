@@ -53,21 +53,21 @@ describe("annotateBracketCertainty", () => {
 
   it("propagates confirmed winner certainty into R16", () => {
     const standings = [
-      standing("E", [
-        row("usa", "E", 3, 9),
-        row("mex", "E", 3, 6),
-        row("can", "E", 3, 3),
-        row("jpn", "E", 3, 0)
+      standing("G", [
+        row("usa", "G", 3, 9),
+        row("mex", "G", 3, 6),
+        row("can", "G", 3, 3),
+        row("jpn", "G", 3, 0)
       ])
     ];
     const r32: BracketMatch = {
-      id: "M74",
+      id: "M77",
       stage: "R32",
-      label: "M74",
+      label: "M77",
       homeTeamId: "usa",
       awayTeamId: "mex",
-      homeSeedLabel: "1E",
-      awaySeedLabel: "3:1E",
+      homeSeedLabel: "1G",
+      awaySeedLabel: "3I",
       source: "simulated",
       winnerTeamId: "usa"
     };
@@ -77,8 +77,8 @@ describe("annotateBracketCertainty", () => {
       label: "M89",
       homeTeamId: "usa",
       awayTeamId: "fra",
-      homeSeedLabel: "W74",
-      awaySeedLabel: "W77",
+      homeSeedLabel: "W77",
+      awaySeedLabel: "W74",
       source: "simulated"
     };
 

@@ -223,6 +223,7 @@ export const APP_COPY = {
     stageR16: "Round of 16",
     stageQF: "Quarterfinals",
     stageSF: "Semifinals",
+    stageThirdPlace: "Third Place",
     stageFinal: "Final",
     groupLabel: "Group",
     groupAll: "All groups",

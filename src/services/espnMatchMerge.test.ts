@@ -139,10 +139,17 @@ describe("resolveEspnMergeTarget", () => {
 
 describe("mergeEspnMatchIntoStore", () => {
   it("updates the M89 store key on fuzzy match, preserves matchId", () => {
+    const kickoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     const merged: Record<string, MergedMatch> = {
-      "M89": makeMatch("M89", { matchId: "M89", espnEventId: "776459" })
+      "M89": makeMatch("M89", { matchId: "M89", espnEventId: "776459", date: kickoff })
     };
-    const incoming = makeMatch("776459", { status: "live", homeScore: 1, awayScore: 0 });
+    const incoming = makeMatch("776459", {
+      status: "live",
+      homeScore: 1,
+      awayScore: 0,
+      date: kickoff,
+      clockMinute: 30,
+    });
     const mode = mergeEspnMatchIntoStore(merged, incoming, {});
     expect(mode).toBe("fuzzy");
     expect(merged["M89"]).toBeDefined();

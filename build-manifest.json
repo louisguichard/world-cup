@@ -1,6 +1,150 @@
 {
-  "updatedAt": "2026-06-30T07:41:34.836Z",
+  "updatedAt": "2026-06-30T18:12:53.696Z",
   "builds": [
+    {
+      "version": "5.0.0",
+      "build": 41,
+      "kind": "build",
+      "message": "71 file(s) in .github, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, package.json — 71 files changed, 4138 insertions(+), 671 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:12:53.696Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 40,
+      "kind": "build",
+      "message": "Bracket routing, live phase gates, CI pnpm lockfile, ThirdPlace stage types",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:12:44.595Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 39,
+      "kind": "build",
+      "message": "Live view uses lifecycle active phase instead of status===live gate",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:08:15.373Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 38,
+      "kind": "build",
+      "message": "Fix R16 cross-bracket routing, locked-in TBD slots, storedId slot trust, knockout stage pills",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:05:39.425Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 37,
+      "kind": "build",
+      "message": "Stabilize premature-live merge test against wall clock",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:00:31.444Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 36,
+      "kind": "build",
+      "message": "Self-healing tournament rules audit suite and RULES singleton",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:59:39.666Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 35,
+      "kind": "build",
+      "message": "ESPN-only live promotion with demotion reconcile",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:52:20.056Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 34,
+      "kind": "build",
+      "message": "Reject premature live status before kickoff window",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:48:20.483Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 33,
+      "kind": "build",
+      "message": "Stage-aware match lifecycle: group 100min cap, no ET phase",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:46:17.764Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 32,
+      "kind": "build",
+      "message": "Add tournament rules JSON, validators, and FIFA tiebreaker order fix",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:43:50.146Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 31,
+      "kind": "build",
+      "message": "Block secondary live promotion; reconcile with ESPN scoreboard",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:39:28.734Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 30,
+      "kind": "build",
+      "message": "Guard past-kickoff lifecycle until API leaves scheduled",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:34:42.772Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 29,
+      "kind": "build",
+      "message": "Finalize bracket SoT in getR32Slots and knockoutRoundFixtures per JSON",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:33:05.322Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 28,
+      "kind": "build",
+      "message": "Complete bracket resolution: ThirdPlace, official ESPN slot re-key, remove thirdPlaceMap from R32",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:29:41.476Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 27,
+      "kind": "build",
+      "message": "Import official knockout bracket JSON and JSON parity tests",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:24:57.440Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 26,
+      "kind": "build",
+      "message": "Align bracket engine 1:1 with world_cup_2026_knockout_bracket.json",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:23:42.330Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 25,
+      "kind": "build",
+      "message": "Bracket runtime audit instrumentation",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:19:46.669Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 24,
+      "kind": "build",
+      "message": "Audit-corrected WC2026 bracket progression and R32 fixtures",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T17:19:21.047Z"
+    },
     {
       "version": "5.0.0",
       "build": 23,
@@ -176,153 +320,17 @@
       "message": "120 file(s) in .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json — 120 files changed, 7308 insertions(+), 2610 deletions(-)",
       "date": "2026-06-30",
       "timestamp": "2026-06-30T06:21:05.605Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 1,
-      "kind": "major",
-      "message": "v5.0.0 release: knockout UX, FIFA public API, paninarr assets, penalty pipeline",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:20:37.692Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 108,
-      "kind": "build",
-      "message": "Remove unused Paninarr team sticker merge path",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:20:19.647Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 107,
-      "kind": "build",
-      "message": "Team crests: canonical /logos/teams only, remove Paninarr sticker overlays",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:19:28.858Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 106,
-      "kind": "build",
-      "message": "Bracket spacing: fit cards in grid slots, compact layout, tighter columns",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:16:05.246Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 105,
-      "kind": "build",
-      "message": "Remove debug instrumentation from bracket toggle fix",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:15:31.871Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 104,
-      "kind": "build",
-      "message": "Fix venue popover blocking bracket Locked in toggle clicks",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:14:04.352Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 103,
-      "kind": "build",
-      "message": "IconicFootball-API typed client, photo waterfall tier, boot warm index",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:04:34.230Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 102,
-      "kind": "build",
-      "message": "FIFA public API HTTP supplement integration",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:03:54.455Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 101,
-      "kind": "build",
-      "message": "Fix player photo enrich waterfall after Paninarr tier",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T05:59:24.400Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 100,
-      "kind": "build",
-      "message": "Add Paninarr full sticker catalog and ImageAssetService",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T05:57:43.227Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 99,
-      "kind": "build",
-      "message": "KnockoutRoundStatusBento reads locked liveMatches instead of bracket projection",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T05:34:51.108Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 98,
-      "kind": "build",
-      "message": "Wire andrekamp matches.json for post-match goals and highlight fallback",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T05:25:44.080Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 97,
-      "kind": "build",
-      "message": "Widen bracket column gap, enlarge round labels, improve connector readability",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T05:12:53.499Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 96,
-      "kind": "build",
-      "message": "Add KnockoutRoundStatusBento to Live view during knockout phase",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T05:12:50.996Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 95,
-      "kind": "build",
-      "message": "Fix player DB lookup freeze; remove debug instrumentation",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T05:11:00.905Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 94,
-      "kind": "build",
-      "message": "Fix MatchGoalScorers Fast Refresh by moving helper to lib",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T04:56:35.017Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 93,
-      "kind": "build",
-      "message": "Remove penalty pipeline debug instrumentation after verified fix",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T04:55:15.677Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 92,
-      "kind": "build",
-      "message": "Parse ESPN FT-Pens shootout details into penalty scores",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T04:51:58.149Z"
     }
   ],
   "commits": [
+    {
+      "hash": "6d0efff3460d5afd2231ce8ef1d99af9770c3090",
+      "shortHash": "6d0efff",
+      "message": "Record v5.0.0 build 23 production deploy on Vercel.",
+      "version": "5.0.0",
+      "build": 23,
+      "timestamp": "2026-06-30T07:41:56.676Z"
+    },
     {
       "hash": "5eeb3a3659bd22096df961d48b7600fcbfbeb873",
       "shortHash": "5eeb3a3",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 70,
       "timestamp": "2026-06-28T06:37:25.277Z"
-    },
-    {
-      "hash": "ee62ba5603d11b37fbfd8d64d6a2545279c433e1",
-      "shortHash": "ee62ba5",
-      "message": "Fix knockout schedule placeholders and complete pnpm monorepo stack.",
-      "version": "4.0.0",
-      "build": 68,
-      "timestamp": "2026-06-28T06:34:15.601Z"
     }
   ],
   "deploys": [

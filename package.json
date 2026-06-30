@@ -13,6 +13,7 @@
     "stack:down": "docker compose -f infra/local/docker-compose.yml down",
     "stack:logs": "docker compose -f infra/local/docker-compose.yml logs -f",
     "test": "vitest run",
+    "test:rules-audit": "vitest run src/lib/__tests__/tournamentRulesAudit.test.ts --reporter=verbose",
     "test:all": "vitest run --config vitest.workspace.ts",
     "test:packages": "vitest run --config vitest.workspace.ts packages",
     "smoke:pipeline": "tsx scripts/smoke-pipeline.ts",

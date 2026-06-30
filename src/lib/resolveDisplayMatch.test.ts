@@ -41,7 +41,7 @@ describe("resolveDisplayMatch", () => {
     const raw: MergedMatch = {
       id: "760484",
       espnEventId: "760484",
-      matchId: "M73",
+      matchId: "M81",
       date: "2026-06-28T19:00:00Z",
       homeTeamId: "2nd Group A",
       awayTeamId: "2nd Group B",
@@ -56,13 +56,13 @@ describe("resolveDisplayMatch", () => {
       period: "first_half",
     };
 
-    const schedule = materializeFullSchedule(teams, { M73: raw }, standings);
+    const schedule = materializeFullSchedule(teams, { M81: raw }, standings);
     const index = buildMaterializedMatchIndex(schedule);
     const display = resolveDisplayMatch(raw, index);
 
     expect(display.homeTeamId).toBe("rsa");
     expect(display.awayTeamId).toBe("ecu");
-    expect(display.venue).toContain("SoFi");
+    expect(display.venue).toContain("Lumen Field");
   });
 
   it("fills venue from broadcast when raw match lacks it", () => {

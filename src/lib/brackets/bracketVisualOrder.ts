@@ -1,30 +1,14 @@
 import { BRACKET_FEED_MAP } from "../bracketTree";
+import { R32_VISUAL_ORDER } from "./bracketProgression";
 import type { BracketMatch, Stage } from "../../types";
 
 /**
  * Canonical R32 column order: each R16 feeder pair is adjacent (no crossed connectors).
- * Derived from KNOCKOUT_ROUND_FIXTURES feeder groupings.
+ * Derived from BRACKET_PROGRESSION feeder groupings.
  */
-export const R32_VISUAL_ORDER: string[] = [
-  "M73",
-  "M74",
-  "M75",
-  "M76",
-  "M77",
-  "M78",
-  "M79",
-  "M80",
-  "M81",
-  "M82",
-  "M83",
-  "M84",
-  "M85",
-  "M86",
-  "M87",
-  "M88",
-];
+export { R32_VISUAL_ORDER };
 
-const LATER_STAGES: Stage[] = ["R16", "QF", "SF", "Final"];
+const LATER_STAGES: Stage[] = ["R16", "QF", "SF", "ThirdPlace", "Final"];
 
 /** Visual slot index for a match — R32 from canonical order, later rounds from feeder midpoint. */
 export function computeVisualIndex(
@@ -83,6 +67,7 @@ export function orderBracketByStage(
     R16: [],
     QF: [],
     SF: [],
+    ThirdPlace: [],
     Final: [],
   };
 
