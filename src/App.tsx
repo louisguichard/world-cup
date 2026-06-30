@@ -84,6 +84,9 @@ type ScheduleEntry = {
   // powers the per-team filter.
   teamPool: string[];
   kind: "group" | "knockout";
+  // The third-place play-off: contested by the two semi-final losers, so a
+  // team's chance of appearing is P(reach SF) − P(reach Final), not a stageReach.
+  thirdPlace?: boolean;
 };
 
 type FilterOption = {
@@ -299,17 +302,26 @@ function buildUpcomingSchedule(
     if (!bracketMatch?.homeTeamId || !bracketMatch?.awayTeamId) return undefined;
     const fixture = realByPair.get(teamPairKey(bracketMatch.homeTeamId, bracketMatch.awayTeamId));
     if (!fixture) return undefined;
-    let winnerTeamId: string | undefined;
-    let loserTeamId: string | undefined;
+    // Prefer the team ESPN flagged as advancing — it accounts for a penalty
+    // shoot-out when regulation finished level. Only fall back to the score when
+    // that flag is missing, otherwise a drawn-but-decided tie (e.g. 1–1 on pens)
+    // would leave both teams "alive" and the loser would haunt later rounds.
+    let winnerTeamId =
+      fixture.status === "completed" ? fixture.winnerTeamId : undefined;
     if (
+      !winnerTeamId &&
       fixture.status === "completed" &&
       typeof fixture.homeScore === "number" &&
       typeof fixture.awayScore === "number" &&
       fixture.homeScore !== fixture.awayScore
     ) {
       winnerTeamId = fixture.homeScore > fixture.awayScore ? fixture.homeTeamId : fixture.awayTeamId;
-      loserTeamId = fixture.homeScore > fixture.awayScore ? fixture.awayTeamId : fixture.homeTeamId;
     }
+    const loserTeamId = winnerTeamId
+      ? winnerTeamId === fixture.homeTeamId
+        ? fixture.awayTeamId
+        : fixture.homeTeamId
+      : undefined;
     return { status: fixture.status, winnerTeamId, loserTeamId, homeScore: fixture.homeScore, awayScore: fixture.awayScore };
   };
 
@@ -421,7 +433,8 @@ function buildUpcomingSchedule(
       away: awayLoser ? { kind: "team", teamId: awayLoser } : { kind: "tbd", candidates: candidatesFor("M102") },
       status: "scheduled",
       teamPool: [...new Set([...candidatesFor("M101"), ...candidatesFor("M102")])],
-      kind: "knockout"
+      kind: "knockout",
+      thirdPlace: true
     });
   }
 
@@ -1852,11 +1865,25 @@ function ScheduleTeamLabel({
 
 type QualifierRow = { team: Team; reach: number | undefined };
 
+// Chance that a team fills an undecided slot of this tie. Usually the simulated
+// reach for the tie's stage; for the third-place play-off it's the chance of
+// losing a semi-final, i.e. P(reach SF) − P(reach Final).
+function qualifierReach(
+  summary: TeamSimulationSummary | undefined,
+  stage?: Stage,
+  thirdPlace?: boolean
+): number | undefined {
+  if (!summary) return undefined;
+  if (thirdPlace) return Math.max(0, summary.stageReach.SF - summary.stageReach.Final);
+  return stage ? summary.stageReach[stage] : undefined;
+}
+
 function sideQualifiers(
   side: ScheduleSide,
   teamsById: Record<string, Team>,
   teamReach: Record<string, TeamSimulationSummary> | undefined,
-  stage?: Stage
+  stage?: Stage,
+  thirdPlace?: boolean
 ): QualifierRow[] {
   const ids = side.kind === "team" ? [side.teamId] : side.candidates;
   const rows = ids
@@ -1865,7 +1892,7 @@ function sideQualifiers(
       if (!team) return null;
       // A settled side is certain to play, so it shows 100%.
       if (side.kind === "team") return { team, reach: 1 };
-      const reach = stage ? teamReach?.[id]?.stageReach?.[stage] : undefined;
+      const reach = qualifierReach(teamReach?.[id], stage, thirdPlace);
       return { team, reach: typeof reach === "number" ? reach : undefined };
     })
     .filter((row): row is QualifierRow => Boolean(row));
@@ -1882,16 +1909,18 @@ function QualifierList({
   away,
   teamsById,
   teamReach,
-  stage
+  stage,
+  thirdPlace
 }: {
   home: ScheduleSide;
   away: ScheduleSide;
   teamsById: Record<string, Team>;
   teamReach?: Record<string, TeamSimulationSummary>;
   stage?: Stage;
+  thirdPlace?: boolean;
 }) {
-  const homeRows = sideQualifiers(home, teamsById, teamReach, stage);
-  const awayRows = sideQualifiers(away, teamsById, teamReach, stage);
+  const homeRows = sideQualifiers(home, teamsById, teamReach, stage, thirdPlace);
+  const awayRows = sideQualifiers(away, teamsById, teamReach, stage, thirdPlace);
   if (!homeRows.length && !awayRows.length) return null;
 
   const column = (rows: QualifierRow[], side: "left" | "right") => (
@@ -2086,7 +2115,14 @@ function ScheduleRow({
         </div>
       </div>
       {expanded ? (
-        <QualifierList home={entry.home} away={entry.away} teamsById={teamsById} teamReach={teamReach} stage={entry.stage} />
+        <QualifierList
+          home={entry.home}
+          away={entry.away}
+          teamsById={teamsById}
+          teamReach={teamReach}
+          stage={entry.stage}
+          thirdPlace={entry.thirdPlace}
+        />
       ) : null}
     </div>
   );
