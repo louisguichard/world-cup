@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-30T18:12:53.696Z",
+  "updatedAt": "2026-06-30T18:13:59.352Z",
   "builds": [
+    {
+      "version": "5.0.0",
+      "build": 42,
+      "kind": "build",
+      "message": "CI: generate bundled data before test via pretest hook",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:13:59.351Z"
+    },
     {
       "version": "5.0.0",
       "build": 41,
@@ -312,17 +320,17 @@
       "message": "Bracket visual order + paired elbow connectors fix crossing lines",
       "date": "2026-06-30",
       "timestamp": "2026-06-30T06:25:28.651Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 2,
-      "kind": "build",
-      "message": "120 file(s) in .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json — 120 files changed, 7308 insertions(+), 2610 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:21:05.605Z"
     }
   ],
   "commits": [
+    {
+      "hash": "c68c575629b52409b9d7d95b9a0a18978db2db57",
+      "shortHash": "c68c575",
+      "message": "Fix bracket routing, live visibility, and CI pipeline for pnpm.",
+      "version": "5.0.0",
+      "build": 41,
+      "timestamp": "2026-06-30T18:12:54.161Z"
+    },
     {
       "hash": "6d0efff3460d5afd2231ce8ef1d99af9770c3090",
       "shortHash": "6d0efff",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 70,
       "timestamp": "2026-06-28T06:40:00.733Z"
-    },
-    {
-      "hash": "90962db099843a488de43fe89e7cdcc17a03285f",
-      "shortHash": "90962db",
-      "message": "Fix Vercel serverless build for pnpm monorepo deploy.",
-      "version": "4.0.0",
-      "build": 70,
-      "timestamp": "2026-06-28T06:37:25.277Z"
     }
   ],
   "deploys": [

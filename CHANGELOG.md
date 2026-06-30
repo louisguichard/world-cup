@@ -8,6 +8,7 @@
 ## [Unreleased]
 
 ### Builds
+- **5.0.0 build 42** (2026-06-30): CI: generate bundled data before test via pretest hook
 - **5.0.0 build 41** (2026-06-30): 71 file(s) in .github, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, package.json — 71 files changed, 4138 insertions(+), 671 deletions(-)
 - **5.0.0 build 40** (2026-06-30): Bracket routing, live phase gates, CI pnpm lockfile, ThirdPlace stage types
 - **5.0.0 build 39** (2026-06-30): Live view uses lifecycle active phase instead of status===live gate

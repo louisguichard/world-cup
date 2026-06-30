@@ -175,6 +175,10 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+## [5.0.0] build 42 — 2026-06-30 (build)
+- CI: generate bundled data before test via pretest hook
+
 ## [5.0.0] build 41 — 2026-06-30 (build)
 - 71 file(s) in .github, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, package.json — 71 files changed, 4138 insertions(+), 671 deletions(-)
 
