@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T03:51:27.158Z",
+  "updatedAt": "2026-06-30T03:53:25.025Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "a8472b646fa5882b59ef5233e7410526b6cd761c",
+      "shortHash": "a8472b6",
+      "message": "Fix live ET labels, penalty bar, bracket live scores, and connector layout.",
+      "version": "4.0.0",
+      "build": 83,
+      "timestamp": "2026-06-30T03:51:27.851Z"
+    },
+    {
       "hash": "478a2bd7bcc1044b850d1148f83cb4c356c270a4",
       "shortHash": "478a2bd",
       "message": "Record v4.0.0 build 80 production deploy on Vercel.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 26,
       "timestamp": "2026-06-27T18:42:29.882Z"
-    },
-    {
-      "hash": "e8bd51c91d6c3782d449e75500ed1beb66f42f02",
-      "shortHash": "e8bd51c",
-      "message": "Bust client caches and force fresh deploy shell",
-      "version": "4.0.0",
-      "build": 23,
-      "timestamp": "2026-06-27T17:27:59.717Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "4.0.0",
+      "build": 83,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-30T03:53:25.023Z"
+    },
     {
       "url": "",
       "environment": "production",
@@ -716,14 +724,6 @@
       "build": 16,
       "message": "Production deploy via deploy:vercel",
       "timestamp": "2026-06-27T06:51:06.339Z"
-    },
-    {
-      "url": "https://world-cup-rho-ten.vercel.app",
-      "environment": "production",
-      "version": "3.0.0",
-      "build": 15,
-      "message": "Production deploy via deploy:vercel",
-      "timestamp": "2026-06-27T06:44:05.747Z"
     }
   ]
 }
