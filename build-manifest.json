@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T06:21:05.605Z",
+  "updatedAt": "2026-06-30T06:23:16.310Z",
   "builds": [
     {
       "version": "5.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "146646c26d93f7ca9680bdaee32f0f5fa02304ff",
+      "shortHash": "146646c",
+      "message": "Release v5.0.0: deployable knockout build with FIFA public API and paninarr assets.",
+      "version": "5.0.0",
+      "build": 2,
+      "timestamp": "2026-06-30T06:21:08.316Z"
+    },
+    {
       "hash": "c4ebb0450b244657836ee28b6761bf72c7472edf",
       "shortHash": "c4ebb04",
       "message": "Record v4.0.0 build 85 production deploy on Vercel.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 36,
       "timestamp": "2026-06-27T19:29:55.645Z"
-    },
-    {
-      "hash": "8b3c16d9f5d4c7aa67ca826775e7f3ee2b2eac3e",
-      "shortHash": "8b3c16d",
-      "message": "Fix Vercel rewrites: pass service/upstream query params to api/rapid",
-      "version": "4.0.0",
-      "build": 34,
-      "timestamp": "2026-06-27T19:25:59.301Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "5.0.0",
+      "build": 2,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-30T06:23:16.308Z"
+    },
     {
       "url": "",
       "environment": "production",
@@ -716,14 +724,6 @@
       "build": 18,
       "message": "Production deploy via deploy:vercel",
       "timestamp": "2026-06-27T06:58:05.156Z"
-    },
-    {
-      "url": "https://world-cup-rho-ten.vercel.app",
-      "environment": "production",
-      "version": "3.0.0",
-      "build": 17,
-      "message": "Production deploy via deploy:vercel",
-      "timestamp": "2026-06-27T06:55:31.937Z"
     }
   ]
 }
