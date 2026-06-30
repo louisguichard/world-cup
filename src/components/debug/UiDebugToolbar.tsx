@@ -27,6 +27,7 @@ const ISSUE_LABELS: Record<UiDebugIssueKind, string> = {
   "horizontal-overflow": "Horizontal overflow",
   "vertical-clip": "Vertical clip",
   "layout-collision": "Layout collision",
+  "text-truncated": "Text truncated",
 };
 
 export function UiDebugToolbar({

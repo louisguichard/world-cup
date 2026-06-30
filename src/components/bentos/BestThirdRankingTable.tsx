@@ -8,7 +8,7 @@ import {
 } from "../../lib/thirdPlaceLiveStatus";
 import { buildThirdPlaceCutoffScenario, CUTOFF_RANK } from "../../lib/thirdPlaceCutoffScenario";
 import type { QualificationMatchContext } from "../../lib/thirdPlaceQualification";
-import { buildQualificationContext } from "../../lib/qualification";
+import { useQualificationContext } from "../../store/selectors/qualificationSelectors";
 import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import type { GroupStanding, Team, TeamRecord } from "../../types";
@@ -126,15 +126,14 @@ export function BestThirdRankingTable({
   ranked: rankedProp,
   qualContext: qualContextProp,
 }: Props) {
-  const liveMatches = useStore((s) => s.liveMatches);
+  const sharedQualContext = useQualificationContext();
+  const qualContext = qualContextProp ?? sharedQualContext;
   const tbl = APP_COPY.table;
   const bt = APP_COPY.bestThird;
   const rows = snapshot.rankings.slice(0, 12);
   const deltaByTeam = new Map(snapshot.deltas.map((delta) => [delta.teamId, delta]));
   const focusSet = new Set(focusTeamIds);
   const crossingMap = new Map(cutoffCrossings.map((c) => [c.teamId, c.direction]));
-  const qualContext =
-    qualContextProp ?? buildQualificationContext(Object.values(liveMatches), Object.values(teams));
   const ranked = rankedProp ?? snapshot.rankings;
 
   const maxPoints = Math.max(1, ...rows.map((r) => r.points));

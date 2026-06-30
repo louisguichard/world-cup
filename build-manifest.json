@@ -1,6 +1,46 @@
 {
-  "updatedAt": "2026-06-30T07:25:12.940Z",
+  "updatedAt": "2026-06-30T07:39:15.734Z",
   "builds": [
+    {
+      "version": "5.0.0",
+      "build": 23,
+      "kind": "build",
+      "message": "34 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, scripts, src, version.json — 34 files changed, 767 insertions(+), 438 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:39:15.734Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 22,
+      "kind": "build",
+      "message": "Remove debug instrumentation and trim perf hot-path bloat",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:38:38.809Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 21,
+      "kind": "build",
+      "message": "Shared schedule and qual caches; dedupe expensive derived data across components",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:36:51.821Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 20,
+      "kind": "build",
+      "message": "Skip schedule/qual recompute on clock ticks; defer Live heavy sections",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:32:19.415Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 19,
+      "kind": "build",
+      "message": "Defer bracket projection and tab nav to fix UI freeze on tab/drawer switch",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T07:28:20.693Z"
+    },
     {
       "version": "5.0.0",
       "build": 18,
@@ -280,49 +320,17 @@
       "message": "Parse ESPN FT-Pens shootout details into penalty scores",
       "date": "2026-06-30",
       "timestamp": "2026-06-30T04:51:58.149Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 91,
-      "kind": "build",
-      "message": "Fix schedule score overlap, stabilize player photos, add hybrid player database and team drawer roster",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T04:49:18.838Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 90,
-      "kind": "build",
-      "message": "Boot penalty pipeline: ESPN events + PBP before Zafronix fallback",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T04:47:59.405Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 89,
-      "kind": "build",
-      "message": "Fix bracket column layout and SVG connector alignment",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T04:46:59.493Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 88,
-      "kind": "build",
-      "message": "Wire penalty enrichment at boot, preserve on poll, relax ID guard, fix loading UI",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T04:40:38.830Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 87,
-      "kind": "build",
-      "message": "Fix corrupt font assets and nested venue button DOM warning",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T04:38:25.759Z"
     }
   ],
   "commits": [
+    {
+      "hash": "e662f060dfd33c145d1b17469f418d780c94d4a6",
+      "shortHash": "e662f06",
+      "message": "Record v5.0.0 build 18 production deploy on Vercel.",
+      "version": "5.0.0",
+      "build": 18,
+      "timestamp": "2026-06-30T07:25:37.284Z"
+    },
     {
       "hash": "c22244fc4e8cbcde244c8262c61f49f52d119ddf",
       "shortHash": "c22244f",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 55,
       "timestamp": "2026-06-28T05:09:17.336Z"
-    },
-    {
-      "hash": "0e778fac355bc7fbce6591d0ca6f775382a61183",
-      "shortHash": "0e778fa",
-      "message": "Complete operational readiness follow-through: status contract, BC3 UI, smoke.",
-      "version": "4.0.0",
-      "build": 52,
-      "timestamp": "2026-06-28T05:05:57.563Z"
     }
   ],
   "deploys": [

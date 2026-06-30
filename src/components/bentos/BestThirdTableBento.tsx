@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
+import { computeQualificationStatus } from "../../lib/qualification";
+import { useQualificationContext } from "../../store/selectors/qualificationSelectors";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
 import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
@@ -82,11 +83,7 @@ function rowClasses(index: number, qualRowClass: string): string {
 export function BestThirdTableBento({ standings }: BestThirdTableBentoProps) {
   const teams = useStore((s) => s.teams);
   const liveMatches = useStore((s) => s.liveMatches);
-
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
+  const qualContext = useQualificationContext();
 
   const ranked = useMemo(() => rankAliveBestThirds(standings, qualContext), [standings, qualContext]);
 

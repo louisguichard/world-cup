@@ -152,6 +152,26 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+
+
+
+## [5.0.0] build 23 — 2026-06-30 (build)
+- 34 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, scripts, src, version.json — 34 files changed, 767 insertions(+), 438 deletions(-)
+
+## [5.0.0] build 22 — 2026-06-30 (build)
+- Remove debug instrumentation and trim perf hot-path bloat
+
+## [5.0.0] build 21 — 2026-06-30 (build)
+- Shared schedule and qual caches; dedupe expensive derived data across components
+
+## [5.0.0] build 20 — 2026-06-30 (build)
+- Skip schedule/qual recompute on clock ticks; defer Live heavy sections
+
+## [5.0.0] build 19 — 2026-06-30 (build)
+- Defer bracket projection and tab nav to fix UI freeze on tab/drawer switch
+
 ## [5.0.0] build 18 — 2026-06-30 (build)
 - Bracket team names 2-line clamp all viewports; fix embed head alignment
 

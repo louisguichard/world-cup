@@ -25,6 +25,9 @@ export function UiDebugOverlay({ settings, scanKey, onIssuesChange }: Props) {
       return;
     }
 
+    let idleId = 0;
+    let scrollTimer = 0;
+
     const runScan = () => {
       const root = document.querySelector(".wc-chrome");
       if (!(root instanceof HTMLElement)) {
@@ -49,15 +52,26 @@ export function UiDebugOverlay({ settings, scanKey, onIssuesChange }: Props) {
       }
     };
 
-    runScan();
-    const timer = window.setInterval(runScan, 1200);
-    window.addEventListener("resize", runScan);
-    window.addEventListener("scroll", runScan, true);
+    const scheduleScan = () => {
+      if (idleId) cancelIdleCallback(idleId);
+      idleId = requestIdleCallback(runScan, { timeout: 800 });
+    };
+
+    scheduleScan();
+    const timer = window.setInterval(scheduleScan, 3000);
+    window.addEventListener("resize", scheduleScan);
+    const onScroll = () => {
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(scheduleScan, 400);
+    };
+    window.addEventListener("scroll", onScroll, true);
 
     return () => {
+      if (idleId) cancelIdleCallback(idleId);
+      window.clearTimeout(scrollTimer);
       window.clearInterval(timer);
-      window.removeEventListener("resize", runScan);
-      window.removeEventListener("scroll", runScan, true);
+      window.removeEventListener("resize", scheduleScan);
+      window.removeEventListener("scroll", onScroll, true);
       const rootEl = document.querySelector(".wc-chrome");
       if (rootEl instanceof HTMLElement) clearLayoutContainerMarks(rootEl);
     };

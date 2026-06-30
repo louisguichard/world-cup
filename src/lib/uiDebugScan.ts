@@ -2,7 +2,8 @@ export type UiDebugIssueKind =
   | "page-horizontal-overflow"
   | "horizontal-overflow"
   | "vertical-clip"
-  | "layout-collision";
+  | "layout-collision"
+  | "text-truncated";
 
 export type UiDebugIssue = {
   id: string;
@@ -106,6 +107,17 @@ function isIntentionalScrollRegion(el: HTMLElement): boolean {
   );
 }
 
+/** Bracket cards on touch breakpoints use 2-line clamp — flag single-line squeeze. */
+function isBracketNameSeverelyTruncated(el: HTMLElement): boolean {
+  if (!el.classList.contains("team-name-text")) return false;
+  if (!el.closest(".bracket-card, .bracket-view, .live-bracket-embed")) return false;
+  const text = el.textContent?.trim() ?? "";
+  if (text.length < 4) return false;
+  const style = getComputedStyle(el);
+  if (style.whiteSpace !== "nowrap") return false;
+  return el.scrollWidth > el.clientWidth + 2;
+}
+
 function isCompactScorersSlot(el: HTMLElement): boolean {
   return el.classList.contains("match-goal-scorers-slot");
 }
@@ -160,7 +172,9 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
         (el.classList.contains("schedule-day-group") && Boolean(el.closest(".dashboard-view"))) ||
         (el.classList.contains("dashboard-section") &&
           Boolean(el.querySelector(".schedule-list, .schedule-day-group"))) ||
-        Boolean(el.closest(".wc-main-simulator, .app-shell"));
+        (el.classList.contains("bracket-section") && el.classList.contains("bracket-section--embedded")) ||
+        Boolean(el.closest(".wc-main-simulator, .app-shell")) ||
+        (el.classList.contains("team-name-text") && Boolean(el.closest(".bracket-card")));
 
       if (!skipHorizontal && (clipped || (!isScrollContainer(el) && hDelta > 8))) {
         issues.push({
@@ -181,7 +195,8 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
       !isIntentionalGlowBleed(el) &&
       !el.classList.contains("team-flag-inner") &&
       !isCompactScorersSlot(el) &&
-      !el.classList.contains("group-table-scroll")
+      !el.classList.contains("group-table-scroll") &&
+      !(el.classList.contains("team-name-text") && el.closest(".bracket-card"))
     ) {
       issues.push({
         id: `v-${index++}`,
@@ -226,8 +241,9 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
             parent.classList.contains("match-goal-scorers-slot")) ||
           (el.classList.contains("live-qual-row") &&
             parent.classList.contains("qual-dashboard-row")) ||
+          (parent.classList.contains("bracket-head") && el.tagName === "H3") ||
           (parent.classList.contains("bracket-rounds") &&
-            el.classList.contains("bracket-round")) ||
+            (el.classList.contains("bracket-round") || el.classList.contains("bracket-cell"))) ||
           (el.classList.contains("fixture-betting-body") &&
             parent.classList.contains("fixture-betting-details"));
 
@@ -242,6 +258,17 @@ export function scanUiLayoutIssues(root: HTMLElement | Document = document): UiD
           });
         }
       }
+    }
+
+    if (isBracketNameSeverelyTruncated(el)) {
+      issues.push({
+        id: `t-${index++}`,
+        kind: "text-truncated",
+        label: describeElement(el),
+        detail: `Bracket team name clipped (${el.clientWidth}px wide): "${(el.textContent ?? "").slice(0, 24)}"`,
+        rect,
+        element: el,
+      });
     }
   }
 

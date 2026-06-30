@@ -1,15 +1,15 @@
 import type { MergedMatch, Team } from "../../types";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLookup";
 import { formatKickoff, formatKickoffDate } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { APP_COPY } from "../../lib/appCopy";
 import { matchStageLabel } from "../../lib/matchStageLabel";
-import { buildQualificationContext } from "../../lib/qualification";
 import {
   getBestThirdBubbleTeamIds,
   matchInvolvesBestThirdBubble,
 } from "../../lib/thirdPlaceLiveStatus";
+import { useQualificationContext } from "../../store/selectors/qualificationSelectors";
 import { useMatchTheme } from "../../hooks/useMatchTheme";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
@@ -45,7 +45,7 @@ type Props = {
   showKickoffCountdown?: boolean;
 };
 
-export function MatchScheduleCard({
+export const MatchScheduleCard = memo(function MatchScheduleCard({
   match,
   home,
   away,
@@ -56,7 +56,7 @@ export function MatchScheduleCard({
   const matchEvents = useStore((s) => s.matchEvents);
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
-  const liveMatchesMap = useStore((s) => s.liveMatches);
+  const qualContext = useQualificationContext();
   const events = useMemo(
     () => resolveEventsForMatch(match, matchEvents, teams),
     [match, matchEvents, teams]
@@ -69,10 +69,6 @@ export function MatchScheduleCard({
   const isDone = match.status === "completed" || match.locked;
   const matchTheme = useMatchTheme(match.homeTeamId, match.awayTeamId, isLive ? "live" : "default");
 
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatchesMap), Object.values(teams)),
-    [liveMatchesMap, teams]
-  );
   const bubbleTeamIds = useMemo(
     () => getBestThirdBubbleTeamIds(standings, qualContext),
     [standings, qualContext]
@@ -281,4 +277,4 @@ export function MatchScheduleCard({
       <article className={cardClass}>{body}</article>
     </div>
   );
-}
+});

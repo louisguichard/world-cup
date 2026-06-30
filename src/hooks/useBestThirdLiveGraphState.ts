@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RankingSnapshot } from "../lib/buildRankingTimeline";
-import { buildQualificationContext } from "../lib/qualification";
+import { useQualificationContext } from "../store/selectors/qualificationSelectors";
 import {
   bubbleStateLabel,
   detectCutoffCrossings,
@@ -55,19 +55,14 @@ export function useBestThirdLiveGraphState({
   focusTeamIds,
 }: UseBestThirdLiveGraphStateInput): UseBestThirdLiveGraphStateResult {
   const standings = useStore((s) => s.groupStandings);
-  const liveMatches = useStore((s) => s.liveMatches);
   const teams = useStore((s) => s.teams);
+  const qualContext = useQualificationContext();
 
   const { snapshots, presentIndex, hasData: timelineHasData } = useRankingTimeline();
 
   const snapshot = snapshots[presentIndex] ?? null;
   const ranked = snapshot?.rankings ?? [];
   const deltas = snapshot?.deltas ?? [];
-
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
 
   const prevRankedRef = useRef<TeamRecord[]>([]);
   const [cutoffCrossings, setCutoffCrossings] = useState<CutoffCrossing[]>([]);

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
+import { computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
+import { useQualificationContext } from "../../store/selectors/qualificationSelectors";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
 import { getThirdPlaceBubbleState } from "../../lib/thirdPlaceLiveStatus";
 import { formatLiveClock } from "../../lib/formatMatchClock";
@@ -15,7 +16,7 @@ function statusLabel(
   rank: number,
   teamId: string,
   standings: GroupStanding[],
-  qualContext: ReturnType<typeof buildQualificationContext>
+  qualContext: QualificationMatchContext
 ): { text: string; className: string } {
   const race = APP_COPY.bestThirdRace;
 
@@ -40,12 +41,8 @@ function statusLabel(
 export function BestThirdRacePanel() {
   const standings = useStore((s) => s.groupStandings);
   const teams = useStore((s) => s.teams);
+  const qualContext = useQualificationContext();
   const liveMatches = useStore((s) => s.liveMatches);
-
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
 
   const ranked = useMemo(() => rankAliveBestThirds(standings, qualContext), [standings, qualContext]);
   const thirdIds = useMemo(() => new Set(ranked.map((r) => r.teamId)), [ranked]);

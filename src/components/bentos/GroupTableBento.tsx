@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { GroupStanding } from "../../types";
-import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
+import { computeQualificationStatus } from "../../lib/qualification";
+import { useQualificationContext } from "../../store/selectors/qualificationSelectors";
 import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
@@ -18,11 +19,7 @@ export interface GroupTableBentoProps {
 export function GroupTableBento({ standing }: GroupTableBentoProps) {
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
-  const liveMatches = useStore((s) => s.liveMatches);
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
+  const qualContext = useQualificationContext();
   const bubbleTeamIds = useMemo(
     () => getBestThirdBubbleTeamIds(standings, qualContext),
     [standings, qualContext]

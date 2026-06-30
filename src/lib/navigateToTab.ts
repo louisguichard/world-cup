@@ -1,3 +1,4 @@
+import { startTransition } from "react";
 import { buildAppHash } from "../lib/appHash";
 import { clearReturnContext } from "../store/slices/navigationSlice";
 import { useStore } from "../store";
@@ -16,11 +17,13 @@ export function navigateToTab(tab: TabId): void {
   state.closeTeamSheet();
   clearReturnContext();
 
-  if (state.activeTab !== tab || hadOverlay) {
-    state.setActiveTab(tab);
-  }
-
-  window.history.replaceState(null, "", buildAppHash(tab, state.simulatorMode));
+  startTransition(() => {
+    const next = useStore.getState();
+    if (next.activeTab !== tab || hadOverlay) {
+      next.setActiveTab(tab);
+    }
+    window.history.replaceState(null, "", buildAppHash(tab, next.simulatorMode));
+  });
 }
 
 /** Shortcut for the default landing tab (Live). */

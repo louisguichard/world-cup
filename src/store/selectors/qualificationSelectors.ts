@@ -6,18 +6,18 @@ import {
   type LiveQualificationLayout,
   type TeamQualificationView
 } from "../../lib/qualificationView";
-import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
+import { computeQualificationStatus } from "../../lib/qualification";
 import type { QualificationBuckets } from "../../lib/qualification";
+import { getQualificationContext } from "../../lib/qualificationContextCache";
+import { buildScheduleOverlayFingerprint } from "./scheduleSelectors";
 import { useStore } from "../index";
 import type { QualificationStatus, QualificationTier } from "../../types";
 
 export function useQualificationContext() {
-  const liveMatches = useStore((s) => s.liveMatches);
-  const teams = useStore((s) => s.teams);
-  return useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
+  const inputFingerprint = useStore((s) =>
+    buildScheduleOverlayFingerprint(s.liveMatches, s.groupStandings)
   );
+  return useMemo(() => getQualificationContext(), [inputFingerprint]);
 }
 
 export type QualificationSnapshot = {
@@ -30,13 +30,16 @@ export type QualificationSnapshot = {
 export function useQualificationSnapshot(): QualificationSnapshot {
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
-  const liveMatches = useStore((s) => s.liveMatches);
+  const inputFingerprint = useStore((s) =>
+    buildScheduleOverlayFingerprint(s.liveMatches, s.groupStandings)
+  );
 
   return useMemo(() => {
+    const { liveMatches } = useStore.getState();
     const matches = Object.values(liveMatches);
     const { teamIds, buckets, views, layout } = buildQualificationSnapshot(teams, standings, matches);
     return { teamIds, buckets, views, layout };
-  }, [teams, standings, liveMatches]);
+  }, [teams, standings, inputFingerprint]);
 }
 
 export function useTeamQualificationView(teamId: string): TeamQualificationView | null {

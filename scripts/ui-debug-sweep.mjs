@@ -28,6 +28,7 @@ const ROUTES = [
 
 const VIEWPORTS = [
   { label: "mobile", width: 390, height: 844 },
+  { label: "ipad", width: 834, height: 1194 },
   { label: "desktop", width: 1280, height: 800 },
 ];
 

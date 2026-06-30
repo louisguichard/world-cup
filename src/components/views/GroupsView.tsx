@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { buildQualificationContext, computeQualificationStatus } from "../../lib/qualification";
+import { computeQualificationStatus } from "../../lib/qualification";
+import { useQualificationContext } from "../../store/selectors/qualificationSelectors";
 import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { resolveQualificationDisplay } from "../../lib/qualificationDisplay";
 import { StandingThemeRow } from "../team/StandingThemeRow";
@@ -33,11 +34,7 @@ import { useTournamentPhase } from "../../hooks/useTournamentPhase";
 export function GroupsView() {
   const standings = useStore((s) => s.groupStandings);
   const teams = useStore((s) => s.teams);
-  const liveMatches = useStore((s) => s.liveMatches);
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
+  const qualContext = useQualificationContext();
   const bubbleTeamIds = useMemo(
     () => getBestThirdBubbleTeamIds(standings, qualContext),
     [standings, qualContext]

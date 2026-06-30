@@ -149,9 +149,11 @@ export function AppShell() {
       </main>
       <BottomTabBar />
       <SplashScreen />
-      <Suspense fallback={<ViewLoadingFallback />}>
-        <TeamDetailSheet />
-      </Suspense>
+      {teamSheetOpen ? (
+        <Suspense fallback={<ViewLoadingFallback />}>
+          <TeamDetailSheet />
+        </Suspense>
+      ) : null}
       <DebugPanel />
       <div id="sr-live" className="sr-only" aria-live="polite" />
       <Suspense fallback={<ViewLoadingFallback />}>

@@ -1,14 +1,14 @@
 import { memo, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { knockoutSchedule } from "../../data/knockoutSchedule";
-import { buildQualificationContext, computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
+import { computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
 import { buildCanonicalTournamentDataset } from "../../lib/canonicalTournamentDataset";
 import { projectTournament } from "../../lib/tournament";
 import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import { formatKickoffLabel, resolveOfficialMatchKickoff } from "../../services/ScheduleLinker";
-import { materializeFullSchedule } from "../../lib/materializeFullSchedule";
-import { readStandingsCache } from "../../lib/standingsCache";
+import { getQualificationContext } from "../../lib/qualificationContextCache";
+import { getMaterializedScheduleBundleFromStore } from "../../lib/materializedScheduleCache";
 import { useTournamentPhase } from "../../hooks/useTournamentPhase";
 import type {
   BracketGhostCandidate,
@@ -388,10 +388,7 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
   }, [projectionFingerprint]);
   const teams = canonical.teams;
   const matches = canonical.matches;
-  const qualContext = useMemo(
-    () => buildQualificationContext(matches, teams),
-    [matches, teams]
-  );
+  const qualContext = useMemo(() => getQualificationContext(), [projectionFingerprint]);
 
   const projectionMatches = useMemo(
     () =>
@@ -418,18 +415,11 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
     let cancelled = false;
     const timer = window.setTimeout(() => {
       if (cancelled) return;
-      const t0 = performance.now();
       const store = useStore.getState();
       let result: Pick<TournamentProjection, "bracket" | "standings"> | null = null;
 
       if (deferredMode === "projected") {
-        const effectiveStandings =
-          store.groupStandings.length > 0 ? store.groupStandings : readStandingsCache() ?? [];
-        const mergedSchedule = materializeFullSchedule(
-          store.teams,
-          store.liveMatches,
-          effectiveStandings
-        );
+        const mergedSchedule = getMaterializedScheduleBundleFromStore().schedule;
         result = projectTournament(
           teams,
           deferredProjectionMatches,
@@ -443,22 +433,6 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
       } else {
         result = buildConfirmedOnlyBracket(teams, matches, store.liveMatches, qualContext);
       }
-
-      const elapsedMs = Math.round(performance.now() - t0);
-      // #region agent log
-      fetch("http://127.0.0.1:7681/ingest/f800a0a9-8d11-45c6-8805-1b187f693046", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "99cde0" },
-        body: JSON.stringify({
-          sessionId: "99cde0",
-          location: "BracketBento.tsx:projectionEffect",
-          message: "projection computed async",
-          data: { mode: deferredMode, elapsedMs, fingerprint: projectionFingerprint.slice(0, 40) },
-          timestamp: Date.now(),
-          hypothesisId: "H1",
-        }),
-      }).catch(() => {});
-      // #endregion
 
       startProjectionTransition(() => {
         if (!cancelled) setProjection(result);

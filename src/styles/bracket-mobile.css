@@ -61,6 +61,44 @@
   word-break: break-word;
 }
 
+/* All bracket surfaces — replace single-line nowrap squeeze with 2-line clamp */
+.bracket-view .bracket-team-slot .bracket-team .team-name-text,
+.bracket-view .bracket-card .team-name-text {
+  max-width: none !important;
+  white-space: normal !important;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.bracket-head h3 {
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.live-bracket-embed .bracket-head {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: var(--bracket-col-gap);
+  width: max-content;
+  min-width: max-content;
+}
+
+.live-bracket-embed .bracket-head h3 {
+  flex: 0 0 var(--bracket-col-width);
+  width: var(--bracket-col-width);
+  min-width: var(--bracket-col-width);
+  margin: 0;
+  text-align: center;
+}
+
 @media (max-width: 1023px) {
   .bracket-view,
   .live-bracket-embed {

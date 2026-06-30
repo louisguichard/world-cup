@@ -1,6 +1,5 @@
 import { useMemo, useState, type CSSProperties } from "react";
-import { buildQualificationContext } from "../../lib/qualification";
-import { useQualificationSnapshot, useTeamQualificationView } from "../../store/selectors/qualificationSelectors";
+import { useQualificationContext, useQualificationSnapshot, useTeamQualificationView } from "../../store/selectors/qualificationSelectors";
 import { getBestThirdBubbleTeamIds } from "../../lib/thirdPlaceLiveStatus";
 import { teamDisplayNameFromId, resolveTeamFromStore } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
@@ -72,12 +71,7 @@ export function TeamsView() {
   const [filter, setFilter] = useState<QualFilter>("all");
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
-  const liveMatches = useStore((s) => s.liveMatches);
-
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
+  const qualContext = useQualificationContext();
   const bubbleTeamIds = useMemo(
     () => getBestThirdBubbleTeamIds(standings, qualContext),
     [standings, qualContext]

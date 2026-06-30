@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { buildQualificationContext } from "../../lib/qualification";
+import { useQualificationContext } from "../../store/selectors/qualificationSelectors";
 import { rankAliveBestThirds } from "../../lib/bestThirds";
 import { resolveTeamForDisplay } from "../../data/wc2026TeamCatalog";
 import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
@@ -171,12 +170,7 @@ export function InContentionBento() {
 
 export function BestThirdsBento() {
   const standings = useStore((s) => s.groupStandings);
-  const teams = useStore((s) => s.teams);
-  const liveMatches = useStore((s) => s.liveMatches);
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
+  const qualContext = useQualificationContext();
   const bt = APP_COPY.bestThird;
   const best = rankAliveBestThirds(standings, qualContext).slice(0, 8);
 

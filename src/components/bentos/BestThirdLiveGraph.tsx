@@ -3,7 +3,7 @@ import { useBestThirdLiveGraphState } from "../../hooks/useBestThirdLiveGraphSta
 import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
 import { APP_COPY } from "../../lib/appCopy";
 import { buildThirdPlaceCutoffScenario, CUTOFF_RANK } from "../../lib/thirdPlaceCutoffScenario";
-import { buildQualificationContext } from "../../lib/qualification";
+import { useQualificationContext } from "../../store/selectors/qualificationSelectors";
 import { useStore } from "../../store";
 import type { Team } from "../../types";
 import { TeamFlag } from "../team/TeamFlag";
@@ -109,13 +109,8 @@ function LadderRow({
 export function BestThirdLiveGraph({ focusTeamIds }: Props) {
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
-  const liveMatches = useStore((s) => s.liveMatches);
+  const qualContext = useQualificationContext();
   const [expanded, setExpanded] = useState(false);
-
-  const qualContext = useMemo(
-    () => buildQualificationContext(Object.values(liveMatches), Object.values(teams)),
-    [liveMatches, teams]
-  );
 
   const {
     snapshot,
