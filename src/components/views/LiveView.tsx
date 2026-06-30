@@ -11,6 +11,7 @@ import { MODULE_IDS } from "../../lib/moduleIds";
 import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useMaterializedSchedule } from "../../hooks/useMaterializedSchedule";
 import { useMaterializedMatchIndex } from "../../hooks/useMaterializedMatchIndex";
+import { useTournamentPhase } from "../../hooks/useTournamentPhase";
 import { resolveDisplayMatch } from "../../lib/resolveDisplayMatch";
 import { useStore } from "../../store";
 import { ModuleSectionActions } from "../shared/ModuleSectionActions";
@@ -54,6 +55,7 @@ export function LiveView() {
 
   const materializedSchedule = useMaterializedSchedule();
   const materializedIndex = useMaterializedMatchIndex();
+  const { isKnockoutActive, activeRoundLabel } = useTournamentPhase();
 
   const live = useMemo(
     () =>
@@ -86,6 +88,7 @@ export function LiveView() {
 
   const primary = live.find((m) => m.id === primaryId) ?? live[0];
   const secondary = live.filter((m) => m.id !== primary?.id).slice(0, 6);
+  const liveKicker = isKnockoutActive && !primary?.group ? activeRoundLabel : copy.liveNowKicker;
 
   return (
     <div className="dashboard-view" data-state={liveCount > 0 ? "live" : "idle"}>
@@ -101,7 +104,7 @@ export function LiveView() {
         <section className="dashboard-section" aria-label="Live now">
           <div className="section-heading compact">
             <div>
-              <div className="section-kicker">{copy.liveNowKicker}</div>
+              <div className="section-kicker">{liveKicker}</div>
               <h2 className="section-title-text">{copy.liveNowTitle}</h2>
             </div>
             <ModuleSectionActions moduleId={MODULE_IDS.liveMatches} refreshLabel="Refresh live scores" />
@@ -124,7 +127,7 @@ export function LiveView() {
                       >
                         <LiveMatchBento match={m} variant="secondary" />
                       </button>
-                      {m.group && m.group !== primary?.group ? (
+                      {m.group && !isKnockoutActive && m.group !== primary?.group ? (
                         <LiveGroupStandingsPanel
                           group={m.group}
                           variant="mini"
@@ -137,18 +140,20 @@ export function LiveView() {
               ) : null}
             </div>
             <div className="live-command-aside">
-              {primary?.group ? (
+              {!isKnockoutActive && primary?.group ? (
                 <BentoErrorBoundary bento="LiveGroupStandingsPanel">
                   <LiveGroupStandingsPanel group={primary.group} />
                 </BentoErrorBoundary>
               ) : null}
-              <Suspense fallback={<DeferredSectionSkeleton />}>
-                <BentoErrorBoundary bento="BestThirdLiveGraph">
-                  <BestThirdLiveGraph
-                    focusTeamIds={primary ? [primary.homeTeamId, primary.awayTeamId] : []}
-                  />
-                </BentoErrorBoundary>
-              </Suspense>
+              {!isKnockoutActive ? (
+                <Suspense fallback={<DeferredSectionSkeleton />}>
+                  <BentoErrorBoundary bento="BestThirdLiveGraph">
+                    <BestThirdLiveGraph
+                      focusTeamIds={primary ? [primary.homeTeamId, primary.awayTeamId] : []}
+                    />
+                  </BentoErrorBoundary>
+                </Suspense>
+              ) : null}
             </div>
           </div>
         </section>
@@ -159,9 +164,11 @@ export function LiveView() {
             <p>{copy.noLiveBody}</p>
           </div>
           <Suspense fallback={<DeferredSectionSkeleton />}>
-            <BentoErrorBoundary bento="BestThirdLiveGraph">
-              <BestThirdLiveGraph focusTeamIds={[]} />
-            </BentoErrorBoundary>
+            {!isKnockoutActive ? (
+              <BentoErrorBoundary bento="BestThirdLiveGraph">
+                <BestThirdLiveGraph focusTeamIds={[]} />
+              </BentoErrorBoundary>
+            ) : null}
           </Suspense>
         </section>
       )}
@@ -217,32 +224,34 @@ export function LiveView() {
         ) : null}
       </section>
 
-      <section
-        className="dashboard-section qual-dashboard-row dashboard-section--defer"
-        aria-label="Qualification"
-      >
-        <div className="section-heading compact">
-          <div>
-            <div className="section-kicker">{copy.qualKicker}</div>
-            <h2 className="section-title-text">{copy.qualTitle}</h2>
-            <p className="section-note">{APP_COPY.qual.sectionLead}</p>
+      {!isKnockoutActive ? (
+        <section
+          className="dashboard-section qual-dashboard-row dashboard-section--defer"
+          aria-label="Qualification"
+        >
+          <div className="section-heading compact">
+            <div>
+              <div className="section-kicker">{copy.qualKicker}</div>
+              <h2 className="section-title-text">{copy.qualTitle}</h2>
+              <p className="section-note">{APP_COPY.qual.sectionLead}</p>
+            </div>
+            <ModuleSectionActions moduleId={MODULE_IDS.qualification} refreshLabel="Refresh qualification" />
           </div>
-          <ModuleSectionActions moduleId={MODULE_IDS.qualification} refreshLabel="Refresh qualification" />
-        </div>
-        <Suspense fallback={<DeferredSectionSkeleton />}>
-          <div className="live-qual-row">
-            <BentoErrorBoundary bento="QualifiedBento">
-              <QualifiedBento />
-            </BentoErrorBoundary>
-            <BentoErrorBoundary bento="InContentionBento">
-              <InContentionBento />
-            </BentoErrorBoundary>
-            <BentoErrorBoundary bento="EliminatedBento">
-              <EliminatedBento />
-            </BentoErrorBoundary>
-          </div>
-        </Suspense>
-      </section>
+          <Suspense fallback={<DeferredSectionSkeleton />}>
+            <div className="live-qual-row">
+              <BentoErrorBoundary bento="QualifiedBento">
+                <QualifiedBento />
+              </BentoErrorBoundary>
+              <BentoErrorBoundary bento="InContentionBento">
+                <InContentionBento />
+              </BentoErrorBoundary>
+              <BentoErrorBoundary bento="EliminatedBento">
+                <EliminatedBento />
+              </BentoErrorBoundary>
+            </div>
+          </Suspense>
+        </section>
+      ) : null}
 
       <Suspense fallback={<DeferredSectionSkeleton />}>
         <LiveBracketEmbed />

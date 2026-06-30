@@ -7,6 +7,7 @@ import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import { formatKickoffLabel, resolveOfficialMatchKickoff } from "../../services/ScheduleLinker";
+import { useMaterializedSchedule } from "../../hooks/useMaterializedSchedule";
 import type {
   BracketGhostCandidate,
   BracketMatch,
@@ -318,6 +319,7 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
   const liveMatchesMap = useStore((s) => s.liveMatches);
   const markets = useStore((s) => s.knockoutMarkets);
   const overrides = useStore((s) => s.scoreOverrides);
+  const mergedSchedule = useMaterializedSchedule();
   const canonical = useMemo(
     () =>
       buildCanonicalTournamentDataset({
@@ -362,9 +364,10 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
       overrides,
       {},
       qualContext.lockedGroupMatchCount,
-      qualContext.lockedStandingsByGroup
+      qualContext.lockedStandingsByGroup,
+      mergedSchedule
     );
-  }, [teams, deferredProjectionMatches, markets, overrides, qualContext.lockedGroupMatchCount, qualContext.lockedStandingsByGroup]);
+  }, [teams, deferredProjectionMatches, markets, overrides, qualContext.lockedGroupMatchCount, qualContext.lockedStandingsByGroup, mergedSchedule]);
 
   const orderedByStage = useMemo(() => {
     const map: Record<Stage, BracketMatch[]> = {

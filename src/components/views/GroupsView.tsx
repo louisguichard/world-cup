@@ -28,6 +28,7 @@ import { useStore } from "../../store";
 import { GroupOfficialQualificationSection } from "../analyst/GroupOfficialQualificationSection";
 import { GroupAdvancementProbabilitySection } from "../analyst/GroupAdvancementProbabilitySection";
 import { TournamentInsightsPanel } from "../tournament/TournamentInsightsPanel";
+import { useTournamentPhase } from "../../hooks/useTournamentPhase";
 
 export function GroupsView() {
   const standings = useStore((s) => s.groupStandings);
@@ -71,11 +72,12 @@ export function GroupsView() {
   );
 
   const copy = APP_COPY.groups;
+  const { isGroupStageOver } = useTournamentPhase();
 
   return (
     <div className="groups-view dashboard-view">
       <section className="hero-panel hero-panel--compact">
-        <div className="eyebrow">{copy.eyebrow}</div>
+        <div className="eyebrow">{isGroupStageOver ? copy.archiveEyebrow : copy.eyebrow}</div>
         <h1>
           Twelve groups. <span className="accent">{copy.titleAccent}</span>
         </h1>
@@ -83,6 +85,12 @@ export function GroupsView() {
       </section>
 
       <TournamentInsightsPanel />
+
+      {isGroupStageOver ? (
+        <div className="groups-archive-banner" role="status">
+          {copy.archiveBanner}
+        </div>
+      ) : null}
 
       <div className="groups-view-toggle" role="group" aria-label="Standings view mode">
         <button

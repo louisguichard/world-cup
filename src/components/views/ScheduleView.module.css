@@ -113,6 +113,16 @@
   min-width: 60px;
 }
 
+.stageBadge {
+  margin-top: 4px;
+  font-family: var(--font-brand);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
 .teamCell {
   color: var(--text);
   font-weight: 600;

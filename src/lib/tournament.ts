@@ -9,6 +9,7 @@ import type {
   GroupStanding,
   Match,
   MatchWithScore,
+  MergedMatch,
   PolymarketMatchMarket,
   ScoreOverride,
   Stage,
@@ -18,6 +19,7 @@ import type {
   TournamentProjection,
   TournamentSimulationResult
 } from "../types";
+import { isKnockoutMatch, resolveMatchWinner } from "./resolveMatchWinner";
 import { groupLetters } from "../types";
 import { clamp, normalizeName, pairKey } from "./normalize";
 import { knockoutScore, knockoutWinProbability, makeFallbackPrediction, normalizeProbabilities, samplePredictedScore } from "./predictions";
@@ -761,6 +763,108 @@ export function annotateBracketCertainty(
   return annotated;
 }
 
+const KNOCKOUT_STAGE_ORDER: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
+
+function resolveFeederTeam(
+  seedLabel: string | undefined,
+  byId: Map<string, BracketMatch>
+): string | undefined {
+  if (!seedLabel?.startsWith("W")) return undefined;
+  const upstreamId = `M${seedLabel.slice(1)}`;
+  return byId.get(upstreamId)?.winnerTeamId;
+}
+
+function buildCompletedKnockoutLookup(mergedMatches: MergedMatch[]): Map<string, MergedMatch> {
+  const completedKnockout = new Map<string, MergedMatch>();
+  for (const match of mergedMatches) {
+    if (!isKnockoutMatch(match)) continue;
+    if (match.status !== "completed") continue;
+    if (typeof match.homeScore !== "number" || typeof match.awayScore !== "number") continue;
+    const key = match.matchId ?? match.id;
+    completedKnockout.set(key, match);
+  }
+  return completedKnockout;
+}
+
+/** Overlay confirmed knockout results onto a projected bracket and propagate winners forward. */
+export function resolveKnockoutResults(
+  bracket: BracketMatch[],
+  mergedMatches: MergedMatch[],
+  teamsById: TeamsById = {},
+  knockoutMarkets: PolymarketMatchMarket[] = []
+): BracketMatch[] {
+  const completedKnockout = buildCompletedKnockoutLookup(mergedMatches);
+  if (completedKnockout.size === 0) {
+    return bracket;
+  }
+
+  const byId = new Map(bracket.map((match) => [match.id, { ...match }]));
+
+  for (const stage of KNOCKOUT_STAGE_ORDER) {
+    for (const bm of bracket) {
+      if (bm.stage !== stage) continue;
+
+      const completed = completedKnockout.get(bm.id);
+      if (completed) {
+        const winnerTeamId = resolveMatchWinner(completed, teamsById);
+        byId.set(bm.id, {
+          ...byId.get(bm.id)!,
+          homeTeamId: completed.homeTeamId,
+          awayTeamId: completed.awayTeamId,
+          homeScore: completed.homeScore,
+          awayScore: completed.awayScore,
+          winnerTeamId,
+          source: "scheduled",
+          homeCertainty: "confirmed",
+          awayCertainty: "confirmed",
+          homeGhosts: undefined,
+          awayGhosts: undefined
+        });
+        continue;
+      }
+
+      const current = byId.get(bm.id)!;
+      const homeTeamId = resolveFeederTeam(current.homeSeedLabel, byId) ?? current.homeTeamId;
+      const awayTeamId = resolveFeederTeam(current.awaySeedLabel, byId) ?? current.awayTeamId;
+
+      if (!homeTeamId || !awayTeamId) {
+        byId.set(bm.id, {
+          ...current,
+          homeTeamId,
+          awayTeamId
+        });
+        continue;
+      }
+
+      const homeConfirmed = Boolean(resolveFeederTeam(current.homeSeedLabel, byId));
+      const awayConfirmed = Boolean(resolveFeederTeam(current.awaySeedLabel, byId));
+
+      const fresh = playKnockoutMatch(
+        bm.id,
+        stage,
+        homeTeamId,
+        awayTeamId,
+        teamsById,
+        knockoutMarkets,
+        undefined,
+        {},
+        current.homeSeedLabel,
+        current.awaySeedLabel
+      );
+
+      byId.set(bm.id, {
+        ...fresh,
+        homeCertainty: homeConfirmed ? "confirmed" : current.homeCertainty,
+        awayCertainty: awayConfirmed ? "confirmed" : current.awayCertainty,
+        homeGhosts: homeConfirmed ? undefined : current.homeGhosts,
+        awayGhosts: awayConfirmed ? undefined : current.awayGhosts
+      });
+    }
+  }
+
+  return bracket.map((bm) => byId.get(bm.id)!);
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 
 export function projectTournament(
@@ -770,7 +874,8 @@ export function projectTournament(
   overrides: Record<string, ScoreOverride> = {},
   bracketPicks: Record<string, string> = {},
   lockedGroupMatchCount: Partial<Record<GroupLetter, number>> = {},
-  lockedStandingsByGroup: Partial<Record<GroupLetter, TeamRecord[]>> = {}
+  lockedStandingsByGroup: Partial<Record<GroupLetter, TeamRecord[]>> = {},
+  mergedMatches: MergedMatch[] = []
 ): TournamentProjection {
   const teamsById = toTeamsById(teams);
   const scoredMatches = materializeMatches(matches, teamsById, overrides);
@@ -790,11 +895,17 @@ export function projectTournament(
     bracketPicks,
     qualContext
   );
-  const bracket = annotateBracketCertainty(
+  const annotatedBracket = annotateBracketCertainty(
     rawBracket,
     standings,
     lockedGroupMatchCount,
     lockedStandingsByGroup
+  );
+  const bracket = resolveKnockoutResults(
+    annotatedBracket,
+    mergedMatches,
+    bracketTeamsById,
+    knockoutMarkets
   );
 
   return {
