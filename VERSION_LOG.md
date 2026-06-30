@@ -109,6 +109,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [4.0.0] build 85 — 2026-06-30 (build)
+- 10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 10 files changed, 78 insertions(+), 63 deletions(-)
+
+## [4.0.0] build 84 — 2026-06-30 (build)
+- polish bracket knockout copy, connector CSS, live feeder highlights
+
 ## [4.0.0] build 83 — 2026-06-30 (build)
 - 21 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 21 files changed, 643 insertions(+), 118 deletions(-)
 

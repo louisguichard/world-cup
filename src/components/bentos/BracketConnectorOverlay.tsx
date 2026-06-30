@@ -6,9 +6,25 @@ type Props = {
   cardRects: Map<string, DOMRect>;
   containerRect: DOMRect;
   confirmedWinners: Set<string>;
+  liveProvisionalFeeders?: Set<string>;
 };
 
-export function BracketConnectorOverlay({ cardRects, containerRect, confirmedWinners }: Props) {
+function pathClassName(
+  feederId: string,
+  confirmedWinners: Set<string>,
+  liveProvisionalFeeders: Set<string>
+): string {
+  if (confirmedWinners.has(feederId)) return styles.pathConfirmed;
+  if (liveProvisionalFeeders.has(feederId)) return styles.pathLiveProvisional;
+  return styles.pathPending;
+}
+
+export function BracketConnectorOverlay({
+  cardRects,
+  containerRect,
+  confirmedWinners,
+  liveProvisionalFeeders = new Set(),
+}: Props) {
   const paths: ReactElement[] = [];
 
   for (const [childId, feeders] of Object.entries(BRACKET_FEED_MAP)) {
@@ -26,12 +42,11 @@ export function BracketConnectorOverlay({ cardRects, containerRect, confirmedWin
       const fx = feederRect.right - containerRect.left;
       const fy = feederRect.top - containerRect.top + feederRect.height / 2;
       const mx = (fx + cx) / 2;
-      const isConfirmed = confirmedWinners.has(feederId);
 
       paths.push(
         <path
           key={`${feederId}->${childId}`}
-          className={isConfirmed ? styles.pathConfirmed : styles.pathPending}
+          className={pathClassName(feederId, confirmedWinners, liveProvisionalFeeders)}
           d={`M ${fx} ${fy} C ${mx} ${fy}, ${mx} ${cy}, ${cx} ${cy}`}
           fill="none"
         />

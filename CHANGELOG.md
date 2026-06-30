@@ -8,6 +8,8 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 85** (2026-06-30): 10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 10 files changed, 78 insertions(+), 63 deletions(-)
+- **4.0.0 build 84** (2026-06-30): polish bracket knockout copy, connector CSS, live feeder highlights
 - **4.0.0 build 83** (2026-06-30): 21 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 21 files changed, 643 insertions(+), 118 deletions(-)
 - **4.0.0 build 82** (2026-06-30): fix bracket live scores, LOCKED IN badge, connector slot layout
 - **4.0.0 build 81** (2026-06-30): fix live ET period label, penalty bar visibility, goal event fetch

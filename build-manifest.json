@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-30T03:53:25.025Z",
+  "updatedAt": "2026-06-30T04:19:42.982Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 85,
+      "kind": "build",
+      "message": "10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 10 files changed, 78 insertions(+), 63 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:19:42.982Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 84,
+      "kind": "build",
+      "message": "polish bracket knockout copy, connector CSS, live feeder highlights",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:18:21.941Z"
+    },
     {
       "version": "4.0.0",
       "build": 83,
@@ -304,25 +320,17 @@
       "message": "Execute phases 1-6: local stack, identity unify, qual bridge, UI wiring, admin token gate, smoke pipeline; resolve merge conflicts",
       "date": "2026-06-28",
       "timestamp": "2026-06-28T04:49:34.810Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 45,
-      "kind": "build",
-      "message": "244 file(s) in .cursor, .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api — 244 files changed, 87284 insertions(+), 2461 deletions(-)",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T04:48:43.815Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 44,
-      "kind": "build",
-      "message": "19 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, package.json, scripts — 19 files changed, 71658 insertions(+), 206 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T21:23:18.806Z"
     }
   ],
   "commits": [
+    {
+      "hash": "06adaec1586ab9f75694ad8229f8a7d3d8746c8d",
+      "shortHash": "06adaec",
+      "message": "Record v4.0.0 build 83 production deploy on Vercel.",
+      "version": "4.0.0",
+      "build": 83,
+      "timestamp": "2026-06-30T03:53:32.112Z"
+    },
     {
       "hash": "a8472b646fa5882b59ef5233e7410526b6cd761c",
       "shortHash": "a8472b6",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 30,
       "timestamp": "2026-06-27T19:17:01.068Z"
-    },
-    {
-      "hash": "499e1a1601142938c63d836edb54fa8ced93585b",
-      "shortHash": "499e1a1",
-      "message": "Merge football prediction integration with team display fixes",
-      "version": "4.0.0",
-      "build": 26,
-      "timestamp": "2026-06-27T18:42:29.882Z"
     }
   ],
   "deploys": [

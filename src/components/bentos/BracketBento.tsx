@@ -8,6 +8,7 @@ import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_COPY } from "../../lib/appCopy";
 import { formatKickoffLabel, resolveOfficialMatchKickoff } from "../../services/ScheduleLinker";
 import { useMaterializedSchedule } from "../../hooks/useMaterializedSchedule";
+import { useTournamentPhase } from "../../hooks/useTournamentPhase";
 import type {
   BracketGhostCandidate,
   BracketMatch,
@@ -26,7 +27,7 @@ import { CertaintyBadge } from "../shared/CertaintyBadge";
 import { LoadingState } from "../shared/LoadingState";
 import { BracketConnectorOverlay } from "./BracketConnectorOverlay";
 import { lookupBracketLiveMatch } from "../../lib/bracketTree";
-import { resolveMatchWinner } from "../../lib/resolveMatchWinner";
+import { isKnockoutMatch, resolveMatchWinner } from "../../lib/resolveMatchWinner";
 import type { TeamThemeStatus } from "../team/TeamThemeRoot";
 
 const allBracketStages: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
@@ -372,6 +373,7 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
   const markets = useStore((s) => s.knockoutMarkets);
   const overrides = useStore((s) => s.scoreOverrides);
   const mergedSchedule = useMaterializedSchedule();
+  const { isKnockoutActive } = useTournamentPhase();
   const canonical = useMemo(
     () =>
       buildCanonicalTournamentDataset({
@@ -468,19 +470,31 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
     };
   }, [projection?.bracket, bracketStages, mode]);
 
-  const confirmedWinners = useMemo(() => {
-    const winners = new Set<string>();
+  const { confirmedWinners, liveProvisionalFeeders } = useMemo(() => {
+    const confirmed = new Set<string>();
+    const liveProvisional = new Set<string>();
+
     for (const [key, match] of Object.entries(liveMatchesMap)) {
-      if (match.status !== "completed" || !match.locked) continue;
       const id = match.matchId ?? match.id ?? key;
-      winners.add(id);
-    }
-    for (const slot of projection?.bracket ?? []) {
-      if (slot.winnerTeamId && slot.homeCertainty === "confirmed" && slot.awayCertainty === "confirmed") {
-        winners.add(slot.id);
+      if (match.status === "completed" && match.locked) {
+        confirmed.add(id);
+        continue;
+      }
+      if (match.status !== "live" || !isKnockoutMatch(match)) continue;
+      const home = match.homeScore ?? 0;
+      const away = match.awayScore ?? 0;
+      if (home !== away) {
+        liveProvisional.add(id);
       }
     }
-    return winners;
+
+    for (const slot of projection?.bracket ?? []) {
+      if (slot.winnerTeamId && slot.homeCertainty === "confirmed" && slot.awayCertainty === "confirmed") {
+        confirmed.add(slot.id);
+      }
+    }
+
+    return { confirmedWinners: confirmed, liveProvisionalFeeders: liveProvisional };
   }, [liveMatchesMap, projection?.bracket]);
 
   const showConnectors = bracketStages.length > 1;
@@ -499,7 +513,11 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
         </div>
       ) : null}
       <p className="bracket-hint">
-        {mode === "confirmed" ? bb.confirmedHint : bb.projectedHint}
+        {mode === "confirmed"
+          ? isKnockoutActive
+            ? bb.confirmedKnockoutHint
+            : bb.confirmedHint
+          : bb.projectedHint}
       </p>
       {!projection ? (
         <LoadingState label={bb.loading} />
@@ -516,6 +534,7 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
                 cardRects={cardRects}
                 containerRect={containerRect}
                 confirmedWinners={confirmedWinners}
+                liveProvisionalFeeders={liveProvisionalFeeders}
               />
             ) : null}
             {bracketStages.map((stage) => (

@@ -338,6 +338,8 @@ export const APP_COPY = {
     projectedTitle: "Best guess",
     confirmedHint:
       "Only teams that are definitely in after all 3 group games. Empty spots say TBD (to be decided).",
+    confirmedKnockoutHint:
+      "Live scores update the path forward; only finished matches are locked in.",
     projectedHint:
       "Based on today's standings. Teams can still change as more group games are played.",
     loading: "The bracket will show up once tournament data is loaded.",

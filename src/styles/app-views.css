@@ -2104,7 +2104,7 @@
 }
 
 .live-bracket-embed .bracket-rounds {
-  align-items: start;
+  align-items: stretch;
   padding-bottom: 8px;
 }
 
