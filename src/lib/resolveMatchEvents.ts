@@ -1,4 +1,7 @@
-import { resolveCanonicalTeamId } from "../data/wc2026TeamCatalog";
+import { resolveCanonicalTeamId, resolveTeamAbbrevFromHint } from "../data/wc2026TeamCatalog";
+import { buildKampMatchIndex, getCachedKampRecords } from "../services/kamp/KampMatchesClient";
+import { findKampRecordForMatch } from "../services/kamp/linkKampMatch";
+import { mapKampGoalsToEvents } from "../services/kamp/mapKampGoalsToEvents";
 import type { MatchEvent, MergedMatch, Team } from "../types";
 
 /** Resolves events for a match from the store map (multiple key aliases). */
@@ -14,6 +17,26 @@ export function resolveEventsForMatch(
       return teams ? normalizeEventsForMatch(hit, match, teams) : hit;
     }
   }
+
+  if (match.status === "completed" && teams) {
+    const records = getCachedKampRecords();
+    if (records?.length) {
+      const index = buildKampMatchIndex(records, resolveTeamAbbrevFromHint);
+      const kamp = findKampRecordForMatch(match, index, teams);
+      if (kamp?.gols?.length) {
+        const mapped = mapKampGoalsToEvents(
+          kamp.gols,
+          match.homeTeamId,
+          match.awayTeamId,
+          teams
+        );
+        if (mapped.length > 0) {
+          return normalizeEventsForMatch(mapped, match, teams);
+        }
+      }
+    }
+  }
+
   return [];
 }
 

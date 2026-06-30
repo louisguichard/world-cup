@@ -7,6 +7,7 @@ This repo is a single primary product: a Vite + React 18 + TypeScript PWA, **Roa
 ### Services
 
 - **Web app (primary)** — `npm run dev` serves on `http://127.0.0.1:5173/` (host is pinned to `127.0.0.1`, not `localhost`/`0.0.0.0`, in `vite.config.ts`). This is the only service needed to develop/test the product end to end.
+- **FIFA public API HTTP (optional)** — clone [fifa-public-api-mcp](https://github.com/chrispickford/fifa-public-api-mcp) as a sibling repo (`../fifa-public-api-mcp`), run `npm run serve` there (port 4000), or `npm run fifa:serve` from this repo after building the sibling. The PWA proxies `/api/fifa-public` → `127.0.0.1:4000` in dev. No API key required. If the service is down, boot/live continue on ESPN + static schedule (`apiFlags.fifaPublicApi` kill-switch).
 - **`tools/api-portal` (optional)** — a separate Express + Vite key-vault tool (`npm run dev:portal`). It depends on the native `keytar` module (macOS Keychain / Linux libsecret) and is only for syncing API keys to Vercel. Not required for app development; skip unless explicitly working on key management.
 
 ### Non-obvious caveats

@@ -26,6 +26,8 @@ import {
   teamLiveCardNameForMatch,
   scheduleNameHintForMatch,
 } from "../../lib/matchTeamDisplay";
+import { useMatchSupplement } from "../../hooks/useMatchSupplement";
+import { resolveEventsForMatch } from "../../lib/resolveMatchEvents";
 import { useStore } from "../../store";
 import { useGoalDetector } from "../../hooks/useGoalDetector";
 import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
@@ -55,11 +57,11 @@ export function MatchScheduleCard({
   const teams = useStore((s) => s.teams);
   const standings = useStore((s) => s.groupStandings);
   const liveMatchesMap = useStore((s) => s.liveMatches);
-  const events =
-    matchEvents[match.id] ??
-    matchEvents[match.matchId ?? ""] ??
-    matchEvents[match.espnEventId ?? ""] ??
-    [];
+  const events = useMemo(
+    () => resolveEventsForMatch(match, matchEvents, teams),
+    [match, matchEvents, teams]
+  );
+  const kampSupplement = useMatchSupplement(match);
   const broadcast =
     (match.matchId ? getBroadcast(match.matchId) : undefined) ?? getBroadcastByKickoff(match.date);
   const kickoffUtc = match.date;
@@ -165,7 +167,7 @@ export function MatchScheduleCard({
           {(match.matchId || match.venue) ? (
             <>
               {" · "}
-              <VenueLabel matchId={match.matchId} venueString={match.venue} inline />
+              <VenueLabel matchId={match.matchId} venueString={match.venue} inline nested={Boolean(onSelect)} />
             </>
           ) : null}
           {!isDone && broadcast?.venue.city ? (
@@ -174,6 +176,17 @@ export function MatchScheduleCard({
         </span>
         {match.group ? <span className="match-source espn">Group {match.group}</span> : null}
         {stageLabel ? <span className="match-source espn">{stageLabel}</span> : null}
+        {isDone && kampSupplement?.highlightsUrl ? (
+          <a
+            href={kampSupplement.highlightsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="match-source kamp-highlights-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Highlights
+          </a>
+        ) : null}
         {match.group ? (
           <ScenarioBranchButton groupId={match.group} matchId={match.id} />
         ) : null}

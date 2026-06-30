@@ -91,6 +91,37 @@ describe("mapEspnDetailsToEvents", () => {
     }
   });
 
+  it("maps ESPN penalty shootout kicks from scoreboard details", () => {
+    const events = mapEspnDetailsToEvents(
+      [
+        {
+          type: { text: "Penalty - Scored" },
+          clock: { displayValue: "120'" },
+          team: { id: "home-id" },
+          scoringPlay: true,
+          penaltyKick: true,
+          shootout: true,
+          athletesInvolved: [{ displayName: "Kicker A", team: { id: "home-id" } }],
+        },
+        {
+          type: { text: "Penalty - Scored" },
+          clock: { displayValue: "120'" },
+          team: { id: "away-id" },
+          scoringPlay: true,
+          penaltyKick: true,
+          shootout: true,
+        },
+      ],
+      "espn-pens",
+      "home-id",
+      "away-id"
+    );
+
+    expect(events).toHaveLength(2);
+    expect(events.every((e) => e.type === "goal")).toBe(true);
+    expect(events.every((e) => e.minute === 120)).toBe(true);
+  });
+
   it("still maps legacy participants when present", () => {
     const events = mapEspnDetailsToEvents(
       [

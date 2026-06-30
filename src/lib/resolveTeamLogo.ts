@@ -36,11 +36,12 @@ export function resolveTeamLogo(team: Pick<Team, "abbreviation" | "logo" | "name
     if (override) return override;
   }
 
-  if (team.logo && !isInvalidTeamLogoUrl(team.logo)) {
-    return team.logo;
-  }
-
-  return abbrev ? resolveTeamLogoByAbbrev(abbrev) : undefined;
+  return (
+    resolveTeamLogoFromHint(team.abbreviation) ??
+    resolveTeamLogoFromHint(team.name) ??
+    resolveTeamLogoFromHint(team.shortName) ??
+    resolveTeamLogoFromHint(team.id)
+  );
 }
 
 export { resolveTeamLogoByAbbrev, resolveTeamLogoFromHint };
@@ -51,7 +52,8 @@ export function applyTeamLogoOverrides(teams: Record<string, Team>): Record<stri
   for (const [id, team] of Object.entries(teams)) {
     const merged = mergeTeamWithCatalog(team);
     const logo = resolveTeamLogo(merged);
-    patched[id] = logo && logo !== merged.logo ? { ...merged, logo } : merged;
+    const withLogo = logo && logo !== merged.logo ? { ...merged, logo } : merged;
+    patched[id] = withLogo;
   }
 
   return patched;

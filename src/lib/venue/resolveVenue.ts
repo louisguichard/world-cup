@@ -8,6 +8,8 @@ import {
   venuesBySlug
 } from "../../data/venues/venueIndex";
 import { getBroadcast } from "../../services/BroadcastLookup";
+import { getPaninarrVenueImages } from "../../data/paninarrVenueHeroes";
+import { getFifaVenueSupplement } from "./fifaVenueSupplement";
 import type { ResolvedVenue, VenueEnrichment } from "./types";
 
 type ScheduleVenueCatalogEntry = {
@@ -65,10 +67,37 @@ function mergeWithCoordinates(stadiumName: string, base: VenueEnrichment): Venue
   };
 }
 
+function mergeWithPaninarrImages(venue: VenueEnrichment): VenueEnrichment {
+  const paninarr = getPaninarrVenueImages(venue.slug);
+  if (!paninarr) return venue;
+  return {
+    ...venue,
+    heroImageUrl: paninarr.heroImageUrl ?? venue.heroImageUrl,
+    cityHeroImageUrl: paninarr.cityHeroImageUrl ?? venue.cityHeroImageUrl,
+    heroImageCredit: paninarr.heroImageCredit ?? venue.heroImageCredit,
+  };
+}
+
+function mergeWithFifaSupplement(stadiumName: string, base: VenueEnrichment): VenueEnrichment {
+  const fifa = getFifaVenueSupplement(stadiumName);
+  if (!fifa) return base;
+  return {
+    ...base,
+    fifaOfficialName: base.fifaOfficialName || fifa.fifaOfficialName,
+    capacity: base.capacity ?? fifa.capacity,
+    city: base.city || fifa.city,
+  };
+}
+
 function toResolved(venue: VenueEnrichment): ResolvedVenue {
-  const merged = mergeWithCoordinates(
-    venue.stadiumName,
-    mergeWithKnockout(venue.stadiumName, mergeWithScheduleCatalog(venue.stadiumName, venue))
+  const merged = mergeWithPaninarrImages(
+    mergeWithCoordinates(
+      venue.stadiumName,
+      mergeWithFifaSupplement(
+        venue.stadiumName,
+        mergeWithKnockout(venue.stadiumName, mergeWithScheduleCatalog(venue.stadiumName, venue))
+      )
+    )
   );
   return {
     ...merged,

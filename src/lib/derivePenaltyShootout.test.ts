@@ -3,6 +3,7 @@ import {
   derivePenaltyShootout,
   isKnockoutPenaltyDecided,
   penaltyShootoutFromAggregate,
+  penaltyShootoutFromEspnDetails,
   penaltyShootoutFromEvents,
 } from "./derivePenaltyShootout";
 import type { MatchEvent, MergedMatch } from "../types";
@@ -81,6 +82,24 @@ describe("derivePenaltyShootout", () => {
     const shootout = penaltyShootoutFromAggregate({ home: 4, away: 3 });
     expect(shootout.homeScore).toBe(4);
     expect(shootout.awayScore).toBe(3);
+  });
+
+  it("builds shootout from ESPN scoreboard shootout details", () => {
+    const shootout = penaltyShootoutFromEspnDetails(
+      [
+        { shootout: true, scoringPlay: true, team: { id: "ger" } },
+        { shootout: true, scoringPlay: true, team: { id: "ecu" } },
+        { shootout: true, scoringPlay: true, team: { id: "ger" } },
+        { shootout: true, scoringPlay: true, team: { id: "ecu" } },
+        { shootout: true, scoringPlay: true, team: { id: "ger" } },
+        { shootout: true, scoringPlay: true, team: { id: "ecu" } },
+        { shootout: true, scoringPlay: true, team: { id: "ecu" } },
+      ],
+      "ger",
+      "ecu"
+    );
+    expect(shootout?.homeScore).toBe(3);
+    expect(shootout?.awayScore).toBe(4);
   });
 
   it("prefers existing shootout on match", () => {

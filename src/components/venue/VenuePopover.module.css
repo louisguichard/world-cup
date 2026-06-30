@@ -111,6 +111,7 @@
   inset: 0;
   z-index: var(--z-venue-overlay, 10000);
   background: transparent;
+  pointer-events: none;
 }
 
 /* Popover (desktop) */
@@ -220,6 +221,10 @@
 
 .hubCta:hover {
   filter: brightness(1.08);
+}
+
+.heroThumb {
+  margin-bottom: 12px;
 }
 
 @media (min-width: 481px) {

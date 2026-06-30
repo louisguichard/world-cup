@@ -1,5 +1,5 @@
 /* App shell service worker — enables install + offline fallback for static assets. */
-const CACHE = "wc-shell-v7";
+const CACHE = "wc-shell-v8";
 const PRECACHE = [
   "/",
   "/index.html",
@@ -10,13 +10,38 @@ const PRECACHE = [
   "/logos/tournament/official/64.png",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/paninarr-precache-urls.json",
 ];
+
+async function precachePaninarrImages(cache) {
+  try {
+    const res = await fetch("/paninarr-precache-urls.json");
+    if (!res.ok) return;
+    const data = await res.json();
+    const urls = Array.isArray(data?.urls) ? data.urls : [];
+    await Promise.all(
+      urls.map(async (url) => {
+        try {
+          const imgRes = await fetch(url, { mode: "cors" });
+          if (imgRes.ok) await cache.put(url, imgRes);
+        } catch {
+          /* cross-origin cache best-effort */
+        }
+      })
+    );
+  } catch {
+    /* optional paninarr precache */
+  }
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(PRECACHE))
+      .then(async (cache) => {
+        await cache.addAll(PRECACHE);
+        await precachePaninarrImages(cache);
+      })
       .catch(() => undefined)
   );
   self.skipWaiting();

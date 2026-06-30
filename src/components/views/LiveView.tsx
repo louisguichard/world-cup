@@ -18,6 +18,7 @@ import { resolveDisplayMatch } from "../../lib/resolveDisplayMatch";
 import { useBracketProjection } from "../../hooks/useBracketProjection";
 import { isKnockoutMatch } from "../../lib/resolveMatchWinner";
 import { useStore } from "../../store";
+import { KnockoutRoundStatusBento } from "../bentos/KnockoutRoundStatusBento";
 import { ModuleSectionActions } from "../shared/ModuleSectionActions";
 
 const BestThirdLiveGraph = lazy(() =>
@@ -195,6 +196,14 @@ export function LiveView() {
           <RecentResultsBento />
         </div>
       </Suspense>
+
+      {isKnockoutActive ? (
+        <div className="dashboard-section">
+          <BentoErrorBoundary bento="KnockoutRoundStatusBento">
+            <KnockoutRoundStatusBento />
+          </BentoErrorBoundary>
+        </div>
+      ) : null}
 
       <section className="dashboard-section" aria-label="Upcoming fixtures">
         <div className="section-heading compact">

@@ -53,5 +53,21 @@ services:
       - "9092:9092"
       - "9644:9644"
 
+  fifa-data:
+    image: node:22-alpine
+    container_name: wc2026-fifa-data
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ../../../fifa-public-api-mcp:/app
+    command: sh -c "npm ci && npm run build && HOST=0.0.0.0 node build/httpServer.js"
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: "4000"
+      HOST: "0.0.0.0"
+      FIFA_WC_COMPETITION_ID: "17"
+      FIFA_WC_SEASON_ID: "285023"
+
 volumes:
   wc2026_pg_data:

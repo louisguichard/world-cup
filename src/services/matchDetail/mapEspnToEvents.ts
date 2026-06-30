@@ -23,6 +23,9 @@ type EspnDetail = {
   ownGoal?: boolean;
   redCard?: boolean;
   yellowCard?: boolean;
+  shootout?: boolean;
+  penaltyKick?: boolean;
+  scoringPlay?: boolean;
   text?: string;
 };
 
@@ -44,6 +47,12 @@ function parseClock(displayValue?: string, value?: number): { minute: number; mi
 
 function eventTypeFromDetail(text: string, detail: EspnDetail): MatchEventType | null {
   const t = text.toLowerCase();
+  const isShootoutKick = Boolean(detail.shootout && detail.penaltyKick);
+  if (isShootoutKick) {
+    if (t.includes("missed") || detail.scoringPlay === false) return "penalty_missed";
+    if (t.includes("saved")) return "penalty_saved";
+    if (t.includes("scored") || detail.scoringPlay === true) return "goal";
+  }
   if (detail.ownGoal || t.includes("own goal")) return "own_goal";
   if (t.includes("goal") || t.includes("scores")) return "goal";
   if (detail.redCard && detail.yellowCard) return "yellow_red_card";

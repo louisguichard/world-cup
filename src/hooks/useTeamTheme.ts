@@ -12,6 +12,7 @@ import {
 } from "../data/wc2026TeamCatalog";
 import { useStore } from "../store";
 import type { Team } from "../types";
+import { resolveTeamLogo } from "../lib/resolveTeamLogo";
 import { extractDominantColor } from "../utils/extractTeamColor";
 
 const FALLBACK_VARS: Record<string, string> = {
@@ -41,7 +42,7 @@ function teamColorSignature(team: Team | undefined, teamId: string | undefined |
   if (!team) return teamId ?? "";
   return [
     team.id,
-    team.logo ?? "",
+    resolveTeamLogo(team) ?? "",
     team.color ?? "",
     team.alternateColor ?? "",
     team.abbreviation ?? "",
@@ -68,19 +69,20 @@ export function useTeamIdentity(teamId: string | undefined | null): TeamIdentity
   );
 
   useEffect(() => {
-    if (!team?.logo) {
+    const crestUrl = team ? resolveTeamLogo(team) : undefined;
+    if (!crestUrl) {
       clearAsyncPrimary(setAsyncPrimary);
       return;
     }
 
-    const sync = resolveTeamIdentity(team);
+    const sync = team ? resolveTeamIdentity(team) : null;
     if (sync && sync.primary !== "#6B7280") {
       clearAsyncPrimary(setAsyncPrimary);
       return;
     }
 
     let cancelled = false;
-    void extractDominantColor(team.logo).then((color) => {
+    void extractDominantColor(crestUrl).then((color) => {
       if (!cancelled && color !== "#6B7280") {
         setAsyncPrimary((prev) => (prev === color ? prev : color));
       }
@@ -89,7 +91,7 @@ export function useTeamIdentity(teamId: string | undefined | null): TeamIdentity
     return () => {
       cancelled = true;
     };
-  }, [teamId, colorSignature, team?.logo]);
+  }, [teamId, colorSignature, team]);
 
   return syncIdentity;
 }

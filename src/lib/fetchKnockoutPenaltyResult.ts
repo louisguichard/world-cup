@@ -21,11 +21,11 @@ export function needsZafronixPenaltyFetch(match: MergedMatch): boolean {
   if (match.penaltyShootout) return false;
   if (match.status !== "completed") return false;
   if (!isKnockoutMatch(match)) return false;
-  if (!match.matchId?.startsWith("M")) return false;
+  if (!match.matchId) return false;
 
   const home = match.homeScore ?? 0;
   const away = match.awayScore ?? 0;
-  return home === away || match.decidedByPenalties === true;
+  return home === away || match.decidedByPenalties === true || match.period === "penalties";
 }
 
 /** Backfill penalty shootout totals for completed knockout ties missing data. */

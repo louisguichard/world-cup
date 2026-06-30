@@ -1,5 +1,5 @@
 export type ScoreVote = {
-  source: "wclive" | "espn" | "sportapi7";
+  source: "wclive" | "espn" | "sportapi7" | "fifaPublic";
   matchId: string;
   homeScore: number;
   awayScore: number;

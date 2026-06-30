@@ -57,6 +57,22 @@ function snapshotEqual(a: MatchLiveSnapshot, b: MatchLiveSnapshot): boolean {
   );
 }
 
+function preservePenaltyFields(
+  existing: Record<string, MergedMatch>,
+  incoming: Record<string, MergedMatch>
+): Record<string, MergedMatch> {
+  const merged: Record<string, MergedMatch> = {};
+  for (const id of Object.keys(incoming)) {
+    const prev = existing[id];
+    merged[id] = {
+      ...incoming[id],
+      penaltyShootout: incoming[id].penaltyShootout ?? prev?.penaltyShootout,
+      decidedByPenalties: incoming[id].decidedByPenalties ?? prev?.decidedByPenalties,
+    };
+  }
+  return merged;
+}
+
 export function mergeLiveMatchRecords(
   existing: Record<string, MergedMatch>,
   incoming: Record<string, MergedMatch>
@@ -65,14 +81,14 @@ export function mergeLiveMatchRecords(
   const incomingIds = Object.keys(incoming);
 
   if (existingIds.length !== incomingIds.length) {
-    return { merged: incoming, changed: true };
+    return { merged: preservePenaltyFields(existing, incoming), changed: true };
   }
 
   for (const id of incomingIds) {
     const prev = existing[id];
     const next = incoming[id];
     if (!prev || !snapshotEqual(matchLiveSnapshot(prev), matchLiveSnapshot(next))) {
-      return { merged: incoming, changed: true };
+      return { merged: preservePenaltyFields(existing, incoming), changed: true };
     }
   }
 

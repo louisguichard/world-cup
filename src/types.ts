@@ -30,6 +30,14 @@ export type Team = {
   titleCalibrationAdjustment?: number;
   /** World Cup 2026 Teams API id (for roster / player photos). */
   wc2026TeamId?: string;
+  /** Spanish display name (canonical catalog). */
+  nameEs?: string;
+};
+
+export type MatchSupplement = {
+  highlightsUrl?: string;
+  source: "andrekamp";
+  fetchedAt: number;
 };
 
 export type OutcomeProbabilities = {
@@ -79,6 +87,8 @@ export type Match = {
   clockExtra?: number;
   clockRunning?: boolean;
   displayClock?: string;
+  penaltyShootout?: PenaltyShootout;
+  decidedByPenalties?: boolean;
 };
 
 export type ScoreOverride = {
@@ -223,6 +233,7 @@ export type PlayerRef = {
   jerseyNumber?: number;
   headshotUrl?: string;
   position?: string;
+  role?: "player" | "manager";
 };
 
 /** Enriched profile for a goal scorer in a match. */
@@ -447,6 +458,8 @@ export type MergedMatch = {
   dataSource?: SourceKind;
   sofaEventId?: string;
   espnEventId?: string;
+  /** FIFA public API match id (api.fifa.com). */
+  fifaMatchId?: string;
   compositeKey?: string;
   sofaLinkedAt?: number;
   period?: MatchPeriod;
@@ -613,4 +626,7 @@ export type StadiumInfo = {
   capacity?: number;
   lat?: number;
   lon?: number;
+  heroImageUrl?: string;
+  cityHeroImageUrl?: string;
+  heroImageCredit?: string;
 };

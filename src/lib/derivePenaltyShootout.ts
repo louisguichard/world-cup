@@ -21,6 +21,44 @@ function isShootoutEvent(event: MatchEvent, duringPenalties: boolean): boolean {
   return isPostFtShootoutEvent(event);
 }
 
+/** Build shootout from ESPN scoreboard `details` entries flagged with `shootout: true`. */
+export function penaltyShootoutFromEspnDetails(
+  details: unknown[],
+  homeTeamId: string,
+  awayTeamId: string
+): PenaltyShootout | undefined {
+  type EspnShootoutDetail = {
+    shootout?: boolean;
+    scoringPlay?: boolean;
+    team?: { id?: string };
+  };
+
+  const shootoutDetails = (details as EspnShootoutDetail[]).filter((d) => d.shootout);
+  if (shootoutDetails.length === 0) return undefined;
+
+  const home: PenaltyKick[] = [];
+  const away: PenaltyKick[] = [];
+
+  for (const detail of shootoutDetails) {
+    const scored = detail.scoringPlay === true;
+    const kick: PenaltyKick = { scored };
+    if (detail.team?.id === homeTeamId) {
+      home.push(kick);
+    } else if (detail.team?.id === awayTeamId) {
+      away.push(kick);
+    }
+  }
+
+  if (home.length === 0 && away.length === 0) return undefined;
+
+  return {
+    home,
+    away,
+    homeScore: home.filter((k) => k.scored).length,
+    awayScore: away.filter((k) => k.scored).length,
+  };
+}
+
 /** Build shootout from Zafronix aggregate penalty totals when kick-by-kick data is unavailable. */
 export function penaltyShootoutFromAggregate(aggregate: PenaltyAggregate): PenaltyShootout {
   const home: PenaltyKick[] = Array.from({ length: aggregate.home }, () => ({ scored: true }));

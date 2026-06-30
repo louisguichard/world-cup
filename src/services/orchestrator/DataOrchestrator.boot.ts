@@ -22,7 +22,7 @@ import { useStore } from "../../store";
 import { fetchScoreboard } from "../ESPNClient";
 import { applyLiveScore } from "../DataMerger";
 import { mergeEspnMatchIntoStore } from "../espnMatchMerge";
-import { publishMatchEvents } from "../matchDetail/fetchMatchEvents";
+import { publishMatchEvents, fetchMatchEvents } from "../matchDetail/fetchMatchEvents";
 import {
   fetchAllTeams as fetchZafronixTeams,
   isZafronixDisabled,
@@ -42,6 +42,8 @@ import {
 import { getAllScheduleEntries } from "../BroadcastLookup";
 import { normalizeZafronixTeam, normalizeWC2026Team, mergeTeamPartials } from "../adapters/normalizeTeam";
 import { buildStandingsFromTeamGroups, mergeStandingsPartials } from "../adapters/normalizeStandings";
+import { enrichKnockoutPenaltiesFromZafronix, needsZafronixPenaltyFetch } from "../../lib/fetchKnockoutPenaltyResult";
+import { enrichMatchesPenaltyShootouts } from "../../lib/enrichMatchPenaltyShootout";
 import { applyTeamLogoOverrides } from "../../lib/resolveTeamLogo";
 import {
   mergeTeamsWithCatalog,
@@ -49,6 +51,7 @@ import {
   withEspnTeamAliases,
 } from "../../data/wc2026TeamCatalog";
 import { logger } from "../Logger";
+import { enrichFromFifaPublicApi } from "../enrichFromFifaPublicApi";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -139,6 +142,25 @@ async function mergeTeamsFromCascade(
   return applyTeamLogoOverrides(teams);
 }
 
+/** ESPN events → play-by-play → Zafronix cascade (mirrors live poll penalty path). */
+async function enrichBootPenaltyPipeline(
+  matches: Record<string, MergedMatch>
+): Promise<Record<string, MergedMatch>> {
+  const store = useStore.getState();
+  let out = enrichMatchesPenaltyShootouts(matches, store.matchEvents);
+
+  const pbpCandidates = Object.values(out).filter(needsZafronixPenaltyFetch);
+  await Promise.allSettled(
+    pbpCandidates.map(async (match) => {
+      const events = await fetchMatchEvents(match, match.matchId ?? match.id);
+      if (events.length > 0) publishMatchEvents(match, events);
+    })
+  );
+
+  out = enrichMatchesPenaltyShootouts(out, useStore.getState().matchEvents);
+  return enrichKnockoutPenaltiesFromZafronix(out);
+}
+
 async function runDeferredEnrichment(
   espnTeamsMap: Record<string, Team>,
   liveMatches: MergedMatch[]
@@ -153,6 +175,19 @@ async function runDeferredEnrichment(
     store.setTeams(teams);
     endBootPhase("teams-merge");
 
+    try {
+      const preDeferred = useStore.getState().liveMatches;
+      const enriched = await enrichBootPenaltyPipeline(preDeferred);
+      store.setLiveMatches(enriched);
+      logger.info("Penalty shootout enrichment complete (deferred)", "DataOrchestrator.boot", {
+        enriched: Object.values(enriched).filter((m) => m.penaltyShootout).length,
+      });
+    } catch (err) {
+      logger.warn("Penalty enrichment failed in deferred boot", "DataOrchestrator.boot", {
+        reason: err instanceof Error ? err.message : String(err),
+      });
+    }
+
     const teamsList = Object.values(teams);
     const standings = await resolveGroupStandings({
       matches: liveMatches,
@@ -162,6 +197,15 @@ async function runDeferredEnrichment(
     });
     if (standings.length > 0) {
       store.setGroupStandings(standings);
+    }
+
+    const fifaEnriched = await enrichFromFifaPublicApi(
+      useStore.getState().teams,
+      useStore.getState().liveMatches
+    );
+    if (fifaEnriched.mergedCount > 0 || Object.keys(fifaEnriched.teams).length > 0) {
+      store.setTeams(fifaEnriched.teams);
+      store.setLiveMatches(fifaEnriched.matches);
     }
 
     store.startFootballPredictionSync();
@@ -310,6 +354,21 @@ export async function runBoot(): Promise<void> {
       if (m.locked) store.addLockedMatchId(m.id);
     }
     endBootPhase("matches-build", `${Object.keys(liveMatches).length} matches`);
+
+    void (async () => {
+      try {
+        const preBoot = useStore.getState().liveMatches;
+        const enriched = await enrichBootPenaltyPipeline(preBoot);
+        store.setLiveMatches(enriched);
+        logger.info("Penalty shootout enrichment complete", "DataOrchestrator.boot", {
+          enriched: Object.values(enriched).filter((m) => m.penaltyShootout).length,
+        });
+      } catch (err) {
+        logger.warn("Penalty enrichment failed at boot", "DataOrchestrator.boot", {
+          reason: err instanceof Error ? err.message : String(err),
+        });
+      }
+    })();
 
     startBootPhase("standings-load");
     const teamsList = Object.values(useStore.getState().teams);

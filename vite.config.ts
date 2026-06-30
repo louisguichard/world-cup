@@ -162,6 +162,12 @@ const rapidApiProxies = {
   },
 };
 
+const fifaPublicProxy = {
+  target: "http://127.0.0.1:4000",
+  changeOrigin: true,
+  rewrite: stripPrefix("/api/fifa-public"),
+};
+
 const proxy = {
   ...rapidApiProxies,
   "/espn": {
@@ -189,6 +195,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       ...proxy,
+      "/api/fifa-public": fifaPublicProxy,
       "/api/sofascore": sofaProxy,
       "/espn-web": {
         target: "https://site.web.api.espn.com",
@@ -208,6 +215,7 @@ export default defineConfig({
     port: 4173,
     proxy: {
       ...proxy,
+      "/api/fifa-public": fifaPublicProxy,
       "/api/sofascore": sofaProxy,
       "/espn-web": {
         target: "https://site.web.api.espn.com",

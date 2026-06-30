@@ -7,6 +7,8 @@ import { navigateHome } from "../../lib/navigateToTab";
 import { APP_COPY } from "../../lib/appCopy";
 import { clearReturnContext } from "../../store/slices/navigationSlice";
 import { useStore } from "../../store";
+import { GettyHeroImage } from "../../components/media/GettyHeroImage";
+import { useGettyVenueHero } from "../../hooks/useGettyWorldCupImages";
 import { VenueMatchRow } from "../../components/venue/VenueMatchRow";
 import { VenuePopoverPanel } from "../../components/venue/VenuePopover";
 import { VenueTimelinePreview } from "../../components/venue/VenueTimelinePreview";
@@ -40,6 +42,10 @@ export function VenueHubView() {
     if (!venue) return null;
     return buildVenueMatchSlice(allMatches, venue.stadiumName);
   }, [allMatches, venue]);
+
+  const gettyHero = useGettyVenueHero(venue?.heroImageUrl ? null : venue);
+  const heroUrl = venue?.heroImageUrl ?? gettyHero.image?.url;
+  const heroCredit = venue?.heroImageCredit ?? (gettyHero.image ? "Getty Images" : undefined);
 
   const handleBack = () => {
     const ctx = returnContext;
@@ -90,6 +96,16 @@ export function VenueHubView() {
 
       <div className={styles.scroll}>
         <div className={styles.hubInner}>
+          {heroUrl ? (
+            <GettyHeroImage
+              imageUrl={heroUrl}
+              title={venue.displayPrimary}
+              credit={heroCredit}
+              className={styles.hero}
+              aspect="wide"
+            />
+          ) : null}
+
           <div className={styles.detailsToggle}>
             <button
               type="button"

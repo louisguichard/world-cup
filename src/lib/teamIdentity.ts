@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { liveCardNameForAbbrev } from "../data/teamLiveCardNames";
 import { TEAM_IDENTITY_OVERRIDES } from "../data/teamIdentityOverrides";
-import { resolveCatalogTeamName, resolveTeamLogoByAbbrev, resolveTeamForDisplay, resolveTeamFromStore } from "../data/wc2026TeamCatalog";
+import { resolveCatalogTeamName, resolveTeamAbbrevFromHint, resolveTeamLogoByAbbrev, resolveTeamForDisplay, resolveTeamFromStore, WC2026_TEAM_NAMES_ES } from "../data/wc2026TeamCatalog";
 import type { CrestProfile } from "../data/teamCrestDisplay";
 import type { Team } from "../types";
 import { crestDisplayToCssVars, resolveCrestDisplay } from "./resolveCrestDisplay";
@@ -157,6 +157,23 @@ export function teamDisplayName(
   if (fb && !isInternalTeamId(fb)) return fb;
 
   return "TBD";
+}
+
+/** Spanish display label from canonical team catalog. */
+export function teamDisplayNameEs(
+  team?: Pick<Team, "nameEs" | "name" | "shortName" | "abbreviation" | "id"> | null,
+  fallback = "TBD"
+): string {
+  const es = team?.nameEs?.trim();
+  if (es) return es;
+
+  const abbrev =
+    resolveTeamAbbrevFromHint(team?.abbreviation) ??
+    resolveTeamAbbrevFromHint(team?.name) ??
+    resolveTeamAbbrevFromHint(fallback);
+  if (abbrev && WC2026_TEAM_NAMES_ES[abbrev]) return WC2026_TEAM_NAMES_ES[abbrev];
+
+  return teamDisplayName(team, fallback);
 }
 
 /** Compact label for live hero/schedule cards — ESPN short name or FIFA abbrev when shorter. */

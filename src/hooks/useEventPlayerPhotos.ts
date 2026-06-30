@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MatchEvent, Team } from "../types";
 import {
   enrichEventPlayerPhotos,
+  mergePhotoMaps,
   resolveEventPhotosSync,
 } from "../services/playerProfile/resolveEventPlayerPhotos";
 
@@ -11,21 +12,23 @@ type Input = {
   awayTeam?: Team;
 };
 
+function filterPlayerEvents(events: MatchEvent[]): MatchEvent[] {
+  return events.filter(
+    (e) =>
+      e.playerName.trim().length > 0 ||
+      (e.assistName?.trim() && (e.type === "goal" || e.type === "own_goal"))
+  );
+}
+
 export function useEventPlayerPhotos(input: Input): Record<string, string | undefined> {
   const homeTeamRef = useRef(input.homeTeam);
   const awayTeamRef = useRef(input.awayTeam);
+  const playerEventsRef = useRef<MatchEvent[]>([]);
   homeTeamRef.current = input.homeTeam;
   awayTeamRef.current = input.awayTeam;
 
-  const playerEvents = useMemo(
-    () =>
-      input.events.filter(
-        (e) =>
-          e.playerName.trim().length > 0 ||
-          (e.assistName?.trim() && (e.type === "goal" || e.type === "own_goal"))
-      ),
-    [input.events]
-  );
+  const playerEvents = useMemo(() => filterPlayerEvents(input.events), [input.events]);
+  playerEventsRef.current = playerEvents;
 
   const eventKey = useMemo(
     () =>
@@ -43,45 +46,27 @@ export function useEventPlayerPhotos(input: Input): Record<string, string | unde
   );
 
   useEffect(() => {
-    const sync = resolveEventPhotosSync(playerEvents);
-    setPhotos((prev) => {
-      const prevKeys = Object.keys(prev);
-      const syncKeys = Object.keys(sync);
-      if (
-        prevKeys.length === syncKeys.length &&
-        syncKeys.every((key) => prev[key] === sync[key])
-      ) {
-        return prev;
-      }
-      return sync;
-    });
+    const events = playerEventsRef.current;
+    if (events.length === 0) return;
 
-    if (playerEvents.length === 0) return;
+    const sync = resolveEventPhotosSync(events);
+    setPhotos((prev) => mergePhotoMaps(prev, sync));
 
     let cancelled = false;
     void enrichEventPlayerPhotos({
-      events: playerEvents,
+      events,
       homeTeam: homeTeamRef.current,
       awayTeam: awayTeamRef.current,
     }).then((enriched) => {
       if (!cancelled) {
-        setPhotos((prev) => {
-          const keys = Object.keys(enriched);
-          if (
-            keys.length === Object.keys(prev).length &&
-            keys.every((key) => prev[key] === enriched[key])
-          ) {
-            return prev;
-          }
-          return enriched;
-        });
+        setPhotos((prev) => mergePhotoMaps(prev, enriched));
       }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [eventKey, homeTeamId, awayTeamId, playerEvents]);
+  }, [eventKey, homeTeamId, awayTeamId]);
 
   return photos;
 }

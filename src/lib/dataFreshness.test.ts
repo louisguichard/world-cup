@@ -43,7 +43,32 @@ describe("mergeLiveMatchRecords", () => {
     const incoming = { m1: baseMatch({ homeScore: 2 }) };
     const { merged, changed } = mergeLiveMatchRecords(existing, incoming);
     expect(changed).toBe(true);
-    expect(merged).toBe(incoming);
+    expect(merged.m1.homeScore).toBe(2);
+  });
+
+  it("preserves penaltyShootout when incoming poll omits it", () => {
+    const shootout = { home: [], away: [], homeScore: 4, awayScore: 3 };
+    const existing = {
+      m1: baseMatch({
+        status: "completed",
+        homeScore: 1,
+        awayScore: 1,
+        penaltyShootout: shootout,
+        decidedByPenalties: true,
+      }),
+    };
+    const incoming = {
+      m1: baseMatch({
+        status: "completed",
+        homeScore: 1,
+        awayScore: 1,
+        lastUpdatedAt: "2026-06-15T20:00:00Z",
+      }),
+    };
+    const { merged, changed } = mergeLiveMatchRecords(existing, incoming);
+    expect(changed).toBe(true);
+    expect(merged.m1.penaltyShootout).toEqual(shootout);
+    expect(merged.m1.decidedByPenalties).toBe(true);
   });
 
   it("returns changed=true when match count differs", () => {

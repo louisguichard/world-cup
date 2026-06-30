@@ -111,6 +111,106 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## [5.0.0] build 2 — 2026-06-30 (build)
+- 120 file(s) in .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json — 120 files changed, 7308 insertions(+), 2610 deletions(-)
+
+## [5.0.0] build 1 — 2026-06-30 (major)
+- v5.0.0 release: knockout UX, FIFA public API, paninarr assets, penalty pipeline
+
+## [4.0.0] build 108 — 2026-06-30 (build)
+- Remove unused Paninarr team sticker merge path
+
+## [4.0.0] build 107 — 2026-06-30 (build)
+- Team crests: canonical /logos/teams only, remove Paninarr sticker overlays
+
+## [4.0.0] build 106 — 2026-06-30 (build)
+- Bracket spacing: fit cards in grid slots, compact layout, tighter columns
+
+## [4.0.0] build 105 — 2026-06-30 (build)
+- Remove debug instrumentation from bracket toggle fix
+
+## [4.0.0] build 104 — 2026-06-30 (build)
+- Fix venue popover blocking bracket Locked in toggle clicks
+
+## [4.0.0] build 103 — 2026-06-30 (build)
+- IconicFootball-API typed client, photo waterfall tier, boot warm index
+
+## [4.0.0] build 102 — 2026-06-30 (build)
+- FIFA public API HTTP supplement integration
+
+## [4.0.0] build 101 — 2026-06-30 (build)
+- Fix player photo enrich waterfall after Paninarr tier
+
+## [4.0.0] build 100 — 2026-06-30 (build)
+- Add Paninarr full sticker catalog and ImageAssetService
+
+## [4.0.0] build 99 — 2026-06-30 (build)
+- KnockoutRoundStatusBento reads locked liveMatches instead of bracket projection
+
+## [4.0.0] build 98 — 2026-06-30 (build)
+- Wire andrekamp matches.json for post-match goals and highlight fallback
+
+## [4.0.0] build 97 — 2026-06-30 (build)
+- Widen bracket column gap, enlarge round labels, improve connector readability
+
+## [4.0.0] build 96 — 2026-06-30 (build)
+- Add KnockoutRoundStatusBento to Live view during knockout phase
+
+## [4.0.0] build 95 — 2026-06-30 (build)
+- Fix player DB lookup freeze; remove debug instrumentation
+
+## [4.0.0] build 94 — 2026-06-30 (build)
+- Fix MatchGoalScorers Fast Refresh by moving helper to lib
+
+## [4.0.0] build 93 — 2026-06-30 (build)
+- Remove penalty pipeline debug instrumentation after verified fix
+
+## [4.0.0] build 92 — 2026-06-30 (build)
+- Parse ESPN FT-Pens shootout details into penalty scores
+
+## [4.0.0] build 91 — 2026-06-30 (build)
+- Fix schedule score overlap, stabilize player photos, add hybrid player database and team drawer roster
+
+## [4.0.0] build 90 — 2026-06-30 (build)
+- Boot penalty pipeline: ESPN events + PBP before Zafronix fallback
+
+## [4.0.0] build 89 — 2026-06-30 (build)
+- Fix bracket column layout and SVG connector alignment
+
+## [4.0.0] build 88 — 2026-06-30 (build)
+- Wire penalty enrichment at boot, preserve on poll, relax ID guard, fix loading UI
+
+## [4.0.0] build 87 — 2026-06-30 (build)
+- Fix corrupt font assets and nested venue button DOM warning
+
+## [4.0.0] build 86 — 2026-06-30 (build)
+- Add horizontal padding and margin to LiveView upcoming fixtures section
+
 ## [4.0.0] build 85 — 2026-06-30 (build)
 - 10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 10 files changed, 78 insertions(+), 63 deletions(-)
 

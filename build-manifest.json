@@ -1,6 +1,206 @@
 {
-  "updatedAt": "2026-06-30T04:21:49.971Z",
+  "updatedAt": "2026-06-30T06:21:05.605Z",
   "builds": [
+    {
+      "version": "5.0.0",
+      "build": 2,
+      "kind": "build",
+      "message": "120 file(s) in .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json — 120 files changed, 7308 insertions(+), 2610 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:21:05.605Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 1,
+      "kind": "major",
+      "message": "v5.0.0 release: knockout UX, FIFA public API, paninarr assets, penalty pipeline",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:20:37.692Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 108,
+      "kind": "build",
+      "message": "Remove unused Paninarr team sticker merge path",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:20:19.647Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 107,
+      "kind": "build",
+      "message": "Team crests: canonical /logos/teams only, remove Paninarr sticker overlays",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:19:28.858Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 106,
+      "kind": "build",
+      "message": "Bracket spacing: fit cards in grid slots, compact layout, tighter columns",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:16:05.246Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 105,
+      "kind": "build",
+      "message": "Remove debug instrumentation from bracket toggle fix",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:15:31.871Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 104,
+      "kind": "build",
+      "message": "Fix venue popover blocking bracket Locked in toggle clicks",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:14:04.352Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 103,
+      "kind": "build",
+      "message": "IconicFootball-API typed client, photo waterfall tier, boot warm index",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:04:34.230Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 102,
+      "kind": "build",
+      "message": "FIFA public API HTTP supplement integration",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:03:54.455Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 101,
+      "kind": "build",
+      "message": "Fix player photo enrich waterfall after Paninarr tier",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T05:59:24.400Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 100,
+      "kind": "build",
+      "message": "Add Paninarr full sticker catalog and ImageAssetService",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T05:57:43.227Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 99,
+      "kind": "build",
+      "message": "KnockoutRoundStatusBento reads locked liveMatches instead of bracket projection",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T05:34:51.108Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 98,
+      "kind": "build",
+      "message": "Wire andrekamp matches.json for post-match goals and highlight fallback",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T05:25:44.080Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 97,
+      "kind": "build",
+      "message": "Widen bracket column gap, enlarge round labels, improve connector readability",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T05:12:53.499Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 96,
+      "kind": "build",
+      "message": "Add KnockoutRoundStatusBento to Live view during knockout phase",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T05:12:50.996Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 95,
+      "kind": "build",
+      "message": "Fix player DB lookup freeze; remove debug instrumentation",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T05:11:00.905Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 94,
+      "kind": "build",
+      "message": "Fix MatchGoalScorers Fast Refresh by moving helper to lib",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:56:35.017Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 93,
+      "kind": "build",
+      "message": "Remove penalty pipeline debug instrumentation after verified fix",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:55:15.677Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 92,
+      "kind": "build",
+      "message": "Parse ESPN FT-Pens shootout details into penalty scores",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:51:58.149Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 91,
+      "kind": "build",
+      "message": "Fix schedule score overlap, stabilize player photos, add hybrid player database and team drawer roster",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:49:18.838Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 90,
+      "kind": "build",
+      "message": "Boot penalty pipeline: ESPN events + PBP before Zafronix fallback",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:47:59.405Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 89,
+      "kind": "build",
+      "message": "Fix bracket column layout and SVG connector alignment",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:46:59.493Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 88,
+      "kind": "build",
+      "message": "Wire penalty enrichment at boot, preserve on poll, relax ID guard, fix loading UI",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:40:38.830Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 87,
+      "kind": "build",
+      "message": "Fix corrupt font assets and nested venue button DOM warning",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:38:25.759Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 86,
+      "kind": "build",
+      "message": "Add horizontal padding and margin to LiveView upcoming fixtures section",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T04:28:10.661Z"
+    },
     {
       "version": "4.0.0",
       "build": 85,
@@ -120,209 +320,17 @@
       "message": "Frontend perf: polling governor, SSE cleanup, panel error boundaries",
       "date": "2026-06-28",
       "timestamp": "2026-06-28T06:51:59.304Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 70,
-      "kind": "build",
-      "message": "69 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, package.json, packages — 69 files changed, 5149 insertions(+), 63 deletions(-)",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T06:37:24.283Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 69,
-      "kind": "build",
-      "message": "Fix Vercel deploy: @vercel/node, nodejs runtime, BC2 bridge types",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T06:37:20.984Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 68,
-      "kind": "build",
-      "message": "75 file(s) in .env.example, .gitignore, .npmrc, CHANGELOG.md, VERSION_LOG.md, api — 75 files changed, 8189 insertions(+), 7827 deletions(-)",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T06:34:13.661Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 67,
-      "kind": "build",
-      "message": "Fix knockout placeholders stored as teamId; resolve from standings on schedule overlay",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T06:11:14.249Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 66,
-      "kind": "build",
-      "message": "Resolve knockout schedule from standings; finalize group tables in store",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:57:38.870Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 65,
-      "kind": "build",
-      "message": "Reliable server:dev env loading via run-server-dev.mjs; richer workers_skipped diagnostics",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:48:56.568Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 64,
-      "kind": "build",
-      "message": "Fix blank web app: stop bundling node:crypto inputHash into browser; fix analyst import paths",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:47:31.677Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 63,
-      "kind": "build",
-      "message": "stack:wait + stack:bootstrap for Postgres readiness after compose up",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:44:00.130Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 62,
-      "kind": "build",
-      "message": "Server loads .env.local; admin API proxy to 3001; clarify dev server blocking",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:43:32.648Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 61,
-      "kind": "build",
-      "message": "Graceful EADDRINUSE on server:dev; add server:stop script",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:28:48.038Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 60,
-      "kind": "build",
-      "message": "Remove debug instrumentation from smoke-stack script",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:27:40.140Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 59,
-      "kind": "build",
-      "message": "Fix pnpm exec version clash; smoke-stack skips when Docker daemon down",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:26:29.504Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 58,
-      "kind": "build",
-      "message": "Prisma config fallback URL for generate without DATABASE_URL",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:21:21.614Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 57,
-      "kind": "build",
-      "message": "Prisma 7 config, qual engine in package, Clerk auth, pnpm workspace, smoke:stack",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:21:09.524Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 56,
-      "kind": "build",
-      "message": "HTTP-only server:dev with lazy Redis/Prisma, Hono QueryAPI, tsx runner",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:13:00.774Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 55,
-      "kind": "build",
-      "message": "17 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, docs, package.json — 17 files changed, 595 insertions(+), 31 deletions(-)",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:09:16.956Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 54,
-      "kind": "build",
-      "message": "Fix smoke-db and verify-db Prisma import graceful handling",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:09:07.498Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 53,
-      "kind": "build",
-      "message": "Restore BC API routes, Vite dev API middleware, catalog qual fallback",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:08:33.182Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 52,
-      "kind": "build",
-      "message": "17 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, package.json, packages — 17 files changed, 451 insertions(+), 25 deletions(-)",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:05:57.191Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 51,
-      "kind": "build",
-      "message": "Status contract, prediction panel, SSE poll gate, smoke test, local-dev docs",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:05:50.675Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 50,
-      "kind": "build",
-      "message": "13 file(s) in .env.example, CHANGELOG.md, VERSION_LOG.md, apps, build-manifest.json, src — 13 files changed, 209 insertions(+), 51 deletions(-)",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:00:22.288Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 49,
-      "kind": "build",
-      "message": "Fix remaining tests, Meteosource normalize module, admin token client, qual standings test ids",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T05:00:11.998Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 48,
-      "kind": "build",
-      "message": "25 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, package.json, server — 25 files changed, 1197 insertions(+), 47 deletions(-)",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T04:50:52.166Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 47,
-      "kind": "build",
-      "message": "Move staging serverless routes out of Vercel deploy path",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T04:50:51.867Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 46,
-      "kind": "build",
-      "message": "Execute phases 1-6: local stack, identity unify, qual bridge, UI wiring, admin token gate, smoke pipeline; resolve merge conflicts",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T04:49:34.810Z"
     }
   ],
   "commits": [
+    {
+      "hash": "c4ebb0450b244657836ee28b6761bf72c7472edf",
+      "shortHash": "c4ebb04",
+      "message": "Record v4.0.0 build 85 production deploy on Vercel.",
+      "version": "4.0.0",
+      "build": 85,
+      "timestamp": "2026-06-30T04:22:04.008Z"
+    },
     {
       "hash": "64ad76b6227b023757c6a92db07976105bac689c",
       "shortHash": "64ad76b",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 34,
       "timestamp": "2026-06-27T19:25:59.301Z"
-    },
-    {
-      "hash": "19ec866e94cc70689a34a9dd7a47ef9298309158",
-      "shortHash": "19ec866",
-      "message": "Flatten API proxies to top-level rapid.ts and proxy.ts for Vercel",
-      "version": "4.0.0",
-      "build": 32,
-      "timestamp": "2026-06-27T19:23:13.209Z"
     }
   ],
   "deploys": [

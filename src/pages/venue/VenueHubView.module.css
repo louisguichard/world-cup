@@ -121,6 +121,10 @@
   margin: 0 auto;
 }
 
+.hero {
+  margin-bottom: 16px;
+}
+
 .detailsToggle {
   margin-bottom: 16px;
 }

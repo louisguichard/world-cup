@@ -1,7 +1,7 @@
 {
   "name": "road-to-wc-final",
   "private": true,
-  "version": "4.0.0",
+  "version": "5.0.0",
   "type": "module",
   "packageManager": "pnpm@9.15.4",
   "scripts": {
@@ -24,7 +24,7 @@
     "server:dev": "node scripts/run-server-dev.mjs",
     "server:dev:workers": "node scripts/run-server-dev.mjs --workers",
     "server:stop": "lsof -ti:3001 | xargs kill -9 2>/dev/null || true",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/ensure-generated-data.mjs && tsc -b && vite build",
     "preview": "vite preview",
     "test:apis": "node scripts/test-all-apis.mjs",
     "test:sofascore6": "node scripts/test-sofascore6.mjs",
@@ -43,6 +43,10 @@
     "test:tvpro-api": "node scripts/test-tvpro-api.mjs",
     "test:youtube-match-videos": "node scripts/test-youtube-match-videos.mjs",
     "sync:match-schedule": "node scripts/sync-match-schedule-from-espn.mjs",
+    "sync:player-database": "node scripts/sync-player-database.mjs",
+    "sync:kamp-matches": "node scripts/sync-kamp-matches.mjs",
+    "fifa:serve": "node --watch ../fifa-public-api-mcp/build/httpServer.js",
+    "sync:paninarr": "node scripts/sync-paninarr-assets.mjs",
     "audit:espn": "node scripts/audit-espn-live.mjs",
     "test:world-cup-history": "node scripts/test-world-cup-history.mjs",
     "test:wc2026-teams": "node scripts/test-wc2026-teams.mjs",

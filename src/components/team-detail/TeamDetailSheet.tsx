@@ -18,6 +18,7 @@ import { TeamFlag } from "../team/TeamFlag";
 import { QualificationStatusBadge } from "../shared/QualificationStatusBadge";
 import { TeamMatchLists, TeamSquadList, TeamStatsPanel } from "./TeamProfileSections";
 import { Wc2026SquadList } from "./Wc2026SquadList";
+import { PlayerRoster } from "../match/PlayerRoster";
 import { PlayerPhoto } from "../player/PlayerPhoto";
 import { useTeamProfile } from "../../hooks/useTeamProfile";
 import { useWc2026TeamSquad } from "../../hooks/useWc2026TeamSquad";
@@ -384,7 +385,11 @@ export function TeamDetailSheet() {
           ) : null}
 
           {tab === "players" ? (
-            wcSquadLoading ? (
+            <>
+              {team ? (
+                <PlayerRoster teamId={team.id} teamName={teamDisplay} side="home" />
+              ) : null}
+            {wcSquadLoading ? (
               <LoadingState label="Loading squad photos…" className="team-sheet-empty" />
             ) : wcSquad.length > 0 ? (
               <Wc2026SquadList players={wcSquad} />
@@ -408,7 +413,8 @@ export function TeamDetailSheet() {
               <LoadingState label="Loading squad…" className="team-sheet-empty" />
             ) : (
               <TeamSquadList players={sofaProfile?.players ?? []} />
-            )
+            )}
+            </>
           ) : null}
 
           {tab === "form" ? (

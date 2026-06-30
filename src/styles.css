@@ -1,23 +1,7 @@
 /* =========================================================================
    FIFA World Cup 2026 — Official design language
-   Dark canvas, royal blue accents, WorldCup26 display type.
+   Dark canvas, royal blue accents, Noto Sans type stack.
    ========================================================================= */
-
-@font-face {
-  font-family: "WorldCup26";
-  src: url("/fonts/WorldCup26-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "FWC2026";
-  src: url("/fonts/FWC2026_Normal_Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
 
 :root {
   /* ── FWC 2026 OFFICIAL COLOR PALETTE ── */
@@ -122,12 +106,12 @@
   --glow-red: 0 0 12px rgba(214, 0, 0, 0.45);
 
   /* ── TYPOGRAPHY (FWC 2026 official cuts) ── */
-  --font-brand: "WorldCup26", "FWC2026", sans-serif;
+  --font-brand: "Noto Sans", system-ui, -apple-system, sans-serif;
   --font-display: var(--font-brand);
   --font-heading: var(--font-brand);
   --tracking-label: 0.08em;
-  --font-ui: "FWC2026", "WorldCup26", "Noto Sans", system-ui, sans-serif;
-  --font-body: "Noto Sans", "FWC2026", system-ui, -apple-system, sans-serif;
+  --font-ui: "Noto Sans", system-ui, -apple-system, sans-serif;
+  --font-body: "Noto Sans", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 
   --text-xs: 0.6875rem;
@@ -378,7 +362,6 @@ p {
   .splash-kicker,
   .bottom-tab,
   .bracket-toggle-label,
-  .bracket-head h3,
   .bento-retry-btn,
   .groups-view-toggle-btn,
   .splash-retry-btn,
@@ -1892,88 +1875,6 @@ h2 {
   font-size: 13px;
 }
 
-.bracket-scroll {
-  overflow-x: auto;
-  overflow-y: visible;
-  max-width: 100%;
-  min-width: 0;
-  padding: 20px 24px 26px;
-}
-
-.bracket-head {
-  display: flex;
-  flex-direction: row;
-  gap: var(--bracket-gap);
-  min-width: 1180px;
-  margin-bottom: 12px;
-}
-
-.bracket-head h3 {
-  flex: 1 1 0;
-  color: var(--faint);
-  font-family: var(--font-brand);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.bracket-rounds {
-  --bracket-slot-h: 88px;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  min-width: 1180px;
-  min-height: calc(16 * var(--bracket-slot-h));
-  position: relative;
-}
-
-.bracket-round {
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  margin-right: var(--bracket-gap);
-  gap: 0;
-}
-
-.bracket-round:nth-child(1) .bracket-cell {
-  flex: 0 0 calc(100% / 16);
-}
-
-.bracket-round:nth-child(2) .bracket-cell {
-  flex: 0 0 calc(100% / 8);
-}
-
-.bracket-round:nth-child(3) .bracket-cell {
-  flex: 0 0 calc(100% / 4);
-}
-
-.bracket-round:nth-child(4) .bracket-cell {
-  flex: 0 0 calc(100% / 2);
-}
-
-.bracket-round:nth-child(5) .bracket-cell {
-  flex: 0 0 100%;
-}
-
-.bracket-round.is-final {
-  margin-right: 0;
-}
-
-.bracket-cell {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  height: auto;
-  min-height: 0;
-  margin-bottom: 0;
-  padding: 4px 0;
-  box-sizing: border-box;
-}
-
 .bracket-card {
   position: relative;
   display: flex;
@@ -2007,9 +1908,9 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  min-height: 26px;
-  padding: 6px 10px;
+  gap: 6px;
+  min-height: 22px;
+  padding: 4px 8px;
   border-bottom: 1px solid var(--line);
   background: var(--surface-2);
 }

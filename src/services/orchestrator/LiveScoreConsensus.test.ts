@@ -69,4 +69,15 @@ describe("computeScoreConsensus", () => {
       expect(result.sources).toContain("sportapi7");
     }
   });
+
+  it("agrees when fifaPublic matches espn", () => {
+    const result = computeScoreConsensus([
+      vote({ source: "fifaPublic", matchId: "M12", homeScore: 1, awayScore: 0 }),
+      vote({ source: "espn", matchId: "M12", homeScore: 1, awayScore: 0 }),
+    ]);
+    expect(result.agreed).toBe(true);
+    if (result.agreed) {
+      expect(result.sources).toContain("fifaPublic");
+    }
+  });
 });

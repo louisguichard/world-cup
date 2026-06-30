@@ -38,6 +38,7 @@ import { PlayerPhoto } from "../../components/player/PlayerPhoto";
 import { useGoalScorerProfiles } from "../../hooks/useGoalScorerProfiles";
 import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
 import { useHighlightlyMatchData } from "../../hooks/useHighlightlyMatchData";
+import { useMatchSupplement } from "../../hooks/useMatchSupplement";
 import { getHighlightlyQuotaStatus } from "../../lib/highlightlyQuota";
 import { useLiveStreamForMatch } from "../../hooks/useLiveStreamForMatch";
 import { mapHighlightlyStatistics } from "../../services/matchDetail/fetchHighlightlyMatchBundle";
@@ -134,6 +135,11 @@ export function MatchDetailView() {
   );
   const eventPhotos = useEventPlayerPhotos({ events: goalEvents, homeTeam, awayTeam });
   const highlightly = useHighlightlyMatchData(match, homeTeam, awayTeam);
+  const kampSupplement = useMatchSupplement(match);
+  const kampHighlightsFallback =
+    highlightly.highlights.length === 0 && !highlightly.loading
+      ? kampSupplement?.highlightsUrl
+      : undefined;
   const highlightQuota = useMemo(() => getHighlightlyQuotaStatus(), [highlightly.fetchedAt]);
   const highlightQuotaLabel = `${highlightQuota.remaining}/${highlightQuota.limit} API requests left this month`;
   const liveStream = useLiveStreamForMatch(match, homeTeam, awayTeam);
@@ -460,6 +466,7 @@ export function MatchDetailView() {
               introHighlight={highlightly.intro?.introHighlight}
               attribution={highlightly.attribution}
               quotaLabel={highlightQuotaLabel}
+              fallbackHighlightsUrl={kampHighlightsFallback}
             />
           </PanelErrorBoundary>
         ) : null}

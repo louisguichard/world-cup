@@ -5,8 +5,12 @@ import { syncTournamentProfileIfNeeded } from "../services/teamProfile/TeamProfi
 import { syncWc2026CatalogIfNeeded } from "../services/wc2026/Wc2026PlayerSync";
 import { syncWcLiveDrawIfNeeded } from "../services/WorldCup2026LiveClient";
 import { startHighlightlyPostMatchSync } from "../services/highlights/HighlightlyPostMatchSync";
+import { startKampPostMatchSync } from "../services/kamp/KampPostMatchSync";
+import { ensurePaninarrCatalogLoaded } from "../services/paninarr/ImageAssetService";
+import { warmIconicFootballIndex } from "../services/iconicFootball/IconicFootballClient";
 
 let stopHighlightlySync: (() => void) | null = null;
+let stopKampSync: (() => void) | null = null;
 let visibilityBound = false;
 
 function bindPollingVisibility(): void {
@@ -40,9 +44,17 @@ export function startAppServices(): void {
   void syncTournamentProfileIfNeeded();
   void syncWc2026CatalogIfNeeded();
   void syncWcLiveDrawIfNeeded();
+  void ensurePaninarrCatalogLoaded();
+  warmIconicFootballIndex();
 
   stopHighlightlySync?.();
   stopHighlightlySync = startHighlightlyPostMatchSync(() => {
+    const state = useStore.getState();
+    return { liveMatches: state.liveMatches, teams: state.teams };
+  });
+
+  stopKampSync?.();
+  stopKampSync = startKampPostMatchSync(() => {
     const state = useStore.getState();
     return { liveMatches: state.liveMatches, teams: state.teams };
   });

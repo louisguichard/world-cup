@@ -13,8 +13,10 @@ import { createUiSlice, type UiSliceState } from "./slices/uiSlice";
 import { createOfficialSlice, type OfficialSliceState } from "./slices/officialSlice";
 import { createPredictionSlice, type PredictionSliceState } from "./slices/predictionSlice";
 import { createScenarioSlice, type ScenarioSliceState } from "./slices/scenarioSlice";
+import { createMatchSupplementSlice, type MatchSupplementSliceState } from "./slices/matchSupplementSlice";
 
 export type AppStore = MatchSliceState &
+  MatchSupplementSliceState &
   TournamentSliceState &
   SimulationSliceState &
   UiSliceState &
@@ -53,7 +55,8 @@ export const useStore = create<AppStore>()(
       ),
       ...createOfficialSlice((fn) => set((state) => fn(state as OfficialSliceState))),
       ...createPredictionSlice((fn) => set((state) => fn(state as PredictionSliceState))),
-      ...createScenarioSlice((fn) => set((state) => fn(state as ScenarioSliceState)))
+      ...createScenarioSlice((fn) => set((state) => fn(state as ScenarioSliceState))),
+      ...createMatchSupplementSlice((fn) => set((state) => fn(state as MatchSupplementSliceState)))
     }),
     { enabled: import.meta.env.DEV, name: "world-cup" }
   )

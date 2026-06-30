@@ -1,5 +1,5 @@
 export const TYPOGRAPHY = {
-  fontFamilyDisplay: '"WorldCup26", "FWC2026Normal", sans-serif',
+  fontFamilyDisplay: '"Noto Sans", system-ui, sans-serif',
   fontFamilyBody: '"Inter", system-ui, -apple-system, sans-serif',
   fontFamilyMono: '"JetBrains Mono", monospace',
 

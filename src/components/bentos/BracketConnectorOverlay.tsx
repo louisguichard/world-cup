@@ -4,7 +4,7 @@ import styles from "./BracketConnectorOverlay.module.css";
 
 type Props = {
   cardRects: Map<string, DOMRect>;
-  containerRect: DOMRect;
+  containerSize: { width: number; height: number };
   confirmedWinners: Set<string>;
   liveProvisionalFeeders?: Set<string>;
 };
@@ -21,7 +21,7 @@ function pathClassName(
 
 export function BracketConnectorOverlay({
   cardRects,
-  containerRect,
+  containerSize,
   confirmedWinners,
   liveProvisionalFeeders = new Set(),
 }: Props) {
@@ -32,22 +32,25 @@ export function BracketConnectorOverlay({
     const childRect = cardRects.get(childId);
     if (!childRect) continue;
 
-    const cx = childRect.left - containerRect.left;
-    const cy = childRect.top - containerRect.top + childRect.height / 2;
+    const cx = childRect.left;
+    const cy = childRect.top + childRect.height / 2;
 
     for (const feederId of feeders) {
       const feederRect = cardRects.get(feederId);
       if (!feederRect) continue;
 
-      const fx = feederRect.right - containerRect.left;
-      const fy = feederRect.top - containerRect.top + feederRect.height / 2;
-      const mx = (fx + cx) / 2;
+      const fx = feederRect.right;
+      const fy = feederRect.top + feederRect.height / 2;
+
+      if (cx - fx < 12) continue;
+
+      const mx = fx + (cx - fx) * 0.5;
 
       paths.push(
         <path
           key={`${feederId}->${childId}`}
           className={pathClassName(feederId, confirmedWinners, liveProvisionalFeeders)}
-          d={`M ${fx} ${fy} C ${mx} ${fy}, ${mx} ${cy}, ${cx} ${cy}`}
+          d={`M ${fx} ${fy} H ${mx} V ${cy} H ${cx}`}
           fill="none"
         />
       );
@@ -60,8 +63,8 @@ export function BracketConnectorOverlay({
     <svg
       aria-hidden="true"
       className={styles.overlay}
-      width={containerRect.width}
-      height={containerRect.height}
+      width={containerSize.width}
+      height={containerSize.height}
     >
       {paths}
     </svg>

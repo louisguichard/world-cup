@@ -53,6 +53,110 @@ export const WC2026_TEAM_NAMES: Record<string, string> = {
   UZB: "Uzbekistan",
 };
 
+/** FIFA abbrev → Spanish display name for all 48 WC 2026 nations. */
+export const WC2026_TEAM_NAMES_ES: Record<string, string> = {
+  ALG: "Argelia",
+  ARG: "Argentina",
+  AUS: "Australia",
+  AUT: "Austria",
+  BEL: "Bélgica",
+  BIH: "Bosnia y Herzegovina",
+  BRA: "Brasil",
+  CAN: "Canadá",
+  CIV: "Costa de Marfil",
+  COD: "RD del Congo",
+  COL: "Colombia",
+  CPV: "Cabo Verde",
+  CRO: "Croacia",
+  CUW: "Curazao",
+  CZE: "Chequia",
+  ECU: "Ecuador",
+  EGY: "Egipto",
+  ENG: "Inglaterra",
+  ESP: "España",
+  FRA: "Francia",
+  GER: "Alemania",
+  GHA: "Ghana",
+  HAI: "Haití",
+  IRN: "Irán",
+  IRQ: "Irak",
+  JOR: "Jordania",
+  JPN: "Japón",
+  KOR: "Corea del Sur",
+  KSA: "Arabia Saudita",
+  MAR: "Marruecos",
+  MEX: "México",
+  NED: "Países Bajos",
+  NOR: "Noruega",
+  NZL: "Nueva Zelanda",
+  PAN: "Panamá",
+  PAR: "Paraguay",
+  POR: "Portugal",
+  QAT: "Catar",
+  RSA: "Sudáfrica",
+  SCO: "Escocia",
+  SEN: "Senegal",
+  SUI: "Suiza",
+  SWE: "Suecia",
+  TUN: "Túnez",
+  TUR: "Turquía",
+  URU: "Uruguay",
+  USA: "Estados Unidos",
+  UZB: "Uzbekistán",
+};
+
+/** Brazilian Portuguese feed names (andrekamp matches.json) → FIFA abbrev. */
+export const TEAM_NAME_PT_TO_ABBREV: Record<string, string> = {
+  alemanha: "GER",
+  argentina: "ARG",
+  argelia: "ALG",
+  "arabia saudita": "KSA",
+  australia: "AUS",
+  austria: "AUT",
+  belgica: "BEL",
+  bosnia: "BIH",
+  brasil: "BRA",
+  "cabo verde": "CPV",
+  canada: "CAN",
+  catar: "QAT",
+  colombia: "COL",
+  "congo dr": "COD",
+  "coreia do sul": "KOR",
+  "costa do marfim": "CIV",
+  croacia: "CRO",
+  curacao: "CUW",
+  eua: "USA",
+  egito: "EGY",
+  equador: "ECU",
+  escocia: "SCO",
+  espanha: "ESP",
+  franca: "FRA",
+  gana: "GHA",
+  haiti: "HAI",
+  holanda: "NED",
+  inglaterra: "ENG",
+  iraque: "IRQ",
+  ira: "IRN",
+  japao: "JPN",
+  jordania: "JOR",
+  marrocos: "MAR",
+  mexico: "MEX",
+  noruega: "NOR",
+  "nova zelandia": "NZL",
+  panama: "PAN",
+  paraguai: "PAR",
+  portugal: "POR",
+  senegal: "SEN",
+  suecia: "SWE",
+  suica: "SUI",
+  tchequia: "CZE",
+  tunisia: "TUN",
+  turquia: "TUR",
+  uruguai: "URU",
+  uzbequistao: "UZB",
+  "africa do sul": "RSA",
+};
+
 /** Normalized name / alias → FIFA abbrev. */
 export const TEAM_NAME_TO_ABBREV: Record<string, string> = {
   algeria: "ALG",
@@ -143,8 +247,15 @@ export function resolveTeamAbbrevFromHint(hint: string | undefined | null): stri
 
   const normalized = normalizeHint(raw);
   if (TEAM_NAME_TO_ABBREV[normalized]) return TEAM_NAME_TO_ABBREV[normalized];
+  if (TEAM_NAME_PT_TO_ABBREV[normalized]) return TEAM_NAME_PT_TO_ABBREV[normalized];
 
   for (const [name, abbrev] of Object.entries(TEAM_NAME_TO_ABBREV)) {
+    if (normalized.includes(name) || name.includes(normalized)) {
+      return abbrev;
+    }
+  }
+
+  for (const [name, abbrev] of Object.entries(TEAM_NAME_PT_TO_ABBREV)) {
     if (normalized.includes(name) || name.includes(normalized)) {
       return abbrev;
     }
@@ -170,6 +281,7 @@ export function buildCatalogTeam(abbrev: string, group: GroupLetter = "A"): Team
   return {
     id: key.toLowerCase(),
     name,
+    nameEs: WC2026_TEAM_NAMES_ES[key],
     shortName: key,
     abbreviation: key,
     group,
@@ -236,14 +348,13 @@ export function mergeTeamWithCatalog(team: Team): Team {
   if (!abbrev) return team;
 
   const catalog = buildCatalogTeam(abbrev, team.group);
-  const logo = TEAM_LOGO_OVERRIDES[abbrev] ?? team.logo;
-
   return {
     ...team,
     abbreviation: abbrev,
     name: team.name || catalog.name,
+    nameEs: team.nameEs || catalog.nameEs,
     shortName: team.shortName || catalog.shortName,
-    logo: logo ?? team.logo ?? "",
+    logo: TEAM_LOGO_OVERRIDES[abbrev] ?? "",
   };
 }
 

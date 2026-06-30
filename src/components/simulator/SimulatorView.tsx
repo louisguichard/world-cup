@@ -958,7 +958,7 @@ function BracketView({
         </div>
         <div className="bracket-rounds">
           {bracketStages.map((stage) => (
-            <div className={`bracket-round ${stage === "Final" ? "is-final" : ""}`} key={stage}>
+            <div className={`bracket-round ${stage === "Final" ? "is-final" : ""}`} data-stage={stage} key={stage}>
               {orderedByStage[stage].map((match) => (
                 <div className="bracket-cell" key={match.id}>
                   <BracketCard

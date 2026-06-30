@@ -177,6 +177,7 @@ function BracketTeamReadonly({
   teamsById,
   status = "default",
   stage,
+  compact = true,
   onTeamSelect
 }: {
   team?: Team;
@@ -189,6 +190,7 @@ function BracketTeamReadonly({
   teamsById: Record<string, Team>;
   status?: TeamThemeStatus;
   stage?: Stage;
+  compact?: boolean;
   onTeamSelect?: (teamId: string) => void;
 }) {
   const resolvedTeamId = team?.id ?? teamId;
@@ -198,10 +200,14 @@ function BracketTeamReadonly({
     mode === "confirmed" && !slotConfirmed ? "tbd" : slotConfirmed ? "confirmed" : "projected";
   const isKnockoutCard = Boolean(stage);
   const showConfirmedBadge =
-    effectiveCertainty === "confirmed" && mode === "confirmed" && !isKnockoutCard;
+    !compact && effectiveCertainty === "confirmed" && mode === "confirmed" && !isKnockoutCard;
+  const showProjectedBadge =
+    !compact && effectiveCertainty === "projected" && mode === "projected";
+  const showGhostAlternates =
+    !compact && effectiveCertainty === "projected" && mode === "projected" && !slotConfirmed;
 
   const resolvedStatus: TeamThemeStatus = winner ? "advancing" : status;
-  const visibleGhosts = ghosts?.slice(0, 2) ?? [];
+  const visibleGhosts = showGhostAlternates ? (ghosts?.slice(0, 2) ?? []) : [];
 
   if (effectiveCertainty === "tbd") {
     if (team) {
@@ -221,7 +227,7 @@ function BracketTeamReadonly({
               {teamDisplayName(team, "TBD", seedLabel ?? undefined)}
             </span>
           </div>
-          <CertaintyBadge certainty="projected" size="xs" />
+          {!compact ? <CertaintyBadge certainty="projected" size="xs" /> : null}
           {visibleGhosts.length > 0 ? (
             <>
               <div className="bracket-ghost-label">Also possible</div>
@@ -241,7 +247,7 @@ function BracketTeamReadonly({
           <span className="bracket-dot" />
           <span>{seedLabel ?? "TBD"}</span>
         </div>
-        <CertaintyBadge certainty="tbd" size="xs" />
+        {!compact ? <CertaintyBadge certainty="tbd" size="xs" /> : null}
       </div>
     );
   }
@@ -267,15 +273,9 @@ function BracketTeamReadonly({
         </span>
         {winner ? <b>✓</b> : null}
       </button>
-      {showConfirmedBadge ? (
-        <>
-          <CertaintyBadge certainty="confirmed" size="xs" />
-        </>
-      ) : null}
-      {effectiveCertainty === "projected" && mode === "projected" ? (
-        <CertaintyBadge certainty="projected" size="xs" />
-      ) : null}
-      {effectiveCertainty === "projected" && mode === "projected" && !slotConfirmed && visibleGhosts.length > 0 ? (
+      {showConfirmedBadge ? <CertaintyBadge certainty="confirmed" size="xs" /> : null}
+      {showProjectedBadge ? <CertaintyBadge certainty="projected" size="xs" /> : null}
+      {showGhostAlternates && visibleGhosts.length > 0 ? (
         <GhostTeamList ghosts={visibleGhosts} teamsById={teamsById} showFrequency={true} />
       ) : null}
     </div>
@@ -439,33 +439,51 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
   const bb = APP_COPY.bracketBento;
   const bracketStages = visibleBracketStages(mode, orderedByStage);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const roundsRef = useRef<HTMLDivElement>(null);
   const [cardRects, setCardRects] = useState<Map<string, DOMRect>>(new Map());
-  const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number } | null>(null);
 
   useEffect(() => {
-    const container = scrollRef.current;
-    if (!container || !projection?.bracket) return;
+    const scrollEl = scrollRef.current;
+    const roundsEl = roundsRef.current;
+    if (!scrollEl || !roundsEl || !projection?.bracket) return;
 
     const measure = () => {
-      const cRect = container.getBoundingClientRect();
+      const origin = roundsEl.getBoundingClientRect();
       const map = new Map<string, DOMRect>();
-      container.querySelectorAll<HTMLElement>("[data-match-id]").forEach((el) => {
+      roundsEl.querySelectorAll<HTMLElement>("[data-match-id]").forEach((el) => {
         const id = el.dataset.matchId;
-        if (id) map.set(id, el.getBoundingClientRect());
+        if (!id) return;
+        const elRect = el.getBoundingClientRect();
+        map.set(
+          id,
+          new DOMRect(
+            elRect.left - origin.left,
+            elRect.top - origin.top,
+            elRect.width,
+            elRect.height
+          )
+        );
       });
       setCardRects(map);
-      setContainerRect(cRect);
+      setContainerSize({ width: origin.width, height: origin.height });
     };
 
     const ro = new ResizeObserver(measure);
-    ro.observe(container);
-    container.addEventListener("scroll", measure, { passive: true });
+    ro.observe(roundsEl);
+    scrollEl.addEventListener("scroll", measure, { passive: true });
     window.addEventListener("resize", measure);
     measure();
 
+    let cancelled = false;
+    void document.fonts?.ready.then(() => {
+      if (!cancelled) measure();
+    });
+
     return () => {
+      cancelled = true;
       ro.disconnect();
-      container.removeEventListener("scroll", measure);
+      scrollEl.removeEventListener("scroll", measure);
       window.removeEventListener("resize", measure);
     };
   }, [projection?.bracket, bracketStages, mode]);
@@ -528,17 +546,21 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
               <h3 key={stage}>{stage}</h3>
             ))}
           </div>
-          <div className="bracket-rounds" style={{ position: "relative" }}>
-            {showConnectors && containerRect ? (
+          <div className="bracket-rounds" ref={roundsRef}>
+            {showConnectors && containerSize ? (
               <BracketConnectorOverlay
                 cardRects={cardRects}
-                containerRect={containerRect}
+                containerSize={containerSize}
                 confirmedWinners={confirmedWinners}
                 liveProvisionalFeeders={liveProvisionalFeeders}
               />
             ) : null}
             {bracketStages.map((stage) => (
-              <div className={`bracket-round ${stage === "Final" ? "is-final" : ""}`} key={stage}>
+              <div
+                className={`bracket-round ${stage === "Final" ? "is-final" : ""}`}
+                data-stage={stage}
+                key={stage}
+              >
                 {orderedByStage[stage].map((match) => (
                   <div className="bracket-cell" key={match.id} data-match-id={match.id}>
                     <BracketCardReadonly

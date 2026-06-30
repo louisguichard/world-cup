@@ -1,7 +1,9 @@
+import { memo } from "react";
 import type { MatchEvent, Team } from "../../types";
 import type { PlayerPhotoSize } from "../player/PlayerPhoto";
 import { PlayerPhoto } from "../player/PlayerPhoto";
 import { useEventPlayerPhotos } from "../../hooks/useEventPlayerPhotos";
+import { MATCH_DISPLAY_EVENT_TYPES } from "../../lib/matchDisplayEvents";
 
 type Props = {
   events: MatchEvent[];
@@ -20,13 +22,6 @@ const OTHER_TYPES = new Set<MatchEvent["type"]>([
   "goal_disallowed",
   "penalty_missed",
   "penalty_saved",
-]);
-
-const DISPLAY_TYPES = new Set<MatchEvent["type"]>([
-  ...GOAL_TYPES,
-  ...CARD_TYPES,
-  ...SUB_TYPES,
-  ...OTHER_TYPES,
 ]);
 
 function formatGoal(e: MatchEvent) {
@@ -101,7 +96,7 @@ function eventsForSide(
 }
 
 /** Compact goals, cards, subs, and key incidents for live cards and result rows. */
-export function MatchGoalScorers({
+export const MatchGoalScorers = memo(function MatchGoalScorers({
   events,
   homeTeamId,
   awayTeamId,
@@ -109,7 +104,7 @@ export function MatchGoalScorers({
   awayTeam,
   photoSize = "sm",
 }: Props) {
-  const displayEvents = events.filter((e) => DISPLAY_TYPES.has(e.type));
+  const displayEvents = events.filter((e) => MATCH_DISPLAY_EVENT_TYPES.has(e.type));
   const photos = useEventPlayerPhotos({ events: displayEvents, homeTeam, awayTeam });
 
   const homeEvents = [
@@ -160,8 +155,5 @@ export function MatchGoalScorers({
       </div>
     </div>
   );
-}
+});
 
-export function hasDisplayableMatchEvents(events: MatchEvent[]): boolean {
-  return events.some((e) => DISPLAY_TYPES.has(e.type));
-}

@@ -25,6 +25,11 @@ vi.mock("../../config/apiFlags", () => ({
   isApiEnabled: () => true,
 }));
 
+vi.mock("../../data/playerDatabase", () => ({
+  ensurePlayerDatabase: async () => undefined,
+  hydratePlayerImageFromDatabase: async () => undefined,
+}));
+
 describe("resolveEventPlayerPhotos", () => {
   beforeEach(() => {
     vi.clearAllMocks();

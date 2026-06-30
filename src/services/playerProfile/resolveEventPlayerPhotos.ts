@@ -8,20 +8,77 @@ import {
   resolveWc2026TeamId,
   type Wc2026Player,
 } from "../WorldCup2026Client";
+import { hydratePlayerImageFromDatabase, ensurePlayerDatabase } from "../../data/playerDatabase";
+import { imageAssetService, ensurePaninarrCatalogLoaded } from "../paninarr/ImageAssetService";
+import { lookupIconicPlayerPhotoAsync } from "../iconicFootball/IconicFootballClient";
+import { resolveCanonicalTeamId } from "../../data/wc2026TeamCatalog";
 import { matchPlayerInRoster } from "./matchPlayerInRoster";
+
+const resolvedPhotoCache = new Map<string, string>();
+const enrichFailedNames = new Set<string>();
+
+export function mergePhotoMaps(
+  prev: Record<string, string | undefined>,
+  next: Record<string, string | undefined>
+): Record<string, string | undefined> {
+  const merged = { ...prev };
+  let changed = false;
+  for (const [key, value] of Object.entries(next)) {
+    if (value && merged[key] !== value) {
+      merged[key] = value;
+      changed = true;
+    } else if (!merged[key] && value) {
+      merged[key] = value;
+      changed = true;
+    }
+  }
+  return changed ? merged : prev;
+}
+
+function cachePhotoKey(playerId: string | undefined, playerName: string): string {
+  return playerId ? `id:${playerId}` : `name:${playerName.trim().toLowerCase()}`;
+}
+
+function rememberPhoto(playerId: string | undefined, playerName: string, url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  resolvedPhotoCache.set(cachePhotoKey(playerId, playerName), url);
+  return url;
+}
+
+function recallPhoto(playerId: string | undefined, playerName: string): string | undefined {
+  return resolvedPhotoCache.get(cachePhotoKey(playerId, playerName));
+}
 
 export function photoUrlFromPlayer(player?: Wc2026Player): string | undefined {
   const image = player?.image;
   return typeof image === "string" && image.trim() ? image.trim() : undefined;
 }
 
-function photoForPlayer(playerId: string | undefined, playerName: string): string | undefined {
+function photoFromPaninarr(
+  playerId: string | undefined,
+  playerName: string,
+  teamId?: string
+): string | undefined {
+  const asset = imageAssetService.getPlayerHeadshot({
+    teamId: teamId ? resolveCanonicalTeamId(teamId) : undefined,
+    playerName,
+  });
+  return asset?.imageUrl ? rememberPhoto(playerId, playerName, asset.imageUrl) : undefined;
+}
+
+function photoForPlayer(playerId: string | undefined, playerName: string, teamId?: string): string | undefined {
+  const cached = recallPhoto(playerId, playerName);
+  if (cached) return cached;
+
   const fromIndex = lookupWc2026Player({ playerId, playerName });
-  return photoUrlFromPlayer(fromIndex);
+  const fromWc = photoUrlFromPlayer(fromIndex);
+  if (fromWc) return rememberPhoto(playerId, playerName, fromWc);
+
+  return photoFromPaninarr(playerId, playerName, teamId);
 }
 
 function photoForEvent(event: MatchEvent): string | undefined {
-  return photoForPlayer(event.playerId, event.playerName);
+  return photoForPlayer(event.playerId, event.playerName, event.teamId);
 }
 
 export function assistPhotoKey(providerId: string): string {
@@ -37,7 +94,7 @@ export function resolveEventPhotosSync(events: MatchEvent[]): Record<string, str
       event.assistName?.trim() &&
       (event.type === "goal" || event.type === "own_goal")
     ) {
-      out[assistPhotoKey(event.providerId)] = photoForPlayer(undefined, event.assistName);
+      out[assistPhotoKey(event.providerId)] = photoForPlayer(undefined, event.assistName, event.teamId);
     }
   }
   return out;
@@ -47,6 +104,102 @@ async function resolveWcTeamId(team: Team | undefined): Promise<string | undefin
   if (!team) return undefined;
   if (team.wc2026TeamId) return team.wc2026TeamId;
   return resolveWc2026TeamId(team.abbreviation);
+}
+
+async function enrichFromStaticDatabase(
+  events: MatchEvent[],
+  photos: Record<string, string | undefined>
+): Promise<void> {
+  const names = new Set<string>();
+  for (const event of events) {
+    if (!photos[event.providerId] && event.playerName.trim()) {
+      if (!enrichFailedNames.has(event.playerName)) names.add(event.playerName);
+    }
+    const assistKey = assistPhotoKey(event.providerId);
+    if (
+      event.assistName?.trim() &&
+      (event.type === "goal" || event.type === "own_goal") &&
+      !photos[assistKey] &&
+      !enrichFailedNames.has(event.assistName)
+    ) {
+      names.add(event.assistName);
+    }
+  }
+
+  if (names.size === 0) return;
+
+  await Promise.all(
+    [...names].map(async (name) => {
+      const url = await hydratePlayerImageFromDatabase(name);
+      if (!url) return;
+      rememberPhoto(undefined, name, url);
+      for (const event of events) {
+        if (!photos[event.providerId] && event.playerName === name) {
+          photos[event.providerId] = url;
+        }
+        const assistKey = assistPhotoKey(event.providerId);
+        if (
+          event.assistName === name &&
+          (event.type === "goal" || event.type === "own_goal") &&
+          !photos[assistKey]
+        ) {
+          photos[assistKey] = url;
+        }
+      }
+    })
+  );
+}
+
+function enrichFromPaninarr(
+  events: MatchEvent[],
+  photos: Record<string, string | undefined>
+): void {
+  for (const event of events) {
+    if (!photos[event.providerId] && event.playerName.trim()) {
+      const url = photoFromPaninarr(event.playerId, event.playerName, event.teamId);
+      if (url) photos[event.providerId] = url;
+    }
+
+    const assistKey = assistPhotoKey(event.providerId);
+    if (
+      event.assistName?.trim() &&
+      (event.type === "goal" || event.type === "own_goal") &&
+      !photos[assistKey]
+    ) {
+      const assistUrl = photoFromPaninarr(undefined, event.assistName, event.teamId);
+      if (assistUrl) photos[assistKey] = assistUrl;
+    }
+  }
+}
+
+async function enrichFromPaninarrAsync(
+  events: MatchEvent[],
+  photos: Record<string, string | undefined>
+): Promise<void> {
+  await ensurePaninarrCatalogLoaded();
+  enrichFromPaninarr(events, photos);
+}
+
+async function enrichFromIconicFootball(
+  events: MatchEvent[],
+  photos: Record<string, string | undefined>
+): Promise<void> {
+  for (const event of events) {
+    if (!photos[event.providerId] && event.playerName.trim()) {
+      const url = await lookupIconicPlayerPhotoAsync(event.playerName);
+      if (url) photos[event.providerId] = rememberPhoto(event.playerId, event.playerName, url);
+    }
+
+    const assistKey = assistPhotoKey(event.providerId);
+    if (
+      event.assistName?.trim() &&
+      (event.type === "goal" || event.type === "own_goal") &&
+      !photos[assistKey]
+    ) {
+      const assistUrl = await lookupIconicPlayerPhotoAsync(event.assistName);
+      if (assistUrl) photos[assistKey] = rememberPhoto(undefined, event.assistName, assistUrl);
+    }
+  }
 }
 
 function applyRoster(
@@ -61,7 +214,9 @@ function applyRoster(
         playerName: event.playerName,
       });
       const url = photoUrlFromPlayer(player);
-      if (url) photos[event.providerId] = url;
+      if (url) {
+        photos[event.providerId] = rememberPhoto(event.playerId, event.playerName, url);
+      }
     }
 
     const assistKey = assistPhotoKey(event.providerId);
@@ -72,7 +227,9 @@ function applyRoster(
     ) {
       const assister = matchPlayerInRoster(roster, { playerName: event.assistName });
       const assistUrl = photoUrlFromPlayer(assister);
-      if (assistUrl) photos[assistKey] = assistUrl;
+      if (assistUrl) {
+        photos[assistKey] = rememberPhoto(undefined, event.assistName, assistUrl);
+      }
     }
   }
 }
@@ -88,6 +245,25 @@ export async function enrichEventPlayerPhotos(input: {
   if (playerEvents.length === 0) return photos;
 
   const needsFetch = playerEvents.some((e) => {
+    if (e.playerName.trim() && !photos[e.providerId] && !enrichFailedNames.has(e.playerName)) return true;
+    if (
+      e.assistName?.trim() &&
+      (e.type === "goal" || e.type === "own_goal") &&
+      !photos[assistPhotoKey(e.providerId)] &&
+      !enrichFailedNames.has(e.assistName)
+    ) {
+      return true;
+    }
+    return false;
+  });
+  if (!needsFetch) return photos;
+
+  await ensurePlayerDatabase();
+  await enrichFromStaticDatabase(playerEvents, photos);
+  await enrichFromPaninarrAsync(playerEvents, photos);
+  await enrichFromIconicFootball(playerEvents, photos);
+
+  const stillNeedsFetch = playerEvents.some((e) => {
     if (e.playerName.trim() && !photos[e.providerId]) return true;
     if (
       e.assistName?.trim() &&
@@ -98,7 +274,7 @@ export async function enrichEventPlayerPhotos(input: {
     }
     return false;
   });
-  if (!needsFetch) return photos;
+  if (!stillNeedsFetch) return photos;
 
   const canFetchRoster = isApiEnabled("wc2026Teams") && !isWorldCup2026Disabled();
   if (!canFetchRoster) return photos;
@@ -125,6 +301,20 @@ export async function enrichEventPlayerPhotos(input: {
     const roster = rosterByTeamId.get(teamId) ?? [];
     const teamEvents = playerEvents.filter((e) => e.teamId === teamId);
     applyRoster(teamEvents, roster, photos);
+  }
+
+  for (const event of playerEvents) {
+    if (!photos[event.providerId] && event.playerName.trim()) {
+      enrichFailedNames.add(event.playerName);
+    }
+    const assistKey = assistPhotoKey(event.providerId);
+    if (
+      event.assistName?.trim() &&
+      (event.type === "goal" || event.type === "own_goal") &&
+      !photos[assistKey]
+    ) {
+      enrichFailedNames.add(event.assistName);
+    }
   }
 
   return photos;

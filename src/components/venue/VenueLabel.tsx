@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { resolveVenueFromMatch } from "../../lib/venue/resolveVenue";
 import { useStore } from "../../store";
 import type { NavigationContext, TabId } from "../../types";
@@ -10,6 +10,7 @@ type Props = {
   venueString?: string;
   compact?: boolean;
   inline?: boolean;
+  nested?: boolean;
   className?: string;
 };
 
@@ -39,7 +40,7 @@ function navigationFromTab(tab: TabId): NavigationContext["from"] {
   }
 }
 
-export function VenueLabel({ matchId, venueString, compact, inline, className }: Props) {
+export function VenueLabel({ matchId, venueString, compact, inline, nested, className }: Props) {
   const openVenueHub = useStore((s) => s.openVenueHub);
   const activeTab = useStore((s) => s.activeTab);
   const venue = useMemo(
@@ -79,6 +80,28 @@ export function VenueLabel({ matchId, venueString, compact, inline, className }:
     openVenueHub(venue.slug, { from: navigationFromTab(activeTab) });
   };
 
+  const handleToggle = useCallback(
+    (e?: MouseEvent | KeyboardEvent) => {
+      e?.stopPropagation();
+      if (open) {
+        handleClose();
+      } else {
+        handleOpen();
+      }
+    },
+    [open, handleClose, handleOpen]
+  );
+
+  const handleTriggerKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      e.stopPropagation();
+      handleToggle(e);
+    },
+    [handleToggle]
+  );
+
   if (!venue) {
     if (venueString) {
       return <span className={className}>{venueString}</span>;
@@ -88,6 +111,34 @@ export function VenueLabel({ matchId, venueString, compact, inline, className }:
 
   const mode = prefersHover ? "popover" : "sheet";
 
+  const triggerContent = (
+    <>
+      <span className={styles.venueLabelStadium}>{venue.displayPrimary}</span>
+      {!compact ? (
+        inline ? (
+          <>
+            <span className={styles.venueLabelSep}>·</span>
+            <span className={styles.venueLabelCity}>{venue.hostCity}</span>
+          </>
+        ) : (
+          <span className={styles.venueLabelCity}>{venue.hostCity}</span>
+        )
+      ) : null}
+    </>
+  );
+
+  const triggerProps = {
+    className: styles.venueLabelTrigger,
+    "aria-haspopup": "dialog" as const,
+    "aria-expanded": open,
+    onClick: (e: MouseEvent) => handleToggle(e),
+    onFocus: prefersHover ? handleOpen : undefined,
+    onBlur: prefersHover ? () => (hoverTimer.current = setTimeout(handleClose, 150)) : undefined,
+    ...(nested
+      ? { role: "button" as const, tabIndex: 0, onKeyDown: handleTriggerKeyDown }
+      : {}),
+  };
+
   return (
     <span
       ref={wrapRef}
@@ -95,27 +146,13 @@ export function VenueLabel({ matchId, venueString, compact, inline, className }:
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <button
-        type="button"
-        className={styles.venueLabelTrigger}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={() => (open ? handleClose() : handleOpen())}
-        onFocus={prefersHover ? handleOpen : undefined}
-        onBlur={prefersHover ? () => hoverTimer.current = setTimeout(handleClose, 150) : undefined}
-      >
-        <span className={styles.venueLabelStadium}>{venue.displayPrimary}</span>
-        {!compact ? (
-          inline ? (
-            <>
-              <span className={styles.venueLabelSep}>·</span>
-              <span className={styles.venueLabelCity}>{venue.hostCity}</span>
-            </>
-          ) : (
-            <span className={styles.venueLabelCity}>{venue.hostCity}</span>
-          )
-        ) : null}
-      </button>
+      {nested ? (
+        <span {...triggerProps}>{triggerContent}</span>
+      ) : (
+        <button type="button" {...triggerProps}>
+          {triggerContent}
+        </button>
+      )}
       <VenuePopover
         venue={venue}
         open={open}

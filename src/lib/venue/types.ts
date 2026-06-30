@@ -15,6 +15,9 @@ export type VenueEnrichment = {
   timezone: string;
   coordinates?: { lat: number; lon: number };
   aliases?: string[];
+  heroImageUrl?: string;
+  cityHeroImageUrl?: string;
+  heroImageCredit?: string;
 };
 
 export type ResolvedVenue = VenueEnrichment & {

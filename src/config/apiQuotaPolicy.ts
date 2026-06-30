@@ -213,6 +213,20 @@ export const API_QUOTA_POLICY: Record<ApiSourceId, ApiQuotaPolicy> = {
     minIntervalMs: { live: 300_000, background: 3_600_000, test: 300_000, boot: 0 },
     note: "FIFA match clips and stats.",
   },
+  fifaPublicApi: {
+    dailyLimit: null,
+    softDailyLimit: 5_000,
+    reserveForLive: 200,
+    minIntervalMs: { live: 15_000, background: 60_000, test: 30_000, boot: 0 },
+    note: "Local FIFA public HTTP service — no auth; cache on service side.",
+  },
+  iconicFootball: {
+    dailyLimit: null,
+    softDailyLimit: 500,
+    reserveForLive: 50,
+    minIntervalMs: { live: 300_000, background: 3_600_000, test: 300_000, boot: 0 },
+    note: "Bundled iconic player headshots — local index, no network quota.",
+  },
   aiSportsHighlights: {
     dailyLimit: 20,
     reserveForLive: 3,

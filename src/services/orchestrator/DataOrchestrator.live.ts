@@ -20,6 +20,10 @@ import { fetchLiveEvents as fetchSportApiLive } from "../SportAPI7Client";
 import { normalizeWCLiveMatch } from "../adapters/normalizeMatch";
 import { publishMatchEvents, fetchMatchEvents } from "../matchDetail/fetchMatchEvents";
 import { scheduleSimulation } from "../SimulationScheduler";
+import { enqueueKampEnrichmentForCompletedMatch } from "../kamp/KampPostMatchSync";
+import { fetchWc2026Live, isFifaPublicDisabled } from "../FifaPublicClient";
+import { normalizeFifaPublicLiveMatch } from "../adapters/normalizeFifaPublicMatch";
+import { isApiEnabled } from "../../config/apiFlags";
 import { logger } from "../Logger";
 import { computeScoreConsensus, type ScoreVote } from "./LiveScoreConsensus";
 import { selectPrimaryMatch } from "../PollingEngine";
@@ -37,7 +41,7 @@ async function collectAllVotes(
 ): Promise<Map<string, ScoreVote[]>> {
   const byMatch = new Map<string, ScoreVote[]>();
 
-  const [wcMap, sportApiEvents] = await Promise.all([
+  const [wcMap, sportApiEvents, fifaLive] = await Promise.all([
     fetchWcLive().then((wcMatches) => {
       const map = new Map<string, ScoreVote[]>();
       for (const raw of wcMatches) {
@@ -66,6 +70,9 @@ async function collectAllVotes(
       return map;
     }),
     fetchSportApiLive(),
+    isApiEnabled("fifaPublicApi") && !isFifaPublicDisabled()
+      ? fetchWc2026Live()
+      : Promise.resolve([]),
   ]);
 
   for (const [id, votes] of wcMap) {
@@ -117,6 +124,26 @@ async function collectAllVotes(
     const list = byMatch.get(storeMatch.id) ?? [];
     list.push(vote);
     byMatch.set(storeMatch.id, list);
+  }
+
+  for (const raw of fifaLive) {
+    if (raw.status !== "live") continue;
+    const partial = normalizeFifaPublicLiveMatch(raw);
+    if (partial.homeScore === undefined || partial.awayScore === undefined) continue;
+    const storeKey = partial.id ?? (raw.matchNumber != null ? `M${raw.matchNumber}` : undefined);
+    if (!storeKey || !merged[storeKey]) continue;
+
+    const vote: ScoreVote = {
+      source: "fifaPublic",
+      matchId: storeKey,
+      homeScore: partial.homeScore,
+      awayScore: partial.awayScore,
+      clockMinute: partial.clockMinute,
+      timestamp: Date.now(),
+    };
+    const list = byMatch.get(storeKey) ?? [];
+    list.push(vote);
+    byMatch.set(storeKey, list);
   }
 
   return byMatch;
@@ -296,6 +323,14 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
 
   if (!options?.light) {
     merged = await enrichKnockoutPenaltiesFromZafronix(merged);
+  }
+
+  const previousMatches = store.liveMatches;
+  for (const m of Object.values(merged)) {
+    const prior = previousMatches[m.id];
+    if (m.status === "completed" && prior?.status !== "completed") {
+      enqueueKampEnrichmentForCompletedMatch(m, teams);
+    }
   }
 
   store.batchPollUpdate({

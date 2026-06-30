@@ -10,6 +10,7 @@ type Props = {
   introHighlight?: HighlightlyHighlight | null;
   attribution?: string;
   quotaLabel?: string;
+  fallbackHighlightsUrl?: string;
 };
 
 function highlightHost(url?: string): string | null {
@@ -29,6 +30,7 @@ export function MatchHighlightsTab({
   introHighlight,
   attribution,
   quotaLabel,
+  fallbackHighlightsUrl,
 }: Props) {
   if (loading && highlights.length === 0) {
     return (
@@ -46,6 +48,16 @@ export function MatchHighlightsTab({
           Clips for {homeTeamName} vs {awayTeamName} appear after kickoff — full recaps
           usually land within 1–48 hours. Free-tier coverage varies by league.
         </p>
+        {fallbackHighlightsUrl ? (
+          <a
+            href={fallbackHighlightsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.link}
+          >
+            Watch highlights{highlightHost(fallbackHighlightsUrl) ? ` on ${highlightHost(fallbackHighlightsUrl)}` : ""}
+          </a>
+        ) : null}
         {attribution ? <p className={styles.attribution}>{attribution}</p> : null}
         {quotaLabel ? <p className={styles.quota}>{quotaLabel}</p> : null}
       </div>

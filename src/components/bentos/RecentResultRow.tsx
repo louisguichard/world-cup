@@ -13,7 +13,7 @@ import {
 import { isAdvancingTeam } from "../../lib/resolveMatchWinner";
 import { TeamFlag } from "../team/TeamFlag";
 
-const EMPTY_SHOOTOUT = { home: [], away: [], homeScore: 0, awayScore: 0 };
+const PLACEHOLDER_SHOOTOUT = { home: [], away: [], homeScore: 0, awayScore: 0 };
 
 type ResultRowProps = {
   match: MergedMatch;
@@ -79,6 +79,10 @@ function PenaltyResultRow({ match, onSelect }: ResultRowProps) {
 
   if (!showPenalties) return <StandardResultRow match={match} onSelect={onSelect} />;
 
+  const hasConfirmedShootout =
+    Boolean(shootout) && (shootout!.homeScore > 0 || shootout!.awayScore > 0);
+  const penaltyLoading = !hasConfirmedShootout;
+
   return (
     <button
       type="button"
@@ -87,12 +91,12 @@ function PenaltyResultRow({ match, onSelect }: ResultRowProps) {
     >
       <KnockoutResultScoreboard
         match={match}
-        shootout={shootout ?? EMPTY_SHOOTOUT}
+        shootout={hasConfirmedShootout ? shootout! : PLACEHOLDER_SHOOTOUT}
         teams={teams}
         winnerTeamId={winnerTeamId}
         stageLabel={stageLabel}
         compact
-        loading={loading}
+        loading={penaltyLoading || loading}
         meta={
           <>
             <span className="final-pill">{APP_COPY.match.final}</span>

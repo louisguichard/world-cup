@@ -1,6 +1,7 @@
 import type { GroupLetter, Match, MatchEvent, MatchPeriod, Team } from "../types";
 import { isApiEnabled } from "../config/apiFlags";
 import { inferPeriodFromClock } from "../lib/formatMatchClock";
+import { penaltyShootoutFromEspnDetails } from "../lib/derivePenaltyShootout";
 import type { ApiRequestIntent } from "../config/apiQuotaPolicy";
 import { acquireApiQuota, logApiQuotaBlock } from "./ApiQuotaGovernor";
 import { mapEspnDetailsToEvents } from "./matchDetail/mapEspnToEvents";
@@ -50,7 +51,7 @@ type EspnCompetitionStatus = {
   clock?: number;
   displayClock?: string;
   period?: number;
-  type?: { state?: string; completed?: boolean; detail?: string };
+  type?: { state?: string; completed?: boolean; detail?: string; name?: string };
 };
 
 export function parseEspnClockFields(status: EspnCompetitionStatus | undefined): {
@@ -152,7 +153,7 @@ export function parseEspnScoreboard(scoreboard: unknown): {
           clock?: number;
           displayClock?: string;
           period?: number;
-          type?: { state?: string; completed?: boolean; detail?: string };
+          type?: { state?: string; completed?: boolean; detail?: string; name?: string };
         };
         details?: unknown[];
       }>;
@@ -197,6 +198,15 @@ export function parseEspnScoreboard(scoreboard: unknown): {
     const hasRealScore = status === "completed" || status === "live";
     const conduct = parseConduct(competition.details ?? []);
     const clockFields = parseEspnClockFields(competition.status);
+    const statusDetail = String(statusType?.detail ?? "").toLowerCase();
+    const statusName = String(statusType?.name ?? "");
+    const decidedByPenalties =
+      statusDetail.includes("pen") || statusName === "STATUS_FINAL_PEN";
+    const penaltyShootout = penaltyShootoutFromEspnDetails(
+      competition.details ?? [],
+      home.team.id,
+      away.team.id
+    );
 
     const match: Match = {
       id: String(e.id),
@@ -211,7 +221,9 @@ export function parseEspnScoreboard(scoreboard: unknown): {
       awayConduct: conduct[away.team.id] ?? 0,
       locked: hasRealScore,
       source: "espn",
-      ...clockFields
+      ...clockFields,
+      ...(decidedByPenalties || penaltyShootout ? { decidedByPenalties: true } : {}),
+      ...(penaltyShootout ? { penaltyShootout } : {}),
     };
 
     if (group) {

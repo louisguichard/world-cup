@@ -80,6 +80,15 @@ describe("resolveTeamLogo", () => {
       })
     ).toBe(TEAM_LOGO_OVERRIDES.MEX);
   });
+
+  it("never returns upstream API crest URLs when catalog abbrev is known", () => {
+    const resolved = resolveTeamLogo({
+      abbreviation: "BRA",
+      logo: "https://a.espncdn.com/i/teamlogos/countries/500/bra.png",
+    });
+    expect(resolved).toBe(TEAM_LOGO_OVERRIDES.BRA);
+    expect(resolved?.startsWith("/logos/teams/")).toBe(true);
+  });
 });
 
 describe("applyTeamLogoOverrides", () => {

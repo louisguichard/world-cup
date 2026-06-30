@@ -34,10 +34,12 @@ export type ApiSourceId =
   | "plData"
   | "gettyImages"
   | "fifaFootballData"
+  | "fifaPublicApi"
   | "aiSportsHighlights"
   | "allSportsApi2"
   | "tvproApi"
-  | "youtubeMatchVideos";
+  | "youtubeMatchVideos"
+  | "iconicFootball";
 
 export type ApiAuditStatus = "pass" | "fail" | "untested";
 
@@ -280,6 +282,14 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     lastLatencyMs: 0,
     failureReason: "Requires RapidAPI subscription — match clips and stats",
   },
+  fifaPublicApi: {
+    enabled: true,
+    splashPath: false,
+    label: "FIFA Public API (local HTTP)",
+    lastAudit: "untested",
+    lastLatencyMs: 0,
+    disableReason: "Optional — run fifa-public-api-mcp on port 4000",
+  },
   aiSportsHighlights: {
     enabled: true,
     splashPath: false,
@@ -311,6 +321,13 @@ export const API_SOURCES: Record<ApiSourceId, ApiSourceConfig> = {
     lastAudit: "untested",
     lastLatencyMs: 0,
     failureReason: "Requires RapidAPI subscription — video search verification",
+  },
+  iconicFootball: {
+    enabled: true,
+    splashPath: false,
+    label: "IconicFootball API",
+    lastAudit: "pass",
+    lastLatencyMs: 4,
   },
 };
 

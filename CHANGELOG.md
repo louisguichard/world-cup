@@ -1,13 +1,25 @@
 # Changelog
 
+## [5.0.0] — 2026-06-30
+
+### Changed
+- v5.0.0 release: knockout UX, FIFA public API, paninarr assets, penalty pipeline
+
+## [Unreleased]
+
+### Builds
+- **5.0.0 build 2** (2026-06-30): 120 file(s) in .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json — 120 files changed, 7308 insertions(+), 2610 deletions(-)
+
 ## [4.0.0] — 2026-06-27
 
 ### Changed
 - Major v4 release: universal team identity, live qualification standings seed, Mexico crest fix, hash navigation refactor, and build 22 feature set.
 
-## [Unreleased]
-
-### Builds
+Zafronix fallback
+- **4.0.0 build 89** (2026-06-30): Fix bracket column layout and SVG connector alignment
+- **4.0.0 build 88** (2026-06-30): Wire penalty enrichment at boot, preserve on poll, relax ID guard, fix loading UI
+- **4.0.0 build 87** (2026-06-30): Fix corrupt font assets and nested venue button DOM warning
+- **4.0.0 build 86** (2026-06-30): Add horizontal padding and margin to LiveView upcoming fixtures section
 - **4.0.0 build 85** (2026-06-30): 10 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 10 files changed, 78 insertions(+), 63 deletions(-)
 - **4.0.0 build 84** (2026-06-30): polish bracket knockout copy, connector CSS, live feeder highlights
 - **4.0.0 build 83** (2026-06-30): 21 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 21 files changed, 643 insertions(+), 118 deletions(-)

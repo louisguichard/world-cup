@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import type { ResolvedVenue } from "../../lib/venue/types";
+import { GettyHeroImage } from "../media/GettyHeroImage";
 import styles from "./VenuePopover.module.css";
 
 type VenueDetailRowsProps = {
@@ -60,6 +61,15 @@ export function VenuePopoverPanel({
       <p className={styles.detailValue} style={{ margin: "0 0 10px", fontSize: "0.8rem" }}>
         {venue.hostCity} · {venue.country}
       </p>
+      {venue.heroImageUrl ? (
+        <GettyHeroImage
+          imageUrl={venue.heroImageUrl}
+          title={venue.displayPrimary}
+          credit={venue.heroImageCredit ?? "Wikimedia Commons"}
+          aspect="square"
+          className={styles.heroThumb}
+        />
+      ) : null}
       <VenueDetailRows venue={venue} />
       {showHubCta ? (
         <button type="button" className={styles.hubCta} onClick={onOpenHub}>
@@ -143,6 +153,21 @@ export function VenuePopover({ venue, open, mode, anchorRef, onClose, onOpenHub 
     };
   }, [open, mode]);
 
+  useEffect(() => {
+    if (!open || mode !== "popover") return;
+
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+      if (panelRef.current?.contains(target)) return;
+      if (anchorRef.current?.contains(target)) return;
+      onClose();
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [open, mode, onClose, anchorRef]);
+
   if (!open) return null;
 
   const panel = (
@@ -168,12 +193,7 @@ export function VenuePopover({ venue, open, mode, anchorRef, onClose, onOpenHub 
         {panel}
       </div>
     ) : (
-      <div
-        className={styles.popoverBackdrop}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onClose();
-        }}
-      >
+      <div className={styles.popoverBackdrop}>
         <div
           className={styles.popoverWrap}
           style={{ top: popoverPos.top, left: popoverPos.left }}

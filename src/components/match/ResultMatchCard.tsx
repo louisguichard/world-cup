@@ -19,7 +19,7 @@ import { isAdvancingTeam } from "../../lib/resolveMatchWinner";
 import { TeamLabel } from "../team/TeamLabel";
 import { TeamLabelById } from "../team/TeamLabelById";
 
-const EMPTY_SHOOTOUT = { home: [], away: [], homeScore: 0, awayScore: 0 };
+const PLACEHOLDER_SHOOTOUT = { home: [], away: [], homeScore: 0, awayScore: 0 };
 
 export interface ResultMatchCardProps {
   match: MergedMatch;
@@ -54,9 +54,14 @@ export function ResultMatchCard({ match: rawMatch }: ResultMatchCardProps) {
   const homeAdvancing = isAdvancingTeam(match, match.homeTeamId, teams, shootout);
   const awayAdvancing = isAdvancingTeam(match, match.awayTeamId, teams, shootout);
 
-  const ariaLabel = showPenalties && shootout
-    ? `${homeName} ${homeScore}–${awayScore} ${awayName}, penalties ${shootout.homeScore}–${shootout.awayScore}, ${stageLabel ?? "Final"}`
-    : `${homeName} ${homeScore}–${awayScore} ${awayName}, Final`;
+  const hasConfirmedShootout =
+    Boolean(shootout) && (shootout!.homeScore > 0 || shootout!.awayScore > 0);
+  const penaltyLoading = showPenalties && !hasConfirmedShootout;
+
+  const ariaLabel =
+    showPenalties && hasConfirmedShootout
+      ? `${homeName} ${homeScore}–${awayScore} ${awayName}, penalties ${shootout!.homeScore}–${shootout!.awayScore}, ${stageLabel ?? "Final"}`
+      : `${homeName} ${homeScore}–${awayScore} ${awayName}, Final`;
 
   return (
     <article
@@ -82,11 +87,11 @@ export function ResultMatchCard({ match: rawMatch }: ResultMatchCardProps) {
         {showPenalties ? (
           <KnockoutResultScoreboard
             match={match}
-            shootout={shootout ?? EMPTY_SHOOTOUT}
+            shootout={hasConfirmedShootout ? shootout! : PLACEHOLDER_SHOOTOUT}
             teams={teams}
             winnerTeamId={winnerTeamId}
             stageLabel={stageLabel}
-            loading={loading}
+            loading={penaltyLoading || loading}
           />
         ) : (
           <div className="score-line fixture-matchup">

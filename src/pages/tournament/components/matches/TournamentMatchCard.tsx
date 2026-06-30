@@ -73,6 +73,7 @@ export function TournamentMatchCard({ match }: Props) {
             matchId={match.matchId ?? match.id}
             venueString={match.venue}
             compact
+            nested
             className={styles.matchCardVenue}
           />
         ) : null}

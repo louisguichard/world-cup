@@ -119,6 +119,13 @@
   overflow: visible;
 }
 
+.dashboard-section:has(.schedule-day-group) {
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
 .dashboard-section > * {
   max-width: 100%;
   min-width: 0;

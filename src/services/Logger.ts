@@ -49,7 +49,10 @@ class LoggerService {
     } else if (level === "warn") {
       console.warn(prefix, message, context ?? "");
     } else if (import.meta.env.DEV) {
-      console.log(prefix, message, context ?? "");
+      const debugLogsEnabled = import.meta.env.VITE_DEBUG_LOGS === "true";
+      if (level === "info" || (level === "debug" && debugLogsEnabled)) {
+        console.log(prefix, message, context ?? "");
+      }
     }
 
     return entry;
