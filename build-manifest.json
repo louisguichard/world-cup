@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T04:19:42.982Z",
+  "updatedAt": "2026-06-30T04:21:49.971Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "64ad76b6227b023757c6a92db07976105bac689c",
+      "shortHash": "64ad76b",
+      "message": "Polish bracket UX for knockout phase with live connector highlights.",
+      "version": "4.0.0",
+      "build": 85,
+      "timestamp": "2026-06-30T04:19:43.550Z"
+    },
+    {
       "hash": "06adaec1586ab9f75694ad8229f8a7d3d8746c8d",
       "shortHash": "06adaec",
       "message": "Record v4.0.0 build 83 production deploy on Vercel.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 32,
       "timestamp": "2026-06-27T19:23:13.209Z"
-    },
-    {
-      "hash": "eac83bc9ca7f70163c0c653d69b3c1b6994c13cb",
-      "shortHash": "eac83bc",
-      "message": "Fix Vercel API proxy: use [...path] instead of [[...path]] catch-all",
-      "version": "4.0.0",
-      "build": 30,
-      "timestamp": "2026-06-27T19:17:01.068Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "4.0.0",
+      "build": 85,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-30T04:21:49.968Z"
+    },
     {
       "url": "",
       "environment": "production",
@@ -716,14 +724,6 @@
       "build": 17,
       "message": "Production deploy via deploy:vercel",
       "timestamp": "2026-06-27T06:55:31.937Z"
-    },
-    {
-      "url": "https://world-cup-rho-ten.vercel.app",
-      "environment": "production",
-      "version": "3.0.0",
-      "build": 16,
-      "message": "Production deploy via deploy:vercel",
-      "timestamp": "2026-06-27T06:51:06.339Z"
     }
   ]
 }
