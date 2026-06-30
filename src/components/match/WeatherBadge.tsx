@@ -1,5 +1,6 @@
 import type { WeatherLocationInput } from "../../lib/weather/resolveHostCityWeather";
 import { useStadiumWeather } from "../../hooks/useStadiumWeather";
+import { LoadingBall } from "../shared/LoadingBall";
 import { WeatherIcon } from "./WeatherIcon";
 
 type Props = WeatherLocationInput & {
@@ -10,7 +11,11 @@ export function WeatherBadge({ matchId, venueString, cityHint, showLoading }: Pr
   const { weather, loading } = useStadiumWeather({ matchId, venueString, cityHint });
 
   if (loading && showLoading) {
-    return <span className="weather-badge weather-badge--loading" aria-hidden>…</span>;
+    return (
+      <span className="weather-badge weather-badge--loading" aria-hidden>
+        <LoadingBall size="xs" aria-hidden />
+      </span>
+    );
   }
 
   if (loading || !weather) return null;

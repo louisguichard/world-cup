@@ -4,6 +4,7 @@ import { useStore } from "../../store";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { useGroupOfficialQualification } from "../../hooks/useGroupOfficialQualification";
 import { OfficialQualificationPanel } from "../analyst/OfficialQualificationPanel";
+import { LoadingState } from "../shared/LoadingState";
 
 type Props = {
   groupId: GroupLetter;
@@ -15,9 +16,11 @@ export function GroupOfficialQualificationSection({ groupId }: Props) {
 
   if (loading) {
     return (
-      <p className="analyst-panel analyst-panel--official analyst-panel--loading" data-testid="official-qual-loading">
-        Loading official engine…
-      </p>
+      <LoadingState
+        label="Loading official engine…"
+        className="analyst-panel analyst-panel--official analyst-panel--loading"
+        data-testid="official-qual-loading"
+      />
     );
   }
 

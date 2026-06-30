@@ -41,6 +41,7 @@ import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchT
 import { teamDisplayName } from "../../lib/teamIdentity";
 import { APP_BRAND } from "../../config/appMeta";
 import { BrandLogo } from "../shared/BrandLogo";
+import { LoadingBall } from "../shared/LoadingBall";
 import { APP_COPY } from "../../lib/appCopy";
 import { TeamFlag } from "../team/TeamFlag";
 import { TeamLabel } from "../team/TeamLabel";
@@ -428,7 +429,7 @@ export function SimulatorView() {
         </span>
         <strong>{APP_BRAND.shortName}</strong>
         <span className="app-loading-note">
-          <span className="loader sm" />
+          <LoadingBall size="sm" aria-hidden />
           {APP_COPY.simulator.loading}
         </span>
       </main>
@@ -556,7 +557,7 @@ export function SimulatorView() {
 
           {simulatorMode === "probabilities" && data && !simulations ? (
             <section className="probability-prep">
-              <span className="loader sm" />
+              <LoadingBall size="sm" />
               <strong>{APP_COPY.simulator.preparingRuns}</strong>
               <p>
                 {APP_COPY.simulator.preparingRunsDetail(

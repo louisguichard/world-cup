@@ -3,6 +3,7 @@ import type { MatchStatisticsBundle, MatchStatus } from "../../../../types";
 import type { HighlightlyTeamStats } from "../../../../types/sportHighlights";
 import { HighlightlyStatsPanel } from "../statistics/HighlightlyStatsPanel";
 import { MatchTabEmptyState } from "../../../../components/shared/MatchTabEmptyState";
+import { LoadingState } from "../../../../components/shared/LoadingState";
 import { StatComparisonRow } from "../statistics/StatComparisonRow";
 import { StatPeriodFilter } from "../statistics/StatPeriodFilter";
 import styles from "../../MatchDetailView.module.css";
@@ -45,11 +46,7 @@ export function MatchStatisticsTab({ statistics, loading, homeTeamName, awayTeam
   if (loading && !statistics) {
     return (
       <div className={styles.tabPanel}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className={styles.skeleton} />
-          ))}
-        </div>
+        <LoadingState label="Loading statistics…" />
       </div>
     );
   }

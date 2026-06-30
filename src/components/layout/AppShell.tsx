@@ -15,6 +15,7 @@ import { usePlatform } from "../../hooks/usePlatform";
 import { usePullToRefresh } from "../../hooks/usePullToRefresh";
 import { DataOrchestrator } from "../../services/orchestrator/DataOrchestrator";
 import { useStore } from "../../store";
+import { ViewLoadingFallback } from "../shared/LoadingState";
 
 const LiveView = lazy(() =>
   import("../views/LiveView").then((m) => ({ default: m.LiveView }))
@@ -113,12 +114,12 @@ export function AppShell() {
         {splashPhase === "done" && !activeMatchId && !activeVenueSlug ? <InstallAppBanner /> : null}
         {activeTab === "live" ? (
           <BentoErrorBoundary bento="LiveView">
-            <Suspense fallback={null}>
+            <Suspense fallback={<ViewLoadingFallback />}>
               <LiveView />
             </Suspense>
           </BentoErrorBoundary>
         ) : null}
-        <Suspense fallback={null}>
+        <Suspense fallback={<ViewLoadingFallback />}>
           {activeTab === "results" ? (
             <BentoErrorBoundary bento="ResultsView"><ResultsView /></BentoErrorBoundary>
           ) : null}
@@ -148,12 +149,12 @@ export function AppShell() {
       </main>
       <BottomTabBar />
       <SplashScreen />
-      <Suspense fallback={null}>
+      <Suspense fallback={<ViewLoadingFallback />}>
         <TeamDetailSheet />
       </Suspense>
       <DebugPanel />
       <div id="sr-live" className="sr-only" aria-live="polite" />
-      <Suspense fallback={null}>
+      <Suspense fallback={<ViewLoadingFallback />}>
         {activeVenueSlug && !activeMatchId ? <VenueHubView /> : null}
         {activeMatchId ? <MatchDetailView /> : null}
       </Suspense>

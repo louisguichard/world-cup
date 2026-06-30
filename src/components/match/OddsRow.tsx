@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { APP_COPY } from "../../lib/appCopy";
 import { useMatchOdds } from "../../hooks/useMatchOdds";
+import { LoadingState } from "../shared/LoadingState";
 import {
   buildMatchOddsSummary,
   explainAmericanOdds,
@@ -50,7 +51,7 @@ export function OddsRow({
     return (
       <div className={`odds-panel odds-panel--loading ${compact ? "odds-panel--compact" : ""}`.trim()}>
         <span className="odds-panel-title">{compact ? copy.panelTitleCompact : copy.panelTitle}</span>
-        <span className="odds-loading">Loading prices…</span>
+        <LoadingState layout="inline" size="sm" label={copy.fixtureBettingLoading} />
       </div>
     );
   }

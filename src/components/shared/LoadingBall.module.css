@@ -1,0 +1,38 @@
+.ball {
+  border-radius: 50%;
+  background-image: url("/loading-ball.webp");
+  background-size: cover;
+  background-position: center;
+  animation: loading-ball-spin 1.2s linear infinite;
+  flex-shrink: 0;
+}
+
+.xs {
+  width: 18px;
+  height: 18px;
+}
+
+.sm {
+  width: 32px;
+  height: 32px;
+}
+
+.md {
+  width: 48px;
+  height: 48px;
+}
+
+.lg {
+  width: 80px;
+  height: 80px;
+}
+
+@keyframes loading-ball-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

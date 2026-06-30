@@ -1,4 +1,5 @@
 import type { HighlightlyHighlight, HighlightlyMatchIntro } from "../../../../types/sportHighlights";
+import { LoadingState } from "../../../../components/shared/LoadingState";
 import styles from "./MatchHighlightsTab.module.css";
 
 type Props = {
@@ -32,7 +33,7 @@ export function MatchHighlightsTab({
   if (loading && highlights.length === 0) {
     return (
       <div className={styles.panel}>
-        <p className={styles.muted}>Loading highlights…</p>
+        <LoadingState label="Loading highlights…" />
       </div>
     );
   }

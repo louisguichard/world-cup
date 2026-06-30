@@ -1,9 +1,10 @@
 /* App shell service worker — enables install + offline fallback for static assets. */
-const CACHE = "wc-shell-v6";
+const CACHE = "wc-shell-v7";
 const PRECACHE = [
   "/",
   "/index.html",
   "/manifest.json",
+  "/loading-ball.webp",
   "/logos/tournament/official/128.png",
   "/logos/tournament/white/128.png",
   "/logos/tournament/official/64.png",

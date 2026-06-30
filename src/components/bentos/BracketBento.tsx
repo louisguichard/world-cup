@@ -23,6 +23,7 @@ import { VenueLabel } from "../venue/VenueLabel";
 import { useTeamTheme } from "../../hooks/useTeamTheme";
 import { TeamFlag } from "../team/TeamFlag";
 import { CertaintyBadge } from "../shared/CertaintyBadge";
+import { LoadingState } from "../shared/LoadingState";
 import type { TeamThemeStatus } from "../team/TeamThemeRoot";
 
 const allBracketStages: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
@@ -411,7 +412,7 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
         {mode === "confirmed" ? bb.confirmedHint : bb.projectedHint}
       </p>
       {!projection ? (
-        <p className="view-note">{bb.loading}</p>
+        <LoadingState label={bb.loading} />
       ) : (
         <div className="bracket-scroll">
           <div className="bracket-head">

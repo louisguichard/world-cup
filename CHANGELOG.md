@@ -8,6 +8,7 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 78** (2026-06-30): 29 file(s) in public, src — 29 files changed, 226 insertions(+), 58 deletions(-)
 - **4.0.0 build 77** (2026-06-30): 260 file(s) in build-manifest.json, index.html, package.json, public, src, tools — 260 files changed, 1993 insertions(+), 330 deletions(-)
 - **4.0.0 build 76** (2026-06-30): 18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 18 files changed, 545 insertions(+), 64 deletions(-)
 - **4.0.0 build 75** (2026-06-30): Stamp real knockout results into bracket projection; add tournament phase config

@@ -3,6 +3,7 @@ import { useStore } from "../../../../store";
 import { buildWorldCupHistoryStats, getTournamentByYear } from "../../../../lib/worldCupHistoryStats";
 import type { WorldCupAwardEntry } from "../../../../types/worldCupHistory";
 import { AllTimeLeadersSection } from "../stats/AllTimeLeadersSection";
+import { LoadingState } from "../../../../components/shared/LoadingState";
 import styles from "../../TournamentView.module.css";
 
 function AwardTable({ title, rows }: { title: string; rows: WorldCupAwardEntry[] }) {
@@ -52,11 +53,7 @@ export function TournamentHistoryTab() {
   if (!bundle && syncRunning) {
     return (
       <div className={styles.tabPanel}>
-        <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className={styles.skeleton} style={{ height: 48 }} />
-          ))}
-        </div>
+        <LoadingState label="Loading World Cup history…" />
       </div>
     );
   }

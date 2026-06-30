@@ -1,5 +1,6 @@
 import type { Lineup, MatchStatus } from "../../../../types";
 import { MatchTabEmptyState } from "../../../../components/shared/MatchTabEmptyState";
+import { LoadingState } from "../../../../components/shared/LoadingState";
 import { PitchDiagram } from "../lineups/PitchDiagram";
 import { SubstitutesBench } from "../lineups/SubstitutesBench";
 import { ManagerRow } from "../lineups/ManagerRow";
@@ -18,11 +19,7 @@ export function MatchLineupsTab({ lineups, loading, homeTeamName, awayTeamName, 
   if (loading && lineups.length === 0) {
     return (
       <div className={styles.tabPanel}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className={styles.skeleton} style={{ height: i === 0 ? 200 : 16 }} />
-          ))}
-        </div>
+        <LoadingState label="Loading lineups…" />
       </div>
     );
   }

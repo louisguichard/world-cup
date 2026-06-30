@@ -13,6 +13,7 @@ import { fetchTournamentStats } from "../../../../services/matchDetail/fetchTour
 import { TournamentLeaderboard } from "../stats/TournamentLeaderboard";
 import { AllTimeLeadersSection } from "../stats/AllTimeLeadersSection";
 import { MatchAwardsFeed } from "../stats/MatchAwardsFeed";
+import { LoadingState } from "../../../../components/shared/LoadingState";
 import styles from "../../TournamentView.module.css";
 
 export function TournamentStatsTab() {
@@ -66,11 +67,7 @@ export function TournamentStatsTab() {
   if (loading && !bundle) {
     return (
       <div className={styles.tabPanel}>
-        <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className={styles.skeleton} style={{ height: 48 }} />
-          ))}
-        </div>
+        <LoadingState label="Loading tournament stats…" />
       </div>
     );
   }

@@ -4,6 +4,7 @@ import { getHistoricalMatchesForTeam, fetchMatchHistory } from "../../../../serv
 import { fetchSofaRapidH2H } from "../../../../services/matchDetail/fetchSofaRapidH2H";
 import { hasZafronixKey, zafronixSignupUrl } from "../../../../lib/apiSetup";
 import { MatchTabEmptyState } from "../../../../components/shared/MatchTabEmptyState";
+import { LoadingState } from "../../../../components/shared/LoadingState";
 import styles from "../../MatchDetailView.module.css";
 
 type Props = {
@@ -155,11 +156,7 @@ export function MatchH2HTab({ match, homeTeamName, awayTeamName }: Props) {
   if (loading) {
     return (
       <div className={styles.tabPanel}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className={styles.skeleton} />
-          ))}
-        </div>
+        <LoadingState label="Loading head-to-head…" />
       </div>
     );
   }

@@ -3,6 +3,7 @@ import type { FootballPredictionPerformance } from "../../services/FootballPredi
 import { APP_COPY } from "../../lib/appCopy";
 import { resolvePredictionPick } from "../../lib/matchFootballPredictions";
 import { useStore } from "../../store";
+import { LoadingState } from "../shared/LoadingState";
 
 const copy = APP_COPY.odds;
 const pred = APP_COPY.predictions;
@@ -73,7 +74,7 @@ export function FootballPredictionInsightsPanel() {
   if (!bundle && syncRunning) {
     return (
       <section className="fp-insights-panel" aria-label={pred.ariaLabel}>
-        <p className="fp-insights-loading">{pred.loading}</p>
+        <LoadingState label={pred.loading} />
       </section>
     );
   }

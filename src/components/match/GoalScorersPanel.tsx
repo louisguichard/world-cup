@@ -1,6 +1,7 @@
 import type { GoalScorerProfile, Team } from "../../types";
 import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
 import { GoalScorerCard } from "./GoalScorerCard";
+import { LoadingState } from "../shared/LoadingState";
 import styles from "./GoalScorersPanel.module.css";
 
 type Props = {
@@ -25,11 +26,7 @@ export function GoalScorersPanel({ profiles, homeTeam, awayTeam, loading }: Prop
     <section className={styles.panel} aria-label="Goal scorers">
       <h2 className={styles.panelTitle}>Goal scorers</h2>
       {loading && profiles.length === 0 ? (
-        <div className={styles.skeletonGrid}>
-          {[0, 1].map((i) => (
-            <div key={i} className={styles.skeletonCard} aria-hidden />
-          ))}
-        </div>
+        <LoadingState label="Loading goal scorers…" size="sm" />
       ) : (
         <div className={styles.grid}>
           {profiles.map((profile) => (

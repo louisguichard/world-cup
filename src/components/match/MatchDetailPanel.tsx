@@ -9,6 +9,7 @@ import {
 } from "../../lib/matchTeamDisplay";
 import { useStore } from "../../store";
 import { TeamFlag } from "../team/TeamFlag";
+import { LoadingState } from "../shared/LoadingState";
 
 type Props = {
   match: MergedMatch;
@@ -82,7 +83,7 @@ export function MatchDetailPanel({ match, wcMatchId, onClose }: Props) {
 
             <div className="match-detail-body">
               {loading ? (
-                <p className="match-detail-loading">Loading…</p>
+                <LoadingState label="Loading…" />
               ) : (
                 <>
                   {tab === "commentary" ? (

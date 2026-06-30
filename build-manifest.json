@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-30T02:42:27.586Z",
+  "updatedAt": "2026-06-30T02:50:43.082Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 78,
+      "kind": "build",
+      "message": "29 file(s) in public, src — 29 files changed, 226 insertions(+), 58 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T02:50:43.082Z"
+    },
     {
       "version": "4.0.0",
       "build": 77,
@@ -312,17 +320,17 @@
       "message": "13 file(s) in api, config, package.json, scripts, src, vercel.json — 13 files changed, 784 insertions(+), 2 deletions(-)",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T20:27:48.117Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 38,
-      "kind": "build",
-      "message": "7 file(s) in CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json, vercel.json, version.json — 7 files changed, 56 insertions(+), 45 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T19:31:38.935Z"
     }
   ],
   "commits": [
+    {
+      "hash": "c47d40116de2e3a56634876b732a3044d3fabf24",
+      "shortHash": "c47d401",
+      "message": "Add football-logos branding, knockout penalty scores, and team drawer UX fixes.",
+      "version": "4.0.0",
+      "build": 77,
+      "timestamp": "2026-06-30T02:42:37.782Z"
+    },
     {
       "hash": "d220627397ecd9429e622f0c7a6da21e48322f5b",
       "shortHash": "d220627",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 7,
       "timestamp": "2026-06-27T14:28:25.293Z"
-    },
-    {
-      "hash": "cd21e5f0aa599e5832e794147cc7267a02b4cf29",
-      "shortHash": "cd21e5f",
-      "message": "Sync build-manifest commit record for cb36242.",
-      "version": "4.0.0",
-      "build": 7,
-      "timestamp": "2026-06-27T14:28:01.873Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "4.0.0",
+      "build": 77,
+      "message": "Production deploy: logos, penalties, team drawer UX",
+      "timestamp": "2026-06-30T02:44:38.984Z"
+    },
     {
       "url": "",
       "environment": "production",

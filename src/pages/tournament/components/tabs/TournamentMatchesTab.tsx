@@ -3,6 +3,7 @@ import { useStore } from "../../../../store";
 import { useMaterializedSchedule } from "../../../../hooks/useMaterializedSchedule";
 import { groupMatchesByDay } from "../../../../lib/groupMatchesByDay";
 import { TournamentMatchCard } from "../matches/TournamentMatchCard";
+import { LoadingState } from "../../../../components/shared/LoadingState";
 import type { DayGroup } from "../../../../lib/groupMatchesByDay";
 import styles from "../../TournamentView.module.css";
 
@@ -41,7 +42,7 @@ export function TournamentMatchesTab() {
   if (dayGroups.length === 0) {
     return (
       <div className={styles.tabPanel}>
-        <div className={styles.emptyState}>Loading schedule…</div>
+        <LoadingState label="Loading schedule…" className={styles.emptyState} />
       </div>
     );
   }

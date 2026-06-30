@@ -3,6 +3,7 @@ import { bootstrap } from "../../lib/bootstrap";
 import { APP_BRAND } from "../../config/appMeta";
 import { APP_COPY } from "../../lib/appCopy";
 import { BrandLogo } from "../shared/BrandLogo";
+import { LoadingBall } from "../shared/LoadingBall";
 
 const splash = APP_COPY.splash;
 
@@ -82,6 +83,7 @@ export function SplashScreen() {
         <SplashErrorCard onRetry={handleRetry} />
       ) : (
         <div className="splash-progress">
+          <LoadingBall size="lg" className="splash-loading-ball" />
           <div className="splash-progress-track">
             <div className="splash-progress-bar" style={{ width: `${progress}%` }} />
           </div>

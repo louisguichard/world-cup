@@ -29,6 +29,7 @@ import { useEliminationStory } from "../../hooks/useEliminationStory";
 import { useTeamTournamentStatus } from "../../hooks/useTeamTournamentStatus";
 import { KnockoutStoryCard } from "./KnockoutStoryCard";
 import { TeamEliminationCard } from "./TeamEliminationCard";
+import { LoadingState } from "../shared/LoadingState";
 import { CompactMatchScore } from "../match/CompactMatchScore";
 import { advancementSectionCopy } from "../../lib/teamTournamentStatus";
 import { qualCopyFromVariant } from "../../lib/appCopy";
@@ -349,11 +350,11 @@ export function TeamDetailSheet() {
 
           {tab === "players" ? (
             wcSquadLoading ? (
-              <p className="team-sheet-empty">Loading squad photos…</p>
+              <LoadingState label="Loading squad photos…" className="team-sheet-empty" />
             ) : wcSquad.length > 0 ? (
               <Wc2026SquadList players={wcSquad} />
             ) : zafronixRosterLoading ? (
-              <p className="team-sheet-empty">Loading squad…</p>
+              <LoadingState label="Loading squad…" className="team-sheet-empty" />
             ) : zafronixSquad.length > 0 ? (
               <ul className="team-squad-list">
                 {zafronixSquad.map((p) => (
@@ -369,7 +370,7 @@ export function TeamDetailSheet() {
                 ))}
               </ul>
             ) : sofaLoading ? (
-              <p className="team-sheet-empty">Loading squad…</p>
+              <LoadingState label="Loading squad…" className="team-sheet-empty" />
             ) : (
               <TeamSquadList players={sofaProfile?.players ?? []} />
             )

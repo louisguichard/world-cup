@@ -7,6 +7,7 @@ import { MatchScheduleCard } from "../match/MatchScheduleCard";
 import { groupMatchesByDay } from "../../lib/groupMatchesByDay";
 import { getNextKickoffMs, isNextKickoffFixture } from "../../lib/kickoffCountdown";
 import { APP_COPY } from "../../lib/appCopy";
+import { SectionLoadingFallback } from "../shared/LoadingState";
 import { MODULE_IDS } from "../../lib/moduleIds";
 import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useMaterializedSchedule } from "../../hooks/useMaterializedSchedule";
@@ -36,7 +37,7 @@ const EliminatedBento = lazy(() =>
 );
 
 function DeferredSectionSkeleton() {
-  return <div className="dashboard-section-skeleton" aria-hidden="true" />;
+  return <SectionLoadingFallback />;
 }
 
 export function LiveView() {

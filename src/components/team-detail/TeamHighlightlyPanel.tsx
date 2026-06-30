@@ -1,4 +1,5 @@
 import type { HighlightlyHighlight, HighlightlyMatch, HighlightlyTeamSeasonStats } from "../../types/sportHighlights";
+import { LoadingState } from "../shared/LoadingState";
 import styles from "./TeamHighlightlyPanel.module.css";
 
 type Props = {
@@ -21,7 +22,7 @@ export function TeamHighlightlyPanel({
   loading,
 }: Props) {
   if (loading && highlights.length === 0 && lastFive.length === 0) {
-    return <p className="team-sheet-empty">Loading Highlightly data…</p>;
+    return <LoadingState label="Loading Highlightly data…" className="team-sheet-empty" />;
   }
 
   const wcStats = seasonStats.find((s) => s.leagueName?.toLowerCase().includes("world cup"));

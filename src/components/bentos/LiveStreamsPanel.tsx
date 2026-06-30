@@ -1,4 +1,5 @@
 import { useLiveFootballStreamSchedule } from "../../hooks/useLiveFootballStreamSchedule";
+import { LoadingState } from "../shared/LoadingState";
 import styles from "./LiveStreamsPanel.module.css";
 
 export function LiveStreamsPanel() {
@@ -10,7 +11,7 @@ export function LiveStreamsPanel() {
     return (
       <section className={styles.section}>
         <h2 className={styles.title}>Live streams</h2>
-        <p className={styles.muted}>Loading football streams…</p>
+        <LoadingState label="Loading football streams…" />
       </section>
     );
   }

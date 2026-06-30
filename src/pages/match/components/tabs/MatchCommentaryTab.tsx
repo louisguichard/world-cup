@@ -1,6 +1,7 @@
 import type { WcCommentaryEntry } from "../../../../services/WorldCup2026LiveClient";
 import type { MatchStatus } from "../../../../types";
 import { MatchTabEmptyState } from "../../../../components/shared/MatchTabEmptyState";
+import { LoadingState } from "../../../../components/shared/LoadingState";
 import styles from "../../MatchDetailView.module.css";
 
 type Props = {
@@ -13,11 +14,7 @@ export function MatchCommentaryTab({ commentary, loading, matchStatus }: Props) 
   if (loading && commentary.length === 0) {
     return (
       <div className={styles.tabPanel}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className={styles.skeleton} style={{ width: `${70 + (i % 3) * 10}%` }} />
-          ))}
-        </div>
+        <LoadingState label="Loading commentary…" />
       </div>
     );
   }
