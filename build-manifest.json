@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T03:31:48.594Z",
+  "updatedAt": "2026-06-30T03:33:32.575Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "8c21bd81042133cb553ef3f74bcae2d3e97304d3",
+      "shortHash": "8c21bd8",
+      "message": "Fix TeamDetailSheet freezes from unstable effect deps and live poll churn.",
+      "version": "4.0.0",
+      "build": 80,
+      "timestamp": "2026-06-30T03:31:49.010Z"
+    },
+    {
       "hash": "980aa708679440f912618a1488d81b9591354b22",
       "shortHash": "980aa70",
       "message": "Unify fixture cards on centered horizontal layout and improve knockout bracket UX.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 19,
       "timestamp": "2026-06-27T16:56:33.074Z"
-    },
-    {
-      "hash": "fbfaaab412a575a589b4f1e13de01a7361653c85",
-      "shortHash": "fbfaaab",
-      "message": "Unify standings and simulation on canonical dataset",
-      "version": "4.0.0",
-      "build": 15,
-      "timestamp": "2026-06-27T16:39:21.010Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "4.0.0",
+      "build": 80,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-30T03:33:32.574Z"
+    },
     {
       "url": "",
       "environment": "production",
