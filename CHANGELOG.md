@@ -8,6 +8,8 @@
 ## [Unreleased]
 
 ### Builds
+- **4.0.0 build 76** (2026-06-30): 18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 18 files changed, 545 insertions(+), 64 deletions(-)
+- **4.0.0 build 75** (2026-06-30): Stamp real knockout results into bracket projection; add tournament phase config
 - **4.0.0 build 74** (2026-06-30): 22 file(s) in src — 22 files changed, 870 insertions(+), 77 deletions(-)
 - **4.0.0 build 73** (2026-06-28): 30 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, src, version.json — 30 files changed, 881 insertions(+), 404 deletions(-)
 - **4.0.0 build 72** (2026-06-28): Phase 1 frontend perf + Phase 2 performance architecture doc

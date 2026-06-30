@@ -20,6 +20,7 @@ import { TeamFlag } from "../team/TeamFlag";
 import { teamDisplayNameForMatch, flagTeamIdForMatch, scheduleNameHintForMatch, resolveMatchTeam } from "../../lib/matchTeamDisplay";
 import { APP_BRAND } from "../../config/appMeta";
 import { APP_COPY } from "../../lib/appCopy";
+import { matchStageLabel } from "../../lib/matchStageLabel";
 import type { MergedMatch, Team } from "../../types";
 
 type ViewMode = "day" | "all";
@@ -279,13 +280,17 @@ function ScheduleMatchTable({ matches, teams, onOpenMatch }: ScheduleMatchTableP
           {matches.map((m) => {
             const home = resolveMatchTeam(m, "home", teams);
             const away = resolveMatchTeam(m, "away", teams);
+            const stageLabel = m.stage ? matchStageLabel(m) : undefined;
             return (
               <tr
                 key={m.id}
                 className={styles.tableRow}
                 onClick={() => onOpenMatch(m.matchId ?? m.id)}
               >
-                <td className={styles.timeCell}>{formatKickoffTime(m.date)}</td>
+                <td className={styles.timeCell}>
+                  <div>{formatKickoffTime(m.date)}</div>
+                  {stageLabel ? <div className={styles.stageBadge}>{stageLabel}</div> : null}
+                </td>
                 <td className={`${styles.teamCell} ${styles["teamCell--home"]}`}>
                   <span className={styles.teamCellInner}>
                     <TeamFlag

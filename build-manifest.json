@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-30T01:54:08.408Z",
+  "updatedAt": "2026-06-30T02:06:18.409Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 76,
+      "kind": "build",
+      "message": "18 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 18 files changed, 545 insertions(+), 64 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T02:06:18.409Z"
+    },
+    {
+      "version": "4.0.0",
+      "build": 75,
+      "kind": "build",
+      "message": "Stamp real knockout results into bracket projection; add tournament phase config",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T02:01:50.852Z"
+    },
     {
       "version": "4.0.0",
       "build": 74,
@@ -304,25 +320,17 @@
       "message": "Use path query param for Vercel rapid rewrites",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T19:31:38.882Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 36,
-      "kind": "build",
-      "message": "1 file(s) in vercel.json — 1 file changed, 36 insertions(+), 36 deletions(-)",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T19:29:55.564Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 35,
-      "kind": "build",
-      "message": "Fix vercel rewrite syntax for rapid proxy query passthrough",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T19:29:55.517Z"
     }
   ],
   "commits": [
+    {
+      "hash": "54e39eae4cd694c0ba5e53694e2658cc8e5d46ae",
+      "shortHash": "54e39ea",
+      "message": "Record v4.0.0 build 74 production deploy on Vercel.",
+      "version": "4.0.0",
+      "build": 74,
+      "timestamp": "2026-06-30T01:54:16.770Z"
+    },
     {
       "hash": "b4bc175b626b669d30ae97a590f408112a930b01",
       "shortHash": "b4bc175",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 4,
       "timestamp": "2026-06-27T07:52:39.898Z"
-    },
-    {
-      "hash": "617303571e8ca49d2ff4e8392d83dd16475785fe",
-      "shortHash": "6173035",
-      "message": "Record v4.0.0 build 2 production deploy on Vercel.",
-      "version": "4.0.0",
-      "build": 2,
-      "timestamp": "2026-06-27T07:37:40.966Z"
     }
   ],
   "deploys": [

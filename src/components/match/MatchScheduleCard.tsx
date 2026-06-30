@@ -4,6 +4,7 @@ import { getBroadcast, getBroadcastByKickoff } from "../../services/BroadcastLoo
 import { formatKickoffTime } from "../../lib/formatKickoff";
 import { formatLiveClock } from "../../lib/formatMatchClock";
 import { APP_COPY } from "../../lib/appCopy";
+import { matchStageLabel } from "../../lib/matchStageLabel";
 import { buildQualificationContext } from "../../lib/qualification";
 import {
   getBestThirdBubbleTeamIds,
@@ -103,6 +104,7 @@ export function MatchScheduleCard({
   const awayFlagId = flagTeamIdForMatch(match, "away", teams);
   const homeNameHint = scheduleNameHintForMatch(match, "home");
   const awayNameHint = scheduleNameHintForMatch(match, "away");
+  const stageLabel = match.stage ? matchStageLabel(match) : undefined;
 
   const metaTimeDisplay = isDone
     ? APP_COPY.match.final
@@ -171,6 +173,7 @@ export function MatchScheduleCard({
           ) : null}
         </span>
         {match.group ? <span className="match-source espn">Group {match.group}</span> : null}
+        {stageLabel ? <span className="match-source espn">{stageLabel}</span> : null}
         {match.group ? (
           <ScenarioBranchButton groupId={match.group} matchId={match.id} />
         ) : null}

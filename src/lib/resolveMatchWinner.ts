@@ -1,9 +1,11 @@
 import { resolveCanonicalTeamId } from "../data/wc2026TeamCatalog";
 import type { MergedMatch, PenaltyShootout, Team } from "../types";
 
-function isKnockoutMatch(match: Pick<MergedMatch, "matchId" | "group" | "stage">): boolean {
+export function isKnockoutMatch(
+  match: Pick<MergedMatch, "matchId" | "id" | "group" | "stage">
+): boolean {
   if (match.group) return false;
-  const matchId = match.matchId ?? "";
+  const matchId = match.matchId ?? match.id ?? "";
   const num = Number(matchId.replace(/^M/, ""));
   if (Number.isFinite(num) && num >= 73) return true;
   return Boolean(match.stage);

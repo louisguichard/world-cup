@@ -144,6 +144,7 @@ export const APP_COPY = {
     bracketTitle: "Road to the final",
     bracketLead:
       "Preview the full bracket here. Switch between best-guess projections and locked-in teams.",
+    knockoutRoundKicker: "Knockout stage",
     groupStandings: {
       title: (group: string) => `Group ${group} · live table`,
       ariaLabel: (group: string) => `Live Group ${group} standings`,
@@ -192,6 +193,8 @@ export const APP_COPY = {
     fixturesKicker: "Upcoming games",
     noResults: "No finished group games match this filter.",
     qualKicker: "Moving on",
+    archiveBanner: "Archive — Group Stage Final Standings",
+    archiveEyebrow: "Group stage complete",
   },
 
   results: {
