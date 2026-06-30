@@ -27,6 +27,7 @@ import { CertaintyBadge } from "../shared/CertaintyBadge";
 import { LoadingState } from "../shared/LoadingState";
 import { BracketConnectorOverlay } from "./BracketConnectorOverlay";
 import { lookupBracketLiveMatch } from "../../lib/bracketTree";
+import { orderBracketByStage } from "../../lib/brackets/bracketVisualOrder";
 import { isKnockoutMatch, resolveMatchWinner } from "../../lib/resolveMatchWinner";
 import type { TeamThemeStatus } from "../team/TeamThemeRoot";
 
@@ -423,17 +424,10 @@ export function BracketBento({ embedded = false }: { embedded?: boolean }) {
   }, [teams, deferredProjectionMatches, markets, overrides, qualContext.lockedGroupMatchCount, qualContext.lockedStandingsByGroup, mergedSchedule]);
 
   const orderedByStage = useMemo(() => {
-    const map: Record<Stage, BracketMatch[]> = {
-      R32: [],
-      R16: [],
-      QF: [],
-      SF: [],
-      Final: []
-    };
-    for (const slot of projection?.bracket ?? []) {
-      map[slot.stage].push(slot);
+    if (!projection?.bracket) {
+      return { R32: [], R16: [], QF: [], SF: [], Final: [] } as Record<Stage, BracketMatch[]>;
     }
-    return map;
+    return orderBracketByStage(projection.bracket);
   }, [projection?.bracket]);
 
   const bb = APP_COPY.bracketBento;

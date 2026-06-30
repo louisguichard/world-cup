@@ -136,6 +136,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [5.0.0] build 4 — 2026-06-30 (build)
+- 8 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 8 files changed, 224 insertions(+), 48 deletions(-)
+
+## [5.0.0] build 3 — 2026-06-30 (build)
+- Bracket visual order + paired elbow connectors fix crossing lines
+
 ## [5.0.0] build 2 — 2026-06-30 (build)
 - 120 file(s) in .env.example, AGENTS.md, CHANGELOG.md, VERSION_LOG.md, api, build-manifest.json — 120 files changed, 7308 insertions(+), 2610 deletions(-)
 

@@ -19,6 +19,19 @@ function pathClassName(
   return styles.pathPending;
 }
 
+function pairedPathClassName(
+  feeders: [string, string],
+  confirmedWinners: Set<string>,
+  liveProvisionalFeeders: Set<string>
+): string {
+  const [a, b] = feeders;
+  if (confirmedWinners.has(a) && confirmedWinners.has(b)) return styles.pathConfirmed;
+  if (liveProvisionalFeeders.has(a) || liveProvisionalFeeders.has(b)) {
+    return styles.pathLiveProvisional;
+  }
+  return styles.pathPending;
+}
+
 export function BracketConnectorOverlay({
   cardRects,
   containerSize,
@@ -30,31 +43,41 @@ export function BracketConnectorOverlay({
   for (const [childId, feeders] of Object.entries(BRACKET_FEED_MAP)) {
     if (!feeders) continue;
     const childRect = cardRects.get(childId);
-    if (!childRect) continue;
+    const feeder1Rect = cardRects.get(feeders[0]);
+    const feeder2Rect = cardRects.get(feeders[1]);
+    if (!childRect || !feeder1Rect || !feeder2Rect) continue;
 
     const cx = childRect.left;
-    const cy = childRect.top + childRect.height / 2;
+    const fy1 = feeder1Rect.top + feeder1Rect.height / 2;
+    const fy2 = feeder2Rect.top + feeder2Rect.height / 2;
+    const fMidY = (fy1 + fy2) / 2;
+    const fx = feeder1Rect.right;
+    const mx = fx + (cx - fx) * 0.5;
 
-    for (const feederId of feeders) {
-      const feederRect = cardRects.get(feederId);
-      if (!feederRect) continue;
+    if (cx - fx < 12) continue;
 
-      const fx = feederRect.right;
-      const fy = feederRect.top + feederRect.height / 2;
+    const stemClass = pairedPathClassName(feeders, confirmedWinners, liveProvisionalFeeders);
 
-      if (cx - fx < 12) continue;
-
-      const mx = fx + (cx - fx) * 0.5;
-
-      paths.push(
-        <path
-          key={`${feederId}->${childId}`}
-          className={pathClassName(feederId, confirmedWinners, liveProvisionalFeeders)}
-          d={`M ${fx} ${fy} H ${mx} V ${cy} H ${cx}`}
-          fill="none"
-        />
-      );
-    }
+    paths.push(
+      <path
+        key={`${feeders[0]}->${childId}-top`}
+        className={pathClassName(feeders[0], confirmedWinners, liveProvisionalFeeders)}
+        d={`M ${fx} ${fy1} H ${mx} V ${fMidY}`}
+        fill="none"
+      />,
+      <path
+        key={`${feeders[1]}->${childId}-bot`}
+        className={pathClassName(feeders[1], confirmedWinners, liveProvisionalFeeders)}
+        d={`M ${fx} ${fy2} H ${mx} V ${fMidY}`}
+        fill="none"
+      />,
+      <path
+        key={`${childId}-stem`}
+        className={stemClass}
+        d={`M ${mx} ${fMidY} H ${cx}`}
+        fill="none"
+      />
+    );
   }
 
   if (paths.length === 0) return null;

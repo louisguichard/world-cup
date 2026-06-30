@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-06-30T06:23:16.310Z",
+  "updatedAt": "2026-06-30T06:32:43.879Z",
   "builds": [
+    {
+      "version": "5.0.0",
+      "build": 4,
+      "kind": "build",
+      "message": "8 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 8 files changed, 224 insertions(+), 48 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:32:43.879Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 3,
+      "kind": "build",
+      "message": "Bracket visual order + paired elbow connectors fix crossing lines",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T06:25:28.651Z"
+    },
     {
       "version": "5.0.0",
       "build": 2,
@@ -304,25 +320,17 @@
       "message": "30 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, src, version.json — 30 files changed, 881 insertions(+), 404 deletions(-)",
       "date": "2026-06-28",
       "timestamp": "2026-06-28T20:11:25.728Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 72,
-      "kind": "build",
-      "message": "Phase 1 frontend perf + Phase 2 performance architecture doc",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T20:11:19.274Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 71,
-      "kind": "build",
-      "message": "Frontend perf: polling governor, SSE cleanup, panel error boundaries",
-      "date": "2026-06-28",
-      "timestamp": "2026-06-28T06:51:59.304Z"
     }
   ],
   "commits": [
+    {
+      "hash": "d8def7b74f5fa7b4f850010ee6fd4257d1eba4c4",
+      "shortHash": "d8def7b",
+      "message": "Record v5.0.0 build 2 production deploy on Vercel.",
+      "version": "5.0.0",
+      "build": 2,
+      "timestamp": "2026-06-30T06:23:24.874Z"
+    },
     {
       "hash": "146646c26d93f7ca9680bdaee32f0f5fa02304ff",
       "shortHash": "146646c",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 44,
       "timestamp": "2026-06-27T21:23:18.900Z"
-    },
-    {
-      "hash": "67c1e5f3fb294c657ade98cfc186a020869e23b2",
-      "shortHash": "67c1e5f",
-      "message": "Fix vercel.json rewrite syntax (named upstream param passthrough)",
-      "version": "4.0.0",
-      "build": 36,
-      "timestamp": "2026-06-27T19:29:55.645Z"
     }
   ],
   "deploys": [
