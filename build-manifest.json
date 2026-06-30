@@ -1,6 +1,14 @@
 {
-  "updatedAt": "2026-06-30T03:12:16.175Z",
+  "updatedAt": "2026-06-30T03:31:48.594Z",
   "builds": [
+    {
+      "version": "4.0.0",
+      "build": 80,
+      "kind": "build",
+      "message": "1 file(s) in src — 1 file changed, 42 insertions(+), 7 deletions(-)",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T03:31:48.594Z"
+    },
     {
       "version": "4.0.0",
       "build": 79,
@@ -312,14 +320,6 @@
       "message": "Remove duplicate sofascore6 rewrite; document Getty/YouTube env vars",
       "date": "2026-06-27",
       "timestamp": "2026-06-27T21:00:03.328Z"
-    },
-    {
-      "version": "4.0.0",
-      "build": 40,
-      "kind": "build",
-      "message": "Integrate all feature branches via consolidated rapid proxy",
-      "date": "2026-06-27",
-      "timestamp": "2026-06-27T20:45:03.500Z"
     }
   ],
   "commits": [

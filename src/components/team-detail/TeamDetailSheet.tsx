@@ -63,6 +63,7 @@ export function TeamDetailSheet() {
   const [recentForm, setRecentForm] = useState<ZafronixMatch[]>([]);
 
   const team = teamId ? resolveTeamFromStore(teams, teamId) : null;
+  const teamName = team?.name;
   const teamDisplay = team ? teamDisplayName(team, team.id) : "";
   const highlightlyTeam = useHighlightlyTeamData(teamDisplay, Boolean(team));
   const { profile: sofaProfile, loading: sofaLoading } = useTeamProfile(team?.abbreviation);
@@ -96,12 +97,24 @@ export function TeamDetailSheet() {
     return row ? { group: g!, row } : null;
   }, [team, standings]);
 
+  const teamFixtureKey = useStore((s) => {
+    if (!teamId) return "";
+    return Object.values(s.liveMatches)
+      .filter((m) => m.homeTeamId === teamId || m.awayTeamId === teamId)
+      .map(
+        (m) =>
+          `${m.id}:${m.status}:${m.homeScore ?? ""}:${m.awayScore ?? ""}:${m.locked ? 1 : 0}:${m.date}`
+      )
+      .sort()
+      .join("|");
+  });
+
   const allFixtures = useMemo(() => {
     if (!teamId) return [];
     return Object.values(liveMatches)
       .filter((m) => m.homeTeamId === teamId || m.awayTeamId === teamId)
       .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
-  }, [liveMatches, teamId]);
+  }, [teamFixtureKey, liveMatches, teamId]);
 
   const stats = useMemo(() => {
     if (!groupStanding) return null;
@@ -148,14 +161,36 @@ export function TeamDetailSheet() {
   }, [open, initialTab, teamId]);
 
   useEffect(() => {
-    if (!team) return;
-    void getTeamElo(team.name).then(setElo);
-  }, [team]);
+    if (!teamName) {
+      setElo(null);
+      return;
+    }
+    let cancelled = false;
+    void getTeamElo(teamName).then((val) => {
+      if (!cancelled) setElo(val);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [teamId, teamName]);
 
   useEffect(() => {
-    if (!team || tab !== "form") return;
-    void getHistoricalMatchesForTeam(team.name, 7).then(setRecentForm);
-  }, [team, tab]);
+    if (!teamName) {
+      setRecentForm([]);
+      return;
+    }
+    let cancelled = false;
+    void getHistoricalMatchesForTeam(teamName, 7)
+      .then((matches) => {
+        if (!cancelled) setRecentForm(matches);
+      })
+      .catch(() => {
+        if (!cancelled) setRecentForm([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [teamId, teamName]);
 
   useEffect(() => {
     if (!open) return;
