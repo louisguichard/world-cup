@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T02:06:18.841Z",
+  "updatedAt": "2026-06-30T02:06:44.632Z",
   "builds": [
     {
       "version": "4.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "ed6849c4330df70b6703e0939e144ab7fe30c770",
+      "shortHash": "ed6849c",
+      "message": "Record build 76 commit metadata in build manifest.",
+      "version": "4.0.0",
+      "build": 76,
+      "timestamp": "2026-06-30T02:06:44.631Z"
+    },
+    {
       "hash": "8baf437b84f35a1e7f5ad38b002d849f716e30dd",
       "shortHash": "8baf437",
       "message": "Stamp real knockout results into bracket projection and add tournament phase UX.",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 5,
       "timestamp": "2026-06-27T07:54:32.582Z"
-    },
-    {
-      "hash": "80caf9d2be3934b15b99c3d37ab883a1378d0df8",
-      "shortHash": "80caf9d",
-      "message": "Sync build-manifest commit record for 5341ad0.",
-      "version": "4.0.0",
-      "build": 4,
-      "timestamp": "2026-06-27T07:52:49.729Z"
     }
   ],
   "deploys": [
