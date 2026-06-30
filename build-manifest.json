@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T07:39:15.734Z",
+  "updatedAt": "2026-06-30T07:41:34.836Z",
   "builds": [
     {
       "version": "5.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "5eeb3a3659bd22096df961d48b7600fcbfbeb873",
+      "shortHash": "5eeb3a3",
+      "message": "Fix tab freeze and live-view jank with shared derived-data caches.",
+      "version": "5.0.0",
+      "build": 23,
+      "timestamp": "2026-06-30T07:39:16.103Z"
+    },
+    {
       "hash": "e662f060dfd33c145d1b17469f418d780c94d4a6",
       "shortHash": "e662f06",
       "message": "Record v5.0.0 build 18 production deploy on Vercel.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 68,
       "timestamp": "2026-06-28T06:34:15.601Z"
-    },
-    {
-      "hash": "9fc09095a5b0003835e10738c9f401bee1b97990",
-      "shortHash": "9fc0909",
-      "message": "Restore BC QueryAPI routes and Vite dev middleware for local panels.",
-      "version": "4.0.0",
-      "build": 55,
-      "timestamp": "2026-06-28T05:09:17.336Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "5.0.0",
+      "build": 23,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-06-30T07:41:34.835Z"
+    },
     {
       "url": "",
       "environment": "production",
@@ -716,14 +724,6 @@
       "build": 1,
       "message": "Production deploy via deploy:vercel",
       "timestamp": "2026-06-27T07:22:23.640Z"
-    },
-    {
-      "url": "",
-      "environment": "production",
-      "version": "3.0.0",
-      "build": 20,
-      "message": "Production deploy via deploy:vercel",
-      "timestamp": "2026-06-27T07:08:54.737Z"
     }
   ]
 }
