@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-01T08:07:12.296Z",
+  "updatedAt": "2026-07-01T08:09:35.797Z",
   "builds": [
     {
       "version": "6.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "0110f01321fcd1b27bb3877c60cd6493ed5dcf5e",
+      "shortHash": "0110f01",
+      "message": "Release v6.0.0: live insights strip, bracket flow, and goal stats",
+      "version": "6.0.0",
+      "build": 5,
+      "timestamp": "2026-07-01T08:07:12.662Z"
+    },
+    {
       "hash": "c409d1a6da88eb7f4fede4ece608b8ba3796cb9e",
       "shortHash": "c409d1a",
       "message": "Record v5.0.0 build 68 production deploy on Vercel.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 76,
       "timestamp": "2026-06-30T02:06:18.837Z"
-    },
-    {
-      "hash": "54e39eae4cd694c0ba5e53694e2658cc8e5d46ae",
-      "shortHash": "54e39ea",
-      "message": "Record v4.0.0 build 74 production deploy on Vercel.",
-      "version": "4.0.0",
-      "build": 74,
-      "timestamp": "2026-06-30T01:54:16.770Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "6.0.0",
+      "build": 5,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-07-01T08:09:35.785Z"
+    },
     {
       "url": "",
       "environment": "production",
@@ -716,14 +724,6 @@
       "build": 5,
       "message": "Production deploy via deploy:vercel",
       "timestamp": "2026-06-27T07:54:25.523Z"
-    },
-    {
-      "url": "",
-      "environment": "production",
-      "version": "4.0.0",
-      "build": 2,
-      "message": "Production deploy via deploy:vercel",
-      "timestamp": "2026-06-27T07:37:25.188Z"
     }
   ]
 }
