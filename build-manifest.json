@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-01T08:23:47.495Z",
+  "updatedAt": "2026-07-01T08:25:55.258Z",
   "builds": [
     {
       "version": "6.0.0",
@@ -324,6 +324,14 @@
   ],
   "commits": [
     {
+      "hash": "19dd2224b688bb1020c5d7c994e90b9f9819f394",
+      "shortHash": "19dd222",
+      "message": "Add enriched scorer photos, canonical team IDs in stats, and tournament pulse bento.",
+      "version": "6.0.0",
+      "build": 7,
+      "timestamp": "2026-07-01T08:23:47.884Z"
+    },
+    {
       "hash": "3e557b34633b7c71fbe5fd1ab2b6a73af03df5f3",
       "shortHash": "3e557b3",
       "message": "Record v6.0.0 build 5 production deploy on Vercel.",
@@ -554,17 +562,17 @@
       "version": "4.0.0",
       "build": 76,
       "timestamp": "2026-06-30T02:10:17.231Z"
-    },
-    {
-      "hash": "ed6849c4330df70b6703e0939e144ab7fe30c770",
-      "shortHash": "ed6849c",
-      "message": "Record build 76 commit metadata in build manifest.",
-      "version": "4.0.0",
-      "build": 76,
-      "timestamp": "2026-06-30T02:06:44.631Z"
     }
   ],
   "deploys": [
+    {
+      "url": "",
+      "environment": "production",
+      "version": "6.0.0",
+      "build": 7,
+      "message": "Production deploy via deploy:vercel",
+      "timestamp": "2026-07-01T08:25:55.257Z"
+    },
     {
       "url": "",
       "environment": "production",
@@ -716,14 +724,6 @@
       "build": 48,
       "message": "Production deploy v4.0.0 build 48 on main",
       "timestamp": "2026-06-28T04:52:49.303Z"
-    },
-    {
-      "url": "",
-      "environment": "production",
-      "version": "4.0.0",
-      "build": 5,
-      "message": "Production deploy via deploy:vercel",
-      "timestamp": "2026-06-27T07:54:25.523Z"
     }
   ]
 }
