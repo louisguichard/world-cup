@@ -10,6 +10,7 @@ import type {
 } from "../../types";
 import { isKnockoutBracketMatchId, lookupBracketLiveMatch, seedLabelToMatchId } from "../bracketTree";
 import { materializeFullSchedule } from "../materializeFullSchedule";
+import { prepareLiveMatchStore } from "../liveMatchStorePipeline";
 import { computeStandings } from "../tournament";
 import type { QualificationMatchContext } from "../qualification";
 import { resolveMatchWinner } from "../resolveMatchWinner";
@@ -33,6 +34,15 @@ function indexKnockoutScheduleMatches(
     if (!matchId || !isKnockoutBracketMatchId(matchId)) continue;
     byMatchId.set(matchId, match);
   }
+
+  // Locked official knockouts beat standings-derived schedule materialization.
+  for (const [key, match] of Object.entries(liveMatches)) {
+    const matchId = match.matchId ?? match.id ?? key;
+    if (!isKnockoutBracketMatchId(matchId)) continue;
+    if (match.status !== "completed" || !match.locked) continue;
+    byMatchId.set(matchId, match);
+  }
+
   return byMatchId;
 }
 
@@ -196,8 +206,9 @@ function buildR32Match(
   const winnerTeamId =
     isCompleted && live ? resolveMatchWinner(live, teamsById) ?? undefined : undefined;
 
-  const homeTeamId = isCompleted ? live?.homeTeamId : undefined;
-  const awayTeamId = isCompleted ? live?.awayTeamId : undefined;
+  const hasLiveTeams = Boolean(live?.homeTeamId && live?.awayTeamId);
+  const homeTeamId = isCompleted || hasLiveTeams ? live?.homeTeamId : undefined;
+  const awayTeamId = isCompleted || hasLiveTeams ? live?.awayTeamId : undefined;
 
   return {
     id: slot.matchId,
@@ -299,6 +310,7 @@ export function buildConfirmedOnlyBracket(
   qualContext: QualificationMatchContext
 ): { bracket: BracketMatch[]; standings: GroupStanding[] } {
   const teamsById: TeamsById = Object.fromEntries(teams.map((team) => [team.id, team]));
+  const preparedLive = prepareLiveMatchStore(liveMatches, teamsById);
   const scoredMatches: MatchWithScore[] = [];
   for (const match of matches) {
     if (match.homeScore === undefined || match.awayScore === undefined) continue;
@@ -310,12 +322,12 @@ export function buildConfirmedOnlyBracket(
   }
   const standings = computeStandings(scoredMatches, teams);
   const slotStandings = standingsForConfirmedSlots(standings, qualContext);
-  const scheduleMatches = indexKnockoutScheduleMatches(teamsById, liveMatches, slotStandings);
-  const liveByPair = indexLiveKnockoutByPair(liveMatches);
-  const liveByOfficialSlot = indexLiveByOfficialSlot(liveMatches, slotStandings, teamsById);
+  const scheduleMatches = indexKnockoutScheduleMatches(teamsById, preparedLive, slotStandings);
+  const liveByPair = indexLiveKnockoutByPair(preparedLive);
+  const liveByOfficialSlot = indexLiveByOfficialSlot(preparedLive, slotStandings, teamsById);
   const confirmedWinners = indexConfirmedWinners(
     scheduleMatches,
-    liveMatches,
+    preparedLive,
     teamsById,
     slotStandings
   );
@@ -331,7 +343,7 @@ export function buildConfirmedOnlyBracket(
       slot,
       scheduleMatches,
       liveByOfficialSlot,
-      liveMatches,
+      preparedLive,
       liveByPair,
       slotStandings,
       teamsById
@@ -352,7 +364,7 @@ export function buildConfirmedOnlyBracket(
         awaySeed,
         confirmedWinners,
         scheduleMatches,
-        liveMatches,
+        preparedLive,
         teamsById
       );
       bracket.push(later);

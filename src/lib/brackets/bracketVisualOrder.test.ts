@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { BRACKET_FEED_MAP } from "../bracketTree";
 import {
   buildBracketVisualIndexMap,
+  kickoffMsForBracketMatch,
   orderBracketByStage,
   R32_VISUAL_ORDER,
+  sortBracketMatchesByDate,
 } from "./bracketVisualOrder";
 import type { BracketMatch } from "../../types";
 
@@ -32,8 +34,8 @@ describe("bracketVisualOrder", () => {
 
   it("assigns R16 child index to feeder midpoint", () => {
     const index = buildBracketVisualIndexMap();
-    expect(index.get("M89")).toBe((index.get("M74")! + index.get("M77")!) / 2);
-    expect(index.get("M90")).toBe((index.get("M73")! + index.get("M75")!) / 2);
+    expect(index.get("M89")).toBe((index.get("M73")! + index.get("M74")!) / 2);
+    expect(index.get("M90")).toBe((index.get("M75")! + index.get("M76")!) / 2);
   });
 
   it("sorts emitted bracket slots by topology, not emission order", () => {
@@ -47,7 +49,14 @@ describe("bracketVisualOrder", () => {
     ];
 
     const ordered = orderBracketByStage(shuffled);
-    expect(ordered.R32.map((m) => m.id)).toEqual(["M74", "M73", "M75", "M88"]);
+    expect(ordered.R32.map((m) => m.id)).toEqual(["M73", "M74", "M75", "M88"]);
     expect(ordered.R16.map((m) => m.id)).toEqual(["M89", "M96"]);
+  });
+
+  it("sorts by kickoff date — M76 before M74 before M75 on Jun 29", () => {
+    const jun29 = [slot("M74", "R32"), slot("M76", "R32"), slot("M75", "R32")];
+    expect(sortBracketMatchesByDate(jun29).map((m) => m.id)).toEqual(["M76", "M74", "M75"]);
+    expect(kickoffMsForBracketMatch("M76")).toBeLessThan(kickoffMsForBracketMatch("M74"));
+    expect(kickoffMsForBracketMatch("M74")).toBeLessThan(kickoffMsForBracketMatch("M75"));
   });
 });

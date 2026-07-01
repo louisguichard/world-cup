@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { groupResultsByDay, filterCompletedResults, type ResultsSort } from "../../lib/resultsView";
-import { teamDisplayNameFromId, teamDisplayNameForMatch } from "../../lib/matchTeamDisplay";
+import { buildCompletedResultsViewModel } from "../../lib/buildCompletedResultsViewModel";
+import { groupResultsByDay, type ResultsSort } from "../../lib/resultsView";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import type { GroupLetter, Stage } from "../../types";
@@ -29,18 +29,9 @@ export function ResultsView() {
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
-    const base = filterCompletedResults(Object.values(liveMatchesMap), {
+    return buildCompletedResultsViewModel(liveMatchesMap, teams, {
       sort,
-      stage,
-      group,
-      search: ""
-    });
-    const q = search.trim().toLowerCase();
-    if (!q) return base;
-    return base.filter((m) => {
-      const home = teamDisplayNameFromId(m.homeTeamId, teams);
-      const away = teamDisplayNameFromId(m.awayTeamId, teams);
-      return home.toLowerCase().includes(q) || away.toLowerCase().includes(q);
+      filters: { sort, stage, group, search },
     });
   }, [liveMatchesMap, sort, stage, group, search, teams]);
 

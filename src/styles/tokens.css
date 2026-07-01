@@ -44,10 +44,11 @@
   --content-readable: min(100%, 72ch);
   --chrome-bottom-nav: calc(56px + var(--safe-bottom));
 
-  /* Bracket — slot height must fit a 2-team card (head + rows + score); gap sized for connectors */
-  --bracket-col-width: clamp(156px, 13vw, 200px);
-  --bracket-col-gap: clamp(24px, 3.5vw, 56px);
-  --bracket-slot-h: clamp(168px, 12.5vh, 208px);
+  /* Bracket — fluid columns; slot height follows card content (connectors measure live) */
+  --bracket-col-width: clamp(200px, calc((100vw - 2 * var(--layout-gutter-inline) - 4 * var(--bracket-col-gap, 24px)) / 5), 248px);
+  --bracket-col-gap: clamp(16px, 2.5vw, 40px);
+  --bracket-slot-h: auto;
+  --bracket-card-gap: clamp(8px, 1.2vw, 12px);
 
   /* Card heights — aliases; modules.css owns responsive tuning */
   --card-min: var(--module-grid-min, clamp(260px, 42vw, 320px));

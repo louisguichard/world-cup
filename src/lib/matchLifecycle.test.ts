@@ -11,10 +11,20 @@ import {
 const KICKOFF = Date.parse("2026-06-15T18:00:00.000Z");
 
 describe("getMatchPhase", () => {
-  it("returns locked when match.locked is true", () => {
+  it("returns locked when match.locked is true and not in play", () => {
     expect(
       getMatchPhase({ kickoffMs: KICKOFF, status: "scheduled", locked: true }, KICKOFF)
     ).toBe("locked");
+  });
+
+  it("ignores locked flag for in-play feeds", () => {
+    const now = KICKOFF + 20 * 60 * 1000;
+    expect(
+      getMatchPhase(
+        { kickoffMs: KICKOFF, status: "live", clockMinute: 20, locked: true },
+        now
+      )
+    ).toBe("live_first");
   });
 
   it("returns dormant when kickoff is more than 15 min away", () => {
@@ -140,14 +150,24 @@ describe("isActivePhase / isMergedMatchInActivePhase", () => {
     ).toBe(true);
   });
 
-  it("excludes locked matches", () => {
+  it("excludes locked scheduled matches", () => {
+    const kickoff = Date.parse("2026-06-30T18:00:00.000Z");
+    expect(
+      isMergedMatchInActivePhase(
+        { date: new Date(kickoff).toISOString(), status: "scheduled", locked: true },
+        kickoff - 60 * 60 * 1000
+      )
+    ).toBe(false);
+  });
+
+  it("surfaces in-play matches when locked flag was set incorrectly", () => {
     const kickoff = Date.parse("2026-06-30T18:00:00.000Z");
     expect(
       isMergedMatchInActivePhase(
         { date: new Date(kickoff).toISOString(), status: "live", clockMinute: 20, locked: true },
         kickoff + 20 * 60 * 1000
       )
-    ).toBe(false);
+    ).toBe(true);
   });
 });
 

@@ -350,6 +350,7 @@ export type GroupsViewMode = "flags" | "table";
 export type SimulatorMode = "tournament" | "probabilities" | "methodology";
 export type SplashPhase = "loading" | "slow" | "error" | "done";
 export type BracketViewMode = "projected" | "confirmed";
+export type BracketLayoutMode = "tree" | "schedule";
 
 export type MatchPeriod =
   | "not_started"

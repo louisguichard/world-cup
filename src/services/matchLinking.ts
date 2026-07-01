@@ -90,13 +90,7 @@ export function findStoreMatchForExternalVote(
     return true;
   });
 
-  if (candidates.length === 0) return undefined;
-
-  candidates.sort((a, b) => {
-    if (a.espnEventId && !b.espnEventId) return -1;
-    if (!a.espnEventId && b.espnEventId) return 1;
-    return 0;
-  });
+  if (candidates.length !== 1) return undefined;
 
   return candidates[0];
 }

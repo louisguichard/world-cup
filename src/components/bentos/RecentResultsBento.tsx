@@ -1,50 +1,39 @@
 import { useMemo } from "react";
-import { localDateKey, yesterdayDateKey } from "../../lib/localDate";
-import { resolveDisplayMatch } from "../../lib/resolveDisplayMatch";
+import {
+  buildCompletedResultsViewModel,
+  buildRecentResultsSections,
+  matchResultStableId,
+} from "../../lib/buildCompletedResultsViewModel";
 import { APP_COPY } from "../../lib/appCopy";
 import { useStore } from "../../store";
 import { useMaterializedMatchIndex } from "../../hooks/useMaterializedMatchIndex";
+import { useTournamentPhase } from "../../hooks/useTournamentPhase";
 import { VenueLabel } from "../venue/VenueLabel";
 import { PenaltyResultRow } from "./RecentResultRow";
 
 export function RecentResultsBento() {
   const liveMatches = useStore((s) => s.liveMatches);
+  const teams = useStore((s) => s.teams);
   const openTeamSheet = useStore((s) => s.openTeamSheet);
   const setActiveTab = useStore((s) => s.setActiveTab);
   const materializedIndex = useMaterializedMatchIndex();
+  const { isKnockoutActive } = useTournamentPhase();
 
   const { sections, total } = useMemo(() => {
-    const now = new Date();
-    const todayKey = localDateKey(now);
-    const yKey = yesterdayDateKey(now);
+    const completed = buildCompletedResultsViewModel(liveMatches, teams, {
+      sort: "recent",
+      materializedIndex,
+    });
 
-    const completed = Object.values(liveMatches)
-      .filter((m) => m.status === "completed" && m.homeScore !== undefined)
-      .map((m) => resolveDisplayMatch(m, materializedIndex))
-      .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-
-    const todayMatches = completed.filter((m) => localDateKey(new Date(m.date)) === todayKey);
-    const yesterdayMatches = completed.filter((m) => localDateKey(new Date(m.date)) === yKey);
-
-    const result: { label: string; matches: typeof completed }[] = [];
-    let remaining = 8;
-
-    const res = APP_COPY.results;
-
-    if (todayMatches.length > 0) {
-      const slice = todayMatches.slice(0, remaining);
-      result.push({ label: `${res.today} (${todayMatches.length})`, matches: slice });
-      remaining -= slice.length;
-    }
-    if (remaining > 0 && yesterdayMatches.length > 0) {
-      result.push({
-        label: `${res.yesterday} (${yesterdayMatches.length})`,
-        matches: yesterdayMatches.slice(0, remaining),
-      });
-    }
-
-    return { sections: result, total: todayMatches.length + yesterdayMatches.length };
-  }, [liveMatches, materializedIndex]);
+    return buildRecentResultsSections(completed, {
+      isKnockoutActive,
+      labels: {
+        today: APP_COPY.results.today,
+        yesterday: APP_COPY.results.yesterday,
+        earlierKnockout: APP_COPY.results.earlierKnockout,
+      },
+    });
+  }, [liveMatches, materializedIndex, teams, isKnockoutActive]);
 
   if (sections.length === 0) return null;
 
@@ -68,7 +57,7 @@ export function RecentResultsBento() {
           <div key={section.label} className="recent-results-group">
             <h3 className="recent-results-group-label">{section.label}</h3>
             {section.matches.map((match) => (
-                <div key={match.id} className="recent-result-item">
+                <div key={matchResultStableId(match)} className="recent-result-item">
                   <PenaltyResultRow match={match} onSelect={openTeamSheet} />
                   {match.matchId || match.venue ? (
                     <div className="recent-result-extra">

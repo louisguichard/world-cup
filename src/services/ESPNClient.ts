@@ -1,6 +1,7 @@
 import type { GroupLetter, Match, MatchEvent, MatchPeriod, Team } from "../types";
 import { isApiEnabled } from "../config/apiFlags";
 import { inferPeriodFromClock } from "../lib/formatMatchClock";
+import { lockedFromEspnStatus } from "../lib/liveDataContract";
 import { penaltyShootoutFromEspnDetails } from "../lib/derivePenaltyShootout";
 import type { ApiRequestIntent } from "../config/apiQuotaPolicy";
 import { acquireApiQuota, logApiQuotaBlock } from "./ApiQuotaGovernor";
@@ -84,14 +85,16 @@ export function parseEspnClockFields(status: EspnCompetitionStatus | undefined):
   let period: MatchPeriod | undefined;
   if (state === "pre") {
     period = "not_started";
-  } else if (state === "post" || status.type?.completed) {
+  } else if (status.type?.completed) {
+    period = "full_time";
+  } else if (detail.includes("half time") || detail === "halftime") {
+    period = "half_time";
+  } else if (state === "post" && (detail.includes("final") || detail.includes("full time"))) {
     period = "full_time";
   } else if (detail.includes("penalt")) {
     period = "penalties";
   } else if (detail.includes("extra") && detail.includes("half")) {
     period = detail.includes("2") ? "extra_time_second" : "extra_time_first";
-  } else if (detail.includes("half time") || detail === "halftime") {
-    period = "half_time";
   } else if (periodNum === 3) {
     period = "extra_time_first";
   } else if (periodNum === 4) {
@@ -224,7 +227,7 @@ export function parseEspnScoreboard(scoreboard: unknown): {
       awayScore: hasRealScore ? Number(away.score) : undefined,
       homeConduct: conduct[home.team.id] ?? 0,
       awayConduct: conduct[away.team.id] ?? 0,
-      locked: hasRealScore,
+      locked: lockedFromEspnStatus(status, statusType?.completed),
       source: "espn",
       ...clockFields,
       ...(decidedByPenalties || penaltyShootout ? { decidedByPenalties: true } : {}),

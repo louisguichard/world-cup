@@ -28,32 +28,26 @@ describe("ROUND_OF_32_FIXTURES — source of truth enforcement", () => {
     expect(ROUND_OF_32_FIXTURES).toHaveLength(16);
   });
 
-  it("M73 is 1A vs 3E", () => {
-    expect(ROUND_OF_32_FIXTURES[0]).toEqual(["M73", "1A", "3E"]);
+  it("M73 is 2A vs 2B (FIFA schedule / ESPN)", () => {
+    expect(ROUND_OF_32_FIXTURES[0]).toEqual(["M73", "2A", "2B"]);
   });
-  it("M74 is 1B vs 3J", () => {
-    expect(ROUND_OF_32_FIXTURES[1]).toEqual(["M74", "1B", "3J"]);
+  it("M74 is 1C vs 2F", () => {
+    expect(ROUND_OF_32_FIXTURES[1]).toEqual(["M74", "1C", "2F"]);
   });
-  it("M75 is 1D vs 3B", () => {
-    expect(ROUND_OF_32_FIXTURES[2]).toEqual(["M75", "1D", "3B"]);
+  it("M79 is 1A vs 3E", () => {
+    expect(ROUND_OF_32_FIXTURES.find(([id]) => id === "M79")).toEqual(["M79", "1A", "3E"]);
   });
-  it("M81 is 2A vs 2B", () => {
-    expect(ROUND_OF_32_FIXTURES[8]).toEqual(["M81", "2A", "2B"]);
+  it("M75 is 1E vs 3D", () => {
+    expect(ROUND_OF_32_FIXTURES.find(([id]) => id === "M75")).toEqual(["M75", "1E", "3D"]);
   });
-  it("M84 is 1H vs 2J", () => {
-    expect(ROUND_OF_32_FIXTURES[11]).toEqual(["M84", "1H", "2J"]);
+  it("M83 is 1H vs 2J", () => {
+    expect(ROUND_OF_32_FIXTURES.find(([id]) => id === "M83")).toEqual(["M83", "1H", "2J"]);
   });
-  it("M85 is 1C vs 2F", () => {
-    expect(ROUND_OF_32_FIXTURES[12]).toEqual(["M85", "1C", "2F"]);
-  });
-  it("M87 is 1J vs 3H", () => {
-    expect(ROUND_OF_32_FIXTURES[14]).toEqual(["M87", "1J", "3H"]);
-  });
-  it("M88 is 2E vs 2I", () => {
-    expect(ROUND_OF_32_FIXTURES[15]).toEqual(["M88", "2E", "2I"]);
+  it("M77 is 2E vs 2I", () => {
+    expect(ROUND_OF_32_FIXTURES.find(([id]) => id === "M77")).toEqual(["M77", "2E", "2I"]);
   });
 
-  it("M73 resolves 1A winner and 3E third-place qualifier", () => {
+  it("M79 resolves 1A winner and 3E third-place qualifier", () => {
     const standings: GroupStanding[] = [
       standing("A", [row("mex", "A", 9), row("can", "A", 6), row("usa", "A", 3), row("per", "A", 0)]),
       standing("E", [row("ger", "E", 9), row("esp", "E", 6), row("ecu", "E", 3), row("arg", "E", 0)]),
@@ -66,9 +60,9 @@ describe("ROUND_OF_32_FIXTURES — source of truth enforcement", () => {
       lockedGroupMatchCount: { A: 6, E: 6 },
       lockedStandingsByGroup: {},
     });
-    const m73 = slots.find((s) => s.matchId === "M73");
-    expect(m73?.homeSource).toBe("1A");
-    expect(m73?.awaySource).toBe("3E");
-    expect(m73?.homeTeamId).toBe("mex");
+    const m79 = slots.find((s) => s.matchId === "M79");
+    expect(m79?.homeSource).toBe("1A");
+    expect(m79?.awaySource).toBe("3E");
+    expect(m79?.homeTeamId).toBe("mex");
   });
 });

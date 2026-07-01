@@ -25,24 +25,24 @@ export type SemiAdvanceRule = {
 export { ROUND_OF_32_FIXTURES, KNOCKOUT_ROUND_FIXTURES };
 export { KNOCKOUT_LATER_STAGES } from "./knockoutRoundFixtures";
 
-/** R32 winner → R16 match number and home/away slot (inverse of JSON R16 feeders). */
+/** R32 winner → R16 match number and home/away slot (FIFA schedule M89–M96 feeders). */
 export const BRACKET_PROGRESSION_R32_R16: Record<number, R32AdvanceRule> = {
-  73: { nextMatch: 90, slot: "home" },
-  74: { nextMatch: 89, slot: "home" },
-  75: { nextMatch: 90, slot: "away" },
-  76: { nextMatch: 91, slot: "home" },
-  77: { nextMatch: 89, slot: "away" },
+  73: { nextMatch: 89, slot: "home" },
+  74: { nextMatch: 89, slot: "away" },
+  75: { nextMatch: 90, slot: "home" },
+  76: { nextMatch: 90, slot: "away" },
+  77: { nextMatch: 91, slot: "home" },
   78: { nextMatch: 91, slot: "away" },
   79: { nextMatch: 92, slot: "home" },
   80: { nextMatch: 92, slot: "away" },
-  81: { nextMatch: 94, slot: "home" },
-  82: { nextMatch: 94, slot: "away" },
-  83: { nextMatch: 93, slot: "home" },
-  84: { nextMatch: 93, slot: "away" },
-  85: { nextMatch: 96, slot: "home" },
-  86: { nextMatch: 95, slot: "home" },
-  87: { nextMatch: 96, slot: "away" },
-  88: { nextMatch: 95, slot: "away" },
+  81: { nextMatch: 93, slot: "home" },
+  82: { nextMatch: 93, slot: "away" },
+  83: { nextMatch: 94, slot: "home" },
+  84: { nextMatch: 94, slot: "away" },
+  85: { nextMatch: 95, slot: "home" },
+  86: { nextMatch: 95, slot: "away" },
+  87: { nextMatch: 96, slot: "home" },
+  88: { nextMatch: 96, slot: "away" },
 };
 
 /** R16/QF winner → next-round match and slot. */
@@ -77,25 +77,25 @@ export const BRACKET_PROGRESSION_SEMIS: Record<number, SemiAdvanceRule> = {
 };
 
 /**
- * R32 column order: each R16 feeder pair adjacent (per JSON bracket_progression).
+ * R32 column order: each R16 feeder pair adjacent (FIFA schedule M89–M96 feeders).
  */
 export const R32_VISUAL_ORDER: string[] = [
-  "M77",
-  "M74",
   "M73",
+  "M74",
   "M75",
   "M76",
+  "M77",
   "M78",
   "M79",
   "M80",
-  "M83",
-  "M84",
   "M81",
   "M82",
-  "M86",
-  "M88",
+  "M83",
+  "M84",
   "M85",
+  "M86",
   "M87",
+  "M88",
 ];
 
 /** True for legacy `3:1X` or JSON `3X` third-place seed labels. */

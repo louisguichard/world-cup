@@ -1,20 +1,20 @@
 import type { MergedMatch } from "../../types";
 import { enrichMatchesPenaltyShootouts } from "../../lib/enrichMatchPenaltyShootout";
 import { enrichKnockoutPenaltiesFromZafronix } from "../../lib/fetchKnockoutPenaltyResult";
-import { reconcileEspnLiveAuthority, espnScoreboardConfirmsLive } from "../../lib/espnLiveAuthority";
+import { reconcileEspnLiveAuthority } from "../../lib/espnLiveAuthority";
 import { deriveStandingsIfScored, standingsEqual } from "../../lib/qualification";
 import { writeLiveMatchCache } from "../../lib/liveMatchCache";
 import { readStandingsCache, writeStandingsCache } from "../../lib/standingsCache";
 import { mergeStandingsPartials } from "../adapters/normalizeStandings";
 import { useStore } from "../../store";
 import { fetchScoreboard } from "../ESPNClient";
-import { applyLiveScore } from "../DataMerger";
+import { applyLiveScore, applySecondaryScorePatch } from "../DataMerger";
 import {
   applyEnrichmentEvents,
   enrichmentSourceLabel,
   fetchEnrichmentEvents,
 } from "../liveEnrichment";
-import { mergeEspnMatchIntoStore } from "../espnMatchMerge";
+import { mergeEspnMatchIntoStore, isProtectedFromEspnOverwrite } from "../espnMatchMerge";
 import { findStoreMatchForExternalVote } from "../matchLinking";
 import { fetchLive as fetchWcLive } from "../WorldCup2026LiveClient";
 import { fetchLiveEvents as fetchSportApiLive } from "../SportAPI7Client";
@@ -25,6 +25,7 @@ import { enqueueKampEnrichmentForCompletedMatch } from "../kamp/KampPostMatchSyn
 import { fetchWc2026Live, isFifaPublicDisabled } from "../FifaPublicClient";
 import { normalizeFifaPublicLiveMatch } from "../adapters/normalizeFifaPublicMatch";
 import { isApiEnabled } from "../../config/apiFlags";
+import { LIVE_DATA_CONTRACT } from "../../lib/liveDataContract";
 import { logger } from "../Logger";
 import { computeScoreConsensus, type ScoreVote } from "./LiveScoreConsensus";
 import { selectPrimaryMatch } from "../PollingEngine";
@@ -35,45 +36,67 @@ const MAX_DISAGREEMENTS = 3;
 const disagreementCounts = new Map<string, number>();
 const pendingConsensusCounts = new Map<string, { signature: string; seen: number; lastSeenAt: number }>();
 
+function secondaryScoreVotesEnabled(): boolean {
+  return (
+    LIVE_DATA_CONTRACT.enableWcLiveScoreVotes ||
+    LIVE_DATA_CONTRACT.enableSportApiScoreVotes ||
+    LIVE_DATA_CONTRACT.enableFifaPublicScoreVotes
+  );
+}
+
 async function collectAllVotes(
   merged: Record<string, MergedMatch>,
   teams: Record<string, import("../../types").Team>,
-  espnMatches: import("../../types").Match[]
+  espnMatches: import("../../types").Match[],
+  lockedMatchIds: Record<string, true> = {}
 ): Promise<Map<string, ScoreVote[]>> {
   const byMatch = new Map<string, ScoreVote[]>();
 
-  const [wcMap, sportApiEvents, fifaLive] = await Promise.all([
-    fetchWcLive().then((wcMatches) => {
-      const map = new Map<string, ScoreVote[]>();
-      for (const raw of wcMatches) {
-        const partial = normalizeWCLiveMatch(raw);
-        if (partial.homeScore === undefined || partial.awayScore === undefined) continue;
-        const homeLabel = String(raw.homeTeam ?? "");
-        const awayLabel = String(raw.awayTeam ?? "");
-        const storeMatch = findStoreMatchForExternalVote(
-          merged,
-          { matchId: String(raw.matchId ?? raw.id ?? ""), homeLabel, awayLabel },
-          teams
-        );
-        if (!storeMatch) continue;
-        const vote: ScoreVote = {
-          source: "wclive",
-          matchId: storeMatch.id,
-          homeScore: partial.homeScore,
-          awayScore: partial.awayScore,
-          clockMinute: partial.clockMinute,
-          timestamp: Date.now(),
-        };
-        const list = map.get(storeMatch.id) ?? [];
-        list.push(vote);
-        map.set(storeMatch.id, list);
-      }
-      return map;
-    }),
-    fetchSportApiLive(),
-    isApiEnabled("fifaPublicApi") && !isFifaPublicDisabled()
+  const wcPromise = LIVE_DATA_CONTRACT.enableWcLiveScoreVotes
+    ? fetchWcLive().then((wcMatches) => {
+        const map = new Map<string, ScoreVote[]>();
+        for (const raw of wcMatches) {
+          const partial = normalizeWCLiveMatch(raw);
+          if (partial.homeScore === undefined || partial.awayScore === undefined) continue;
+          const homeLabel = String(raw.homeTeam ?? "");
+          const awayLabel = String(raw.awayTeam ?? "");
+          const storeMatch = findStoreMatchForExternalVote(
+            merged,
+            { matchId: String(raw.matchId ?? raw.id ?? ""), homeLabel, awayLabel },
+            teams
+          );
+          if (!storeMatch) continue;
+          if (isProtectedFromEspnOverwrite(storeMatch, lockedMatchIds, storeMatch.id)) continue;
+          const vote: ScoreVote = {
+            source: "wclive",
+            matchId: storeMatch.id,
+            homeScore: partial.homeScore,
+            awayScore: partial.awayScore,
+            timestamp: Date.now(),
+          };
+          const list = map.get(storeMatch.id) ?? [];
+          list.push(vote);
+          map.set(storeMatch.id, list);
+        }
+        return map;
+      })
+    : Promise.resolve(new Map<string, ScoreVote[]>());
+
+  const sportApiPromise = LIVE_DATA_CONTRACT.enableSportApiScoreVotes
+    ? fetchSportApiLive()
+    : Promise.resolve([]);
+
+  const fifaPromise =
+    LIVE_DATA_CONTRACT.enableFifaPublicScoreVotes &&
+    isApiEnabled("fifaPublicApi") &&
+    !isFifaPublicDisabled()
       ? fetchWc2026Live()
-      : Promise.resolve([]),
+      : Promise.resolve([]);
+
+  const [wcMap, sportApiEvents, fifaLive] = await Promise.all([
+    wcPromise,
+    sportApiPromise,
+    fifaPromise,
   ]);
 
   for (const [id, votes] of wcMap) {
@@ -85,7 +108,7 @@ async function collectAllVotes(
     if (m.homeScore === undefined || m.awayScore === undefined) continue;
 
     const storeMatch = merged[m.id] ?? Object.values(merged).find((x) => x.espnEventId === m.id);
-    if (!storeMatch) continue;
+    if (!storeMatch || isProtectedFromEspnOverwrite(storeMatch, lockedMatchIds, storeMatch.id)) continue;
 
     const vote: ScoreVote = {
       source: "espn",
@@ -113,13 +136,13 @@ async function collectAllVotes(
       teams
     );
     if (!storeMatch) continue;
+    if (isProtectedFromEspnOverwrite(storeMatch, lockedMatchIds, storeMatch.id)) continue;
 
     const vote: ScoreVote = {
       source: "sportapi7",
       matchId: storeMatch.id,
       homeScore: partial.homeScore,
       awayScore: partial.awayScore,
-      clockMinute: partial.clockMinute,
       timestamp: Date.now(),
     };
     const list = byMatch.get(storeMatch.id) ?? [];
@@ -133,13 +156,13 @@ async function collectAllVotes(
     if (partial.homeScore === undefined || partial.awayScore === undefined) continue;
     const storeKey = partial.id ?? (raw.matchNumber != null ? `M${raw.matchNumber}` : undefined);
     if (!storeKey || !merged[storeKey]) continue;
+    if (isProtectedFromEspnOverwrite(merged[storeKey], lockedMatchIds, storeKey)) continue;
 
     const vote: ScoreVote = {
       source: "fifaPublic",
       matchId: storeKey,
       homeScore: partial.homeScore,
       awayScore: partial.awayScore,
-      clockMinute: partial.clockMinute,
       timestamp: Date.now(),
     };
     const list = byMatch.get(storeKey) ?? [];
@@ -154,14 +177,12 @@ function applyConsensusToMatch(
   merged: Record<string, MergedMatch>,
   storeKey: string,
   votes: ScoreVote[],
-  espnMatches: import("../../types").Match[],
-  teams: Record<string, import("../../types").Team>
+  lockedMatchIds: Record<string, true> = {}
 ): void {
   const existing = merged[storeKey];
-  if (!existing || existing.locked) return;
+  if (isProtectedFromEspnOverwrite(existing, lockedMatchIds, storeKey)) return;
 
   const consensus = computeScoreConsensus(votes);
-  const espnLive = espnScoreboardConfirmsLive(existing, espnMatches, merged, teams, storeKey);
 
   if (consensus.agreed) {
     disagreementCounts.delete(storeKey);
@@ -178,19 +199,14 @@ function applyConsensusToMatch(
         seen,
         lastSeenAt: Date.now(),
       });
-      // Require two consecutive 2-source confirmations before persisting.
       if (seen < 2) return;
     } else {
-      // 3-of-3 agreement can update immediately.
       pendingConsensusCounts.delete(storeKey);
     }
-    merged[storeKey] = applyLiveScore(existing, {
+    merged[storeKey] = applySecondaryScorePatch(existing, {
       homeScore: consensus.homeScore,
       awayScore: consensus.awayScore,
-      clockMinute: consensus.clockMinute,
-      ...(espnLive ? { status: "live" as const } : {}),
-      lastUpdatedAt: Date.now(),
-    }, "espn");
+    });
     return;
   }
 
@@ -201,13 +217,13 @@ function applyConsensusToMatch(
   if (count >= MAX_DISAGREEMENTS) {
     const wclive = votes.find((v) => v.source === "wclive");
     if (wclive) {
-      merged[storeKey] = applyLiveScore(existing, {
+      merged[storeKey] = applySecondaryScorePatch(existing, {
         homeScore: wclive.homeScore,
         awayScore: wclive.awayScore,
-        clockMinute: wclive.clockMinute,
-        lastUpdatedAt: Date.now(),
-      }, "espn");
-      logger.warn("Consensus fallback to wclive", "DataOrchestrator.live", { matchId: storeKey });
+      });
+      logger.warn("Consensus fallback to wclive (score only)", "DataOrchestrator.live", {
+        matchId: storeKey,
+      });
     }
     disagreementCounts.delete(storeKey);
   }
@@ -258,7 +274,9 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
 
   for (const m of espn.matches) {
     const incoming = applyLiveScore(undefined, { ...m, espnEventId: m.id }, "espn");
-    mergeEspnMatchIntoStore(merged, incoming, teams);
+    mergeEspnMatchIntoStore(merged, incoming, teams, {
+      lockedMatchIds: store.lockedMatchIds,
+    });
 
     const detailEvents = espn.eventsByMatchId[m.id];
     const storeMatch = merged[m.id] ?? Object.values(merged).find((x) => x.espnEventId === m.id);
@@ -267,25 +285,9 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
     }
   }
 
-  const demoted = reconcileEspnLiveAuthority(merged, espn.matches, teams);
-  if (demoted.length > 0) {
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
-      body: JSON.stringify({
-        sessionId: "0b0776",
-        location: "DataOrchestrator.live.ts:reconcileEspnLiveAuthority",
-        message: "demoted phantom live matches",
-        data: { demoted },
-        timestamp: Date.now(),
-        hypothesisId: "H3-espn-demote",
-      }),
-    }).catch(() => {});
-    // #endregion
-  }
+  reconcileEspnLiveAuthority(merged, espn.matches, teams);
 
-  const liveMatches = Object.values(merged).filter((m) => m.status === "live" && !m.locked);
+  const liveMatches = Object.values(merged).filter((m) => m.status === "live");
 
   if (!options?.light) {
     const primaryId = store.primaryLiveMatchId;
@@ -310,29 +312,15 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
       })
     );
 
-    const votesByMatch = await collectAllVotes(merged, teams, espn.matches);
-    for (const [storeKey, votes] of votesByMatch) {
-      if (votes.length > 0) {
-        applyConsensusToMatch(merged, storeKey, votes, espn.matches, teams);
+    if (secondaryScoreVotesEnabled()) {
+      const votesByMatch = await collectAllVotes(merged, teams, espn.matches, store.lockedMatchIds);
+      for (const [storeKey, votes] of votesByMatch) {
+        if (votes.length > 0) {
+          applyConsensusToMatch(merged, storeKey, votes, store.lockedMatchIds);
+        }
       }
-    }
 
-    const postConsensusDemoted = reconcileEspnLiveAuthority(merged, espn.matches, teams);
-    if (postConsensusDemoted.length > 0) {
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
-        body: JSON.stringify({
-          sessionId: "0b0776",
-          location: "DataOrchestrator.live.ts:postConsensusReconcile",
-          message: "demoted after consensus",
-          data: { demoted: postConsensusDemoted },
-          timestamp: Date.now(),
-          hypothesisId: "H3-espn-demote",
-        }),
-      }).catch(() => {});
-      // #endregion
+      reconcileEspnLiveAuthority(merged, espn.matches, teams);
     }
 
     const { events: enrichmentEvents, source: enrichmentSource } = await fetchEnrichmentEvents();
@@ -351,26 +339,10 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
     });
   }
 
-  const postEnrichmentDemoted = reconcileEspnLiveAuthority(merged, espn.matches, teams);
-  if (postEnrichmentDemoted.length > 0) {
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
-      body: JSON.stringify({
-        sessionId: "0b0776",
-        location: "DataOrchestrator.live.ts:postEnrichmentReconcile",
-        message: "demoted phantom live after enrichment",
-        data: { demoted: postEnrichmentDemoted },
-        timestamp: Date.now(),
-        hypothesisId: "H3-espn-demote",
-      }),
-    }).catch(() => {});
-    // #endregion
-  }
+  reconcileEspnLiveAuthority(merged, espn.matches, teams);
 
   for (const m of Object.values(merged)) {
-    if (m.locked) store.addLockedMatchId(m.id);
+    if (m.locked && m.status === "completed") store.addLockedMatchId(m.id);
   }
 
   const liveCount = Object.values(merged).filter((m) => m.status === "live").length;
@@ -398,7 +370,7 @@ export async function runLiveTick(options?: { light?: boolean }): Promise<number
 
   store.touchModuleFreshness(MODULE_IDS.liveMatches);
 
-  writeLiveMatchCache(merged);
+  writeLiveMatchCache(useStore.getState().liveMatches);
 
   if (primary && primary !== store.primaryLiveMatchId) {
     store.setPrimaryMatch(primary);

@@ -286,6 +286,7 @@ export type GroupsViewMode = "flags" | "table";
 export type SimulatorMode = "tournament" | "probabilities" | "methodology";
 export type SplashPhase = "loading" | "slow" | "error" | "done";
 export type BracketViewMode = "projected" | "confirmed";
+export type BracketLayoutMode = "tree" | "schedule";
 export type MatchPeriod = "not_started" | "first_half" | "half_time" | "second_half" | "extra_time_first" | "extra_time_break" | "extra_time_second" | "penalties" | "full_time" | "postponed" | "interrupted";
 export type QualificationTier = "qualified" | "at_risk" | "projected_out" | "eliminated" | "pending";
 export type QualificationCertainty = "confirmed" | "projected_strong" | "projected_weak" | "projected";

@@ -2,6 +2,8 @@ import { resolveTeamFromStore } from "../data/wc2026TeamCatalog";
 import { isBracketPlaceholderTeamId } from "./brackets/isBracketPlaceholderTeamId";
 import type { KnockoutParticipant } from "./brackets/resolveKnockoutParticipants";
 import { resolveKnockoutParticipants } from "./brackets/resolveKnockoutParticipants";
+import { sanitizeKnockoutTeamPair } from "./brackets/sanitizeKnockoutParticipant";
+import { prepareLiveMatchStore } from "./liveMatchStorePipeline";
 import { getAllScheduleEntries } from "../services/BroadcastLookup";
 import { pairKey } from "./normalize";
 import type { GroupStanding, MergedMatch, Team, GroupLetter } from "../types";
@@ -33,11 +35,12 @@ export function applyKnockoutTeamIds(
   const awayTeamId = isBracketPlaceholderTeamId(match.awayTeamId)
     ? knockout.away.teamId || ""
     : match.awayTeamId || knockout.away.teamId || "";
+  const sanitized = sanitizeKnockoutTeamPair(homeTeamId, awayTeamId);
   return {
     ...match,
     matchId: match.matchId ?? matchId,
-    homeTeamId,
-    awayTeamId,
+    homeTeamId: sanitized.homeTeamId,
+    awayTeamId: sanitized.awayTeamId,
   };
 }
 
@@ -54,14 +57,17 @@ export function materializeFullSchedule(
 ): MergedMatch[] {
   const entries = getAllScheduleEntries();
   const nameIndex = buildNameIndex(teams);
+  const preparedStore = prepareLiveMatchStore(liveMatches, teams);
   const knockoutParticipants =
-    groupStandings.length > 0 ? resolveKnockoutParticipants(groupStandings, teams, liveMatches) : {};
+    groupStandings.length > 0
+      ? resolveKnockoutParticipants(groupStandings, teams, preparedStore)
+      : {};
 
   // Index live matches by matchId, espnEventId, and pairKey for overlay
   const liveByMatchId: Record<string, MergedMatch> = {};
   const liveByEspnId: Record<string, MergedMatch> = {};
   const liveByPair: Record<string, MergedMatch> = {};
-  for (const m of Object.values(liveMatches)) {
+  for (const m of Object.values(preparedStore)) {
     if (m.matchId) liveByMatchId[m.matchId] = m;
     if (m.espnEventId) liveByEspnId[m.espnEventId] = m;
     if (/^\d+$/.test(m.id)) liveByEspnId[m.id] = m;

@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { shouldRunPollFallback } from "../config/liveDataFlags";
+import { useStore } from "../store";
 import { usePollingGov } from "./usePollingGov";
 
 const DEFAULT_INTERVAL_MS = 2 * 60 * 1000;
@@ -14,7 +15,8 @@ export function usePageVisibilityPolling(
   intervalMs = DEFAULT_INTERVAL_MS
 ): void {
   const tick = useCallback(() => {
-    if (shouldRunPollFallback()) onPoll();
+    const matches = Object.values(useStore.getState().liveMatches);
+    if (shouldRunPollFallback(matches)) onPoll();
   }, [onPoll]);
 
   usePollingGov(tick, intervalMs, enabled);

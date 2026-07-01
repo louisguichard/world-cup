@@ -1,52 +1,46 @@
-import { memo, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { knockoutSchedule } from "../../data/knockoutSchedule";
+import {
+  memo,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { computeQualificationStatus, type QualificationMatchContext } from "../../lib/qualification";
 import { buildCanonicalTournamentDataset } from "../../lib/canonicalTournamentDataset";
-import { projectTournament } from "../../lib/tournament";
-import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
-import { teamDisplayName } from "../../lib/teamIdentity";
+import { collectBracketPathForMatch } from "../../lib/brackets/bracketPathHighlight";
+import {
+  collectBracketPathForTeam,
+  resolveFollowedTeamFocusStage,
+} from "../../lib/brackets/collectBracketPathForTeam";
+import { buildBracketViewModel } from "../../lib/brackets/buildBracketViewModel";
 import { APP_COPY } from "../../lib/appCopy";
-import { formatKickoffLabel, resolveOfficialMatchKickoff } from "../../services/ScheduleLinker";
 import { getQualificationContext } from "../../lib/qualificationContextCache";
 import { getMaterializedScheduleBundleFromStore } from "../../lib/materializedScheduleCache";
 import { useTournamentPhase } from "../../hooks/useTournamentPhase";
-import type {
-  BracketGhostCandidate,
-  BracketMatch,
-  BracketSlotCertainty,
-  GroupStanding,
-  MergedMatch,
-  Stage,
-  Team,
-  TournamentProjection,
-} from "../../types";
+import { isDesktopBracketViewport } from "../../lib/bracketLayoutPreference";
+import { bracketStageShortLabel } from "../../lib/brackets/bracketStageLabels";
+import type { BracketLayoutMode, BracketMatch, Stage, TournamentProjection } from "../../types";
 import { useStore } from "../../store";
 import {
   useBracketProjectionFingerprint,
   useBracketTeams,
   useKnockoutLiveMatches,
 } from "../../store/selectors/bracketSelectors";
-import { CompactMatchScore } from "../match/CompactMatchScore";
-import { VenueLabel } from "../venue/VenueLabel";
-import { useTeamTheme } from "../../hooks/useTeamTheme";
-import { TeamFlag } from "../team/TeamFlag";
-import { CertaintyBadge } from "../shared/CertaintyBadge";
 import { LoadingState } from "../shared/LoadingState";
 import { BracketConnectorOverlay } from "./BracketConnectorOverlay";
-import { BRACKET_FEED_MAP, lookupBracketLiveMatch } from "../../lib/bracketTree";
-import { orderBracketByStage } from "../../lib/brackets/bracketVisualOrder";
-import { buildConfirmedOnlyBracket } from "../../lib/brackets/buildConfirmedOnlyBracket";
-import {
-  KNOCKOUT_ROUND_FIXTURES,
-  ROUND_OF_32_FIXTURES,
-  validateR32FixtureSeeds,
-} from "../../lib/brackets/bracketProgression";
-import { isKnockoutMatch, resolveMatchWinner } from "../../lib/resolveMatchWinner";
-import type { TeamThemeStatus } from "../team/TeamThemeRoot";
+import { orderBracketByStage, sortBracketMatchesByDate } from "../../lib/brackets/bracketVisualOrder";
+import { isMergedMatchInActivePhase } from "../../lib/matchLifecycle";
+import { isKnockoutMatch } from "../../lib/resolveMatchWinner";
+import { BracketCard } from "../bracket/BracketCard";
+import { BracketFollowTeamControl } from "../bracket/BracketFollowTeamControl";
+import { BracketMobileRoundSwipe } from "../bracket/BracketMobileRoundSwipe";
+import { SplitBracketCanvas } from "../bracket/SplitBracketCanvas";
 
 const allBracketStages: Stage[] = ["R32", "R16", "QF", "SF", "Final"];
 
-/** Locked-in mode: R32 first; later rounds appear as feeder winners are confirmed. */
 function visibleBracketStages(
   mode: "confirmed" | "projected",
   orderedByStage: Record<Stage, BracketMatch[]>
@@ -67,322 +61,29 @@ function visibleBracketStages(
   return stages;
 }
 
-function GhostTeamList({
-  ghosts,
-  teamsById,
-  showFrequency
-}: {
-  ghosts: BracketGhostCandidate[];
-  teamsById: Record<string, Team>;
-  showFrequency: boolean;
-}) {
-  if (ghosts.length === 0) return null;
-  return (
-    <div className="bracket-ghost-list" aria-hidden="true">
-      {ghosts.map(({ teamId, frequency }) => {
-        const t = teamsById[teamId];
-        return (
-          <div key={teamId} className="bracket-ghost-team">
-            <TeamFlag team={t} teamId={teamId} size="sm" compact />
-            <span className="team-name-text">{teamDisplayNameFromId(teamId, teamsById)}</span>
-            {showFrequency ? <span className="bracket-ghost-freq">{Math.round(frequency * 100)} conf.</span> : null}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+type BracketBentoProps = {
+  embedded?: boolean;
+  /** Overrides store layout — live embed always uses schedule list. */
+  forceLayoutMode?: BracketLayoutMode;
+};
 
-function isFeederWinnerConfirmed(
-  seedLabel: string | undefined,
-  teamId: string,
-  liveMatches: Record<string, MergedMatch>,
-  teamsById: Record<string, Team>
-): boolean {
-  if (!seedLabel?.startsWith("W")) return false;
-  const feederId = `M${seedLabel.slice(1)}`;
-  const feeder = lookupBracketLiveMatch(liveMatches, feederId);
-  if (!feeder?.locked || feeder.status !== "completed") return false;
-  const winner = resolveMatchWinner(feeder, teamsById);
-  return winner === teamId;
-}
-
-function isTeamSlotConfirmed(
-  teamId: string | undefined,
-  match: BracketMatch,
-  side: "home" | "away",
-  mode: "confirmed" | "projected",
-  standings: GroupStanding[],
-  liveMatches: Record<string, MergedMatch>,
-  qualContext: QualificationMatchContext,
-  teamsById: Record<string, Team>
-): boolean {
-  if (mode === "projected" || !teamId) return false;
-
-  const live = lookupBracketLiveMatch(liveMatches, match.id);
-  if (live?.locked && live.status === "completed" && live.homeScore !== undefined) {
-    return true;
-  }
-
-  if (match.stage === "R32") {
-    return computeQualificationStatus(teamId, standings, qualContext).certainty === "confirmed";
-  }
-
-  const seedLabel = side === "home" ? match.homeSeedLabel : match.awaySeedLabel;
-  return isFeederWinnerConfirmed(seedLabel, teamId, liveMatches, teamsById);
-}
-
-function isSlotConfirmed(
-  match: BracketMatch,
-  mode: "confirmed" | "projected",
-  standings: GroupStanding[],
-  liveMatches: Record<string, MergedMatch>,
-  qualContext: QualificationMatchContext,
-  teamsById: Record<string, Team>
-): { homeConfirmed: boolean; awayConfirmed: boolean } {
-  if (mode === "projected") {
-    return {
-      homeConfirmed: match.homeCertainty === "confirmed",
-      awayConfirmed: match.awayCertainty === "confirmed",
-    };
-  }
-
-  const live = lookupBracketLiveMatch(liveMatches, match.id);
-  if (live?.locked && live.status === "completed" && live.homeScore !== undefined) {
-    return { homeConfirmed: true, awayConfirmed: true };
-  }
-
-  const homeConfirmed = isTeamSlotConfirmed(
-    match.homeTeamId,
-    match,
-    "home",
-    mode,
-    standings,
-    liveMatches,
-    qualContext,
-    teamsById
-  );
-  const awayConfirmed = isTeamSlotConfirmed(
-    match.awayTeamId,
-    match,
-    "away",
-    mode,
-    standings,
-    liveMatches,
-    qualContext,
-    teamsById
-  );
-
-  return { homeConfirmed, awayConfirmed };
-}
-
-function BracketTeamReadonly({
-  team,
-  teamId,
-  seedLabel,
-  winner,
-  slotConfirmed,
-  ghosts,
-  mode,
-  teamsById,
-  status = "default",
-  stage,
-  compact = true,
-  onTeamSelect
-}: {
-  team?: Team;
-  teamId?: string;
-  seedLabel?: string;
-  winner?: boolean;
-  slotConfirmed: boolean;
-  ghosts?: BracketGhostCandidate[];
-  mode: "confirmed" | "projected";
-  teamsById: Record<string, Team>;
-  status?: TeamThemeStatus;
-  stage?: Stage;
-  compact?: boolean;
-  onTeamSelect?: (teamId: string) => void;
-}) {
-  const resolvedTeamId = team?.id ?? teamId;
-  const theme = useTeamTheme(resolvedTeamId);
-
-  const effectiveCertainty: BracketSlotCertainty =
-    mode === "confirmed" && !slotConfirmed ? "tbd" : slotConfirmed ? "confirmed" : "projected";
-  const isKnockoutCard = Boolean(stage);
-  const showConfirmedBadge =
-    !compact && effectiveCertainty === "confirmed" && mode === "confirmed" && !isKnockoutCard;
-  const showProjectedBadge =
-    !compact && effectiveCertainty === "projected" && mode === "projected";
-  const showGhostAlternates =
-    !compact && effectiveCertainty === "projected" && mode === "projected" && !slotConfirmed;
-
-  const resolvedStatus: TeamThemeStatus = winner ? "advancing" : status;
-  const visibleGhosts = showGhostAlternates ? (ghosts?.slice(0, 2) ?? []) : [];
-
-  if (effectiveCertainty === "tbd") {
-    if (team) {
-      return (
-        <div className="bracket-team-slot">
-          <div
-            className="bracket-team bracket-team-projected-muted"
-            data-team-id={team.id}
-            style={{ opacity: 0.55 }}
-          >
-            {resolvedTeamId ? (
-              <TeamFlag team={team} teamId={resolvedTeamId} size="sm" />
-            ) : (
-              <span className="bracket-dot" />
-            )}
-            <span className="team-name-text">
-              {teamDisplayName(team, "TBD", seedLabel ?? undefined)}
-            </span>
-          </div>
-          {!compact ? <CertaintyBadge certainty="projected" size="xs" /> : null}
-          {visibleGhosts.length > 0 ? (
-            <>
-              <div className="bracket-ghost-label">Also possible</div>
-              <GhostTeamList
-                ghosts={visibleGhosts}
-                teamsById={teamsById}
-                showFrequency={false}
-              />
-            </>
-          ) : null}
-        </div>
-      );
-    }
-    return (
-      <div className="bracket-team-slot">
-        <div className="bracket-team bracket-team-tbd">
-          <span className="bracket-dot" />
-          <span>{seedLabel ?? "TBD"}</span>
-        </div>
-        {!compact ? <CertaintyBadge certainty="tbd" size="xs" /> : null}
-      </div>
-    );
-  }
-
-  return (
-    <div className="bracket-team-slot">
-      <button
-        type="button"
-        className={`bracket-team bracket-team-themed ${winner ? "winner" : ""} ${resolvedTeamId ? "bracket-team--clickable" : ""}`}
-        style={resolvedTeamId ? theme : undefined}
-        data-team-id={resolvedTeamId}
-        data-status={resolvedStatus === "default" ? undefined : resolvedStatus}
-        disabled={!resolvedTeamId}
-        onClick={() => resolvedTeamId && onTeamSelect?.(resolvedTeamId)}
-      >
-        {resolvedTeamId ? (
-          <TeamFlag team={team} teamId={resolvedTeamId} />
-        ) : (
-          <span className="bracket-dot" />
-        )}
-        <span className="team-name-text">
-          {teamDisplayName(team, "TBD", seedLabel ?? undefined)}
-        </span>
-        {winner ? <b>✓</b> : null}
-      </button>
-      {showConfirmedBadge ? <CertaintyBadge certainty="confirmed" size="xs" /> : null}
-      {showProjectedBadge ? <CertaintyBadge certainty="projected" size="xs" /> : null}
-      {showGhostAlternates && visibleGhosts.length > 0 ? (
-        <GhostTeamList ghosts={visibleGhosts} teamsById={teamsById} showFrequency={true} />
-      ) : null}
-    </div>
-  );
-}
-
-function BracketCardReadonly({
-  match,
-  teamsById,
-  mode,
-  standings,
-  liveMatches,
-  qualContext,
-  onTeamSelect
-}: {
-  match: BracketMatch;
-  teamsById: Record<string, Team>;
-  mode: "confirmed" | "projected";
-  standings: GroupStanding[];
-  liveMatches: Record<string, MergedMatch>;
-  qualContext: QualificationMatchContext;
-  onTeamSelect: (teamId: string) => void;
-}) {
-  const home = match.homeTeamId ? teamsById[match.homeTeamId] : undefined;
-  const away = match.awayTeamId ? teamsById[match.awayTeamId] : undefined;
-  const info = knockoutSchedule[match.id];
-  const kickoffUtc = info
-    ? resolveOfficialMatchKickoff({ matchId: match.id, date: info.date })
-    : undefined;
-  const { homeConfirmed, awayConfirmed } = isSlotConfirmed(
-    match,
-    mode,
-    standings,
-    liveMatches,
-    qualContext,
-    teamsById
-  );
-  const liveMerged = lookupBracketLiveMatch(liveMatches, match.id);
-
-  return (
-    <article className="bracket-card">
-      <div className="bracket-card-head">
-        <span className="match-date">{kickoffUtc ? formatKickoffLabel(kickoffUtc) : match.label}</span>
-        <VenueLabel matchId={match.id} inline compact />
-      </div>
-      <BracketTeamReadonly
-        team={home}
-        teamId={match.homeTeamId}
-        seedLabel={match.homeSeedLabel}
-        winner={match.winnerTeamId === home?.id}
-        slotConfirmed={homeConfirmed}
-        ghosts={homeConfirmed ? undefined : match.homeGhosts}
-        mode={mode}
-        teamsById={teamsById}
-        stage={match.stage}
-        onTeamSelect={onTeamSelect}
-      />
-      <BracketTeamReadonly
-        team={away}
-        teamId={match.awayTeamId}
-        seedLabel={match.awaySeedLabel}
-        winner={match.winnerTeamId === away?.id}
-        slotConfirmed={awayConfirmed}
-        ghosts={awayConfirmed ? undefined : match.awayGhosts}
-        mode={mode}
-        teamsById={teamsById}
-        stage={match.stage}
-        onTeamSelect={onTeamSelect}
-      />
-      {liveMerged && liveMerged.homeScore !== undefined ? (
-        <div className="bracket-scoreline">
-          <CompactMatchScore match={liveMerged} perspective="home" />
-        </div>
-      ) : match.homeScore !== undefined && match.awayScore !== undefined ? (
-        <div className="bracket-scoreline">
-          <span className="bracket-scoreline-ft">
-            {match.homeScore} – {match.awayScore}
-          </span>
-          {match.penaltyShootout ? (
-            <span className="bracket-penalty-score">
-              ({match.penaltyShootout.homeScore} – {match.penaltyShootout.awayScore})
-            </span>
-          ) : null}
-        </div>
-      ) : null}
-    </article>
-  );
-}
-
-function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
+function BracketBentoInner({ embedded = false, forceLayoutMode }: BracketBentoProps) {
   const mode = useStore((s) => s.bracketViewMode);
+  const layoutMode = useStore((s) => s.bracketLayoutMode);
   const deferredMode = useDeferredValue(mode);
+  const effectiveLayout = forceLayoutMode ?? layoutMode;
+  const deferredLayout = useDeferredValue(effectiveLayout);
   const openTeamSheet = useStore((s) => s.openTeamSheet);
+  const openMatchDetail = useStore((s) => s.openMatchDetail);
+  const followedTeamId = useStore((s) => s.followedTeamId);
   const teamsMap = useBracketTeams();
   const knockoutLiveMatches = useKnockoutLiveMatches();
   const projectionFingerprint = useBracketProjectionFingerprint(deferredMode);
   const { isKnockoutActive } = useTournamentPhase();
+  const [activeStage, setActiveStage] = useState<Stage>("R32");
+  const [scrollEdges, setScrollEdges] = useState({ left: false, right: false });
+  const [isDesktopViewport, setIsDesktopViewport] = useState(isDesktopBracketViewport);
+
   const canonical = useMemo(() => {
     const { teams, liveMatches, knockoutMarkets } = useStore.getState();
     return buildCanonicalTournamentDataset({
@@ -395,67 +96,22 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
   const matches = canonical.matches;
   const qualContext = useMemo(() => getQualificationContext(), [projectionFingerprint]);
 
-  const projectionMatches = useMemo(
-    () =>
-      matches.filter((m) => {
-        if (m.group) return true;
-        return m.homeScore !== undefined && m.awayScore !== undefined;
-      }) as Parameters<typeof projectTournament>[1],
-    [matches]
-  );
-
-  const deferredProjectionMatches = useDeferredValue(projectionMatches);
-  const isModePending = mode !== deferredMode;
-  const [, startProjectionTransition] = useTransition();
-  const [projection, setProjection] = useState<Pick<TournamentProjection, "bracket" | "standings"> | null>(
-    null
-  );
-
-  useEffect(() => {
-    if (!teams.length) {
-      setProjection(null);
-      return;
-    }
-
-    let cancelled = false;
-    const timer = window.setTimeout(() => {
-      if (cancelled) return;
-      const store = useStore.getState();
-      let result: Pick<TournamentProjection, "bracket" | "standings"> | null = null;
-
-      if (deferredMode === "projected") {
-        const mergedSchedule = getMaterializedScheduleBundleFromStore().schedule;
-        result = projectTournament(
-          teams,
-          deferredProjectionMatches,
-          store.knockoutMarkets,
-          store.scoreOverrides,
-          {},
-          qualContext.lockedGroupMatchCount,
-          qualContext.lockedStandingsByGroup,
-          mergedSchedule
-        );
-      } else {
-        result = buildConfirmedOnlyBracket(teams, matches, store.liveMatches, qualContext);
-      }
-
-      startProjectionTransition(() => {
-        if (!cancelled) setProjection(result);
-      });
-    }, 0);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [
-    deferredMode,
-    projectionFingerprint,
-    teams,
-    matches,
-    deferredProjectionMatches,
-    qualContext,
-  ]);
+  const projection = useMemo(() => {
+    if (!teams.length) return null;
+    const store = useStore.getState();
+    const mergedSchedule = getMaterializedScheduleBundleFromStore().schedule;
+    return buildBracketViewModel({
+      mode: deferredMode,
+      context: "tab",
+      teams,
+      matches,
+      liveMatches: store.liveMatches,
+      qualContext,
+      mergedSchedule,
+      knockoutMarkets: store.knockoutMarkets,
+      scoreOverrides: store.scoreOverrides,
+    });
+  }, [deferredMode, projectionFingerprint, teams, matches, qualContext]);
 
   const orderedByStage = useMemo(() => {
     if (!projection?.bracket) {
@@ -464,50 +120,60 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
     return orderBracketByStage(projection.bracket);
   }, [projection?.bracket]);
 
+  const bracketStages = useMemo(
+    () => visibleBracketStages(deferredMode, orderedByStage),
+    [deferredMode, orderedByStage]
+  );
+
   useEffect(() => {
-    if (!projection?.bracket) return;
-    const slot = (id: string) => projection.bracket.find((m) => m.id === id);
-    const m76 = slot("M76");
-    const m90 = slot("M90");
-    const m89 = slot("M89");
-    // #region agent log
-    fetch("http://127.0.0.1:7681/ingest/f800a0a9-8d11-45c6-8805-1b187f693046", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
-      body: JSON.stringify({
-        sessionId: "0b0776",
-        runId: "bracket-audit",
-        hypothesisId: "H1-H3",
-        location: "BracketBento.tsx:bracketAudit",
-        message: "bracket engine runtime audit",
-        data: {
-          mode: deferredMode,
-          r32ValidationErrors: validateR32FixtureSeeds(),
-          canonicalR16: KNOCKOUT_ROUND_FIXTURES.R16,
-          feedM89: BRACKET_FEED_MAP.M89,
-          feedM90: BRACKET_FEED_MAP.M90,
-          m76Fixture: ROUND_OF_32_FIXTURES.find(([id]) => id === "M76"),
-          m76Teams: m76 ? { home: m76.homeTeamId, away: m76.awayTeamId, winner: m76.winnerTeamId } : null,
-          m89Teams: m89 ? { home: m89.homeTeamId, away: m89.awayTeamId, homeSeed: m89.homeSeedLabel, awaySeed: m89.awaySeedLabel } : null,
-          m90Teams: m90 ? { home: m90.homeTeamId, away: m90.awayTeamId, homeSeed: m90.homeSeedLabel, awaySeed: m90.awaySeedLabel } : null,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
-  }, [projection?.bracket, deferredMode]);
+    if (!bracketStages.includes(activeStage)) {
+      setActiveStage(bracketStages[0] ?? "R32");
+    }
+  }, [activeStage, bracketStages]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktopViewport(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const bb = APP_COPY.bracketBento;
-  const bracketStages = visibleBracketStages(deferredMode, orderedByStage);
+  const scheduleMatches = useMemo(() => {
+    const flat: BracketMatch[] = [];
+    for (const stage of bracketStages) {
+      flat.push(...orderedByStage[stage]);
+    }
+    return sortBracketMatchesByDate(flat);
+  }, [orderedByStage, bracketStages]);
+
+  const isScheduleLayout = deferredLayout === "schedule";
+  const showConnectors =
+    !isScheduleLayout && isDesktopViewport && !embedded && bracketStages.length > 1;
+  const showSplitCanvas = showConnectors;
+  const showMobileRoundSwipe =
+    !isScheduleLayout && !showSplitCanvas && !embedded && bracketStages.length > 1;
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const roundsRef = useRef<HTMLDivElement>(null);
   const [cardRects, setCardRects] = useState<Map<string, DOMRect>>(new Map());
   const [containerSize, setContainerSize] = useState<{ width: number; height: number } | null>(null);
 
+  const updateScrollEdges = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    setScrollEdges({
+      left: el.scrollLeft > 8,
+      right: maxScroll - el.scrollLeft > 8,
+    });
+  }, []);
+
   useEffect(() => {
     const scrollEl = scrollRef.current;
     const roundsEl = roundsRef.current;
-    if (!scrollEl || !roundsEl || !projection?.bracket) return;
+    if (!scrollEl || !roundsEl || !projection?.bracket || showSplitCanvas) return;
 
     const measure = () => {
       const origin = roundsEl.getBoundingClientRect();
@@ -528,6 +194,7 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
       });
       setCardRects(map);
       setContainerSize({ width: origin.width, height: origin.height });
+      updateScrollEdges();
     };
 
     let rafId = 0;
@@ -554,7 +221,7 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
       scrollEl.removeEventListener("scroll", debouncedMeasure);
       window.removeEventListener("resize", debouncedMeasure);
     };
-  }, [projection?.bracket, bracketStages, deferredMode]);
+  }, [projection?.bracket, bracketStages, deferredMode, deferredLayout, updateScrollEdges, showSplitCanvas]);
 
   const { confirmedWinners, liveProvisionalFeeders } = useMemo(() => {
     const confirmed = new Set<string>();
@@ -566,7 +233,7 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
         confirmed.add(id);
         continue;
       }
-      if (match.status !== "live" || !isKnockoutMatch(match)) continue;
+      if (!isMergedMatchInActivePhase(match) || !isKnockoutMatch(match)) continue;
       const home = match.homeScore ?? 0;
       const away = match.awayScore ?? 0;
       if (home !== away) {
@@ -583,7 +250,108 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
     return { confirmedWinners: confirmed, liveProvisionalFeeders: liveProvisional };
   }, [knockoutLiveMatches, projection?.bracket]);
 
-  const showConnectors = bracketStages.length > 1;
+  const { visibleMatchIds, matchesById } = useMemo(() => {
+    const ids = new Set<string>();
+    const byId = new Map<string, BracketMatch>();
+    for (const stage of bracketStages) {
+      for (const match of orderedByStage[stage]) {
+        ids.add(match.id);
+        byId.set(match.id, match);
+      }
+    }
+    return { visibleMatchIds: ids, matchesById: byId };
+  }, [bracketStages, orderedByStage]);
+
+  const [pathHighlight, setPathHighlight] = useState<Set<string> | null>(null);
+
+  const followedPath = useMemo(() => {
+    if (!followedTeamId || !projection?.bracket) return null;
+    const path = collectBracketPathForTeam(
+      followedTeamId,
+      projection.bracket,
+      knockoutLiveMatches,
+      teamsMap
+    );
+    return path.size > 0 ? path : null;
+  }, [followedTeamId, projection?.bracket, knockoutLiveMatches, teamsMap]);
+
+  const activePathHighlight = pathHighlight ?? followedPath;
+  const showPathFilter = Boolean(activePathHighlight?.size) && (showConnectors || showMobileRoundSwipe);
+
+  const showPathHighlight = showPathFilter;
+
+  const handleTeamPathHoverStart = useCallback((matchId: string) => {
+    setPathHighlight(collectBracketPathForMatch(matchId));
+  }, []);
+
+  const handleTeamPathHoverEnd = useCallback(() => {
+    setPathHighlight(null);
+  }, []);
+
+  useEffect(() => {
+    if (!followedTeamId || !followedPath) return;
+    const focusStage = resolveFollowedTeamFocusStage(
+      followedTeamId,
+      bracketStages,
+      orderedByStage
+    );
+    if (focusStage) {
+      setActiveStage(focusStage);
+    }
+  }, [followedTeamId, followedPath, bracketStages, orderedByStage]);
+
+  const handleMatchSelect = useCallback(
+    (matchId: string) => {
+      openMatchDetail(matchId, { from: "bracket", bracketRound: activeStage });
+    },
+    [activeStage, openMatchDetail]
+  );
+
+  useEffect(() => {
+    const root = scrollRef.current;
+    if (!root || !projection?.bracket?.length || showMobileRoundSwipe) return;
+
+    const focusCard = (matchId: string) => {
+      const card = root.querySelector<HTMLElement>(`[data-match-id="${matchId}"] .bracket-card--clickable`);
+      card?.focus();
+    };
+
+    const orderedIds = isScheduleLayout
+      ? scheduleMatches.map((match) => match.id)
+      : bracketStages.flatMap((stage) => orderedByStage[stage].map((match) => match.id));
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft" && event.key !== "ArrowDown" && event.key !== "ArrowUp") {
+        return;
+      }
+      const active = document.activeElement;
+      if (!(active instanceof HTMLElement) || !root.contains(active)) return;
+
+      const currentCell = active.closest<HTMLElement>("[data-match-id]");
+      const currentId = currentCell?.dataset.matchId;
+      if (!currentId) return;
+
+      const index = orderedIds.indexOf(currentId);
+      if (index < 0) return;
+
+      const delta =
+        event.key === "ArrowRight" || event.key === "ArrowDown"
+          ? 1
+          : event.key === "ArrowLeft" || event.key === "ArrowUp"
+            ? -1
+            : 0;
+      const nextId = orderedIds[index + delta];
+      if (!nextId) return;
+
+      event.preventDefault();
+      focusCard(nextId);
+    };
+
+    root.addEventListener("keydown", onKeyDown);
+    return () => root.removeEventListener("keydown", onKeyDown);
+  }, [bracketStages, isScheduleLayout, orderedByStage, scheduleMatches, showMobileRoundSwipe]);
+
+  const qualContextStable = qualContext as QualificationMatchContext;
 
   return (
     <section
@@ -605,47 +373,158 @@ function BracketBentoInner({ embedded = false }: { embedded?: boolean }) {
             : bb.confirmedHint
           : bb.projectedHint}
       </p>
-      {!projection || isModePending ? (
+      {!projection ? (
         <LoadingState label={bb.loading} />
       ) : (
-        <div className="bracket-scroll" ref={scrollRef}>
-          <div className="bracket-head">
-            {bracketStages.map((stage) => (
-              <h3 key={stage}>{stage}</h3>
-            ))}
-          </div>
-          <div className="bracket-rounds" ref={roundsRef}>
-            {showConnectors && containerSize ? (
-              <BracketConnectorOverlay
-                cardRects={cardRects}
-                containerSize={containerSize}
-                confirmedWinners={confirmedWinners}
-                liveProvisionalFeeders={liveProvisionalFeeders}
-              />
-            ) : null}
-            {bracketStages.map((stage) => (
+        <>
+          {!isScheduleLayout ? (
+            <BracketFollowTeamControl
+              bracket={projection.bracket}
+              teamsById={teamsMap}
+              embedded={embedded}
+            />
+          ) : null}
+          {showSplitCanvas ? (
+            <SplitBracketCanvas
+              visibleMatchIds={visibleMatchIds}
+              matchesById={matchesById}
+              teamsById={teamsMap}
+              mode={deferredMode}
+              standings={projection.standings}
+              liveMatches={knockoutLiveMatches}
+              qualContext={qualContextStable}
+              confirmedWinners={confirmedWinners}
+              liveProvisionalFeeders={liveProvisionalFeeders}
+              pathHighlight={activePathHighlight}
+              showPathHighlight={showPathHighlight}
+              onTeamSelect={openTeamSheet}
+              onMatchSelect={handleMatchSelect}
+              onTeamPathHoverStart={handleTeamPathHoverStart}
+              onTeamPathHoverEnd={handleTeamPathHoverEnd}
+            />
+          ) : showMobileRoundSwipe ? (
+            <BracketMobileRoundSwipe
+              stages={bracketStages}
+              activeStage={activeStage}
+              onStageChange={setActiveStage}
+              orderedByStage={orderedByStage}
+              teamsById={teamsMap}
+              mode={deferredMode}
+              standings={projection.standings}
+              liveMatches={knockoutLiveMatches}
+              qualContext={qualContextStable}
+              onTeamSelect={openTeamSheet}
+              onMatchSelect={handleMatchSelect}
+              pathHighlight={activePathHighlight}
+              showPathHighlight={showPathHighlight}
+            />
+          ) : (
+          <div
+            className="bracket-scroll-wrap"
+            data-scroll-left={scrollEdges.left ? "true" : undefined}
+            data-scroll-right={scrollEdges.right ? "true" : undefined}
+          >
+            <div
+              className={`bracket-scroll${isScheduleLayout ? " bracket-scroll--schedule" : ""}`}
+              ref={scrollRef}
+            >
               <div
-                className={`bracket-round ${stage === "Final" ? "is-final" : ""}`}
-                data-stage={stage}
-                key={stage}
+                className={[
+                  "bracket-layout",
+                  isScheduleLayout ? "bracket-layout--schedule" : "bracket-layout--tree",
+                  showConnectors ? "bracket-layout--connectors" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                style={
+                  isScheduleLayout
+                    ? undefined
+                    : ({ "--bracket-stage-count": bracketStages.length } as CSSProperties)
+                }
               >
-                {orderedByStage[stage].map((match) => (
-                  <div className="bracket-cell" key={match.id} data-match-id={match.id}>
-                    <BracketCardReadonly
-                      match={match}
-                      teamsById={teamsMap}
-                      mode={deferredMode}
-                      standings={projection.standings}
-                      liveMatches={knockoutLiveMatches}
-                      qualContext={qualContext}
-                      onTeamSelect={openTeamSheet}
-                    />
+                {!isScheduleLayout ? (
+                  <div
+                    className="bracket-head"
+                    style={{ "--bracket-stage-count": bracketStages.length } as CSSProperties}
+                  >
+                    {bracketStages.map((stage) => (
+                      <h3 key={stage}>{bracketStageShortLabel(stage)}</h3>
+                    ))}
                   </div>
-                ))}
+                ) : null}
+                <div
+                  className={`bracket-rounds${isScheduleLayout ? " bracket-rounds--schedule" : ""}`}
+                  ref={roundsRef}
+                >
+                  {showConnectors && containerSize ? (
+                    <BracketConnectorOverlay
+                      cardRects={cardRects}
+                      containerSize={containerSize}
+                      confirmedWinners={confirmedWinners}
+                      liveProvisionalFeeders={liveProvisionalFeeders}
+                      highlightedPath={showPathHighlight ? pathHighlight : null}
+                    />
+                  ) : null}
+                  {isScheduleLayout ? (
+                    <div className="bracket-schedule-list">
+                      {scheduleMatches.map((match) => (
+                        <div className="bracket-cell" key={match.id} data-match-id={match.id}>
+                          <BracketCard
+                            match={match}
+                            teamsById={teamsMap}
+                            mode={deferredMode}
+                            variant="schedule"
+                            standings={projection.standings}
+                            liveMatches={knockoutLiveMatches}
+                            qualContext={qualContextStable}
+                            onTeamSelect={openTeamSheet}
+                            onMatchSelect={handleMatchSelect}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div
+                      className="bracket-rounds-grid"
+                      style={{ "--bracket-stage-count": bracketStages.length } as CSSProperties}
+                    >
+                      {bracketStages.map((stage) => (
+                        <div
+                          className={`bracket-round ${stage === "Final" ? "is-final" : ""}`}
+                          data-stage={stage}
+                          key={stage}
+                        >
+                          {orderedByStage[stage].map((match) => (
+                            <div className="bracket-cell" key={match.id} data-match-id={match.id}>
+                              <BracketCard
+                                match={match}
+                                teamsById={teamsMap}
+                                mode={deferredMode}
+                                variant="tree"
+                                standings={projection.standings}
+                                liveMatches={knockoutLiveMatches}
+                                qualContext={qualContextStable}
+                                onTeamSelect={openTeamSheet}
+                                onMatchSelect={handleMatchSelect}
+                                pathHighlighted={showPathHighlight && pathHighlight!.has(match.id)}
+                                pathDimmed={showPathHighlight && !pathHighlight!.has(match.id)}
+                                onTeamPathHoverStart={
+                                  showConnectors ? handleTeamPathHoverStart : undefined
+                                }
+                                onTeamPathHoverEnd={showConnectors ? handleTeamPathHoverEnd : undefined}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            ))}
+            </div>
           </div>
-        </div>
+          )}
+        </>
       )}
     </section>
   );

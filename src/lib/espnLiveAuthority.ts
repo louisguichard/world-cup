@@ -1,4 +1,5 @@
 import type { Match, MergedMatch, Team } from "../types";
+import { isResultFinalLocked } from "./liveDataContract";
 import { coerceLiveStatusForKickoff, isMergedMatchEffectivelyLive } from "./matchLifecycle";
 import { resolveEspnMergeTarget } from "../services/espnMatchMerge";
 import { applyLiveScore } from "../services/DataMerger";
@@ -72,7 +73,7 @@ export function reconcileEspnLiveAuthority(
   const demoted: string[] = [];
 
   for (const [storeKey, existing] of Object.entries(merged)) {
-    if (existing.status !== "live" || existing.locked) continue;
+    if (existing.status !== "live" || isResultFinalLocked(existing)) continue;
 
     const espnRow = findEspnRowForStoreMatch(existing, espnMatches, merged, teams, storeKey);
     if (!shouldDemoteStoredLive(existing, espnRow, nowMs)) continue;

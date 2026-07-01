@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { BRACKET_FEED_MAP } from "../../lib/bracketTree";
+import { isConnectorSegmentHighlighted } from "../../lib/brackets/bracketPathHighlight";
 import styles from "./BracketConnectorOverlay.module.css";
 
 type Props = {
@@ -7,29 +8,52 @@ type Props = {
   containerSize: { width: number; height: number };
   confirmedWinners: Set<string>;
   liveProvisionalFeeders?: Set<string>;
+  highlightedPath?: Set<string> | null;
 };
 
 function pathClassName(
   feederId: string,
+  childId: string,
   confirmedWinners: Set<string>,
-  liveProvisionalFeeders: Set<string>
+  liveProvisionalFeeders: Set<string>,
+  highlightedPath: Set<string> | null | undefined
 ): string {
-  if (confirmedWinners.has(feederId)) return styles.pathConfirmed;
-  if (liveProvisionalFeeders.has(feederId)) return styles.pathLiveProvisional;
-  return styles.pathPending;
+  const base = (() => {
+    if (confirmedWinners.has(feederId)) return styles.pathConfirmed;
+    if (liveProvisionalFeeders.has(feederId)) return styles.pathLiveProvisional;
+    return styles.pathPending;
+  })();
+
+  if (!highlightedPath?.size) return base;
+
+  return isConnectorSegmentHighlighted(feederId, childId, highlightedPath)
+    ? `${base} ${styles.pathHighlighted}`
+    : `${base} ${styles.pathDimmed}`;
 }
 
 function pairedPathClassName(
   feeders: [string, string],
+  childId: string,
   confirmedWinners: Set<string>,
-  liveProvisionalFeeders: Set<string>
+  liveProvisionalFeeders: Set<string>,
+  highlightedPath: Set<string> | null | undefined
 ): string {
   const [a, b] = feeders;
-  if (confirmedWinners.has(a) && confirmedWinners.has(b)) return styles.pathConfirmed;
-  if (liveProvisionalFeeders.has(a) || liveProvisionalFeeders.has(b)) {
-    return styles.pathLiveProvisional;
-  }
-  return styles.pathPending;
+  const base = (() => {
+    if (confirmedWinners.has(a) && confirmedWinners.has(b)) return styles.pathConfirmed;
+    if (liveProvisionalFeeders.has(a) || liveProvisionalFeeders.has(b)) {
+      return styles.pathLiveProvisional;
+    }
+    return styles.pathPending;
+  })();
+
+  if (!highlightedPath?.size) return base;
+
+  const stemHighlighted =
+    isConnectorSegmentHighlighted(a, childId, highlightedPath) ||
+    isConnectorSegmentHighlighted(b, childId, highlightedPath);
+
+  return stemHighlighted ? `${base} ${styles.pathHighlighted}` : `${base} ${styles.pathDimmed}`;
 }
 
 export function BracketConnectorOverlay({
@@ -37,6 +61,7 @@ export function BracketConnectorOverlay({
   containerSize,
   confirmedWinners,
   liveProvisionalFeeders = new Set(),
+  highlightedPath = null,
 }: Props) {
   const paths: ReactElement[] = [];
 
@@ -56,18 +81,24 @@ export function BracketConnectorOverlay({
 
     if (cx - fx < 12) continue;
 
-    const stemClass = pairedPathClassName(feeders, confirmedWinners, liveProvisionalFeeders);
+    const stemClass = pairedPathClassName(
+      feeders,
+      childId,
+      confirmedWinners,
+      liveProvisionalFeeders,
+      highlightedPath
+    );
 
     paths.push(
       <path
         key={`${feeders[0]}->${childId}-top`}
-        className={pathClassName(feeders[0], confirmedWinners, liveProvisionalFeeders)}
+        className={pathClassName(feeders[0], childId, confirmedWinners, liveProvisionalFeeders, highlightedPath)}
         d={`M ${fx} ${fy1} H ${mx} V ${fMidY}`}
         fill="none"
       />,
       <path
         key={`${feeders[1]}->${childId}-bot`}
-        className={pathClassName(feeders[1], confirmedWinners, liveProvisionalFeeders)}
+        className={pathClassName(feeders[1], childId, confirmedWinners, liveProvisionalFeeders, highlightedPath)}
         d={`M ${fx} ${fy2} H ${mx} V ${fMidY}`}
         fill="none"
       />,

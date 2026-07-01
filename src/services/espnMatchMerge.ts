@@ -1,12 +1,28 @@
 import type { MergedMatch, Team } from "../types";
-import { resolveCanonicalTeamId } from "../data/wc2026TeamCatalog";
+import { isResultFinalLocked } from "../lib/liveDataContract";
 import { isBracketPlaceholderTeamId } from "../lib/brackets/isBracketPlaceholderTeamId";
 import { isInternalTeamId } from "../lib/teamIdentity";
+import {
+  buildFixtureRegistry,
+  canonicalizeMatchTeamIdsWithRegistry,
+  resolveFixtureRef,
+} from "../lib/registry";
 import { applyLiveScore } from "./DataMerger";
 import { enrichMatchWithScheduleId } from "./ScheduleLinker";
 import { logger } from "./Logger";
 
 export type EspnMergeMode = "id" | "fuzzy" | "new";
+
+export function isProtectedFromEspnOverwrite(
+  match: MergedMatch | undefined,
+  lockedMatchIds?: Record<string, true>,
+  storeKey?: string
+): boolean {
+  if (!match) return false;
+  if (match.source === "manual" || isResultFinalLocked(match)) return true;
+  if (storeKey && lockedMatchIds?.[storeKey]) return true;
+  return false;
+}
 
 const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
 
@@ -38,11 +54,6 @@ function sameFixture(
   return teamNameMatches(aHome, bHome.name) && teamNameMatches(aAway, bAway.name);
 }
 
-function lookupTeam(teams: Record<string, Team>, teamId: string): Team | undefined {
-  if (teams[teamId]) return teams[teamId];
-  return Object.values(teams).find((team) => team.id === teamId);
-}
-
 /** Prefer incoming ESPN ids over empty or bracket placeholder store ids. */
 export function preferTeamId(existing: string | undefined, incoming: string): string {
   if (!existing?.trim()) return incoming;
@@ -56,13 +67,8 @@ export function canonicalizeMatchTeamIds(
   match: MergedMatch,
   teams: Record<string, Team>
 ): MergedMatch {
-  const homeTeam = lookupTeam(teams, match.homeTeamId);
-  const awayTeam = lookupTeam(teams, match.awayTeamId);
-  return {
-    ...match,
-    homeTeamId: resolveCanonicalTeamId(match.homeTeamId, homeTeam),
-    awayTeamId: resolveCanonicalTeamId(match.awayTeamId, awayTeam),
-  };
+  const teamIds = canonicalizeMatchTeamIdsWithRegistry(match, teams);
+  return { ...match, ...teamIds };
 }
 
 /**
@@ -74,6 +80,22 @@ export function resolveEspnMergeTarget(
   incoming: MergedMatch,
   teams: Record<string, Team> = {}
 ): { storeKey: string; mode: EspnMergeMode } {
+  const fixtureRegistry = buildFixtureRegistry();
+  const normalized = canonicalizeMatchTeamIds(incoming, teams);
+  const fixtureId = resolveFixtureRef(normalized, teams, fixtureRegistry);
+
+  if (fixtureId) {
+    if (merged[fixtureId]) {
+      return { storeKey: fixtureId, mode: "id" };
+    }
+    for (const [key, existing] of Object.entries(merged)) {
+      if (existing.matchId === fixtureId || existing.espnEventId === incoming.id) {
+        return { storeKey: key, mode: "fuzzy" };
+      }
+    }
+    return { storeKey: fixtureId, mode: "new" };
+  }
+
   // 1. Exact id match (happy path)
   if (merged[incoming.id]) {
     return { storeKey: incoming.id, mode: "id" };
@@ -108,11 +130,22 @@ export function resolveEspnMergeTarget(
 export function mergeEspnMatchIntoStore(
   merged: Record<string, MergedMatch>,
   incoming: MergedMatch,
-  teams: Record<string, Team>
+  teams: Record<string, Team>,
+  options?: { lockedMatchIds?: Record<string, true> }
 ): EspnMergeMode {
   const normalized = canonicalizeMatchTeamIds(incoming, teams);
   const { storeKey, mode } = resolveEspnMergeTarget(merged, normalized, teams);
   const existing = merged[storeKey];
+
+  if (isProtectedFromEspnOverwrite(existing, options?.lockedMatchIds, storeKey)) {
+    logger.debug("[PollingEngine] Skipping ESPN overwrite for protected match", "espnMatchMerge", {
+      storeKey,
+      incomingId: incoming.id,
+      source: existing?.source,
+      locked: existing?.locked,
+    });
+    return mode;
+  }
 
   logger.debug(`[PollingEngine] Match linked by ${mode}`, "espnMatchMerge", {
     incomingId: incoming.id,
@@ -128,10 +161,26 @@ export function mergeEspnMatchIntoStore(
     ...normalized,
     homeTeamId,
     awayTeamId,
-    espnEventId: incoming.id
+    espnEventId: incoming.id,
   }, "espn");
 
-  merged[storeKey] = enrichMatchWithScheduleId(applied, teams);
+  const enriched = enrichMatchWithScheduleId(applied, teams);
+  const fixtureRegistry = buildFixtureRegistry();
+  const resolvedFixture = resolveFixtureRef(enriched, teams, fixtureRegistry);
+  const finalMatch: MergedMatch = resolvedFixture
+    ? {
+        ...enriched,
+        id: resolvedFixture,
+        matchId: resolvedFixture,
+      }
+    : enriched;
+
+  merged[storeKey] = finalMatch;
+
+  if (resolvedFixture && storeKey !== resolvedFixture) {
+    delete merged[storeKey];
+    merged[resolvedFixture] = finalMatch;
+  }
 
   return mode;
 }

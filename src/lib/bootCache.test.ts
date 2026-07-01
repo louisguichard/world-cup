@@ -29,15 +29,15 @@ describe("bootCache", () => {
     vi.unstubAllGlobals();
   });
 
-  it("exports BOOT_CACHE_VERSION and BOOT_CACHE_SCHEMA_VERSION 6", () => {
-    expect(BOOT_CACHE_VERSION).toBe(6);
-    expect(BOOT_CACHE_SCHEMA_VERSION).toBe(6);
+  it("exports BOOT_CACHE_VERSION and BOOT_CACHE_SCHEMA_VERSION 7", () => {
+    expect(BOOT_CACHE_VERSION).toBe(7);
+    expect(BOOT_CACHE_SCHEMA_VERSION).toBe(7);
   });
 
   it("uses versioned cache keys", () => {
-    expect(BOOT_TEAMS_CACHE_KEY).toBe("wc-boot-teams-v6");
-    expect(LIVE_MATCH_CACHE_KEY).toBe("wc-live-matches-v6");
-    expect(STANDINGS_CACHE_KEY).toBe("wc-standings-v6");
+    expect(BOOT_TEAMS_CACHE_KEY).toBe("wc-boot-teams-v7");
+    expect(LIVE_MATCH_CACHE_KEY).toBe("wc-live-matches-v7");
+    expect(STANDINGS_CACHE_KEY).toBe("wc-standings-v7");
   });
 
   it("migrates legacy v1 team cache into current key", () => {

@@ -4,7 +4,9 @@ import { resolveMatchWinner } from "../resolveMatchWinner";
 import { isKnockoutBracketMatchId } from "../bracketTree";
 import { getR32Slots } from "./getR32Slots";
 import { KNOCKOUT_LATER_STAGES, KNOCKOUT_ROUND_FIXTURES } from "./knockoutRoundFixtures";
+import { prepareLiveMatchStore } from "../liveMatchStorePipeline";
 import { resolveOfficialKnockoutSlotId } from "./resolveOfficialKnockoutSlot";
+import { sanitizeKnockoutParticipant } from "./sanitizeKnockoutParticipant";
 
 export type KnockoutSide = {
   teamId?: string;
@@ -53,26 +55,29 @@ export function resolveKnockoutParticipants(
 ): KnockoutParticipantMap {
   if (standings.length === 0) return {};
 
+  const preparedStore = prepareLiveMatchStore(liveMatches, teams);
+
   const context =
-    qualContext ?? buildQualificationContext(Object.values(liveMatches), Object.values(teams));
+    qualContext ??
+    buildQualificationContext(Object.values(preparedStore), Object.values(teams));
 
   const slots: KnockoutParticipantMap = {};
 
   for (const r32 of getR32Slots(standings, teams, context)) {
-    slots[r32.matchId] = {
+    slots[r32.matchId] = sanitizeKnockoutParticipant({
       home: { teamId: r32.homeTeamId, source: r32.homeSource },
       away: { teamId: r32.awayTeamId, source: r32.awaySource },
-    };
+    });
   }
 
-  const winners = indexWinnersByOfficialSlot(liveMatches, standings, teams);
+  const winners = indexWinnersByOfficialSlot(preparedStore, standings, teams);
 
   for (const stage of KNOCKOUT_LATER_STAGES) {
     for (const [matchId, homeSource, awaySource] of KNOCKOUT_ROUND_FIXTURES[stage]) {
-      slots[matchId] = {
+      slots[matchId] = sanitizeKnockoutParticipant({
         home: { teamId: winners[homeSource], source: homeSource },
         away: { teamId: winners[awaySource], source: awaySource },
-      };
+      });
     }
   }
 

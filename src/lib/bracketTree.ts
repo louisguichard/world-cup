@@ -1,4 +1,5 @@
 import { KNOCKOUT_ROUND_FIXTURES } from "./brackets/knockoutRoundFixtures";
+import { lookupLiveMatch as registryLookupLiveMatch } from "./registry";
 import type { MergedMatch } from "../types";
 
 /** Maps each knockout match → its two feeder match IDs (R32 entries are null). */
@@ -27,15 +28,19 @@ export function seedLabelToMatchId(seedLabel: string): string {
   return seedLabel;
 }
 
-/** First downstream match that consumes this feeder (e.g. M73 → M90). */
+/** First downstream match that consumes this feeder (e.g. M73 → M90). Skips third-place route. */
 export function findChildBracketMatchId(feederMatchId: string): string | undefined {
-  const entry = Object.entries(BRACKET_FEED_MAP).find(([, feeders]) => feeders?.includes(feederMatchId));
-  return entry?.[0];
+  const matches = Object.entries(BRACKET_FEED_MAP).filter(([, feeders]) =>
+    feeders?.includes(feederMatchId)
+  );
+  const winnerRoute = matches.find(([childId]) => childId !== "M103");
+  return winnerRoute?.[0] ?? matches[0]?.[0];
 }
 
 export function siblingFeederMatchId(childMatchId: string, feederMatchId: string): string | undefined {
   const feeders = BRACKET_FEED_MAP[childMatchId];
-  return feeders?.find((id) => id !== feederMatchId);
+  if (!feeders?.includes(feederMatchId)) return undefined;
+  return feeders.find((id) => id !== feederMatchId);
 }
 
 export function isKnockoutBracketMatchId(matchId: string): boolean {
@@ -52,8 +57,5 @@ export function lookupBracketLiveMatch(
   liveMatches: Record<string, MergedMatch>,
   bracketMatchId: string
 ): MergedMatch | undefined {
-  if (liveMatches[bracketMatchId]) return liveMatches[bracketMatchId];
-  return Object.values(liveMatches).find(
-    (m) => m.matchId === bracketMatchId || m.id === bracketMatchId
-  );
+  return registryLookupLiveMatch(liveMatches, bracketMatchId);
 }

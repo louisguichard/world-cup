@@ -33,7 +33,8 @@ export async function enrichFromFifaPublicApi(
       fetchWc2026Stadiums(),
     ]);
 
-    mergedCount = mergeFifaPublicMatchesIntoStore(nextMatches, fifaMatches);
+    const fifaStats = mergeFifaPublicMatchesIntoStore(nextMatches, fifaMatches);
+    mergedCount = fifaStats.applied;
 
     for (const raw of fifaTeams) {
       const partial = normalizeFifaPublicTeam(raw);
@@ -56,12 +57,25 @@ export async function enrichFromFifaPublicApi(
       setFifaVenueSupplements(fifaStadiums.map((s) => normalizeFifaPublicStadium(s)));
     }
 
-    logger.info("FIFA public API enrichment complete", "enrichFromFifaPublicApi", {
+    const logPayload = {
       matches: fifaMatches.length,
       mergedCount,
+      blocked: fifaStats.blocked,
+      skipped: fifaStats.skipped,
+      unchanged: fifaStats.unchanged,
       teams: fifaTeams.length,
       stadiums: fifaStadiums.length,
-    });
+    };
+
+    if (fifaStats.blocked > 0) {
+      logger.warn(
+        "FIFA public API enrichment complete — ESPN overwrites blocked (see fifaPublicMatchMerge logs)",
+        "enrichFromFifaPublicApi",
+        logPayload
+      );
+    } else {
+      logger.info("FIFA public API enrichment complete", "enrichFromFifaPublicApi", logPayload);
+    }
   } catch (error) {
     logger.warn("FIFA public API enrichment skipped", "enrichFromFifaPublicApi", {
       reason: error instanceof Error ? error.message : String(error),

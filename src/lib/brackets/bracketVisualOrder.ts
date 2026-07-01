@@ -1,4 +1,5 @@
 import { BRACKET_FEED_MAP } from "../bracketTree";
+import { knockoutSchedule } from "../../data/knockoutSchedule";
 import { R32_VISUAL_ORDER } from "./bracketProgression";
 import type { BracketMatch, Stage } from "../../types";
 
@@ -49,13 +50,33 @@ export function buildBracketVisualIndexMap(
   return visualIndex;
 }
 
+export function kickoffMsForBracketMatch(matchId: string): number {
+  const iso = knockoutSchedule[matchId]?.date;
+  if (!iso) return Number.POSITIVE_INFINITY;
+  const ms = Date.parse(iso);
+  return Number.isNaN(ms) ? Number.POSITIVE_INFINITY : ms;
+}
+
+/** Chronological kickoff order — independent of bracket-tree slot position. */
+export function sortBracketMatchesByDate(matches: BracketMatch[]): BracketMatch[] {
+  return [...matches].sort((a, b) => {
+    const da = kickoffMsForBracketMatch(a.id);
+    const db = kickoffMsForBracketMatch(b.id);
+    if (da !== db) return da - db;
+    return a.id.localeCompare(b.id);
+  });
+}
+
 export function sortBracketMatchesByVisualOrder(
   matches: BracketMatch[],
   visualIndex: Map<string, number>
 ): BracketMatch[] {
-  return [...matches].sort(
-    (a, b) => (visualIndex.get(a.id) ?? 0) - (visualIndex.get(b.id) ?? 0)
-  );
+  return [...matches].sort((a, b) => {
+    const ia = visualIndex.get(a.id) ?? 0;
+    const ib = visualIndex.get(b.id) ?? 0;
+    if (ia !== ib) return ia - ib;
+    return kickoffMsForBracketMatch(a.id) - kickoffMsForBracketMatch(b.id);
+  });
 }
 
 export function orderBracketByStage(
@@ -83,4 +104,18 @@ export function orderBracketByStage(
   }
 
   return map;
+}
+
+/** Flat chronological list across all knockout stages (schedule / vertical view). */
+export function flattenBracketByDate(
+  bracket: BracketMatch[],
+  stages: readonly Stage[] = LATER_STAGES
+): BracketMatch[] {
+  const allStages: Stage[] = ["R32", ...stages];
+  const byStage = orderBracketByStage(bracket);
+  const flat: BracketMatch[] = [];
+  for (const stage of allStages) {
+    flat.push(...sortBracketMatchesByDate(byStage[stage]));
+  }
+  return sortBracketMatchesByDate(flat);
 }

@@ -20,6 +20,7 @@ import type {
   TournamentSimulationResult
 } from "../types";
 import { isKnockoutMatch, resolveMatchWinner } from "./resolveMatchWinner";
+import { isResultFinalLocked } from "./liveDataContract";
 import { groupLetters } from "../types";
 import { clamp, normalizeName, pairKey } from "./normalize";
 import { knockoutScore, knockoutWinProbability, makeFallbackPrediction, normalizeProbabilities, samplePredictedScore } from "./predictions";
@@ -824,7 +825,6 @@ function buildKnockoutOverlayLookup(
   teamsById: TeamsById = {}
 ): Map<string, KnockoutOverlayEntry> {
   const lookup = new Map<string, KnockoutOverlayEntry>();
-  const rekeys: Array<{ stored: string; official: string }> = [];
   for (const match of mergedMatches) {
     if (!isKnockoutMatch(match)) continue;
     if (typeof match.homeScore !== "number" || typeof match.awayScore !== "number") continue;
@@ -839,31 +839,11 @@ function buildKnockoutOverlayLookup(
       slotStandings.length > 0 && storedKey
         ? resolveOfficialKnockoutSlotId(match, storedKey, slotStandings, teamsById)
         : storedKey;
-    if (officialKey !== storedKey) {
-      rekeys.push({ stored: storedKey, official: officialKey });
-    }
     lookup.set(officialKey, entry);
     if (match.id && match.id !== officialKey) {
       lookup.set(match.id, entry);
     }
   }
-  // #region agent log
-  if (rekeys.length > 0) {
-    fetch("http://127.0.0.1:7681/ingest/f800a0a9-8d11-45c6-8805-1b187f693046", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
-      body: JSON.stringify({
-        sessionId: "0b0776",
-        runId: "overlay-rekey",
-        hypothesisId: "H3-espn-slot",
-        location: "tournament.ts:buildKnockoutOverlayLookup",
-        message: "ESPN match re-keyed to official bracket slot",
-        data: { rekeys },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-  }
-  // #endregion
   return lookup;
 }
 
@@ -905,8 +885,31 @@ export function resolveKnockoutResults(
       const overlay = knockoutOverlay.get(bm.id);
       if (overlay) {
         const { match, isLive } = overlay;
-        if (isLive) {
-          const winnerTeamId = resolveLiveKnockoutLeader(match, teamsById);
+        if (!isLive) {
+          const winnerTeamId = resolveMatchWinner(match, teamsById);
+          const resultViolation = validateMatchResult(match);
+          if (resultViolation) {
+            logTournamentRuleViolation(resultViolation, "resolveKnockoutResults");
+          }
+
+          if (!isResultFinalLocked(match)) {
+            byId.set(bm.id, {
+              ...byId.get(bm.id)!,
+              homeTeamId: match.homeTeamId,
+              awayTeamId: match.awayTeamId,
+              homeScore: match.homeScore,
+              awayScore: match.awayScore,
+              winnerTeamId,
+              penaltyShootout: match.penaltyShootout,
+              source: "scheduled",
+              homeCertainty: "projected",
+              awayCertainty: "projected",
+              homeGhosts: undefined,
+              awayGhosts: undefined,
+            });
+            continue;
+          }
+
           byId.set(bm.id, {
             ...byId.get(bm.id)!,
             homeTeamId: match.homeTeamId,
@@ -914,20 +917,17 @@ export function resolveKnockoutResults(
             homeScore: match.homeScore,
             awayScore: match.awayScore,
             winnerTeamId,
+            penaltyShootout: match.penaltyShootout,
             source: "scheduled",
-            homeCertainty: "projected",
-            awayCertainty: "projected",
+            homeCertainty: "confirmed",
+            awayCertainty: "confirmed",
             homeGhosts: undefined,
             awayGhosts: undefined,
           });
           continue;
         }
 
-        const winnerTeamId = resolveMatchWinner(match, teamsById);
-        const resultViolation = validateMatchResult(match);
-        if (resultViolation) {
-          logTournamentRuleViolation(resultViolation, "resolveKnockoutResults");
-        }
+        const winnerTeamId = resolveLiveKnockoutLeader(match, teamsById);
         byId.set(bm.id, {
           ...byId.get(bm.id)!,
           homeTeamId: match.homeTeamId,
@@ -935,10 +935,9 @@ export function resolveKnockoutResults(
           homeScore: match.homeScore,
           awayScore: match.awayScore,
           winnerTeamId,
-          penaltyShootout: match.penaltyShootout,
           source: "scheduled",
-          homeCertainty: "confirmed",
-          awayCertainty: "confirmed",
+          homeCertainty: "projected",
+          awayCertainty: "projected",
           homeGhosts: undefined,
           awayGhosts: undefined,
         });
@@ -946,8 +945,20 @@ export function resolveKnockoutResults(
       }
 
       const current = byId.get(bm.id)!;
-      const homeTeamId = resolveFeederTeam(current.homeSeedLabel, byId) ?? current.homeTeamId;
-      const awayTeamId = resolveFeederTeam(current.awaySeedLabel, byId) ?? current.awayTeamId;
+      const homeFromFeeder = resolveFeederTeam(current.homeSeedLabel, byId);
+      const awayFromFeeder = resolveFeederTeam(current.awaySeedLabel, byId);
+
+      const homeFeederId = feederMatchIdFromSeed(current.homeSeedLabel);
+      const awayFeederId = feederMatchIdFromSeed(current.awaySeedLabel);
+      const homeUpstream = homeFeederId ? byId.get(homeFeederId) : undefined;
+      const awayUpstream = awayFeederId ? byId.get(awayFeederId) : undefined;
+      const homeFeederCertainty = feederCertaintyFromUpstream(homeUpstream);
+      const awayFeederCertainty = feederCertaintyFromUpstream(awayUpstream);
+
+      const homeTeamId =
+        homeFeederCertainty === "confirmed" ? homeFromFeeder : homeFromFeeder ?? current.homeTeamId;
+      const awayTeamId =
+        awayFeederCertainty === "confirmed" ? awayFromFeeder : awayFromFeeder ?? current.awayTeamId;
 
       if (!homeTeamId || !awayTeamId) {
         byId.set(bm.id, {
@@ -957,13 +968,6 @@ export function resolveKnockoutResults(
         });
         continue;
       }
-
-      const homeFeederId = feederMatchIdFromSeed(current.homeSeedLabel);
-      const awayFeederId = feederMatchIdFromSeed(current.awaySeedLabel);
-      const homeUpstream = homeFeederId ? byId.get(homeFeederId) : undefined;
-      const awayUpstream = awayFeederId ? byId.get(awayFeederId) : undefined;
-      const homeFeederCertainty = feederCertaintyFromUpstream(homeUpstream);
-      const awayFeederCertainty = feederCertaintyFromUpstream(awayUpstream);
 
       const fresh = playKnockoutMatch(
         bm.id,

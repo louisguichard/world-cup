@@ -329,4 +329,64 @@ describe("resolveKnockoutResults", () => {
     expect(m74?.winnerTeamId).toBeUndefined();
     expect(m74?.homeCertainty).toBe("projected");
   });
+
+  it("does not confirm unlocked completed knockout results", () => {
+    const bracket: BracketMatch[] = [simulatedR32("M76", "ned", "mar")];
+    const merged = [
+      completedKnockout({
+        id: "M76",
+        homeTeamId: "ned",
+        awayTeamId: "mar",
+        homeScore: 2,
+        awayScore: 1,
+        locked: false,
+      }),
+    ];
+
+    const result = resolveKnockoutResults(bracket, merged, teamsById);
+    const m76 = result.find((m) => m.id === "M76");
+
+    expect(m76?.homeScore).toBe(2);
+    expect(m76?.awayScore).toBe(1);
+    expect(m76?.winnerTeamId).toBe("ned");
+    expect(m76?.homeCertainty).toBe("projected");
+    expect(m76?.awayCertainty).toBe("projected");
+  });
+
+  it("propagates locked MAR win into R16 and evicts stale NED simulation", () => {
+    const bracket: BracketMatch[] = [
+      simulatedR32("M76", "ned", "mar"),
+      {
+        id: "M91",
+        stage: "R16",
+        label: "M91",
+        homeTeamId: "ned",
+        awayTeamId: "fra",
+        homeSeedLabel: "W76",
+        awaySeedLabel: "W78",
+        homeScore: 2,
+        awayScore: 1,
+        winnerTeamId: "ned",
+        source: "simulated",
+      },
+    ];
+
+    const merged = [
+      completedKnockout({
+        id: "M76",
+        homeTeamId: "ned",
+        awayTeamId: "mar",
+        homeScore: 1,
+        awayScore: 2,
+      }),
+    ];
+
+    const result = resolveKnockoutResults(bracket, merged, teamsById);
+    const m91 = result.find((m) => m.id === "M91");
+
+    expect(m91?.homeTeamId).toBe("mar");
+    expect(m91?.homeTeamId).not.toBe("ned");
+    expect(m91?.homeCertainty).toBe("confirmed");
+    expect(m91?.winnerTeamId).not.toBe("ned");
+  });
 });

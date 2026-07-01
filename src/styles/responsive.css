@@ -48,14 +48,8 @@ body {
 }
 
 .bracket-head,
-.bracket-rounds {
-  justify-content: center;
-  gap: var(--bracket-col-gap);
-  width: 100%;
-  min-width: min(
-    100%,
-    calc(5 * var(--bracket-col-width) + 4 * var(--bracket-col-gap))
-  );
+.bracket-rounds-grid {
+  column-gap: var(--bracket-col-gap);
 }
 
 .bracket-scroll {
@@ -159,6 +153,10 @@ body {
   }
 
   .bracket-view .bracket-toggle {
+    grid-template-columns: 1fr;
+  }
+
+  .bracket-view .bracket-controls {
     grid-template-columns: 1fr;
   }
 

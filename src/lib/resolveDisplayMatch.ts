@@ -57,6 +57,8 @@ export function resolveDisplayMatch(
     ...raw,
     matchId,
     venue,
+    date: materialized.date ?? raw.date,
+    kickoffMs: materialized.kickoffMs ?? raw.kickoffMs,
     stage: raw.stage ?? materialized.stage,
     group: raw.group ?? materialized.group,
     homeTeamId: preferTeamId(raw.homeTeamId, materialized.homeTeamId),

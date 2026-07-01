@@ -34,14 +34,14 @@ describe("resolveDisplayMatch", () => {
       },
       {
         group: "B",
-        rows: [row("bra", "B", 9), row("ecu", "B", 6), row("chi", "B", 3), row("bol", "B", 0)],
+        rows: [row("bra", "B", 9), row("can", "B", 6), row("chi", "B", 3), row("bol", "B", 0)],
       },
     ];
 
     const raw: MergedMatch = {
-      id: "760484",
-      espnEventId: "760484",
-      matchId: "M81",
+      id: "760486",
+      espnEventId: "760486",
+      matchId: "M73",
       date: "2026-06-28T19:00:00Z",
       homeTeamId: "2nd Group A",
       awayTeamId: "2nd Group B",
@@ -56,13 +56,44 @@ describe("resolveDisplayMatch", () => {
       period: "first_half",
     };
 
-    const schedule = materializeFullSchedule(teams, { M81: raw }, standings);
+    const schedule = materializeFullSchedule(teams, { M73: raw }, standings);
     const index = buildMaterializedMatchIndex(schedule);
     const display = resolveDisplayMatch(raw, index);
 
     expect(display.homeTeamId).toBe("rsa");
-    expect(display.awayTeamId).toBe("ecu");
-    expect(display.venue).toContain("Lumen Field");
+    expect(display.awayTeamId).toBe("can");
+    expect(display.venue).toContain("SoFi Stadium");
+  });
+
+  it("inherits kickoff from materialized schedule when live row lacks it", () => {
+    const officialKickoff = Date.parse("2026-06-30T17:00:00.000Z");
+    const raw: MergedMatch = {
+      id: "espn-m77",
+      espnEventId: "espn-m77",
+      matchId: "M77",
+      date: "2026-06-30T20:00:00.000Z",
+      status: "live",
+      homeTeamId: "civ",
+      awayTeamId: "col",
+      homeScore: 1,
+      awayScore: 0,
+      homeConduct: 0,
+      awayConduct: 0,
+      locked: false,
+      source: "espn",
+      clockMinute: 34,
+    };
+    const materialized: MergedMatch = {
+      ...raw,
+      id: "M77",
+      date: new Date(officialKickoff).toISOString(),
+      kickoffMs: officialKickoff,
+    };
+    const index = buildMaterializedMatchIndex([materialized]);
+    const display = resolveDisplayMatch(raw, index);
+
+    expect(display.kickoffMs).toBe(officialKickoff);
+    expect(display.date).toBe(materialized.date);
   });
 
   it("fills venue from broadcast when raw match lacks it", () => {

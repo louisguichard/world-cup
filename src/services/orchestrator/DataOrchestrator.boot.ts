@@ -10,6 +10,8 @@ import {
 import { hydrateBootFromCache, persistBootCache } from "../../lib/bootCache";
 import { hasLiveMatchesInCache } from "../../lib/liveMatchCache";
 import { reconcileEspnLiveAuthority } from "../../lib/espnLiveAuthority";
+import { mergeBootLiveMatches } from "../../lib/mergeBootLiveMatches";
+import { awaitBootPenaltyEnrichment, markBootReady, resetBootReady } from "../../lib/bootReady";
 import {
   finishBootTracking,
   formatBootReport,
@@ -259,6 +261,7 @@ async function runBootstrapSim(): Promise<void> {
 /** Runs splash bootstrap: ESPN, team cascade, matches, standings, simulation. */
 export async function runBoot(): Promise<void> {
   startBootTracking();
+  resetBootReady();
   const store = useStore.getState();
   const mobileFast = isMobileBootProfile();
   store.setSplashPhase("loading");
@@ -276,7 +279,7 @@ export async function runBoot(): Promise<void> {
       store.setGroupStandings(cached.standings);
     }
     for (const m of Object.values(cached.matches)) {
-      if (m.locked) store.addLockedMatchId(m.id);
+      if (m.locked && m.status === "completed") store.addLockedMatchId(m.id);
     }
     store.setSplashProgress(40, "Loading live scores...");
   }
@@ -352,30 +355,21 @@ export async function runBoot(): Promise<void> {
 
     reconcileEspnLiveAuthority(liveMatches, espnData.matches, teams);
 
-    store.setLiveMatches(liveMatches);
-    for (const m of Object.values(liveMatches)) {
-      if (m.locked) store.addLockedMatchId(m.id);
-    }
-    endBootPhase("matches-build", `${Object.keys(liveMatches).length} matches`);
+    const mergedMatches = mergeBootLiveMatches(
+      liveMatches,
+      hadCache ? cached.matches : {},
+      teams
+    );
 
-    void (async () => {
-      try {
-        const preBoot = useStore.getState().liveMatches;
-        const enriched = await enrichBootPenaltyPipeline(preBoot);
-        store.setLiveMatches(enriched);
-        logger.info("Penalty shootout enrichment complete", "DataOrchestrator.boot", {
-          enriched: Object.values(enriched).filter((m) => m.penaltyShootout).length,
-        });
-      } catch (err) {
-        logger.warn("Penalty enrichment failed at boot", "DataOrchestrator.boot", {
-          reason: err instanceof Error ? err.message : String(err),
-        });
-      }
-    })();
+    store.setLiveMatches(mergedMatches);
+    for (const m of Object.values(mergedMatches)) {
+      if (m.locked && m.status === "completed") store.addLockedMatchId(m.id);
+    }
+    endBootPhase("matches-build", `${Object.keys(mergedMatches).length} matches`);
 
     startBootPhase("standings-load");
     const teamsList = Object.values(useStore.getState().teams);
-    const matchList = Object.values(liveMatches);
+    const matchList = Object.values(mergedMatches);
     const bootStandings = mergeStandingsPartials(
       cached.standings,
       deriveStandingsIfScored(matchList, teamsList) ?? [],
@@ -395,11 +389,26 @@ export async function runBoot(): Promise<void> {
 
     store.setSplashProgress(deferHeavy ? 80 : 65, deferHeavy ? "Almost ready..." : "Running simulations...");
 
-    void runDeferredEnrichment(espnTeamsMap, Object.values(liveMatches));
+    void runDeferredEnrichment(espnTeamsMap, Object.values(mergedMatches));
 
     startBootPhase("splash-hold");
     await sleep(splashMinimumHoldMs(mobileFast, hadCache));
     endBootPhase("splash-hold");
+
+    startBootPhase("penalty-enrichment");
+    const preEnrich = useStore.getState().liveMatches;
+    const enriched = await awaitBootPenaltyEnrichment(
+      () => enrichBootPenaltyPipeline(preEnrich),
+      preEnrich
+    );
+    store.setLiveMatches(enriched);
+    endBootPhase(
+      "penalty-enrichment",
+      `${Object.values(enriched).filter((m) => m.penaltyShootout).length} with penalties`
+    );
+    logger.info("Penalty shootout enrichment complete", "DataOrchestrator.boot", {
+      enriched: Object.values(enriched).filter((m) => m.penaltyShootout).length,
+    });
 
     store.setSplashPhase("done");
     persistBootCache(
@@ -408,12 +417,13 @@ export async function runBoot(): Promise<void> {
       useStore.getState().groupStandings
     );
     startBootPhase("services-start");
+    markBootReady();
     startAppServices();
     endBootPhase("services-start");
 
     finishBootTracking(deferHeavy ? "cache-first deferred path" : "full path");
     logger.info("Bootstrap complete", "DataOrchestrator.boot", {
-      matchCount: Object.keys(liveMatches).length,
+      matchCount: Object.keys(mergedMatches).length,
       teamsCount: Object.keys(useStore.getState().teams).length,
       mobileFast,
       hadCache,

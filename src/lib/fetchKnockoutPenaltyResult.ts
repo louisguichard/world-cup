@@ -1,6 +1,7 @@
 import { isApiEnabled } from "../config/apiFlags";
 import { isZafronixDisabled, fetchMatchResult } from "../services/ZafronixClient";
 import type { MergedMatch, PenaltyShootout } from "../types";
+import { resolveBracketMatchId } from "./bracketTree";
 import { penaltyShootoutFromAggregate } from "./derivePenaltyShootout";
 import { isKnockoutMatch } from "./resolveMatchWinner";
 
@@ -21,7 +22,9 @@ export function needsZafronixPenaltyFetch(match: MergedMatch): boolean {
   if (match.penaltyShootout) return false;
   if (match.status !== "completed") return false;
   if (!isKnockoutMatch(match)) return false;
-  if (!match.matchId) return false;
+
+  const matchId = match.matchId ?? resolveBracketMatchId(match);
+  if (!matchId) return false;
 
   const home = match.homeScore ?? 0;
   const away = match.awayScore ?? 0;
@@ -37,7 +40,7 @@ export async function enrichKnockoutPenaltiesFromZafronix(
 
   await Promise.allSettled(
     candidates.map(async ([key, match]) => {
-      const matchId = match.matchId;
+      const matchId = match.matchId ?? resolveBracketMatchId(match);
       if (!matchId) return;
 
       const shootout = await fetchZafronixPenaltyShootout(matchId);

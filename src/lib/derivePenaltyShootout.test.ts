@@ -131,8 +131,23 @@ describe("isKnockoutPenaltyDecided", () => {
     source: "espn",
   };
 
-  it("returns true for completed knockout draw", () => {
-    expect(isKnockoutPenaltyDecided(baseKnockout)).toBe(true);
+  it("returns false for completed knockout draw without penalty evidence", () => {
+    expect(isKnockoutPenaltyDecided(baseKnockout)).toBe(false);
+  });
+
+  it("returns true when decidedByPenalties is set", () => {
+    expect(isKnockoutPenaltyDecided({ ...baseKnockout, decidedByPenalties: true })).toBe(true);
+  });
+
+  it("returns true when penalty shootout totals exist", () => {
+    expect(
+      isKnockoutPenaltyDecided(baseKnockout, {
+        home: [{ scored: true }],
+        away: [{ scored: true }, { scored: true }],
+        homeScore: 1,
+        awayScore: 2,
+      })
+    ).toBe(true);
   });
 
   it("returns false for group-stage draw", () => {

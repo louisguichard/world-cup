@@ -148,17 +148,22 @@ export function matchHadPenaltyShootout(
   return home === away && match.period === "full_time";
 }
 
-/** True when a completed knockout match was decided by penalty shootout. */
+function hasShootoutEvidence(shootout?: PenaltyShootout): boolean {
+  if (!shootout) return false;
+  return shootout.home.length > 0 || shootout.away.length > 0 || shootout.homeScore > 0 || shootout.awayScore > 0;
+}
+
+/** True when a completed knockout match was decided by penalty shootout (not every 1–1 draw). */
 export function isKnockoutPenaltyDecided(
   match: MergedMatch,
-  _shootout?: PenaltyShootout
+  shootout?: PenaltyShootout
 ): boolean {
   if (!isKnockoutMatch(match)) return false;
   if (match.status !== "completed") return false;
 
-  const home = match.homeScore ?? 0;
-  const away = match.awayScore ?? 0;
-  if (home !== away) return false;
+  if (hasShootoutEvidence(shootout) || hasShootoutEvidence(match.penaltyShootout)) return true;
+  if (match.decidedByPenalties === true) return true;
+  if (match.period === "penalties") return true;
 
-  return true;
+  return false;
 }

@@ -1,5 +1,5 @@
 import type { TabId } from "../../types";
-import { isMergedMatchInActivePhase } from "../../lib/matchLifecycle";
+import { useActiveLiveDisplayMatches } from "../../hooks/useActiveLiveDisplayMatches";
 import { useStore } from "../../store";
 import { APP_COPY } from "../../lib/appCopy";
 import { navigateToTab } from "../../lib/navigateToTab";
@@ -17,13 +17,7 @@ const TABS: { id: TabId; label: string }[] = [
 
 export function BottomTabBar() {
   const activeTab = useStore((s) => s.activeTab);
-  const liveCount = useStore((s) => {
-    let count = 0;
-    for (const match of Object.values(s.liveMatches)) {
-      if (isMergedMatchInActivePhase(match)) count += 1;
-    }
-    return count;
-  });
+  const liveCount = useActiveLiveDisplayMatches().length;
 
   return (
     <nav className="bottom-tab-bar" aria-label="Main navigation">

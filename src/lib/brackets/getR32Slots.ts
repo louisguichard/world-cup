@@ -7,32 +7,16 @@ import {
   rankAliveBestThirds,
   type QualificationMatchContext,
 } from "../thirdPlaceQualification";
+import { r32FixturesFromJson } from "./knockoutBracketJson";
 
 /**
  * SOLE SOURCE OF TRUTH — FIFA World Cup 2026 Round of 32 fixture pairings.
- * Derived from `world_cup_2026_knockout_bracket.json`. All code reads from here.
+ * Derived from `world_cup_2026_knockout_bracket.json` (FIFA schedule M73–M104).
  * No runtime API, scraper, or inference may override these matchups.
  *
  * Seeds: "1X" = group winner, "2X" = runner-up, "3X" = best third from group X.
  */
-export const ROUND_OF_32_FIXTURES = [
-  ["M73", "1A", "3E"],
-  ["M74", "1B", "3J"],
-  ["M75", "1D", "3B"],
-  ["M76", "1E", "3D"],
-  ["M77", "1G", "3I"],
-  ["M78", "1I", "3F"],
-  ["M79", "1K", "3L"],
-  ["M80", "1L", "3K"],
-  ["M81", "2A", "2B"],
-  ["M82", "2D", "2G"],
-  ["M83", "2K", "2L"],
-  ["M84", "1H", "2J"],
-  ["M85", "1C", "2F"],
-  ["M86", "1F", "3C"],
-  ["M87", "1J", "3H"],
-  ["M88", "2E", "2I"],
-] as const;
+export const ROUND_OF_32_FIXTURES = r32FixturesFromJson();
 
 Object.freeze(ROUND_OF_32_FIXTURES);
 

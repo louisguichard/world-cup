@@ -14,6 +14,14 @@ describe("parseEspnClockFields", () => {
     expect(fields.clockRunning).toBe(true);
   });
 
+  it("maps halftime post state without marking full_time", () => {
+    const fields = parseEspnClockFields({
+      type: { state: "post", completed: false, detail: "Half Time" },
+    });
+    expect(fields.period).toBe("half_time");
+    expect(fields.period).not.toBe("full_time");
+  });
+
   it("maps completed matches to full_time", () => {
     const fields = parseEspnClockFields({
       type: { state: "post", completed: true, detail: "Full Time" }

@@ -1,4 +1,5 @@
 import type { GroupStanding, MergedMatch } from "../types";
+import { isResultFinalLocked } from "./liveDataContract";
 import { standingsEqual } from "./qualification";
 
 export type MatchLiveSnapshot = Pick<
@@ -57,42 +58,65 @@ function snapshotEqual(a: MatchLiveSnapshot, b: MatchLiveSnapshot): boolean {
   );
 }
 
-function preservePenaltyFields(
-  existing: Record<string, MergedMatch>,
-  incoming: Record<string, MergedMatch>
-): Record<string, MergedMatch> {
-  const merged: Record<string, MergedMatch> = {};
-  for (const id of Object.keys(incoming)) {
-    const prev = existing[id];
-    merged[id] = {
-      ...incoming[id],
-      penaltyShootout: incoming[id].penaltyShootout ?? prev?.penaltyShootout,
-      decidedByPenalties: incoming[id].decidedByPenalties ?? prev?.decidedByPenalties,
-    };
+function mergePenaltyFields(
+  existing: MergedMatch | undefined,
+  incoming: MergedMatch
+): MergedMatch {
+  return {
+    ...incoming,
+    penaltyShootout: incoming.penaltyShootout ?? existing?.penaltyShootout,
+    decidedByPenalties: incoming.decidedByPenalties ?? existing?.decidedByPenalties,
+  };
+}
+
+function mergeLiveRow(
+  existing: MergedMatch | undefined,
+  incoming: MergedMatch
+): MergedMatch {
+  if (existing && isResultFinalLocked(existing) && !isResultFinalLocked(incoming)) {
+    return mergePenaltyFields(existing, {
+      ...existing,
+      lastUpdatedAt: incoming.lastUpdatedAt ?? existing.lastUpdatedAt,
+    });
   }
-  return merged;
+
+  return mergePenaltyFields(existing, incoming);
 }
 
 export function mergeLiveMatchRecords(
   existing: Record<string, MergedMatch>,
   incoming: Record<string, MergedMatch>
 ): { merged: Record<string, MergedMatch>; changed: boolean } {
-  const existingIds = Object.keys(existing);
-  const incomingIds = Object.keys(incoming);
+  const merged: Record<string, MergedMatch> = {};
+  const allKeys = new Set([...Object.keys(existing), ...Object.keys(incoming)]);
+  let changed = false;
 
-  if (existingIds.length !== incomingIds.length) {
-    return { merged: preservePenaltyFields(existing, incoming), changed: true };
-  }
-
-  for (const id of incomingIds) {
+  for (const id of allKeys) {
     const prev = existing[id];
     const next = incoming[id];
-    if (!prev || !snapshotEqual(matchLiveSnapshot(prev), matchLiveSnapshot(next))) {
-      return { merged: preservePenaltyFields(existing, incoming), changed: true };
+
+    if (!next) {
+      if (prev && isResultFinalLocked(prev)) {
+        merged[id] = prev;
+        continue;
+      }
+      if (prev) changed = true;
+      continue;
+    }
+
+    const row = mergeLiveRow(prev, next);
+    merged[id] = row;
+
+    if (!prev || !snapshotEqual(matchLiveSnapshot(prev), matchLiveSnapshot(row))) {
+      changed = true;
     }
   }
 
-  return { merged: existing, changed: false };
+  if (!changed) {
+    return { merged: existing, changed: false };
+  }
+
+  return { merged, changed: true };
 }
 
 export function standingsChanged(a: GroupStanding[], b: GroupStanding[]): boolean {

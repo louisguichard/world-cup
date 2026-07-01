@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { MergedMatch, PenaltyShootout } from "../types";
+import { resolveBracketMatchId } from "../lib/bracketTree";
 import { derivePenaltyShootout, isKnockoutPenaltyDecided } from "../lib/derivePenaltyShootout";
-import { fetchZafronixPenaltyShootout } from "../lib/fetchKnockoutPenaltyResult";
+import {
+  fetchZafronixPenaltyShootout,
+  needsZafronixPenaltyFetch,
+} from "../lib/fetchKnockoutPenaltyResult";
 import { getKnockoutStageLabel } from "../lib/resultsGrouping";
 import { resolveEventsForMatch } from "../lib/resolveMatchEvents";
 import { resolveMatchWinner } from "../lib/resolveMatchWinner";
@@ -55,12 +59,17 @@ export function useKnockoutPenaltyResult(match: MergedMatch): KnockoutPenaltyRes
     setLoading(false);
   }, [match.id, match.matchId, match.penaltyShootout]);
 
+  const officialMatchId = match.matchId ?? resolveBracketMatchId(match) ?? undefined;
+
   useEffect(() => {
-    if (!showPenalties || derivedShootout || !match.matchId) return;
+    if (derivedShootout || !needsZafronixPenaltyFetch({ ...match, matchId: officialMatchId })) {
+      return;
+    }
+    if (!officialMatchId) return;
 
     let cancelled = false;
     setLoading(true);
-    void fetchZafronixPenaltyShootout(match.matchId).then((result) => {
+    void fetchZafronixPenaltyShootout(officialMatchId).then((result) => {
       if (cancelled) return;
       setLoading(false);
       if (result) setFetchedShootout(result);
@@ -69,7 +78,7 @@ export function useKnockoutPenaltyResult(match: MergedMatch): KnockoutPenaltyRes
     return () => {
       cancelled = true;
     };
-  }, [showPenalties, derivedShootout, match.matchId]);
+  }, [derivedShootout, match, officialMatchId]);
 
   return { showPenalties, shootout, winnerTeamId, stageLabel, loading: loading && !shootout };
 }

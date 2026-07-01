@@ -1,10 +1,10 @@
-/**
- * Live data refresh policy — SSE primary, polling fallback only.
- */
+import type { MergedMatch } from "../types";
+import { shouldRunLivePolling } from "../lib/liveDataContract";
 
 export const LIVE_DATA_FLAGS = {
-  /** When true, polling runs only if SSE is disconnected or unhealthy. */
+  /** SSE connected (heartbeats / future EntityUpdated events). */
   ssePrimary: true,
+  /** When true, skip polling only outside live windows while SSE is healthy. */
   pollFallbackOnly: true,
 } as const;
 
@@ -19,7 +19,8 @@ export function isSseHealthy(): boolean {
   return LIVE_DATA_FLAGS.ssePrimary && sseConnected;
 }
 
-export function shouldRunPollFallback(): boolean {
+export function shouldRunPollFallback(liveMatches: MergedMatch[] = []): boolean {
   if (!LIVE_DATA_FLAGS.pollFallbackOnly) return true;
+  if (shouldRunLivePolling(liveMatches)) return true;
   return !isSseHealthy();
 }

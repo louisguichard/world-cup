@@ -1,4 +1,4 @@
-import { isMergedMatchInActivePhase } from "../../lib/matchLifecycle";
+import { useActiveLiveDisplayMatches } from "../../hooks/useActiveLiveDisplayMatches";
 import { useStore } from "../../store";
 import { APP_BRAND } from "../../config/appMeta";
 import { APP_COPY } from "../../lib/appCopy";
@@ -9,13 +9,7 @@ import { ThemeToggle } from "../shared/ThemeToggle";
 
 export function TopNavBar({ compact = false }: { compact?: boolean }) {
   const lastPollAt = useStore((s) => s.lastPollAt);
-  const liveCount = useStore((s) => {
-    let count = 0;
-    for (const match of Object.values(s.liveMatches)) {
-      if (isMergedMatchInActivePhase(match)) count += 1;
-    }
-    return count;
-  });
+  const liveCount = useActiveLiveDisplayMatches().length;
 
   return (
     <header className={`wc-topbar${compact ? " wc-topbar--compact" : ""}`}>

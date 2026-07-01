@@ -33,3 +33,13 @@
   stroke-linejoin: round;
   opacity: 0.95;
 }
+
+.pathHighlighted {
+  opacity: 1;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent, #38bdf8) 45%, transparent));
+}
+
+.pathDimmed {
+  opacity: 0.18;
+}

@@ -2,89 +2,90 @@
     "tournament_info": {
         "name": "FIFA World Cup 2026",
         "knockout_format": "32-team single elimination",
+        "id_system": "FIFA schedule M73–M104 (ESPN-aligned; matchSchedule.json)",
         "round_of_32_matches": {
             "73": {
-                "home": "1A (Mexico)",
-                "away": "3E (Ecuador)"
+                "home": "2A (South Africa)",
+                "away": "2B (Canada)"
             },
             "74": {
-                "home": "1B (Switzerland)",
-                "away": "3J (Algeria)"
+                "home": "1C (Brazil)",
+                "away": "2F (Japan)"
             },
             "75": {
-                "home": "1D (United States)",
-                "away": "3B (Bosnia and Herzegovina)"
-            },
-            "76": {
                 "home": "1E (Germany)",
                 "away": "3D (Paraguay)"
             },
+            "76": {
+                "home": "1F (Netherlands)",
+                "away": "3C (Morocco)"
+            },
             "77": {
-                "home": "1G (Belgium)",
-                "away": "3I (Senegal)"
+                "home": "2E (Ivory Coast)",
+                "away": "2I (Norway)"
             },
             "78": {
                 "home": "1I (France)",
                 "away": "3F (Sweden)"
             },
             "79": {
-                "home": "1K (Colombia)",
-                "away": "3L (Ghana)"
+                "home": "1A (Mexico)",
+                "away": "3E (Ecuador)"
             },
             "80": {
                 "home": "1L (England)",
                 "away": "3K (DR Congo)"
             },
             "81": {
-                "home": "2A (South Africa)",
-                "away": "2B (Canada)"
+                "home": "1G (Belgium)",
+                "away": "3I (Senegal)"
             },
             "82": {
-                "home": "2D (Australia)",
-                "away": "2G (Egypt)"
+                "home": "1D (United States)",
+                "away": "3B (Bosnia and Herzegovina)"
             },
             "83": {
-                "home": "2K (Portugal)",
-                "away": "2L (Croatia)"
-            },
-            "84": {
                 "home": "1H (Spain)",
                 "away": "2J (Austria)"
             },
+            "84": {
+                "home": "2K (Portugal)",
+                "away": "2L (Croatia)"
+            },
             "85": {
-                "home": "1C (Brazil)",
-                "away": "2F (Japan)"
+                "home": "1B (Switzerland)",
+                "away": "3J (Algeria)"
             },
             "86": {
-                "home": "1F (Netherlands)",
-                "away": "3C (Morocco)"
+                "home": "2D (Australia)",
+                "away": "2G (Egypt)"
             },
             "87": {
                 "home": "1J (Argentina)",
                 "away": "3H (Cabo Verde)"
             },
             "88": {
-                "home": "2E (Ivory Coast)",
-                "away": "2I (Norway)"
+                "home": "1K (Colombia)",
+                "away": "3L (Ghana)"
             }
         },
         "bracket_progression": {
             "round_of_16": {
                 "89": {
                     "from": [
-                        "74",
-                        "77"
+                        "73",
+                        "74"
                     ]
                 },
                 "90": {
                     "from": [
                         "75",
-                        "73"
+                        "76"
                     ]
                 },
                 "91": {
                     "from": [
-                        "76",
+                        "77",
                         "78"
                     ]
                 },
@@ -96,26 +97,26 @@
                 },
                 "93": {
                     "from": [
-                        "83",
-                        "84"
-                    ]
-                },
-                "94": {
-                    "from": [
                         "81",
                         "82"
                     ]
                 },
+                "94": {
+                    "from": [
+                        "83",
+                        "84"
+                    ]
+                },
                 "95": {
                     "from": [
-                        "86",
-                        "88"
+                        "85",
+                        "86"
                     ]
                 },
                 "96": {
                     "from": [
-                        "85",
-                        "87"
+                        "87",
+                        "88"
                     ]
                 }
             },
@@ -128,14 +129,14 @@
                 },
                 "98": {
                     "from": [
-                        "93",
-                        "94"
+                        "91",
+                        "92"
                     ]
                 },
                 "99": {
                     "from": [
-                        "91",
-                        "92"
+                        "93",
+                        "94"
                     ]
                 },
                 "100": {

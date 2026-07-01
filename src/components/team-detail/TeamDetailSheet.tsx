@@ -55,6 +55,10 @@ export function TeamDetailSheet() {
   const initialTab = useStore((s) => s.teamSheetTab);
   const close = useStore((s) => s.closeTeamSheet);
   const openMatchDetail = useStore((s) => s.openMatchDetail);
+  const followedTeamId = useStore((s) => s.followedTeamId);
+  const toggleFollowedTeam = useStore((s) => s.toggleFollowedTeam);
+  const setActiveTab = useStore((s) => s.setActiveTab);
+  const bracketCopy = APP_COPY.bracket;
   const teams = useStore((s) => s.teams);
   const liveMatches = useStore((s) => s.liveMatches);
   const standings = useStore((s) => s.groupStandings);
@@ -255,9 +259,26 @@ export function TeamDetailSheet() {
               </div>
               {qual ? <QualificationStatusBadge qual={qual} display={badgeDisplay ?? undefined} size="sm" /> : null}
             </div>
-            <button type="button" onClick={close} aria-label="Close">
-              ×
-            </button>
+            <div className="team-sheet-header-actions">
+              <button
+                type="button"
+                className={`team-sheet-follow-bracket${followedTeamId === team.id ? " is-active" : ""}`}
+                onClick={() => {
+                  toggleFollowedTeam(team.id);
+                  if (followedTeamId !== team.id) {
+                    setActiveTab("bracket");
+                    close();
+                  }
+                }}
+              >
+                {followedTeamId === team.id
+                  ? bracketCopy.unfollowTeamButton
+                  : bracketCopy.followTeamButton}
+              </button>
+              <button type="button" onClick={close} aria-label="Close">
+                ×
+              </button>
+            </div>
           </header>
         </TeamThemeRoot>
 

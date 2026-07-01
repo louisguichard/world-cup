@@ -135,6 +135,20 @@ export function acquireApiQuota(source: ApiSourceId, intent: ApiRequestIntent): 
   return { allowed: true, remaining: remainingAfter, policyLimit: limit };
 }
 
+/** Ms until the quota gate allows another request for this source/intent. */
+export function msUntilApiQuotaAllows(
+  source: ApiSourceId,
+  intent: ApiRequestIntent,
+  nowMs = Date.now()
+): number {
+  const state = loadState();
+  const row = state.usage[source];
+  if (!row || row.lastRequestAt <= 0) return 0;
+  const minInterval = API_QUOTA_POLICY[source].minIntervalMs[intent];
+  const elapsed = nowMs - row.lastRequestAt;
+  return Math.max(0, minInterval - elapsed);
+}
+
 export function logApiQuotaBlock(
   source: ApiSourceId,
   intent: ApiRequestIntent,

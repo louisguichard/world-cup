@@ -61,7 +61,7 @@ describe("matchTeamDisplay", () => {
         group: "A",
         rows: [
           {
-            teamId: "usa",
+            teamId: "mex",
             group: "A",
             played: 3,
             wins: 3,
@@ -74,7 +74,7 @@ describe("matchTeamDisplay", () => {
             conduct: 0,
           },
           {
-            teamId: "mex",
+            teamId: "rsa",
             group: "A",
             played: 3,
             wins: 2,
@@ -87,7 +87,7 @@ describe("matchTeamDisplay", () => {
             conduct: 0,
           },
           {
-            teamId: "can",
+            teamId: "usa",
             group: "A",
             played: 3,
             wins: 1,
@@ -115,11 +115,11 @@ describe("matchTeamDisplay", () => {
         ],
       },
       {
-        group: "B",
+        group: "E",
         rows: [
           {
-            teamId: "bra",
-            group: "B",
+            teamId: "ger",
+            group: "E",
             played: 3,
             wins: 3,
             draws: 0,
@@ -131,8 +131,8 @@ describe("matchTeamDisplay", () => {
             conduct: 0,
           },
           {
-            teamId: "ecu",
-            group: "B",
+            teamId: "esp",
+            group: "E",
             played: 3,
             wins: 2,
             draws: 0,
@@ -144,21 +144,21 @@ describe("matchTeamDisplay", () => {
             conduct: 0,
           },
           {
-            teamId: "chi",
-            group: "B",
+            teamId: "ecu",
+            group: "E",
             played: 3,
             wins: 1,
-            draws: 0,
-            losses: 2,
-            goalsFor: 3,
-            goalsAgainst: 6,
-            goalDifference: -3,
-            points: 3,
+            draws: 1,
+            losses: 1,
+            goalsFor: 4,
+            goalsAgainst: 4,
+            goalDifference: 0,
+            points: 4,
             conduct: 0,
           },
           {
-            teamId: "bol",
-            group: "B",
+            teamId: "arg",
+            group: "E",
             played: 3,
             wins: 0,
             draws: 0,
@@ -174,9 +174,9 @@ describe("matchTeamDisplay", () => {
     ];
 
     const schedule = materializeFullSchedule(catalog, {}, standings);
-    const m81 = schedule.find((m) => m.matchId === "M81");
-    expect(m81?.homeTeamId).toBe("mex");
-    expect(teamDisplayNameForMatch(m81!, "home", catalog)).toBe("Mexico");
-    expect(teamDisplayNameForMatch(m81!, "away", catalog)).toBe("Ecuador");
+    const m79 = schedule.find((m) => m.matchId === "M79");
+    expect(m79?.homeTeamId).toBe("mex");
+    expect(teamDisplayNameForMatch(m79!, "home", catalog)).toBe("Mexico");
+    expect(teamDisplayNameForMatch(m79!, "away", catalog)).toBe("Ecuador");
   });
 });

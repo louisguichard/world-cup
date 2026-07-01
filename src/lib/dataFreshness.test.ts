@@ -85,10 +85,50 @@ describe("mergeLiveMatchRecords", () => {
     expect(changed).toBe(true);
   });
 
-  it("returns changed=true when schedule link or kickoff updates without score change", () => {
-    const existing = { m1: baseMatch({ matchId: undefined, date: "2026-06-15T19:00:00Z" }) };
-    const incoming = { m1: baseMatch({ matchId: "M12", date: "2026-06-15T18:00:00Z" }) };
-    const { changed } = mergeLiveMatchRecords(existing, incoming);
+  it("does not downgrade locked completed rows on poll merge", () => {
+    const existing = {
+      M76: baseMatch({
+        id: "M76",
+        status: "completed",
+        locked: true,
+        homeScore: 1,
+        awayScore: 2,
+      }),
+    };
+    const incoming = {
+      M76: baseMatch({
+        id: "M76",
+        status: "completed",
+        locked: false,
+        homeScore: 2,
+        awayScore: 1,
+      }),
+    };
+
+    const { merged, changed } = mergeLiveMatchRecords(existing, incoming);
+    expect(changed).toBe(false);
+    expect(merged.M76?.locked).toBe(true);
+    expect(merged.M76?.homeScore).toBe(1);
+    expect(merged.M76?.awayScore).toBe(2);
+  });
+
+  it("keeps locked finals when incoming poll omits the key", () => {
+    const existing = {
+      M76: baseMatch({
+        id: "M76",
+        status: "completed",
+        locked: true,
+        homeScore: 1,
+        awayScore: 2,
+      }),
+    };
+    const incoming = {
+      M78: baseMatch({ id: "M78", status: "live", homeScore: 0, awayScore: 0 }),
+    };
+
+    const { merged, changed } = mergeLiveMatchRecords(existing, incoming);
     expect(changed).toBe(true);
+    expect(merged.M76?.locked).toBe(true);
+    expect(merged.M78?.status).toBe("live");
   });
 });

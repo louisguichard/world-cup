@@ -1,6 +1,10 @@
 import { localDateKey } from "./localDate";
-import type { GroupLetter, MergedMatch, Stage } from "../types";
+import type { GroupLetter, MergedMatch, Stage, Team } from "../types";
 import { groupLockedResults, type ResultsSection } from "./resultsGrouping";
+import {
+  compareCompletedResults,
+  filterCompletedResults,
+} from "./buildCompletedResultsViewModel";
 
 export type ResultsSort = "recent" | "oldest" | "highest_scoring" | "biggest_win";
 
@@ -18,51 +22,12 @@ export type ResultsDaySection = {
   matches: MergedMatch[];
 };
 
-function totalGoals(m: MergedMatch): number {
-  return (m.homeScore ?? 0) + (m.awayScore ?? 0);
-}
-
-function goalMargin(m: MergedMatch): number {
-  return Math.abs((m.homeScore ?? 0) - (m.awayScore ?? 0));
-}
-
-function compareMatches(a: MergedMatch, b: MergedMatch, sort: ResultsSort): number {
-  switch (sort) {
-    case "oldest":
-      return Date.parse(a.date) - Date.parse(b.date);
-    case "highest_scoring":
-      return totalGoals(b) - totalGoals(a) || Date.parse(b.date) - Date.parse(a.date);
-    case "biggest_win":
-      return goalMargin(b) - goalMargin(a) || Date.parse(b.date) - Date.parse(a.date);
-    case "recent":
-    default:
-      return Date.parse(b.date) - Date.parse(a.date);
-  }
-}
-
-export function filterCompletedResults(matches: MergedMatch[], filters: ResultsFilters): MergedMatch[] {
-  const q = filters.search.trim().toLowerCase();
-  return matches
-    .filter((m) => m.status === "completed" && m.homeScore !== undefined)
-    .filter((m) => {
-      if (filters.stage === "all") return true;
-      if (filters.stage === "group") return Boolean(m.group);
-      return m.stage === filters.stage;
-    })
-    .filter((m) => {
-      if (filters.group === "all") return true;
-      return m.group === filters.group;
-    })
-    .filter((m) => {
-      if (!q) return true;
-      return m.homeTeamId.toLowerCase().includes(q) || m.awayTeamId.toLowerCase().includes(q);
-    });
-}
+export { compareCompletedResults, filterCompletedResults } from "./buildCompletedResultsViewModel";
 
 export function groupResultsByDay(matches: MergedMatch[], sort: ResultsSort): ResultsDaySection[] {
   const now = new Date();
   const todayKey = localDateKey(now);
-  const sorted = [...matches].sort((a, b) => compareMatches(a, b, sort));
+  const sorted = [...matches].sort((a, b) => compareCompletedResults(a, b, sort));
 
   const todayMatches = sorted.filter((m) => localDateKey(new Date(m.date)) === todayKey);
   const otherMatches = sorted.filter((m) => localDateKey(new Date(m.date)) !== todayKey);
@@ -89,13 +54,17 @@ export function groupResultsByDay(matches: MergedMatch[], sort: ResultsSort): Re
   return sections;
 }
 
-export function groupResultsForView(matches: MergedMatch[], filters: ResultsFilters): {
+export function groupResultsForView(
+  liveMatches: Record<string, MergedMatch>,
+  filters: ResultsFilters,
+  teams: Record<string, Team> = {}
+): {
   daySections: ResultsDaySection[];
   roundSections: ResultsSection[];
 } {
-  const filtered = filterCompletedResults(matches, filters);
+  const filtered = filterCompletedResults(liveMatches, filters, teams);
   return {
     daySections: groupResultsByDay(filtered, filters.sort),
-    roundSections: groupLockedResults(filtered)
+    roundSections: groupLockedResults(filtered),
   };
 }

@@ -12,12 +12,11 @@ import { SectionLoadingFallback } from "../shared/LoadingState";
 import { MODULE_IDS } from "../../lib/moduleIds";
 import { resolveTeamFromStore } from "../../data/wc2026TeamCatalog";
 import { useMaterializedScheduleBundle } from "../../hooks/useMaterializedSchedule";
+import { useActiveLiveDisplayMatches } from "../../hooks/useActiveLiveDisplayMatches";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
 import { useTournamentPhase } from "../../hooks/useTournamentPhase";
-import { resolveDisplayMatch } from "../../lib/resolveDisplayMatch";
 import { useBracketProjection } from "../../hooks/useBracketProjection";
 import { isKnockoutMatch } from "../../lib/resolveMatchWinner";
-import { isMergedMatchInActivePhase } from "../../lib/matchLifecycle";
 import { useStore } from "../../store";
 import { KnockoutRoundStatusBento } from "../bentos/KnockoutRoundStatusBento";
 import { ModuleSectionActions } from "../shared/ModuleSectionActions";
@@ -124,35 +123,11 @@ function LiveNowSection({
   const teams = useStore((s) => s.teams);
   const primaryId = useStore((s) => s.primaryLiveMatchId);
   const setPrimary = useStore((s) => s.setPrimaryMatch);
-  const { index: materializedIndex, schedule: materializedSchedule } = useMaterializedScheduleBundle();
+  const { schedule: materializedSchedule } = useMaterializedScheduleBundle();
+  const live = useActiveLiveDisplayMatches();
 
-  const live = useMemo(() => {
-    const rows = Object.values(liveMatchesMap)
-      .filter((m) => isMergedMatchInActivePhase(m))
-      .map((m) => resolveDisplayMatch(m, materializedIndex));
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
-      body: JSON.stringify({
-        sessionId: "0b0776",
-        location: "LiveView.tsx:live",
-        message: "live cards rendered",
-        data: {
-          count: rows.length,
-          ids: rows.map((m) => m.matchId ?? m.id),
-          teams: rows.map((m) => `${m.homeTeamId}/${m.awayTeamId}`),
-          statuses: rows.map((m) => m.status),
-        },
-        timestamp: Date.now(),
-        hypothesisId: "H1-live-ui",
-      }),
-    }).catch(() => {});
-    // #endregion
-    return rows;
-  }, [liveMatchesMap, materializedIndex]);
-
-  const primary = live.find((m) => m.id === primaryId) ?? live[0];
+  const primary =
+    live.find((m) => m.id === primaryId || m.matchId === primaryId) ?? live[0];
   const secondary = live.filter((m) => m.id !== primary?.id).slice(0, 6);
   const liveKicker = isKnockoutActive && !primary?.group ? activeRoundLabel : copy.liveNowKicker;
   const needsKnockoutProjection = Boolean(primary && isKnockoutMatch(primary));
@@ -230,13 +205,8 @@ function LiveNowSection({
 
 export function LiveView() {
   const copy = APP_COPY.live;
-  const liveCount = useStore((s) => {
-    let count = 0;
-    for (const m of Object.values(s.liveMatches)) {
-      if (isMergedMatchInActivePhase(m)) count++;
-    }
-    return count;
-  });
+  const live = useActiveLiveDisplayMatches();
+  const liveCount = live.length;
 
   const { isKnockoutActive, activeRoundLabel } = useTournamentPhase();
   const qualSectionReady = useDeferredMount(!isKnockoutActive);

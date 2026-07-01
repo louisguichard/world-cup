@@ -4,13 +4,18 @@ import { teamDisplayNameFromId } from "../../lib/matchTeamDisplay";
 import { teamDisplayName } from "../../lib/teamIdentity";
 import {
   findChildBracketMatchId,
-  lookupBracketLiveMatch,
   siblingFeederMatchId,
 } from "../../lib/bracketTree";
+import {
+  resolveDownstreamSlotDisplay,
+  resolveFeederMatchDisplay,
+} from "../../lib/brackets/resolveLiveBracketContext";
+import { resolveFixtureRef, buildFixtureRegistry } from "../../lib/registry";
 import type { BracketMatch, BracketSlotCertainty, MergedMatch, Team } from "../../types";
 import { TeamFlag } from "../team/TeamFlag";
 import { CertaintyBadge } from "../shared/CertaintyBadge";
 import { CompactMatchScore } from "../match/CompactMatchScore";
+import type { BracketContextMatchDisplay } from "../../lib/brackets/resolveLiveBracketContext";
 import styles from "./LiveBracketContextPanel.module.css";
 
 type Props = {
@@ -32,28 +37,23 @@ function bracketById(bracket: BracketMatch[]): Map<string, BracketMatch> {
 }
 
 function CtxMatchNode({
-  match,
-  live,
+  display,
   teamsById,
   label,
-  isLive,
 }: {
-  match: BracketMatch | MergedMatch;
-  live?: MergedMatch;
+  display: BracketContextMatchDisplay;
   teamsById: Record<string, Team>;
   label: string;
-  isLive?: boolean;
 }) {
-  const homeId = match.homeTeamId;
-  const awayId = match.awayTeamId;
+  const homeId = display.homeTeamId;
+  const awayId = display.awayTeamId;
   const home = homeId ? teamsById[homeId] : undefined;
   const away = awayId ? teamsById[awayId] : undefined;
-  const scoreMatch = live ?? (match.homeScore !== undefined ? (match as MergedMatch) : undefined);
 
   return (
-    <article className={`${styles.node} ${isLive ? styles.nodeLive : ""}`.trim()}>
+    <article className={`${styles.node} ${display.isLive ? styles.nodeLive : ""}`.trim()}>
       <header className={styles.nodeHead}>
-        {isLive ? <span className={styles.livePill}>LIVE</span> : null}
+        {display.isLive ? <span className={styles.livePill}>LIVE</span> : null}
         <span className={styles.nodeLabel}>{label}</span>
       </header>
       <div className={styles.nodeTeams}>
@@ -66,9 +66,15 @@ function CtxMatchNode({
           <span>{teamDisplayName(away, "TBD", undefined)}</span>
         </div>
       </div>
-      {scoreMatch && scoreMatch.homeScore !== undefined ? (
-        <div className={styles.nodeScore}>
-          <CompactMatchScore match={scoreMatch} perspective="home" />
+      {display.liveScoreMatch ? (
+        <div className={styles.nodeScore} aria-live="polite" aria-atomic="true">
+          <CompactMatchScore match={display.liveScoreMatch} perspective="home" />
+        </div>
+      ) : display.homeScore !== undefined ? (
+        <div className={styles.nodeScore} aria-live="polite" aria-atomic="true">
+          <span>
+            {display.homeScore}–{display.awayScore}
+          </span>
         </div>
       ) : null}
     </article>
@@ -77,17 +83,27 @@ function CtxMatchNode({
 
 function CtxRoundNode({
   match,
+  slotDisplay,
   teamsById,
   roundLabel,
 }: {
   match: BracketMatch;
+  slotDisplay: BracketContextMatchDisplay;
   teamsById: Record<string, Team>;
   roundLabel: string;
 }) {
-  const home = match.homeTeamId ? teamsById[match.homeTeamId] : undefined;
-  const away = match.awayTeamId ? teamsById[match.awayTeamId] : undefined;
-  const homeCertainty: BracketSlotCertainty = match.homeCertainty ?? (match.homeTeamId ? "projected" : "tbd");
-  const awayCertainty: BracketSlotCertainty = match.awayCertainty ?? (match.awayTeamId ? "projected" : "tbd");
+  const homeId = slotDisplay.homeTeamId ?? match.homeTeamId;
+  const awayId = slotDisplay.awayTeamId ?? match.awayTeamId;
+  const home = homeId ? teamsById[homeId] : undefined;
+  const away = awayId ? teamsById[awayId] : undefined;
+  const homeCertainty: BracketSlotCertainty =
+    homeId && homeId !== match.homeTeamId
+      ? "confirmed"
+      : (match.homeCertainty ?? (homeId ? "projected" : "tbd"));
+  const awayCertainty: BracketSlotCertainty =
+    awayId && awayId !== match.awayTeamId
+      ? "confirmed"
+      : (match.awayCertainty ?? (awayId ? "projected" : "tbd"));
 
   return (
     <article className={styles.roundNode}>
@@ -97,8 +113,8 @@ function CtxRoundNode({
       </header>
       <div className={styles.nodeTeams}>
         <div className={`${styles.nodeTeam} ${homeCertainty === "confirmed" ? styles.nodeTeamConfirmed : ""}`.trim()}>
-          {match.homeTeamId ? (
-            <TeamFlag team={home} teamId={match.homeTeamId} size="sm" compact />
+          {homeId ? (
+            <TeamFlag team={home} teamId={homeId} size="sm" compact />
           ) : (
             <span className={styles.dot} />
           )}
@@ -106,8 +122,8 @@ function CtxRoundNode({
           <CertaintyBadge certainty={homeCertainty} size="xs" />
         </div>
         <div className={`${styles.nodeTeam} ${awayCertainty === "confirmed" ? styles.nodeTeamConfirmed : ""}`.trim()}>
-          {match.awayTeamId ? (
-            <TeamFlag team={away} teamId={match.awayTeamId} size="sm" compact />
+          {awayId ? (
+            <TeamFlag team={away} teamId={awayId} size="sm" compact />
           ) : (
             <span className={styles.dot} />
           )}
@@ -120,17 +136,34 @@ function CtxRoundNode({
 }
 
 export function LiveBracketContextPanel({ liveMatch, bracket, teamsById, liveMatches }: Props) {
-  const liveMatchId = liveMatch.matchId ?? liveMatch.id;
-  const childId = findChildBracketMatchId(liveMatchId);
+  const fixtureRegistry = buildFixtureRegistry();
+  const canonicalMatchId =
+    resolveFixtureRef(liveMatch, teamsById, fixtureRegistry) ??
+    liveMatch.matchId ??
+    liveMatch.id;
+  const childId = findChildBracketMatchId(canonicalMatchId);
   if (!childId) return null;
 
   const byId = bracketById(bracket);
   const r16Match = byId.get(childId);
-  const siblingId = siblingFeederMatchId(childId, liveMatchId);
+  const siblingId = siblingFeederMatchId(childId, canonicalMatchId);
   if (!r16Match || !siblingId) return null;
 
   const siblingBracket = byId.get(siblingId);
-  const siblingLive = lookupBracketLiveMatch(liveMatches, siblingId);
+  const siblingDisplay = resolveFeederMatchDisplay(
+    siblingId,
+    siblingBracket,
+    liveMatches,
+    teamsById
+  );
+  const downstreamDisplay = resolveDownstreamSlotDisplay(r16Match, liveMatches, teamsById);
+  const thisMatchDisplay = resolveFeederMatchDisplay(
+    canonicalMatchId,
+    byId.get(canonicalMatchId),
+    liveMatches,
+    teamsById
+  );
+
   const roundLabel = STAGE_LABELS[r16Match.stage] ?? r16Match.stage;
   const siblingInfo = knockoutSchedule[siblingId];
   const siblingKickoff = siblingInfo
@@ -141,36 +174,33 @@ export function LiveBracketContextPanel({ liveMatch, bracket, teamsById, liveMat
     <section className={styles.panel} aria-label="Knockout path context">
       <div className={styles.flow}>
         <CtxMatchNode
-          match={liveMatch}
-          live={liveMatch}
+          display={thisMatchDisplay.isLive ? thisMatchDisplay : { ...thisMatchDisplay, isLive: liveMatch.status === "live" }}
           teamsById={teamsById}
           label="This match"
-          isLive={liveMatch.status === "live"}
         />
         <div className={styles.arrow} aria-hidden>
           →
         </div>
-        <CtxRoundNode match={r16Match} teamsById={teamsById} roundLabel={roundLabel} />
+        <CtxRoundNode
+          match={r16Match}
+          slotDisplay={downstreamDisplay}
+          teamsById={teamsById}
+          roundLabel={roundLabel}
+        />
       </div>
 
       <div className={styles.sibling}>
         <span className={styles.siblingLabel}>Opponent determined by</span>
-        {siblingBracket ? (
-          <CtxMatchNode
-            match={siblingBracket}
-            live={siblingLive}
-            teamsById={teamsById}
-            label={siblingKickoff}
-            isLive={siblingLive?.status === "live"}
-          />
+        {siblingDisplay.homeTeamId || siblingDisplay.awayTeamId ? (
+          <CtxMatchNode display={siblingDisplay} teamsById={teamsById} label={siblingKickoff} />
         ) : (
           <p className={styles.siblingFallback}>
-            {siblingLive?.homeTeamId
-              ? teamDisplayNameFromId(siblingLive.homeTeamId, teamsById)
+            {siblingDisplay.homeTeamId
+              ? teamDisplayNameFromId(siblingDisplay.homeTeamId, teamsById)
               : "TBD"}{" "}
             vs{" "}
-            {siblingLive?.awayTeamId
-              ? teamDisplayNameFromId(siblingLive.awayTeamId, teamsById)
+            {siblingDisplay.awayTeamId
+              ? teamDisplayNameFromId(siblingDisplay.awayTeamId, teamsById)
               : "TBD"}{" "}
             ({siblingKickoff})
           </p>

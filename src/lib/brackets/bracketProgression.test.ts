@@ -39,15 +39,15 @@ describe("bracketProgression", () => {
     expect(thirdPlaceFixtureFromJson()).toEqual(["M103", "L101", "L102"]);
   });
 
-  it("places Germany/Paraguay on M76 (1E vs 3D)", () => {
-    const m76 = ROUND_OF_32_FIXTURES.find(([id]) => id === "M76");
-    expect(m76).toEqual(["M76", "1E", "3D"]);
-    expect(KNOCKOUT_ROUND_FIXTURES.R16).toContainEqual(["M91", "W76", "W78"]);
+  it("places Germany/Paraguay on M75 (1E vs 3D)", () => {
+    const m75 = ROUND_OF_32_FIXTURES.find(([id]) => id === "M75");
+    expect(m75).toEqual(["M75", "1E", "3D"]);
+    expect(KNOCKOUT_ROUND_FIXTURES.R16).toContainEqual(["M90", "W75", "W76"]);
   });
 
-  it("places Brazil/Japan on M85 (1C vs 2F)", () => {
-    const m85 = ROUND_OF_32_FIXTURES.find(([id]) => id === "M85");
-    expect(m85).toEqual(["M85", "1C", "2F"]);
+  it("places Brazil/Japan on M74 (1C vs 2F)", () => {
+    const m74 = ROUND_OF_32_FIXTURES.find(([id]) => id === "M74");
+    expect(m74).toEqual(["M74", "1C", "2F"]);
   });
 
   it("places each R16 feeder pair adjacent in R32 visual order", () => {

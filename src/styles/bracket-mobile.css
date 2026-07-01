@@ -11,6 +11,34 @@
   min-width: 0;
 }
 
+.live-bracket-embed .bracket-controls {
+  margin-bottom: 12px;
+}
+
+.live-bracket-embed__tree-note {
+  margin-top: 6px;
+}
+
+.live-bracket-embed__tree-link {
+  margin-top: 8px;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.live-bracket-embed__tree-link:hover {
+  text-decoration: underline;
+}
+
+.live-bracket-embed .bracket-controls--embed {
+  grid-template-columns: 1fr;
+}
+
 .live-bracket-embed .bracket-scroll {
   overflow-x: auto;
   overflow-y: visible;
@@ -20,7 +48,8 @@
 }
 
 .live-bracket-embed .bracket-section {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   max-width: 100%;
   min-width: 0;
 }
@@ -83,20 +112,11 @@
 }
 
 .live-bracket-embed .bracket-head {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  gap: var(--bracket-col-gap);
+  display: grid;
+  grid-template-columns: repeat(var(--bracket-stage-count, 5), var(--bracket-col-width));
+  column-gap: var(--bracket-col-gap);
   width: max-content;
   min-width: max-content;
-}
-
-.live-bracket-embed .bracket-head h3 {
-  flex: 0 0 var(--bracket-col-width);
-  width: var(--bracket-col-width);
-  min-width: var(--bracket-col-width);
-  margin: 0;
-  text-align: center;
 }
 
 @media (max-width: 1023px) {
@@ -109,7 +129,8 @@
 
   .bracket-view .bracket-section,
   .live-bracket-embed .bracket-section {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     max-width: 100%;
     min-width: 0;
   }
@@ -127,11 +148,9 @@
   }
 
   .bracket-head {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: flex-start;
-    gap: var(--bracket-col-gap);
+    display: grid;
+    grid-template-columns: repeat(var(--bracket-stage-count, 5), var(--bracket-col-width));
+    column-gap: var(--bracket-col-gap);
     width: max-content;
     min-width: max-content;
     margin-bottom: 10px;
@@ -139,12 +158,19 @@
   }
 
   .bracket-head h3 {
-    flex: 0 0 var(--bracket-col-width);
-    width: var(--bracket-col-width);
-    min-width: var(--bracket-col-width);
     margin: 0;
     text-align: center;
     font-size: 0.75rem;
+    min-width: 0;
+  }
+
+  .bracket-view .bracket-rounds-grid,
+  .live-bracket-embed .bracket-rounds-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--bracket-stage-count, 5), var(--bracket-col-width));
+    column-gap: var(--bracket-col-gap);
+    width: max-content;
+    min-width: max-content;
   }
 
   .bracket-view .bracket-rounds,
@@ -161,29 +187,18 @@
     max-height: none !important;
   }
 
-  .bracket-rounds {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: var(--bracket-col-gap);
+  .bracket-rounds:not(.bracket-rounds--schedule) {
     position: relative;
-    width: max-content;
-    min-width: max-content;
-    min-height: 0 !important;
-    height: auto !important;
     padding-bottom: 8px;
   }
 
   .bracket-round {
     display: flex;
     flex-direction: column;
-    flex: 0 0 var(--bracket-col-width);
-    width: var(--bracket-col-width);
-    min-width: var(--bracket-col-width);
+    width: 100%;
+    min-width: 0;
     height: auto !important;
-    align-self: flex-start;
+    align-self: start;
     justify-content: flex-start !important;
     gap: var(--bracket-card-gap);
   }
@@ -305,9 +320,26 @@
     scroll-snap-stop: always;
   }
 
+  .bracket-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+  }
+
   .bracket-view .bracket-toggle {
     grid-template-columns: 1fr 1fr !important;
     font-size: 0.8rem;
+  }
+
+  .live-bracket-embed .bracket-toggle {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .live-bracket-embed .bracket-toggle-subtitle {
+    display: none;
+  }
+
+  .live-bracket-embed .bracket-hint {
+    font-size: 0.78rem;
   }
 
   .bracket-view .hero-panel--compact h1 {

@@ -24,6 +24,36 @@ describe("applyLiveScore", () => {
     expect(result.homeScore).toBe(2);
   });
 
+  it("result-final locked survives poll from lower-precedence source", () => {
+    const locked = { ...base, locked: true, status: "completed" as const, homeScore: 2, awayScore: 1 };
+    const result = applyLiveScore(locked, { homeScore: 0, awayScore: 0 }, "espn");
+    expect(result.homeScore).toBe(2);
+    expect(result.awayScore).toBe(1);
+  });
+
+  it("allows ESPN to refresh in-play rows that were incorrectly locked", () => {
+    const locked = {
+      ...base,
+      source: "espn" as const,
+      dataSource: "espn" as const,
+      locked: true,
+      homeScore: 0,
+      awayScore: 0,
+      clockMinute: 45,
+      period: "full_time" as const,
+    };
+    const result = applyLiveScore(locked, {
+      homeScore: 2,
+      awayScore: 0,
+      clockMinute: 52,
+      period: "second_half",
+      status: "live",
+    }, "espn");
+    expect(result.homeScore).toBe(2);
+    expect(result.period).toBe("second_half");
+    expect(result.locked).toBe(false);
+  });
+
   it("sofascore beats espn when applied via applyLiveScore", () => {
     const result = applyLiveScore(base, { homeScore: 2 }, "espn");
     expect(result.homeScore).toBe(1);

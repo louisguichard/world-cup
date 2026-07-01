@@ -58,7 +58,13 @@ export function pairKey(first: string, second: string): string {
 
 /** UTC-noon date key for cross-provider match linking (Fix 1–2). */
 export function matchCompositeKey(teamA: string, teamB: string, isoDate: string): string {
+  if (!isoDate) {
+    return `${pairKey(teamA, teamB)}__unknown-date`;
+  }
   const d = new Date(isoDate);
+  if (!Number.isFinite(d.getTime())) {
+    return `${pairKey(teamA, teamB)}__unknown-date`;
+  }
   d.setUTCHours(12, 0, 0, 0);
   const dateKey = d.toISOString().slice(0, 10);
   return `${pairKey(teamA, teamB)}__${dateKey}`;

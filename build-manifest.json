@@ -1,6 +1,214 @@
 {
-  "updatedAt": "2026-06-30T18:16:35.678Z",
+  "updatedAt": "2026-07-01T03:16:28.081Z",
   "builds": [
+    {
+      "version": "5.0.0",
+      "build": 68,
+      "kind": "build",
+      "message": "159 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, package.json — 159 files changed, 20632 insertions(+), 7263 deletions(-)",
+      "date": "2026-07-01",
+      "timestamp": "2026-07-01T03:16:28.081Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 67,
+      "kind": "build",
+      "message": "Canonical locked R32 results, ESPN slot authority, knockout display fixes",
+      "date": "2026-07-01",
+      "timestamp": "2026-07-01T01:16:55.023Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 66,
+      "kind": "build",
+      "message": "Rebase knockout bracket on FIFA schedule M## (ESPN-aligned); add crosswalk, audit script, regression tests",
+      "date": "2026-07-01",
+      "timestamp": "2026-07-01T00:31:13.612Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 65,
+      "kind": "build",
+      "message": "Follow-team bracket path filter with persisted highlight",
+      "date": "2026-07-01",
+      "timestamp": "2026-07-01T00:14:56.603Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 64,
+      "kind": "build",
+      "message": "Mobile bracket tree round-swipe carousel with pill nav sync",
+      "date": "2026-07-01",
+      "timestamp": "2026-07-01T00:12:41.763Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 63,
+      "kind": "build",
+      "message": "Bracket tree pan/zoom on split canvas viewport",
+      "date": "2026-07-01",
+      "timestamp": "2026-07-01T00:10:57.798Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 62,
+      "kind": "build",
+      "message": "Split symmetrical bracket canvas on desktop tree view",
+      "date": "2026-07-01",
+      "timestamp": "2026-07-01T00:09:23.308Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 61,
+      "kind": "build",
+      "message": "Phase 5: sync bracket projection and tree path highlight on hover",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T23:49:43.353Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 60,
+      "kind": "build",
+      "message": "Phase 4: acceptance test gate, QA checklist, qa:phase4 script",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T23:45:43.178Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 59,
+      "kind": "build",
+      "message": "Block FIFA from overwriting ESPN live scores; defer first poll past quota gate; add FIFA merge logging",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T23:43:19.700Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 58,
+      "kind": "build",
+      "message": "Phase 3: Live bracket tree link, knockout desktop tree default",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T23:42:34.924Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 57,
+      "kind": "build",
+      "message": "Phase 2: unified completed results view model for Live recent and Results tab",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T23:41:20.515Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 56,
+      "kind": "build",
+      "message": "Phase 1: commitLiveMatchStore, boot poll gate, locked knockout standings guard",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T23:39:32.122Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 55,
+      "kind": "build",
+      "message": "Fix live dedupe count, penalty UI gate, knockout stage ids, recent results dedupe",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T23:25:08.374Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 54,
+      "kind": "build",
+      "message": "Week C: bracket UX polish, poll merge policy, cache write",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T23:20:05.139Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 53,
+      "kind": "build",
+      "message": "Week B: slot identity, view-model adapter, live context panel",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T23:17:40.784Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 52,
+      "kind": "build",
+      "message": "Week A: boot cache merge, lock policy, live bracket context",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T23:12:52.255Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 51,
+      "kind": "build",
+      "message": "Bracket UX: responsive layout, round nav, compact tree cards, match tap, desktop-only connectors",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T22:40:18.105Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 50,
+      "kind": "build",
+      "message": "Narrow live data contract: ESPN lifecycle, result-final lock, live-window polling",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T22:37:14.980Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 49,
+      "kind": "build",
+      "message": "Client registry Phases 0–2: team/fixture resolve, dedupe, kickoff validation",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T22:09:47.345Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 48,
+      "kind": "build",
+      "message": "Fix LiveView gate: resolve kickoff before active-phase filter",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T20:56:09.209Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 47,
+      "kind": "build",
+      "message": "Fix live card locked gate, kickoff drift, remove debug beacons, harden ESPN protection",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:56:18.197Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 46,
+      "kind": "build",
+      "message": "Fix bracket grid shift from connector overlay consuming first column",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:43:15.363Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 45,
+      "kind": "build",
+      "message": "Fix bracket column alignment, full R32 render, winner/score consistency",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:28:08.205Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 44,
+      "kind": "build",
+      "message": "Protect manual and locked matches from ESPN poll overwrite",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:23:06.818Z"
+    },
+    {
+      "version": "5.0.0",
+      "build": 43,
+      "kind": "build",
+      "message": "Bracket date schedule layout, visual-order date tie-break, active-phase feeders",
+      "date": "2026-06-30",
+      "timestamp": "2026-06-30T18:20:45.332Z"
+    },
     {
       "version": "5.0.0",
       "build": 42,
@@ -112,217 +320,17 @@
       "message": "Finalize bracket SoT in getR32Slots and knockoutRoundFixtures per JSON",
       "date": "2026-06-30",
       "timestamp": "2026-06-30T17:33:05.322Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 28,
-      "kind": "build",
-      "message": "Complete bracket resolution: ThirdPlace, official ESPN slot re-key, remove thirdPlaceMap from R32",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T17:29:41.476Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 27,
-      "kind": "build",
-      "message": "Import official knockout bracket JSON and JSON parity tests",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T17:24:57.440Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 26,
-      "kind": "build",
-      "message": "Align bracket engine 1:1 with world_cup_2026_knockout_bracket.json",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T17:23:42.330Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 25,
-      "kind": "build",
-      "message": "Bracket runtime audit instrumentation",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T17:19:46.669Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 24,
-      "kind": "build",
-      "message": "Audit-corrected WC2026 bracket progression and R32 fixtures",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T17:19:21.047Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 23,
-      "kind": "build",
-      "message": "34 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, scripts, src, version.json — 34 files changed, 767 insertions(+), 438 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:39:15.734Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 22,
-      "kind": "build",
-      "message": "Remove debug instrumentation and trim perf hot-path bloat",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:38:38.809Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 21,
-      "kind": "build",
-      "message": "Shared schedule and qual caches; dedupe expensive derived data across components",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:36:51.821Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 20,
-      "kind": "build",
-      "message": "Skip schedule/qual recompute on clock ticks; defer Live heavy sections",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:32:19.415Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 19,
-      "kind": "build",
-      "message": "Defer bracket projection and tab nav to fix UI freeze on tab/drawer switch",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:28:20.693Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 18,
-      "kind": "build",
-      "message": "Bracket team names 2-line clamp all viewports; fix embed head alignment",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:25:03.324Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 17,
-      "kind": "build",
-      "message": "22 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 22 files changed, 942 insertions(+), 273 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:23:06.034Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 16,
-      "kind": "build",
-      "message": "Show match dates on schedule cards, venue rows, and timeline",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:22:31.067Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 15,
-      "kind": "build",
-      "message": "Fix bracket fixture table, confirmed-only live overlay, R16 feeders",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:20:47.352Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 14,
-      "kind": "build",
-      "message": "Mobile bracket layout overhaul and UI debug text-truncation scan",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:19:54.884Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 13,
-      "kind": "build",
-      "message": "Defer bracket projection off main thread; fix mobile cell overflow",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:07:56.592Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 12,
-      "kind": "build",
-      "message": "25 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, scripts, src, version.json — 25 files changed, 1139 insertions(+), 150 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T07:00:02.385Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 11,
-      "kind": "build",
-      "message": "Remove debug instrumentation after bracket perf and smart polling verification",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:59:53.399Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 10,
-      "kind": "build",
-      "message": "Stop bracket poll cascade: projection fingerprint, remove liveMatches schedule subscription",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:57:43.159Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 9,
-      "kind": "build",
-      "message": "Bracket perf fixes: fingerprint selectors, RAF measure debounce, startTransition toggle",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:54:33.672Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 8,
-      "kind": "build",
-      "message": "Locked-in bracket uses buildConfirmedOnlyBracket, no projection leak",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:52:20.550Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 7,
-      "kind": "build",
-      "message": "Smart match-lifecycle polling: phase-aware intervals and heavy/light source selection",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:52:01.346Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 6,
-      "kind": "build",
-      "message": "Bracket perf: transition toggle, knockout selectors, RAF measure, venue hero fallback",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:41:38.502Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 5,
-      "kind": "build",
-      "message": "Bracket toggle responsiveness: click-through overlay, mobile scroll, deferred projection",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:38:46.434Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 4,
-      "kind": "build",
-      "message": "8 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 8 files changed, 224 insertions(+), 48 deletions(-)",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:32:43.879Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 3,
-      "kind": "build",
-      "message": "Bracket visual order + paired elbow connectors fix crossing lines",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T06:25:28.651Z"
     }
   ],
   "commits": [
+    {
+      "hash": "5f169d630ac8cda741583152ac2ab0c58c18fb22",
+      "shortHash": "5f169d6",
+      "message": "Record v5.0.0 build 42 production deploy on Vercel.",
+      "version": "5.0.0",
+      "build": 42,
+      "timestamp": "2026-06-30T18:16:49.035Z"
+    },
     {
       "hash": "bea5afb3534b778b3230a9e4124f1ef0600105ea",
       "shortHash": "bea5afb",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 73,
       "timestamp": "2026-06-28T20:13:29.835Z"
-    },
-    {
-      "hash": "46fc9be49902c80206bf13d8d82aea101959ae00",
-      "shortHash": "46fc9be",
-      "message": "Add Phase 1 polling governor and Phase 2 frontend performance plan.",
-      "version": "4.0.0",
-      "build": 73,
-      "timestamp": "2026-06-28T20:11:26.166Z"
     }
   ],
   "deploys": [

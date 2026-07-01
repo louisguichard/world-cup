@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { knockoutStageFromMatchId } from "../../lib/brackets/knockoutStageFromMatchId";
 import { useStore } from "../../store";
 import { useTournamentPhase } from "../../hooks/useTournamentPhase";
 import { TeamFlag } from "../team/TeamFlag";
@@ -26,14 +27,7 @@ interface RoundSummary {
 }
 
 function deriveStageFromMatchId(matchId: string): string {
-  const num = Number(matchId.replace(/^M/, ""));
-  if (!Number.isFinite(num)) return "";
-  if (num >= 73 && num <= 104) return "R32";
-  if (num >= 105 && num <= 120) return "R16";
-  if (num >= 121 && num <= 124) return "QF";
-  if (num >= 125 && num <= 126) return "SF";
-  if (num === 127 || num === 128) return "Final";
-  return "";
+  return knockoutStageFromMatchId(matchId) ?? "";
 }
 
 function buildConfirmedRoundSummaries(

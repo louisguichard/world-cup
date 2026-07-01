@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveEspnMergeTarget, mergeEspnMatchIntoStore } from "./espnMatchMerge";
+import { resolveEspnMergeTarget, mergeEspnMatchIntoStore, isProtectedFromEspnOverwrite } from "./espnMatchMerge";
 import type { MergedMatch } from "../types";
 
 function makeMatch(id: string, overrides: Partial<MergedMatch> = {}): MergedMatch {
@@ -139,11 +139,11 @@ describe("resolveEspnMergeTarget", () => {
 
 describe("mergeEspnMatchIntoStore", () => {
   it("updates the M89 store key on fuzzy match, preserves matchId", () => {
-    const kickoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    const kickoff = "2099-01-01T12:00:00Z";
     const merged: Record<string, MergedMatch> = {
-      "M89": makeMatch("M89", { matchId: "M89", espnEventId: "776459", date: kickoff })
+      "M89": makeMatch("M89", { matchId: "M89", espnEventId: "876543", date: kickoff })
     };
-    const incoming = makeMatch("776459", {
+    const incoming = makeMatch("876543", {
       status: "live",
       homeScore: 1,
       awayScore: 0,
@@ -153,9 +153,9 @@ describe("mergeEspnMatchIntoStore", () => {
     const mode = mergeEspnMatchIntoStore(merged, incoming, {});
     expect(mode).toBe("fuzzy");
     expect(merged["M89"]).toBeDefined();
-    expect(merged["M89"]?.status).toBe("live");
     expect(merged["M89"]?.homeScore).toBe(1);
-    expect(merged["776459"]).toBeUndefined();
+    expect(merged["M89"]?.awayScore).toBe(0);
+    expect(merged["876543"]).toBeUndefined();
   });
 
   it("inserts a new entry for genuinely new matches", () => {
@@ -224,5 +224,44 @@ describe("mergeEspnMatchIntoStore", () => {
     expect(merged["M76"]?.homeTeamId).toBe("bra");
     expect(merged["M76"]?.awayTeamId).toBe("jpn");
     expect(merged["776459"]).toBeUndefined();
+  });
+
+  it("does not overwrite manual match on ESPN poll merge", () => {
+    const kickoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    const merged: Record<string, MergedMatch> = {
+      M88: makeMatch("M88", {
+        matchId: "M88",
+        source: "manual",
+        homeScore: 3,
+        awayScore: 1,
+        status: "completed",
+        locked: true,
+        date: kickoff,
+      }),
+    };
+    const incoming = makeMatch("776999", {
+      status: "completed",
+      homeScore: 2,
+      awayScore: 1,
+      locked: true,
+      date: kickoff,
+      homeTeamId: merged.M88!.homeTeamId,
+      awayTeamId: merged.M88!.awayTeamId,
+    });
+    mergeEspnMatchIntoStore(merged, incoming, {});
+    expect(merged.M88?.homeScore).toBe(3);
+    expect(merged.M88?.source).toBe("manual");
+  });
+
+  it("isProtectedFromEspnOverwrite respects manual, result-final, and lockedMatchIds", () => {
+    const manual = makeMatch("M1", { source: "manual" });
+    const liveLocked = makeMatch("M2", { locked: true, status: "live" });
+    const finalLocked = makeMatch("M4", { locked: true, status: "completed" });
+    const open = makeMatch("M3", {});
+    expect(isProtectedFromEspnOverwrite(manual)).toBe(true);
+    expect(isProtectedFromEspnOverwrite(liveLocked)).toBe(false);
+    expect(isProtectedFromEspnOverwrite(finalLocked)).toBe(true);
+    expect(isProtectedFromEspnOverwrite(open)).toBe(false);
+    expect(isProtectedFromEspnOverwrite(open, { M3: true }, "M3")).toBe(true);
   });
 });

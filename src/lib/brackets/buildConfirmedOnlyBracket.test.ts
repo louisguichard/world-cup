@@ -57,10 +57,8 @@ const slotStandings: GroupStanding[] = [
 
 describe("buildConfirmedOnlyBracket", () => {
   it("does not advance eliminated teams into later rounds", () => {
-    const teams = [team("ger", "E"), team("par", "F"), team("fra", "F")];
-    const liveMatches: Record<string, MergedMatch> = {
-      M76: liveMatch({ id: "M76", matchId: "M76", homeTeamId: "ger", awayTeamId: "par" }),
-    };
+    const teams = [team("ger", "E"), team("par", "F"), team("fra", "F"), team("ned", "F"), team("mar", "C")];
+    const liveMatches: Record<string, MergedMatch> = {};
 
     const { bracket } = buildConfirmedOnlyBracket(teams, [] as Match[], liveMatches, {
       lockedGroupMatchCount: {},
@@ -78,10 +76,10 @@ describe("buildConfirmedOnlyBracket", () => {
 
     expect(laterWithGermany).toHaveLength(0);
 
-    const m76 = bracket.find((slot) => slot.id === "M76");
-    expect(m76?.homeTeamId).toBe("ger");
-    expect(m76?.awayTeamId).toBe("par");
-    expect(m76?.winnerTeamId).toBe("par");
+    const m75 = bracket.find((slot) => slot.id === "M75");
+    expect(m75?.homeTeamId).toBe("ger");
+    expect(m75?.awayTeamId).toBe("par");
+    expect(m75?.winnerTeamId).toBe("par");
   });
 
   it("only confirms later-round slots from locked feeder winners", () => {
@@ -91,61 +89,82 @@ describe("buildConfirmedOnlyBracket", () => {
       team("par", "F"),
       team("ger", "E"),
       team("rsa", "A"),
+      team("ned", "F"),
+      team("mar", "C"),
     ];
-    const liveMatches: Record<string, MergedMatch> = {
-      M73: liveMatch({
-        id: "M73",
-        matchId: "M73",
-        homeTeamId: "can",
-        awayTeamId: "rsa",
-        homeScore: 1,
-        awayScore: 0,
-        penaltyShootout: undefined,
-      }),
-      M75: liveMatch({
-        id: "M75",
-        matchId: "M75",
-        homeTeamId: "usa",
-        awayTeamId: "par",
-        homeScore: 2,
-        awayScore: 1,
-        penaltyShootout: undefined,
-      }),
-    };
+    const liveMatches: Record<string, MergedMatch> = {};
 
     const { bracket } = buildConfirmedOnlyBracket(teams, [] as Match[], liveMatches, {
       lockedGroupMatchCount: {},
       lockedStandingsByGroup: {
-        A: [row("can", "A", 9), row("rsa", "A", 6), row("mex", "A", 3), row("per", "A", 0)],
-        D: [row("usa", "D", 9), row("par", "D", 6), row("crc", "D", 3), row("cuw", "D", 0)],
         E: slotStandings[0]!.rows,
         F: slotStandings[1]!.rows,
+        C: [row("mar", "C", 9), row("bra", "C", 6), row("crc", "C", 3), row("cuw", "C", 0)],
       },
     });
 
     const m90 = bracket.find((slot) => slot.id === "M90");
-    expect(m90?.homeTeamId).toBe("usa");
-    expect(m90?.awayTeamId).toBe("can");
+    expect(m90?.homeTeamId).toBe("par");
+    expect(m90?.awayTeamId).toBe("mar");
     expect(m90?.homeCertainty).toBe("confirmed");
     expect(m90?.awayCertainty).toBe("confirmed");
   });
 
   it("prefers live ESPN team ids over standings-derived R32 slots", () => {
-    const teams = [team("ger", "E"), team("par", "F"), team("hai", "F")];
+    const teams = [team("ger", "E"), team("par", "F"), team("hai", "F"), team("mex", "A"), team("ecu", "E")];
     const liveMatches: Record<string, MergedMatch> = {
-      M76: liveMatch({ id: "M76", matchId: "M76", homeTeamId: "ger", awayTeamId: "par" }),
+      M79: liveMatch({
+        id: "M79",
+        matchId: "M79",
+        homeTeamId: "mex",
+        awayTeamId: "ecu",
+        homeScore: 0,
+        awayScore: 0,
+        status: "scheduled",
+        locked: false,
+        penaltyShootout: undefined,
+      }),
     };
 
     const { bracket } = buildConfirmedOnlyBracket(teams, [] as Match[], liveMatches, {
       lockedGroupMatchCount: {},
       lockedStandingsByGroup: {
+        A: [row("mex", "A", 9), row("rsa", "A", 6), row("usa", "A", 3), row("per", "A", 0)],
+        E: [row("ecu", "E", 9), row("ger", "E", 6), row("crc", "E", 3), row("civ", "E", 0)],
+      },
+    });
+
+    const m79 = bracket.find((slot) => slot.id === "M79");
+    expect(m79?.homeTeamId).toBe("mex");
+    expect(m79?.awayTeamId).toBe("ecu");
+    expect(m79?.awayTeamId).not.toBe("hai");
+  });
+
+  it("does not advance eliminated NED from locked M76 into R16 when standings drift", () => {
+    const teams = [
+      team("ned", "F"),
+      team("mar", "C"),
+      team("por", "K"),
+      team("ita", "I"),
+      team("ger", "E"),
+      team("par", "F"),
+    ];
+    const liveMatches: Record<string, MergedMatch> = {};
+
+    const { bracket } = buildConfirmedOnlyBracket(teams, [] as Match[], liveMatches, {
+      lockedGroupMatchCount: {},
+      lockedStandingsByGroup: {
+        F: [row("ned", "F", 9), row("par", "F", 6), row("hai", "F", 3), row("swe", "F", 0)],
+        C: [row("mar", "C", 9), row("bra", "C", 6), row("crc", "C", 3), row("cuw", "C", 0)],
         E: slotStandings[0]!.rows,
-        F: slotStandings[1]!.rows,
       },
     });
 
     const m76 = bracket.find((slot) => slot.id === "M76");
-    expect(m76?.awayTeamId).toBe("par");
-    expect(m76?.awayTeamId).not.toBe("hai");
+    expect(m76?.winnerTeamId).toBe("mar");
+
+    const m90 = bracket.find((slot) => slot.id === "M90");
+    expect(m90?.awayTeamId).toBe("mar");
+    expect(m90?.awayTeamId).not.toBe("ned");
   });
 });

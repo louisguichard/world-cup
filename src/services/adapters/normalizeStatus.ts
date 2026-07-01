@@ -17,7 +17,6 @@ export function mapExternalStatus(raw: unknown): MatchStatus | undefined {
   if (
     s === "completed" ||
     s === "finished" ||
-    s === "post" ||
     s === "ft" ||
     s === "full_time" ||
     s.includes("final")

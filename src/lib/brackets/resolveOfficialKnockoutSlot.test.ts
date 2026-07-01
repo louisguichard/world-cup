@@ -29,7 +29,7 @@ describe("resolveOfficialKnockoutSlot", () => {
     },
   ];
 
-  it("trusts stored bracket match id before seed or venue heuristics", () => {
+  it("re-resolves when stored id contradicts fixture seeds", () => {
     const match: MergedMatch = {
       id: "M75",
       matchId: "M75",
@@ -60,6 +60,6 @@ describe("resolveOfficialKnockoutSlot", () => {
       awayConduct: 0,
     };
 
-    expect(resolveOfficialKnockoutSlotId(match, "espn-401547", standings, teams)).toBe("M76");
+    expect(resolveOfficialKnockoutSlotId(match, "espn-401547", standings, teams)).toBe("M75");
   });
 });

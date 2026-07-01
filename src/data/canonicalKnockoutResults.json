@@ -1,0 +1,57 @@
+{
+  "description": "Authoritative locked FIFA schedule M73–M78 R32 results (ESPN-aligned). Overrides polls when locked.",
+  "matches": {
+    "M73": {
+      "espnEventId": "760486",
+      "homeTeamId": "rsa",
+      "awayTeamId": "can",
+      "homeScore": 0,
+      "awayScore": 1,
+      "stage": "R32"
+    },
+    "M74": {
+      "espnEventId": "760487",
+      "homeTeamId": "bra",
+      "awayTeamId": "jpn",
+      "homeScore": 2,
+      "awayScore": 1,
+      "stage": "R32"
+    },
+    "M75": {
+      "espnEventId": "760489",
+      "homeTeamId": "ger",
+      "awayTeamId": "par",
+      "homeScore": 1,
+      "awayScore": 1,
+      "penaltyShootout": { "homeScore": 3, "awayScore": 4 },
+      "decidedByPenalties": true,
+      "stage": "R32"
+    },
+    "M76": {
+      "espnEventId": "760488",
+      "homeTeamId": "ned",
+      "awayTeamId": "mar",
+      "homeScore": 1,
+      "awayScore": 1,
+      "penaltyShootout": { "homeScore": 2, "awayScore": 3 },
+      "decidedByPenalties": true,
+      "stage": "R32"
+    },
+    "M77": {
+      "espnEventId": "760490",
+      "homeTeamId": "civ",
+      "awayTeamId": "nor",
+      "homeScore": 1,
+      "awayScore": 2,
+      "stage": "R32"
+    },
+    "M78": {
+      "espnEventId": "760492",
+      "homeTeamId": "fra",
+      "awayTeamId": "swe",
+      "homeScore": 3,
+      "awayScore": 0,
+      "stage": "R32"
+    }
+  }
+}

@@ -176,6 +176,110 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## [5.0.0] build 68 — 2026-07-01 (build)
+- 159 file(s) in .cursor, CHANGELOG.md, VERSION_LOG.md, build-manifest.json, docs, package.json — 159 files changed, 20632 insertions(+), 7263 deletions(-)
+
+## [5.0.0] build 67 — 2026-07-01 (build)
+- Canonical locked R32 results, ESPN slot authority, knockout display fixes
+
+## [5.0.0] build 66 — 2026-07-01 (build)
+- Rebase knockout bracket on FIFA schedule M## (ESPN-aligned); add crosswalk, audit script, regression tests
+
+## [5.0.0] build 65 — 2026-07-01 (build)
+- Follow-team bracket path filter with persisted highlight
+
+## [5.0.0] build 64 — 2026-07-01 (build)
+- Mobile bracket tree round-swipe carousel with pill nav sync
+
+## [5.0.0] build 63 — 2026-07-01 (build)
+- Bracket tree pan/zoom on split canvas viewport
+
+## [5.0.0] build 62 — 2026-07-01 (build)
+- Split symmetrical bracket canvas on desktop tree view
+
+## [5.0.0] build 61 — 2026-06-30 (build)
+- Phase 5: sync bracket projection and tree path highlight on hover
+
+## [5.0.0] build 60 — 2026-06-30 (build)
+- Phase 4: acceptance test gate, QA checklist, qa:phase4 script
+
+## [5.0.0] build 59 — 2026-06-30 (build)
+- Block FIFA from overwriting ESPN live scores; defer first poll past quota gate; add FIFA merge logging
+
+## [5.0.0] build 58 — 2026-06-30 (build)
+- Phase 3: Live bracket tree link, knockout desktop tree default
+
+## [5.0.0] build 57 — 2026-06-30 (build)
+- Phase 2: unified completed results view model for Live recent and Results tab
+
+## [5.0.0] build 56 — 2026-06-30 (build)
+- Phase 1: commitLiveMatchStore, boot poll gate, locked knockout standings guard
+
+## [5.0.0] build 55 — 2026-06-30 (build)
+- Fix live dedupe count, penalty UI gate, knockout stage ids, recent results dedupe
+
+## [5.0.0] build 54 — 2026-06-30 (build)
+- Week C: bracket UX polish, poll merge policy, cache write
+
+## [5.0.0] build 53 — 2026-06-30 (build)
+- Week B: slot identity, view-model adapter, live context panel
+
+## [5.0.0] build 52 — 2026-06-30 (build)
+- Week A: boot cache merge, lock policy, live bracket context
+
+## [5.0.0] build 51 — 2026-06-30 (build)
+- Bracket UX: responsive layout, round nav, compact tree cards, match tap, desktop-only connectors
+
+## [5.0.0] build 50 — 2026-06-30 (build)
+- Narrow live data contract: ESPN lifecycle, result-final lock, live-window polling
+
+## [5.0.0] build 49 — 2026-06-30 (build)
+- Client registry Phases 0–2: team/fixture resolve, dedupe, kickoff validation
+
+## [5.0.0] build 48 — 2026-06-30 (build)
+- Fix LiveView gate: resolve kickoff before active-phase filter
+
+## [5.0.0] build 47 — 2026-06-30 (build)
+- Fix live card locked gate, kickoff drift, remove debug beacons, harden ESPN protection
+
+## [5.0.0] build 46 — 2026-06-30 (build)
+- Fix bracket grid shift from connector overlay consuming first column
+
+## [5.0.0] build 45 — 2026-06-30 (build)
+- Fix bracket column alignment, full R32 render, winner/score consistency
+
+## [5.0.0] build 44 — 2026-06-30 (build)
+- Protect manual and locked matches from ESPN poll overwrite
+
+## [5.0.0] build 43 — 2026-06-30 (build)
+- Bracket date schedule layout, visual-order date tie-break, active-phase feeders
+
 ## [5.0.0] build 42 — 2026-06-30 (build)
 - CI: generate bundled data before test via pretest hook
 

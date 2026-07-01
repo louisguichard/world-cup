@@ -152,7 +152,9 @@ export const APP_COPY = {
     bracketKicker: "Knockout path",
     bracketTitle: "Road to the final",
     bracketLead:
-      "Preview the full bracket here. Switch between best-guess projections and locked-in teams.",
+      "Compact knockout schedule below — scores and kickoff order. For the full tree with round connectors, open the Bracket tab.",
+    bracketTreeNote: "Full bracket tree with round connectors lives on the Bracket tab.",
+    openFullBracketTree: "Open bracket tree",
     knockoutRoundKicker: "Knockout stage",
     groupStandings: {
       title: (group: string) => `Group ${group} · live table`,
@@ -232,6 +234,7 @@ export const APP_COPY = {
     empty: "No finished games match this filter.",
     today: "Today",
     yesterday: "Yesterday",
+    earlierKnockout: "Earlier this round",
     day: "Day",
   },
 
@@ -241,12 +244,35 @@ export const APP_COPY = {
     heroLead:
       "See the path from the round of 32 to the championship. Switch between guesses and locked-in teams.",
     modeLabel: "Bracket view",
+    controlsAriaLabel: "Bracket display options",
     projectedLabel: "Best guess",
     projectedSubtitle:
       "Uses today's standings. Teams can still change as more group games are played.",
     confirmedLabel: "Locked in",
     confirmedSubtitle:
       "Only shows teams that are definitely in after all 3 group games are done. Empty slots say TBD.",
+    layoutLabel: "Bracket layout",
+    treeLabel: "Bracket tree",
+    treeSubtitle: "Split bracket — R32 on both sides converging to the Final in the center.",
+    scheduleLabel: "By date",
+    scheduleSubtitle: "Kickoff order — earliest match first.",
+    roundNavLabel: "Knockout round",
+    treeSwipeHint: "Swipe sideways for the next round, or tap a round above.",
+    mobileRoundSwipeHint: "Swipe left for the next round · tap a pill above to jump.",
+    mobileRoundSwipeLabel: "Knockout rounds",
+    treePathHoverHint: "Hover a team to trace its path through the bracket.",
+    panZoomHint: "Drag empty space to pan · scroll to zoom · use controls to reset.",
+    panZoomControlsLabel: "Bracket zoom controls",
+    zoomInLabel: "Zoom in",
+    zoomOutLabel: "Zoom out",
+    resetViewLabel: "Fit",
+    followTeamLabel: "Follow a team",
+    followTeamNone: "No team selected",
+    followTeamHint: "Highlight only that team's route through the knockout bracket.",
+    followTeamActive: (team: string) => `Following ${team}`,
+    clearFollowTeamLabel: "Stop following team",
+    followTeamButton: "Follow in bracket",
+    unfollowTeamButton: "Unfollow in bracket",
   },
 
   teams: {

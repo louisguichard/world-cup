@@ -8,6 +8,7 @@ export type BootPhaseId =
   | "standings-load"
   | "simulation"
   | "splash-hold"
+  | "penalty-enrichment"
   | "services-start"
   | "deferred-enrichment"
   | "boot-complete";
@@ -55,6 +56,7 @@ const PHASE_LABELS: Record<BootPhaseId, string> = {
   "standings-load": "Group standings",
   simulation: "Monte Carlo sim",
   "splash-hold": "Splash minimum hold",
+  "penalty-enrichment": "Penalty shootout enrichment",
   "services-start": "Background services",
   "deferred-enrichment": "Deferred enrichment (mobile)",
   "boot-complete": "Boot complete",

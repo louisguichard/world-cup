@@ -1,9 +1,11 @@
 import type { MergedMatch } from "../types";
+import { bootPollRetryMs, isBootReady } from "../lib/bootReady";
 import { shouldRunHeavyPoll, smartPollIntervalMs } from "../lib/pollPolicy";
 import { shouldRunPollFallback } from "../config/liveDataFlags";
 import { getLockedSet } from "../store/slices/matchSlice";
 import { useStore } from "../store";
 import { DataOrchestrator } from "./orchestrator/DataOrchestrator";
+import { msUntilApiQuotaAllows } from "./ApiQuotaGovernor";
 import { logger } from "./Logger";
 
 function allMatchesLocked(
@@ -62,7 +64,7 @@ class PollingEngine {
       };
     }
 
-    void this.poll();
+    this.scheduleNext();
   }
 
   stop(): void {
@@ -81,7 +83,7 @@ class PollingEngine {
 
   resumeFromHiddenTab(): void {
     if (!this.running || typeof document === "undefined" || document.hidden) return;
-    void this.poll();
+    this.scheduleNext();
   }
 
   private scheduleNext(): void {
@@ -93,12 +95,16 @@ class PollingEngine {
     const { intervalMs, reason, phase } = smartPollIntervalMs(allMatches);
 
     const nextKickoffWakeup = this.msUntilNextImminentMatch(allMatches);
-    const effectiveDelay = Math.min(intervalMs, nextKickoffWakeup);
+    const quotaDelay = msUntilApiQuotaAllows("espnScoreboard", "live");
+    const effectiveDelay = Math.max(
+      Math.min(intervalMs, nextKickoffWakeup),
+      quotaDelay
+    );
 
     logger.debug(
       `Next poll in ${Math.round(effectiveDelay / 1000)}s — ${reason}`,
       "PollingEngine",
-      { phase }
+      { phase, quotaDelayMs: quotaDelay }
     );
 
     if (typeof window !== "undefined" && window.__pollingStatus) {
@@ -144,7 +150,13 @@ class PollingEngine {
     if (!this.running) return;
     if (typeof document !== "undefined" && document.hidden) return;
 
-    if (!shouldRunPollFallback()) {
+    if (!isBootReady()) {
+      if (this.timer) clearTimeout(this.timer);
+      this.timer = setTimeout(() => void this.poll(), bootPollRetryMs());
+      return;
+    }
+
+    if (!shouldRunPollFallback(Object.values(useStore.getState().liveMatches))) {
       this.scheduleNext();
       return;
     }

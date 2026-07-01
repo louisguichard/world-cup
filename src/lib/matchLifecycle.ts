@@ -103,10 +103,16 @@ export function isMergedMatchInActivePhase(
   match: MatchPhaseInput & { kickoffMs?: number; date?: string; locked?: boolean },
   nowMs = Date.now()
 ): boolean {
-  if (match.locked) return false;
   const kickoffMs = match.kickoffMs ?? resolveMatchKickoffMs(match);
+  const inPlay = isInPlayFeedStatus(match.status);
+
+  // Finalized only — in-play matches stay visible even if a stale `locked` flag was set.
+  if (match.locked && !inPlay) {
+    if (match.status !== "completed") return false;
+  }
+
   if (kickoffMs == null) {
-    return isInPlayFeedStatus(match.status);
+    return inPlay;
   }
   return isActivePhase(getMatchPhase({ ...match, kickoffMs }, nowMs));
 }
@@ -155,12 +161,15 @@ function estimatedMaxDurationMinutes(match: MatchPhaseInput): number {
 }
 
 export function getMatchPhase(match: MatchPhaseInput, nowMs = Date.now()): MatchPhase {
-  if (match.locked || match.status === "locked") return "locked";
+  const status = match.status.toLowerCase();
+  if (status === "locked") return "locked";
+
+  const inPlay = isInPlayFeedStatus(match.status);
+  if (match.locked && !inPlay && match.status !== "completed") return "locked";
 
   const kickoffMs = match.kickoffMs ?? (match.date ? Date.parse(match.date) : NaN);
   if (!Number.isFinite(kickoffMs)) return "dormant";
 
-  const status = match.status.toLowerCase();
   if (status === "postponed" || status === "cancelled") return "dormant";
 
   const msUntilKickoff = kickoffMs - nowMs;
@@ -176,24 +185,6 @@ export function getMatchPhase(match: MatchPhaseInput, nowMs = Date.now()): Match
   }
 
   if (match.status === "live" && msUntilKickoff > PRE_KICKOFF_LIVE_TOLERANCE_MS) {
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
-      body: JSON.stringify({
-        sessionId: "0b0776",
-        location: "matchLifecycle.ts:getMatchPhase",
-        message: "rejected premature live status",
-        data: {
-          matchId: match.matchId ?? match.id,
-          msUntilKickoff,
-          status: match.status,
-        },
-        timestamp: Date.now(),
-        hypothesisId: "H4-premature-live",
-      }),
-    }).catch(() => {});
-    // #endregion
     if (msUntilKickoff <= IMMINENT_MS) return "imminent";
     return "dormant";
   }
@@ -204,29 +195,7 @@ export function getMatchPhase(match: MatchPhaseInput, nowMs = Date.now()): Match
 
   if (msUntilKickoff <= IMMINENT_MS && msUntilKickoff > 0) return "imminent";
   if (msUntilKickoff <= 0) {
-    const phase: MatchPhase =
-      match.status === "scheduled" || status === "delayed" ? "imminent" : liveClockPhase(match);
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0b077666-29e2-4011-96ad-0bcda15d5537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0b0776" },
-      body: JSON.stringify({
-        sessionId: "0b0776",
-        location: "matchLifecycle.ts:getMatchPhase",
-        message: "past-kickoff phase",
-        data: {
-          status: match.status,
-          msUntilKickoff,
-          phase,
-          group: match.group,
-          knockout: matchAllowsExtraTime(match),
-        },
-        timestamp: Date.now(),
-        hypothesisId: "H1-lifecycle",
-      }),
-    }).catch(() => {});
-    // #endregion
-    return phase;
+    return match.status === "scheduled" || status === "delayed" ? "imminent" : liveClockPhase(match);
   }
 
   return "dormant";
