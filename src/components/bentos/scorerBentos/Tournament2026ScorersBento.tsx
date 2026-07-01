@@ -6,7 +6,7 @@ import { TeamFlag } from "../../team/TeamFlag";
 import { CrownBadge } from "../../player/CrownBadge";
 import { PlayerPhoto } from "../../player/PlayerPhoto";
 import { PlayerStatPopover } from "../../player/PlayerStatPopover";
-import { usePlayerPhotoUrl } from "../../../hooks/usePlayerPhotoUrl";
+import { useEnrichedPlayerPhoto } from "../../../hooks/useEnrichedPlayerPhoto";
 import styles from "./ScorerBentos.module.css";
 
 const DISPLAY_LIMIT = 8;
@@ -19,7 +19,11 @@ type RowProps = {
 };
 
 function ScorerRow({ rank, stat, isLeader, celebrate }: RowProps) {
-  const photoUrl = usePlayerPhotoUrl(stat.player.displayName);
+  const photoUrl = useEnrichedPlayerPhoto(
+    stat.player.displayName,
+    stat.teamId,
+    stat.player.id
+  );
   const name = stat.player.displayName;
 
   return (

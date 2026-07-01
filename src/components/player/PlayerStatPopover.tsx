@@ -12,7 +12,7 @@ import { APP_COPY } from "../../lib/appCopy";
 import { displayWcCareerTotal } from "../../lib/mergeWcCareerGoals";
 import { useTopScorers2026 } from "../../store/selectors/tournamentStatsSelectors";
 import { PlayerPhoto } from "./PlayerPhoto";
-import { usePlayerPhotoUrl } from "../../hooks/usePlayerPhotoUrl";
+import { useEnrichedPlayerPhoto } from "../../hooks/useEnrichedPlayerPhoto";
 import styles from "./PlayerStatPopover.module.css";
 
 type Props = {
@@ -48,7 +48,7 @@ export function PlayerStatPopover({
 }: Props) {
   const copy = APP_COPY.live.scorers;
   const topScorers = useTopScorers2026();
-  const photoUrl = usePlayerPhotoUrl(playerName);
+  const photoUrl = useEnrichedPlayerPhoto(playerName, teamId);
   const prefersHover = usePrefersHover();
   const [open, setOpen] = useState(false);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

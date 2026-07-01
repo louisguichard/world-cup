@@ -215,6 +215,14 @@ Use `npm run version:patch|minor|major` for semver releases.
 
 
 
+
+
+## [6.0.0] build 7 — 2026-07-01 (build)
+- 25 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 25 files changed, 592 insertions(+), 96 deletions(-)
+
+## [6.0.0] build 6 — 2026-07-01 (build)
+- Enriched scorer photos, canonical team IDs in stats, tournament pulse bento on Live strip
+
 ## [6.0.0] build 5 — 2026-07-01 (build)
 - 84 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, package.json, src, version.json — 84 files changed, 5210 insertions(+), 742 deletions(-)
 

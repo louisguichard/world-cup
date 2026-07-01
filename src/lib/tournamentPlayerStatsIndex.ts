@@ -1,4 +1,4 @@
-import type { MatchEvent, MergedMatch, TournamentPlayerStat } from "../types";
+import type { MatchEvent, MergedMatch, Team, TournamentPlayerStat } from "../types";
 import { aggregateTournamentStats } from "./aggregateTournamentStats";
 import { resolveEventsForMatch } from "./resolveMatchEvents";
 import { bootCacheSchemaFields, matchesBootCacheSchema } from "./bootCacheSchema";
@@ -52,9 +52,10 @@ export function buildTournamentStatsFingerprint(
 /** Pure rebuild from live matches + event log. */
 export function rebuildTournamentPlayerStatsIndex(
   matches: MergedMatch[],
-  matchEvents: Record<string, MatchEvent[]>
+  matchEvents: Record<string, MatchEvent[]>,
+  teams?: Record<string, Team>
 ): TournamentPlayerStatsSnapshot {
-  const { topScorers, topAssists } = aggregateTournamentStats({ matches, matchEvents });
+  const { topScorers, topAssists } = aggregateTournamentStats({ matches, matchEvents, teams });
   return {
     topScorers,
     topAssists,

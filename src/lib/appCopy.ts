@@ -160,6 +160,19 @@ export const APP_COPY = {
     openFullBracketTree: "Open bracket tree",
     knockoutRoundKicker: "Knockout stage",
     insightsStripAria: "Knockout results and goal scorers",
+    pulse: {
+      ariaLabel: "Tournament pulse",
+      kicker: "Tournament pulse",
+      title: "2026 at a glance",
+      teamsLeft: "Teams left",
+      matchesPlayed: "Played",
+      matchesRemaining: "Remaining",
+      totalGoals: "Goals",
+      yellowCards: "Yellow cards",
+      redCards: "Red cards",
+      cardsCoverage: (withEvents: number, completed: number) =>
+        `Card counts from match events (${withEvents}/${completed} completed games).`,
+    },
     scorers: {
       goldenBootKicker: "Golden boot",
       goldenBoot2026: "Golden Boot · 2026",

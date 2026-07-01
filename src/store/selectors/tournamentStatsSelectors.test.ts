@@ -32,6 +32,7 @@ const matchEvents: Record<string, MatchEvent[]> = {
 const state = {
   liveMatches: { M1: match },
   matchEvents,
+  teams: {},
 };
 
 describe("tournamentStatsSelectors", () => {

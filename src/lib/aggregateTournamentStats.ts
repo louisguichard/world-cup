@@ -1,4 +1,5 @@
 import { resolveTeamFromStore } from "../data/wc2026TeamCatalog";
+import { buildTeamRegistry, resolveTeamRef } from "./registry/teamRegistry";
 import type { MatchEvent, MergedMatch, Team, TournamentPlayerStat } from "../types";
 import { normalizePlayerName, playerNamesMatch } from "../services/playerProfile/normalizePlayerName";
 import { resolveEventsForMatch } from "./resolveMatchEvents";
@@ -61,7 +62,16 @@ function toStat(entry: PlayerAccumulator, value: number): TournamentPlayerStat {
   };
 }
 
-function aggregateFromEvents(matchEvents: Record<string, MatchEvent[]>): {
+function resolveStatTeamId(rawTeamId: string, teams?: Record<string, Team>): string {
+  if (!rawTeamId || !teams) return rawTeamId;
+  const registry = buildTeamRegistry(teams);
+  return resolveTeamRef(rawTeamId, teams, registry) || rawTeamId;
+}
+
+function aggregateFromEvents(
+  matchEvents: Record<string, MatchEvent[]>,
+  teams?: Record<string, Team>
+): {
   topScorers: TournamentPlayerStat[];
   topAssists: TournamentPlayerStat[];
 } {
@@ -72,17 +82,18 @@ function aggregateFromEvents(matchEvents: Record<string, MatchEvent[]>): {
       if (event.type !== "goal" || !event.playerName) continue;
 
       const scorer = upsertPlayer(players, {
-        teamId: event.teamId,
+        teamId: resolveStatTeamId(event.teamId, teams),
         name: event.playerName,
         playerId: event.playerId,
       });
       scorer.goals += 1;
 
       if (event.assistName) {
+        const canonicalTeamId = resolveStatTeamId(event.teamId, teams);
         const assist =
-          findPlayerByName(players, event.teamId, event.assistName) ??
+          findPlayerByName(players, canonicalTeamId, event.assistName) ??
           upsertPlayer(players, {
-            teamId: event.teamId,
+            teamId: canonicalTeamId,
             name: event.assistName,
           });
         assist.assists += 1;
@@ -105,24 +116,28 @@ function aggregateFromEvents(matchEvents: Record<string, MatchEvent[]>): {
 
 /** Aggregates 2026 leaders when only the event map is available (e.g. goal-scorer profiles). */
 export function aggregateTournamentStatsFromEvents(
-  matchEvents: Record<string, MatchEvent[]>
+  matchEvents: Record<string, MatchEvent[]>,
+  teams?: Record<string, Team>
 ): {
   topScorers: TournamentPlayerStat[];
   topAssists: TournamentPlayerStat[];
 } {
-  return aggregateFromEvents(matchEvents);
+  return aggregateFromEvents(matchEvents, teams);
 }
 
 /** Aggregates 2026 tournament goals and assists from recorded match events. */
 export function aggregateTournamentStats(input: {
   matches: MergedMatch[];
   matchEvents: Record<string, MatchEvent[]>;
+  teams?: Record<string, Team>;
 }): {
   topScorers: TournamentPlayerStat[];
   topAssists: TournamentPlayerStat[];
 } {
+  const { teams } = input;
+
   if (input.matches.length === 0) {
-    return aggregateFromEvents(input.matchEvents);
+    return aggregateFromEvents(input.matchEvents, teams);
   }
 
   const players = new Map<string, PlayerAccumulator>();
@@ -133,17 +148,18 @@ export function aggregateTournamentStats(input: {
       if (event.type !== "goal" || !event.playerName) continue;
 
       const scorer = upsertPlayer(players, {
-        teamId: event.teamId,
+        teamId: resolveStatTeamId(event.teamId, teams),
         name: event.playerName,
         playerId: event.playerId,
       });
       scorer.goals += 1;
 
       if (event.assistName) {
+        const canonicalTeamId = resolveStatTeamId(event.teamId, teams);
         const assist =
-          findPlayerByName(players, event.teamId, event.assistName) ??
+          findPlayerByName(players, canonicalTeamId, event.assistName) ??
           upsertPlayer(players, {
-            teamId: event.teamId,
+            teamId: canonicalTeamId,
             name: event.assistName,
           });
         assist.assists += 1;

@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-07-01T08:09:35.797Z",
+  "updatedAt": "2026-07-01T08:23:47.495Z",
   "builds": [
+    {
+      "version": "6.0.0",
+      "build": 7,
+      "kind": "build",
+      "message": "25 file(s) in CHANGELOG.md, VERSION_LOG.md, build-manifest.json, src, version.json — 25 files changed, 592 insertions(+), 96 deletions(-)",
+      "date": "2026-07-01",
+      "timestamp": "2026-07-01T08:23:47.495Z"
+    },
+    {
+      "version": "6.0.0",
+      "build": 6,
+      "kind": "build",
+      "message": "Enriched scorer photos, canonical team IDs in stats, tournament pulse bento on Live strip",
+      "date": "2026-07-01",
+      "timestamp": "2026-07-01T08:22:34.095Z"
+    },
     {
       "version": "6.0.0",
       "build": 5,
@@ -304,25 +320,17 @@
       "message": "Protect manual and locked matches from ESPN poll overwrite",
       "date": "2026-06-30",
       "timestamp": "2026-06-30T18:23:06.818Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 43,
-      "kind": "build",
-      "message": "Bracket date schedule layout, visual-order date tie-break, active-phase feeders",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T18:20:45.332Z"
-    },
-    {
-      "version": "5.0.0",
-      "build": 42,
-      "kind": "build",
-      "message": "CI: generate bundled data before test via pretest hook",
-      "date": "2026-06-30",
-      "timestamp": "2026-06-30T18:13:59.351Z"
     }
   ],
   "commits": [
+    {
+      "hash": "3e557b34633b7c71fbe5fd1ab2b6a73af03df5f3",
+      "shortHash": "3e557b3",
+      "message": "Record v6.0.0 build 5 production deploy on Vercel.",
+      "version": "6.0.0",
+      "build": 5,
+      "timestamp": "2026-07-01T08:09:58.891Z"
+    },
     {
       "hash": "0110f01321fcd1b27bb3877c60cd6493ed5dcf5e",
       "shortHash": "0110f01",
@@ -554,14 +562,6 @@
       "version": "4.0.0",
       "build": 76,
       "timestamp": "2026-06-30T02:06:44.631Z"
-    },
-    {
-      "hash": "8baf437b84f35a1e7f5ad38b002d849f716e30dd",
-      "shortHash": "8baf437",
-      "message": "Stamp real knockout results into bracket projection and add tournament phase UX.",
-      "version": "4.0.0",
-      "build": 76,
-      "timestamp": "2026-06-30T02:06:18.837Z"
     }
   ],
   "deploys": [

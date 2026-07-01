@@ -81,6 +81,36 @@ function photoForEvent(event: MatchEvent): string | undefined {
   return photoForPlayer(event.playerId, event.playerName, event.teamId);
 }
 
+/** Sync portrait lookup — WC2026 index, Panini catalog, in-memory cache. */
+export function resolvePlayerPhotoUrlSync(
+  playerName: string,
+  teamId?: string,
+  playerId?: string
+): string | undefined {
+  return photoForPlayer(playerId, playerName, teamId);
+}
+
+/** Async enrichment — static player DB, Panini load, iconic fallback. */
+export async function enrichPlayerPhotoUrl(
+  playerName: string,
+  teamId?: string,
+  playerId?: string
+): Promise<string | undefined> {
+  const sync = resolvePlayerPhotoUrlSync(playerName, teamId, playerId);
+  if (sync) return sync;
+
+  await ensurePlayerDatabase();
+  const hydrated = await hydratePlayerImageFromDatabase(playerName);
+  if (hydrated) return rememberPhoto(playerId, playerName, hydrated);
+
+  await ensurePaninarrCatalogLoaded();
+  const panini = photoFromPaninarr(playerId, playerName, teamId);
+  if (panini) return panini;
+
+  const iconic = await lookupIconicPlayerPhotoAsync(playerName);
+  return iconic ? rememberPhoto(playerId, playerName, iconic) : undefined;
+}
+
 export function assistPhotoKey(providerId: string): string {
   return `${providerId}::assist`;
 }

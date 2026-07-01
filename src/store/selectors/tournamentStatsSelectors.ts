@@ -12,16 +12,21 @@ import {
   getAllTimeCareerLeaders,
   type WcCareerLeaderRow,
 } from "../../lib/worldCupGoalscorersReference";
-import type { MatchEvent, MergedMatch, TournamentPlayerStat } from "../../types";
+import type { MatchEvent, MergedMatch, Team, TournamentPlayerStat } from "../../types";
 import { useStore } from "../index";
 
 export type TournamentStatsSlice = {
   liveMatches: Record<string, MergedMatch>;
   matchEvents: Record<string, MatchEvent[]>;
+  teams: Record<string, Team>;
 };
 
 function snapshotFromState(state: TournamentStatsSlice): TournamentPlayerStatsSnapshot {
-  return rebuildTournamentPlayerStatsIndex(Object.values(state.liveMatches), state.matchEvents);
+  return rebuildTournamentPlayerStatsIndex(
+    Object.values(state.liveMatches),
+    state.matchEvents,
+    state.teams
+  );
 }
 
 export function selectTournamentPlayerStatsSnapshot(
@@ -79,12 +84,13 @@ function useTournamentStatsFingerprint() {
 export function useTournamentPlayerStatsSnapshot(): TournamentPlayerStatsSnapshot {
   const liveMatches = useStore(useShallow((s) => s.liveMatches));
   const matchEvents = useStore(useShallow((s) => s.matchEvents));
+  const teams = useStore((s) => s.teams);
   const fingerprint = useTournamentStatsFingerprint();
 
   return useMemo(() => {
     void fingerprint;
-    return rebuildTournamentPlayerStatsIndex(Object.values(liveMatches), matchEvents);
-  }, [fingerprint, liveMatches, matchEvents]);
+    return rebuildTournamentPlayerStatsIndex(Object.values(liveMatches), matchEvents, teams);
+  }, [fingerprint, liveMatches, matchEvents, teams]);
 }
 
 /** Hydrates from cache on first paint, then live snapshot once events are available. */

@@ -2,7 +2,8 @@ import { APP_COPY } from "../../../lib/appCopy";
 import type { WcCareerLeaderRow } from "../../../lib/worldCupGoalscorersReference";
 import { PlayerPhoto } from "../../player/PlayerPhoto";
 import { PlayerStatPopover } from "../../player/PlayerStatPopover";
-import { usePlayerPhotoUrl } from "../../../hooks/usePlayerPhotoUrl";
+import { resolveCatalogTeamIdByName } from "../../../data/wc2026TeamCatalog";
+import { useEnrichedPlayerPhoto } from "../../../hooks/useEnrichedPlayerPhoto";
 import styles from "./ScorerBentos.module.css";
 
 type RowProps = {
@@ -10,8 +11,9 @@ type RowProps = {
 };
 
 function CareerRow({ row }: RowProps) {
-  const photoUrl = usePlayerPhotoUrl(row.reference.player_name);
   const name = row.reference.player_name;
+  const teamId = resolveCatalogTeamIdByName(row.reference.country);
+  const photoUrl = useEnrichedPlayerPhoto(name, teamId);
 
   return (
     <li className={styles.row}>

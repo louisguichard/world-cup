@@ -63,4 +63,28 @@ describe("aggregateTournamentStats", () => {
     const { topScorers } = aggregateTournamentStats({ matches: [], matchEvents });
     expect(topScorers[0]?.value).toBe(1);
   });
+
+  it("canonicalizes ESPN team ids on stat rows when teams registry is provided", () => {
+    const teams = {
+      "6501": {
+        id: "6501",
+        name: "France",
+        abbreviation: "FRA",
+        group: "D",
+        rating: 1500,
+      },
+    };
+
+    const matchEvents = {
+      M1: [goal({ providerId: "a", teamId: "6501", playerName: "Mbappé" })],
+    };
+
+    const { topScorers } = aggregateTournamentStats({
+      matches: [baseMatch("M1", "6501", "arg")],
+      matchEvents,
+      teams,
+    });
+
+    expect(topScorers[0]?.teamId).toBe("fra");
+  });
 });
